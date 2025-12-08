@@ -38,3 +38,5 @@ fi
 echo "✅ Storefront deployment completed successfully!"
 echo "📍 Check logs: pm2 logs medusa-storefront"
 
+
+
