@@ -25,23 +25,21 @@ jobs:
 
         echo "🔐 Connecting to EC2..."
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
-
-          cd $EC2_PATH
-
-          echo "🟡 Pulling latest updates..."
+          cd /home/ubuntu/front/zda-store     # ← this must be EXACT
+          echo "🟡 Pulling latest..."
           git fetch --all
           git reset --hard origin/main
 
-          echo "🟡 Installing dependencies..."
+          echo "🟡 Installing deps..."
           corepack enable
           yarn install --frozen-lockfile
 
-          echo "🟡 Building production..."
+          echo "🟡 Building..."
           yarn build
 
           echo "🟢 Restarting PM2..."
-          pm2 restart storefront || pm2 start "yarn dev --port 8000" --name storefront
-          pm2 save
+          pm2 restart storefront || pm2 start "yarn start" --name storefront --cwd /home/ubuntu/front/zda-store
 
-          echo "🚀 Deployment complete!"
+          pm2 save
         EOF
+
