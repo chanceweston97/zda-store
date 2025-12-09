@@ -61,7 +61,7 @@ jobs:
           yarn --version
           
           echo "📦 Installing dependencies..."
-          yarn install --frozen-lockfile --production=false
+          yarn install --immutable
           
           echo "🏗️  Building application..."
           yarn build
