@@ -7,7 +7,7 @@ import { HeroBanner } from "../types";
 export const heroBanners: HeroBanner[] = [
   {
     id: "banner-1",
-    title: "Fffffield-tested antennas and cabling built to improve signal where it counts.",
+    title: "Field-tested antennas and cabling built to improve signal where it counts.",
     subtitle: "ZDA Communications",
     image: "/images/hero/banner.webp",
     link: "/store",
