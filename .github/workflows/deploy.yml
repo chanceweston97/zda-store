@@ -42,9 +42,25 @@ jobs:
           yarn install --check-cache
           yarn build
 
-          pm2 delete FrontEn 2>/dev/null || true
-          pm2 start "yarn start" --name FrontEnd --cwd "$APP_PATH"
+          # Create wrapper script for PM2 that loads NVM
+          cat > "$APP_PATH/start.sh" << SCRIPTEOF
+          #!/bin/bash
+          export NVM_DIR="\$HOME/.nvm"
+          [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+          cd "$APP_PATH"
+          yarn start
+          SCRIPTEOF
+          chmod +x "$APP_PATH/start.sh"
+
+          # Stop and delete existing process
+          pm2 delete FrontEnd 2>/dev/null || true
+          
+          # Start with PM2 using the wrapper script
+          pm2 start "$APP_PATH/start.sh" --name FrontEnd --interpreter bash
           pm2 save
+          
+          # Show PM2 status
+          pm2 list
         EOF
 
         rm -f key.pem
