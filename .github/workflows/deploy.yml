@@ -43,7 +43,7 @@ jobs:
           pm2 delete storefront 2>/dev/null || true
           
           # Start PM2 with shell command - yarn is a shell script, not a Node.js script
-          pm2 start "yarn start" --name storefront --cwd /home/ubuntu/front/zda-store --interpreter bash
+          pm2 start "yarn dev" --name storefront --cwd /home/ubuntu/front/zda-store --interpreter bash
 
           pm2 save
         EOF
