@@ -1,24 +1,47 @@
-- name: Deploy to EC2
-  run: |
-    echo "$EC2_KEY" > key.pem          # create key file
-    chmod 600 key.pem                  # secure permissions
-    ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
-      cd $EC2_PATH
+name: Deploy to EC2
 
-      echo "🟡 Pulling latest..."
-      git fetch --all
-      git reset --hard origin/main
+on:
+  push:
+    branches: ["main"]
 
-      echo "🟡 Installing deps..."
-      corepack enable
-      yarn install --frozen-lockfile
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      echo "🟡 Building..."
-      yarn build
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      echo "🟢 Restarting PM2..."
-      pm2 restart storefront || pm2 start "yarn start --port 8000" --name storefront
-      pm2 save
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY:  ${{ secrets.EC2_KEY }}
+        EC2_PATH: ${{ secrets.EC2_PATH }}
 
-      echo "🚀 Deployment complete!"
-    EOF
+      run: |
+        echo "$EC2_KEY" > key.pem
+        chmod 600 key.pem
+
+        echo "🔐 Connecting to EC2..."
+        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
+
+          cd $EC2_PATH
+
+          echo "🟡 Pulling latest updates..."
+          git fetch --all
+          git reset --hard origin/main
+
+          echo "🟡 Installing dependencies..."
+          corepack enable
+          yarn install --frozen-lockfile
+
+          echo "🟡 Building production..."
+          yarn build
+
+          echo "🟢 Restarting PM2..."
+          pm2 restart storefront || pm2 start "yarn start --port 8000" --name storefront
+          pm2 save
+
+          echo "🚀 Deployment complete!"
+        EOF
