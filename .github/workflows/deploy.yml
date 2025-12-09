@@ -43,4 +43,32 @@ jobs:
           corepack enable || true
           corepack prepare yarn@4.6.0 --activate || true
           yarn install --immutable
-          pm2 restart FrontEnd || pm2 start yarn --name FrontEnd -- start
+          
+          # Set required environment variables
+          BACKEND_URL="http://${{ secrets.EC2_HOST }}:9000"
+          echo "MEDUSA_BACKEND_URL=$BACKEND_URL" >> .env.local
+          echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> .env.local
+          
+          # Build the application
+          yarn build
+          
+          # Create PM2 ecosystem file with environment variables
+          cat > ecosystem.config.js << EOF
+          module.exports = {
+            apps: [{
+              name: 'FrontEnd',
+              script: 'yarn',
+              args: 'start',
+              env: {
+                NODE_ENV: 'production',
+                MEDUSA_BACKEND_URL: '$BACKEND_URL',
+                NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: '${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}'
+              }
+            }]
+          };
+          EOF
+          
+          # Restart PM2
+          pm2 delete FrontEnd 2>/dev/null || true
+          pm2 start ecosystem.config.js
+          pm2 save
