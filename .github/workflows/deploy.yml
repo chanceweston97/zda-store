@@ -36,7 +36,11 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           cd ${{ secrets.APP_PATH }}
           git pull || true
-          npm install --production   # or pip install -r requirements.txt
+          corepack enable || true
+          corepack prepare yarn@4.6.0 --activate || true
+          yarn install --immutable
           pm2 restart FrontEnd || pm2 start yarn --name FrontEnd -- start
