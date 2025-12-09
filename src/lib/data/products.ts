@@ -53,35 +53,72 @@ export const listProducts = async ({
     ...(await getCacheOptions("products")),
   }
 
+  // Build query with all fields needed
+  const query: any = {
+    limit,
+    offset,
+    region_id: region?.id,
+    ...queryParams,
+  }
+
+  // Merge fields if provided in queryParams
+  if (queryParams?.fields) {
+    query.fields = queryParams.fields
+  } else {
+    query.fields = "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,*categories"
+  }
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("🔍 listProducts API call:", {
+      regionId: region?.id,
+      regionName: region?.name,
+      limit,
+      offset,
+      query,
+    })
+  }
+
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(
       `/store/products`,
       {
         method: "GET",
-        query: {
-          limit,
-          offset,
-          region_id: region?.id,
-          fields:
-            "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,",
-          ...queryParams,
-        },
+        query,
         headers,
         next,
         cache: "force-cache",
       }
     )
     .then(({ products, count }) => {
+      // Debug logging in development
+      if (process.env.NODE_ENV === "development") {
+        console.log("✅ listProducts API response:", {
+          productsCount: products?.length || 0,
+          totalCount: count,
+          firstProduct: products?.[0] ? {
+            id: products[0].id,
+            title: products[0].title,
+            status: products[0].status,
+            variantCount: products[0].variants?.length || 0,
+          } : null,
+        })
+      }
+
       const nextPage = count > offset + limit ? pageParam + 1 : null
 
       return {
         response: {
-          products,
-          count,
+          products: products || [],
+          count: count || 0,
         },
         nextPage: nextPage,
         queryParams,
       }
+    })
+    .catch((error: any) => {
+      console.error("❌ listProducts API error:", error)
+      throw error
     })
 }
 

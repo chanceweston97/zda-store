@@ -58,6 +58,10 @@ module.exports = {
       fontSize: {
         "3xl": "2rem",
       },
+      spacing: {
+        "7.5": "30px",
+        "9": "36px",
+      },
       fontFamily: {
         sans: [
           "Inter",
