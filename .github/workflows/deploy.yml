@@ -43,7 +43,7 @@ jobs:
           yarn build
 
           pm2 delete FrontEn 2>/dev/null || true
-          pm2 start "yarn start" --name FrontEn --cwd "$APP_PATH"
+          pm2 start "yarn start" --name FrontEnd --cwd "$APP_PATH"
           pm2 save
         EOF
 
