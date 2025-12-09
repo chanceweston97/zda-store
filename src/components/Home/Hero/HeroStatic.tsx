@@ -18,7 +18,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
 
   // Use first banner or default
   const banner = bannerData && bannerData.length > 0 ? bannerData[0] : {
-    title: "Field-tested antennas and cabling built to improve signal where it counts.",
+    title: "FFFField-tested antennas and cabling built to improve signal where it counts.",
     image: "/images/hero/banner.webp",
     buttonText: "All Products",
     link: "/store",
