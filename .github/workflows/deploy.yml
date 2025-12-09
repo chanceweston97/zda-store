@@ -38,11 +38,12 @@ jobs:
 
           echo "🟢 Restarting PM2..."
           cd /home/ubuntu/front/zda-store
-          if pm2 list | grep -q "storefront"; then
-            pm2 restart storefront
-          else
-            pm2 start npm --name storefront -- run start
-          fi
+          
+          # Delete existing errored process if it exists
+          pm2 delete storefront 2>/dev/null || true
+          
+          # Start PM2 with correct working directory - use yarn since project uses yarn
+          pm2 start yarn --name storefront --cwd /home/ubuntu/front/zda-store -- start
 
           pm2 save
         EOF
