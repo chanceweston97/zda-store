@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy Frontend to EC2
 
 on:
   push:
@@ -25,22 +25,55 @@ jobs:
 
         echo "🔐 Connecting to EC2..."
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
-          cd /home/ubuntu/front/zda-store    
-          echo "🟡 Pulling latest..."
-          git fetch --all
+          set -e  # Exit on error
+          
+          # Set deployment path
+          APP_PATH="${EC2_PATH:-/home/ubuntu/front/zda-store}"
+          
+          echo "📂 Navigating to: $APP_PATH"
+          cd "$APP_PATH" || { echo "❌ Directory not found: $APP_PATH"; exit 1; }
+          
+          echo "🔄 Pulling latest code from GitHub..."
+          git fetch origin main
           git reset --hard origin/main
-
-          echo "🟡 Installing deps..."
-          yarn install --frozen-lockfile
-
-          echo "🟡 Building..."
+          git clean -fd  # Remove untracked files
+          
+          echo "📦 Current commit:"
+          git log -1 --oneline
+          
+          echo "🗑️  Cleaning previous build..."
+          rm -rf .next
+          rm -rf node_modules/.cache
+          
+          echo "📥 Installing dependencies..."
+          yarn install --frozen-lockfile --production=false
+          
+          echo "🏗️  Building application..."
           yarn build
-
-          echo "🟢 Restarting PM2..."
-          cd /home/ubuntu/front/zda-store
-          # Start PM2 with shell command - yarn is a shell script, not a Node.js script
-          pm2 start "yarn start" --name FrontEnd --cwd /home/ubuntu/front/zda-store --interpreter bash
-
+          
+          # Verify build succeeded
+          if [ ! -d ".next" ]; then
+            echo "❌ Build failed - .next directory not found"
+            exit 1
+          fi
+          
+          echo "🔄 Restarting PM2 process..."
+          # Stop and delete existing process
+          pm2 delete FrontEnd 2>/dev/null || true
+          
+          # Start new process with correct settings
+          pm2 start "yarn start" \
+            --name FrontEnd \
+            --cwd "$APP_PATH" \
+            --interpreter bash \
+            --max-memory-restart 500M
+          
           pm2 save
+          
+          echo "✅ Deployment completed successfully!"
+          echo "📊 PM2 Status:"
+          pm2 list
         EOF
-
+        
+        # Clean up
+        rm -f key.pem
