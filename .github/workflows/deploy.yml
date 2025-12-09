@@ -1,36 +1,24 @@
-name: Deploy Storefront to EC2
+- name: Deploy to EC2
+  run: |
+    echo "$EC2_KEY" > key.pem          # create key file
+    chmod 600 key.pem                  # secure permissions
+    ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
+      cd $EC2_PATH
 
-on:
-  push:
-    branches: ["main"]
+      echo "🟡 Pulling latest..."
+      git fetch --all
+      git reset --hard origin/main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+      echo "🟡 Installing deps..."
+      corepack enable
+      yarn install --frozen-lockfile
 
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v4
+      echo "🟡 Building..."
+      yarn build
 
-    - name: Create SSH Key
-      run: |
-        echo "$EC2_KEY" > key.pem
-        chmod 600 key.pem
+      echo "🟢 Restarting PM2..."
+      pm2 restart storefront || pm2 start "yarn start --port 8000" --name storefront
+      pm2 save
 
-    - name: Deploy to EC2 over SSH
-      run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST "
-          cd ~/front/zda-store &&
-          echo '🟡 Pulling latest updates...' &&
-          git fetch --all &&
-          git reset --hard origin/main &&
-          echo '🟡 Installing deps...' &&
-          corepack enable &&
-          yarn install --frozen-lockfile &&
-          echo '🟡 Building app...' &&
-          yarn build &&
-          echo '🟢 Restarting PM2...' &&
-          pm2 restart storefront || pm2 start 'yarn start' --name storefront --port 8000 &&
-          pm2 save &&
-          echo '🚀 Deployment Completed Successfully!'
-        "
+      echo "🚀 Deployment complete!"
+    EOF
