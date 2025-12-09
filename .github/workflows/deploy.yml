@@ -24,35 +24,26 @@ jobs:
         chmod 600 key.pem
 
         echo "🔐 Connecting to EC2..."
-        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << EOF
-          set -e  # Exit on any error
-          
-          # Use EC2_PATH if provided, otherwise default
-          DEPLOY_PATH="${EC2_PATH:-/home/ubuntu/front/zda-store}"
-          cd "\$DEPLOY_PATH" || { echo "❌ Directory not found: \$DEPLOY_PATH"; exit 1; }
-          
-          echo "🟡 Pulling latest changes..."
+        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          cd /home/ubuntu/front/zda-store    
+          echo "🟡 Pulling latest..."
           git fetch --all
           git reset --hard origin/main
-          
-          echo "🟡 Installing dependencies..."
-          corepack enable
+
+          echo "🟡 Installing deps..."
           yarn install --frozen-lockfile
-          
-          echo "🟡 Building application..."
-          yarn build || { echo "❌ Build failed!"; exit 1; }
-          
-          echo "🟢 Restarting PM2 process..."
+
+          echo "🟡 Building..."
+          yarn build
+
+          echo "🟢 Restarting PM2..."
+          cd /home/ubuntu/front/zda-store
           if pm2 list | grep -q "storefront"; then
             pm2 restart storefront
           else
-            pm2 start "yarn start" --name storefront --cwd "\$DEPLOY_PATH"
+            pm2 start npm --name storefront -- run start
           fi
-          
+
           pm2 save
-          echo "✅ Deployment completed successfully!"
         EOF
-        
-        # Clean up key file
-        rm -f key.pem
 
