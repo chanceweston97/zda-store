@@ -9,8 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Deploy to EC2
       env:
@@ -23,72 +22,29 @@ jobs:
         echo "$EC2_KEY" > key.pem
         chmod 600 key.pem
 
-        echo "🔐 Connecting to EC2..."
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
-          set -e  # Exit on error
-          
-          # Set deployment path
+          set -e
+
+          # Load node + yarn properly
+          export NVM_DIR="$HOME/.nvm"
+          source "$NVM_DIR/nvm.sh"
+
           APP_PATH="${EC2_PATH:-/home/ubuntu/front/zda-store}"
-          
-          echo "📂 Navigating to: $APP_PATH"
-          cd "$APP_PATH" || { echo "❌ Directory not found: $APP_PATH"; exit 1; }
-          
-          echo "🔄 Pulling latest code from GitHub..."
+          cd "$APP_PATH" || exit 1
+
           git fetch origin main
           git reset --hard origin/main
-          git clean -fd  # Remove untracked files
-          
-          echo "📦 Current commit:"
-          git log -1 --oneline
-          
-          echo "🗑️  Cleaning previous build..."
-          rm -rf .next
-          rm -rf node_modules/.cache
-          
-          echo "📥 Setting up Yarn 4.6.0 via Corepack..."
-          # Enable Corepack (try without sudo first, then with sudo if needed)
-          if ! corepack enable 2>/dev/null; then
-            echo "⚠️  Enabling Corepack with sudo..."
-            sudo corepack enable
-          fi
-          
-          # Prepare and activate Yarn 4.6.0 for this project
-          echo "📦 Preparing Yarn 4.6.0..."
+
+          corepack enable
           corepack prepare yarn@4.6.0 --activate
-          
-          # Verify Yarn version
-          echo "📦 Yarn version:"
-          yarn --version
-          
-          echo "📦 Installing dependencies..."
-          yarn install --immutable
-          
-          echo "🏗️  Building application..."
+          yarn set version 4.6.0
+
+          yarn install --check-cache
           yarn build
-          
-          # Verify build succeeded
-          if [ ! -d ".next" ]; then
-            echo "❌ Build failed - .next directory not found"
-            exit 1
-          fi
-          
-          echo "🔄 Restarting PM2 process..."
-          # Stop and delete existing process
-          pm2 delete FrontEnd 2>/dev/null || true
-          
-          # Start new process with correct settings
-          pm2 start "yarn start" \
-            --name FrontEnd \
-            --cwd "$APP_PATH" \
-            --interpreter bash \
-            --max-memory-restart 500M
-          
+
+          pm2 delete FrontEn 2>/dev/null || true
+          pm2 start "yarn start" --name FrontEn --cwd "$APP_PATH"
           pm2 save
-          
-          echo "✅ Deployment completed successfully!"
-          echo "📊 PM2 Status:"
-          pm2 list
         EOF
-        
-        # Clean up
+
         rm -f key.pem
