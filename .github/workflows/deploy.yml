@@ -1,66 +1,34 @@
-name: Deploy Frontend to EC2
+name: Deploy Backend to EC2
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"]   # deploys whenever you push to main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      env:
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
-        EC2_KEY: ${{ secrets.EC2_KEY }}
-        EC2_PATH: ${{ secrets.EC2_PATH }}
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        source: "."
+        target: ${{ secrets.EC2_PATH }}
 
-      run: |
-        echo "$EC2_KEY" > key.pem
-        chmod 600 key.pem
-
-        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
-          set -e
-
-          # Load node + yarn properly
-          export NVM_DIR="$HOME/.nvm"
-          source "$NVM_DIR/nvm.sh"
-
-          APP_PATH="${EC2_PATH:-/home/ubuntu/front/zda-store}"
-          cd "$APP_PATH" || exit 1
-
-          git fetch origin main
-          git reset --hard origin/main
-
-          corepack enable
-          corepack prepare yarn@4.6.0 --activate
-          yarn set version 4.6.0
-
-          yarn install --check-cache
-          yarn build
-
-          # Create wrapper script for PM2 that loads NVM
-          cat > "$APP_PATH/start.sh" << SCRIPTEOF
-          #!/bin/bash
-          export NVM_DIR="\$HOME/.nvm"
-          [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
-          cd "$APP_PATH"
-          yarn start
-          SCRIPTEOF
-          chmod +x "$APP_PATH/start.sh"
-
-          # Stop and delete existing process
-          pm2 delete FrontEnd 2>/dev/null || true
-          
-          # Start with PM2 using the wrapper script
-          pm2 start "$APP_PATH/start.sh" --name FrontEnd --interpreter bash
-          pm2 save
-          
-          # Show PM2 status
-          pm2 list
-        EOF
-
-        rm -f key.pem
+    - name: SSH into server and perform deploy commands
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd ${{ secrets.EC2_PATH }}
+          git pull || true
+          yarn install
+          pm2 start yarn --name FrontEnd run start
