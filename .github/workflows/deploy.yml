@@ -18,7 +18,7 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
-        script: mkdir -p ${{ secrets.EC2_PATH }}
+        script: mkdir -p ${{ secrets.APP_PATH }}
 
     - name: Copy files to EC2
       uses: appleboy/scp-action@v0.1.4
@@ -27,7 +27,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         source: "."
-        target: ${{ secrets.EC2_PATH }}
+        target: ${{ secrets.APP_PATH }}
 
     - name: SSH into server and perform deploy commands
       uses: appleboy/ssh-action@v0.1.7
