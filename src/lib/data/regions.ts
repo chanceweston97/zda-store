@@ -13,26 +13,56 @@ export const listRegions = async () => {
   const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
   
   try {
+    const headers = await getStoreHeaders()
+    
+    // Add more detailed logging for debugging
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 [SERVER] Fetching regions from:", `${backendUrl}/store/regions`)
+      console.log("🔍 [SERVER] Publishable key set:", !!process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY)
+    }
+    
     const response = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
       method: "GET",
-      headers: await getStoreHeaders(),
+      headers,
       next,
-      cache: "force-cache",
+      cache: "no-store", // Use no-store for server-side to avoid stale cache issues
     })
     
-    if (!response.regions || response.regions.length === 0) {
+    if (!response || !response.regions || response.regions.length === 0) {
       console.error("❌ [SERVER] listRegions: No regions found in response from", `${backendUrl}/store/regions`)
+      console.error("❌ [SERVER] Response:", JSON.stringify(response, null, 2))
+      return []
     }
     
     return response.regions
   } catch (error: any) {
-    console.error("❌ [SERVER] Error in listRegions:", {
+    const errorDetails = {
       message: error?.message,
       status: error?.response?.status,
       statusText: error?.response?.statusText,
       url: `${backendUrl}/store/regions`,
       publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? `${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.substring(0, 20)}...` : "NOT SET",
-    })
+      backendUrl: backendUrl,
+      errorType: error?.name,
+      stack: error?.stack,
+    }
+    
+    console.error("❌ [SERVER] Error in listRegions:", errorDetails)
+    
+    // If it's a network/CORS error, return empty array instead of throwing
+    // This allows the app to continue and try to work without regions
+    if (error?.message?.includes("fetch failed") || 
+        error?.message?.includes("CORS") ||
+        error?.code === "ECONNREFUSED" ||
+        error?.code === "ENOTFOUND") {
+      console.error("❌ [SERVER] Network/CORS error - backend may not be accessible from frontend server")
+      console.error("❌ [SERVER] Check that:")
+      console.error("   1. Backend is running and accessible at:", backendUrl)
+      console.error("   2. CORS is configured on backend to allow requests from frontend server")
+      console.error("   3. Firewall/security groups allow connections between frontend and backend")
+      return []
+    }
+    
     throw medusaError(error)
   }
 }

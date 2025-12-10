@@ -43,8 +43,11 @@ export const listProducts = async ({
       const regions = await listRegions()
       if (regions && regions.length > 0) {
         region = regions[0]
+        console.log("✅ [SERVER] Using region:", region.id, region.name)
       } else {
-        console.error("❌ [SERVER] listRegions() returned empty array or null")
+        console.warn("⚠️ [SERVER] listRegions() returned empty array - trying to fetch products without region_id")
+        // Don't throw error yet - try to fetch products without region_id
+        // Some Medusa versions might allow this, or we can handle the error from the API
       }
     } catch (error: any) {
       console.error("❌ [SERVER] Error fetching regions in listProducts:", {
@@ -53,20 +56,20 @@ export const listProducts = async ({
         statusText: error?.response?.statusText,
         stack: error?.stack,
       })
-      // If we still can't get a region, we'll throw an error below
+      // Continue without region - let the API call fail if region is required
     }
   }
 
-  // region_id is required for price calculations - throw error if we don't have it
+  // Try to fetch products even without region_id - some APIs might work
+  // If region_id is truly required, the API will return an error and we'll handle it
   if (!region?.id) {
     const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
-    const errorMessage = `Unable to determine region for product pricing. Please ensure at least one region is configured in your Medusa backend at ${backendUrl}. Check that:
-1. At least one region exists in Medusa Admin
-2. The region has at least one country assigned
-3. Your backend is accessible from the frontend
-4. CORS is properly configured on your backend`
-    console.error("❌ [SERVER]", errorMessage)
-    throw new Error(errorMessage)
+    console.warn("⚠️ [SERVER] No region available - attempting to fetch products without region_id")
+    console.warn("⚠️ [SERVER] If this fails, ensure:")
+    console.warn("   1. Backend is accessible at:", backendUrl)
+    console.warn("   2. At least one region exists in Medusa Admin")
+    console.warn("   3. CORS is configured on backend")
+    // Don't throw error - let the API call proceed and handle the error response
   }
 
   const headers = {
@@ -82,8 +85,12 @@ export const listProducts = async ({
     offset,
     fields:
       "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,*tags,",
-    region_id: region.id, // Always include region_id - required for pricing
     ...queryParams,
+  }
+  
+  // Only add region_id if we have it - required for pricing but we'll try without it if needed
+  if (region?.id) {
+    query.region_id = region.id
   }
 
   return sdk.client
@@ -110,6 +117,29 @@ export const listProducts = async ({
       }
     })
     .catch((error: any) => {
+      const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+      const errorDetails = {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: `${backendUrl}/store/products`,
+        hasRegion: !!region?.id,
+        regionId: region?.id,
+        errorType: error?.name,
+      }
+      
+      console.error("❌ [SERVER] API Error fetching products:", errorDetails)
+      
+      // If error is about missing region_id, provide helpful message
+      if (error.message?.includes("region") || error.message?.includes("pricing context")) {
+        console.error("❌ [SERVER] Region error detected. Troubleshooting:")
+        console.error("   1. Check backend is accessible:", backendUrl)
+        console.error("   2. Test regions endpoint:", `${backendUrl}/store/regions`)
+        console.error("   3. Verify CORS allows requests from frontend server")
+        console.error("   4. Check publishable key is set correctly")
+        console.error("   5. Ensure at least one region exists in Medusa Admin")
+      }
+      
       throw error
     })
 }
