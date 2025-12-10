@@ -32,16 +32,27 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { handle } = params
   
   // Try to get region - first try "us", then try first available region
-  let region = await getRegion("us")
+  let region: HttpTypes.StoreRegion | null = null
   
-  if (!region) {
+  try {
+    region = await getRegion("us")
+    
+    if (!region) {
+      const regions = await listRegions()
+      if (regions && regions.length > 0) {
+        region = regions[0]
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching regions:", error)
+    // Try to get first available region as fallback
     try {
       const regions = await listRegions()
       if (regions && regions.length > 0) {
         region = regions[0]
       }
-    } catch (error) {
-      console.error("Error fetching regions:", error)
+    } catch (fallbackError) {
+      console.error("Error fetching regions fallback:", fallbackError)
     }
   }
 
@@ -53,6 +64,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const product = await listProducts({
     countryCode: countryCode,
+    regionId: region.id, // Pass regionId directly for better reliability
     queryParams: { handle },
   }).then(({ response }) => response.products[0])
 
@@ -78,16 +90,27 @@ export default async function ProductPage(props: Props) {
   const selectedVariantId = (await searchParams).v_id
 
   // Try to get region - first try "us", then try first available region
-  let region = await getRegion("us")
+  let region: HttpTypes.StoreRegion | null = null
   
-  if (!region) {
+  try {
+    region = await getRegion("us")
+    
+    if (!region) {
+      const regions = await listRegions()
+      if (regions && regions.length > 0) {
+        region = regions[0]
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching regions:", error)
+    // Try to get first available region as fallback
     try {
       const regions = await listRegions()
       if (regions && regions.length > 0) {
         region = regions[0]
       }
-    } catch (error) {
-      console.error("Error fetching regions:", error)
+    } catch (fallbackError) {
+      console.error("Error fetching regions fallback:", fallbackError)
     }
   }
 
@@ -99,6 +122,7 @@ export default async function ProductPage(props: Props) {
 
   const pricedProduct = await listProducts({
     countryCode: countryCode,
+    regionId: region.id, // Pass regionId directly for better reliability
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
 

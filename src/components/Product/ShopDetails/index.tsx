@@ -9,6 +9,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Description from "./Description";
 import Newsletter from "@components/Common/Newsletter";
 import FaqSection from "@components/Home/Faq";
+import { useCartSidebar } from "@components/Common/CartSidebar/CartSidebarProvider";
+import ImagePreviewModal from "./ImagePreviewModal";
 
 const productDetailsHeroData = [
   {
@@ -33,35 +35,64 @@ type ShopDetailsProps = {
 
 const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
   const router = useRouter();
+  const { openCart } = useCartSidebar();
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Get product metadata
   const metadata = product.metadata || {};
   const productType = metadata.productType as "antenna" | "cable" | "connector" | undefined;
-  const tags = metadata.tags as string[] | undefined;
+  // Handle tags - check both product.tags (array) and metadata.tags
+  const tags = useMemo(() => {
+    // First check product.tags (Medusa's native tags field)
+    if (product.tags && Array.isArray(product.tags) && product.tags.length > 0) {
+      return product.tags.map(tag => tag.value || tag);
+    }
+    // Fallback to metadata.tags
+    const tagsData = metadata.tags;
+    if (!tagsData) return undefined;
+    if (Array.isArray(tagsData)) return tagsData;
+    if (typeof tagsData === 'string') {
+      // If it's a comma-separated string, split it
+      return tagsData.includes(',') ? tagsData.split(',').map(t => t.trim()) : [tagsData];
+    }
+    return undefined;
+  }, [product.tags, metadata.tags]);
   // Features and Applications are now plain text, not arrays
   const features = typeof metadata.features === 'string' ? metadata.features : (Array.isArray(metadata.features) ? metadata.features.join('\n') : undefined);
   const applications = typeof metadata.applications === 'string' ? metadata.applications : (Array.isArray(metadata.applications) ? metadata.applications.join('\n') : undefined);
   const featureTitle = metadata.featureTitle as string | undefined;
+  // Get subtitle from metadata - check multiple possible field names
+  const subtitle = useMemo(() => {
+    // Try metadata fields first
+    if (metadata.subtitle && typeof metadata.subtitle === 'string') return metadata.subtitle;
+    if (metadata.shortDescription && typeof metadata.shortDescription === 'string') return metadata.shortDescription;
+    // Try product fields
+    if (product.subtitle && typeof product.subtitle === 'string') return product.subtitle;
+    // Try extracting first line from description if it exists
+    if (product.description && typeof product.description === 'string') {
+      const firstLine = product.description.split('\n')[0].trim();
+      if (firstLine && firstLine.length > 0) return firstLine;
+    }
+    return undefined;
+  }, [metadata.subtitle, metadata.shortDescription, product.subtitle, product.description]);
   const datasheetImage = metadata.datasheetImage as string | undefined;
   const datasheetPdf = metadata.datasheetPdf as string | undefined;
   const specifications = metadata.specifications as string | undefined;
 
   // Get product variants
   const variants = product.variants || [];
-  
+
   // For antennas: gain options from variants
   const gainOptions = useMemo(() => {
     if (productType === "antenna" && variants.length > 0) {
       return variants.map((variant) => ({
         id: variant.id,
         title: variant.title || "",
-        price: variant.calculated_price?.calculated_amount 
-          ? variant.calculated_price.calculated_amount / 100 
-          : 0,
+        price: variant.calculated_price?.calculated_amount || 0,
       }));
     }
     return [];
@@ -73,9 +104,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
       return variants.map((variant) => ({
         id: variant.id,
         title: variant.title || "",
-        price: variant.calculated_price?.calculated_amount 
-          ? variant.calculated_price.calculated_amount / 100 
-          : 0,
+        price: variant.calculated_price?.calculated_amount || 0,
       }));
     }
     return [];
@@ -94,21 +123,21 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
     return variants.find((v) => v.id === selectedVariantId) || variants[0] || null;
   }, [variants, selectedVariantId]);
 
-  // Calculate price
+  // Calculate price - use original calculated_amount without division
   const dynamicPrice = useMemo(() => {
     if (selectedVariant?.calculated_price?.calculated_amount) {
-      return selectedVariant.calculated_price.calculated_amount / 100;
+      return selectedVariant.calculated_price.calculated_amount;
     }
     // Fallback to product price
     if (product.variants?.[0]?.calculated_price?.calculated_amount) {
-      return product.variants[0].calculated_price.calculated_amount / 100;
+      return product.variants[0].calculated_price.calculated_amount;
     }
     return 0;
   }, [selectedVariant, product.variants]);
 
   // Calculate total price
   const totalPrice = useMemo(() => {
-    return Math.round(dynamicPrice * quantity * 100) / 100;
+    return dynamicPrice * quantity;
   }, [dynamicPrice, quantity]);
 
   // Get main image
@@ -132,11 +161,16 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
       return;
     }
 
+    if (!region || !region.id) {
+      toast.error("Unable to determine region. Please refresh the page.");
+      return;
+    }
+
     setIsAddingToCart(true);
 
     try {
       const countryCode = region.countries?.[0]?.iso_2?.toLowerCase() || "us";
-      
+
       const response = await fetch("/api/cart/add-item", {
         method: "POST",
         headers: {
@@ -149,19 +183,23 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add item to cart");
+        throw new Error(data.error || `Failed to add item to cart (${response.status})`);
       }
 
       toast.success("Product added to cart!");
-      
-      // Refresh cart count (trigger a page refresh or update cart state)
+
+      // Trigger cart update event for header cart count
       window.dispatchEvent(new Event("cart-updated"));
-      router.refresh();
+
+      // Open cart sidebar - this will automatically load the updated cart
+      openCart();
     } catch (error: any) {
       console.error("Error adding to cart:", error);
-      toast.error(error.message || "Failed to add product to cart");
+      const errorMessage = error?.message || "Failed to add product to cart. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsAddingToCart(false);
     }
@@ -177,21 +215,46 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
             {/* LEFT: GALLERY */}
             <div className="w-full lg:w-1/2">
-              <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 p-4 sm:p-7.5 relative flex items-center justify-center">
-                {mainImageUrl && (
-                  <Image
-                    src={mainImageUrl}
-                    alt={product.title || "Product"}
-                    width={400}
-                    height={400}
-                    className="w-full h-auto object-contain"
-                  />
-                )}
+              <div className="lg:min-h-[512px] rounded-lg shadow-sm bg-gray-100 p-4 sm:p-7.5 relative flex items-center justify-center">
+                <div>
+                  <button
+                    onClick={() => {
+                      if (thumbnailImages.length > 0) {
+                        setIsImageModalOpen(true);
+                      }
+                    }}
+                    aria-label="button for zoom"
+                    className="gallery__Image w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center ease-out duration-200 text-gray-800 hover:text-[#2958A4] absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+                      />
+                    </svg>
+                  </button>
+
+                  {mainImageUrl && (
+                    <Image
+                      src={mainImageUrl}
+                      alt={product.title || "Product"}
+                      width={400}
+                      height={400}
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Thumbnails */}
               {thumbnailImages.length > 1 && (
-                <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
+                <div className="flex flex-wrap sm:flex-nowrap gap-3 mt-6">
                   {thumbnailImages.map((image, key) => {
                     if (!image?.url) return null;
 
@@ -199,13 +262,12 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 shadow-1 ease-out duration-200 border-2 hover:border-[#2958A4] ${
-                          key === previewImg ? "border-[#2958A4]" : "border-transparent"
-                        }`}
+                        className={`flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 overflow-hidden rounded-lg bg-gray-100 shadow-sm ease-out duration-200 border-[1px] hover:border-[#2958A4] ${key === previewImg ? "border-[#2958A4]" : "border-transparent"
+                          }`}
                       >
                         <Image
-                          width={50}
-                          height={50}
+                          width={64}
+                          height={64}
                           src={image.url}
                           alt="thumbnail"
                           className="w-full h-full object-cover"
@@ -229,14 +291,18 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
               )}
 
               {/* Tags */}
-              {tags && tags.length > 0 && (
+              {tags && Array.isArray(tags) && tags.length > 0 && (
                 <ul className="flex flex-wrap items-center gap-2 mb-3">
-                  {tags.map((tag, index) => (
-                    <li key={index} className="flex items-center gap-2 p-2">
-                      <span className="text-black text-[20px] font-normal">•</span>
-                      <span className="text-black text-[20px] font-normal">{tag}</span>
-                    </li>
-                  ))}
+                  {tags.map((tag, index) => {
+                    const tagText = typeof tag === 'string' ? tag : String(tag);
+                    if (!tagText || tagText.trim() === '') return null;
+                    return (
+                      <li key={index} className="flex items-center gap-2 p-2">
+                        <span className="text-black text-[20px] font-normal">•</span>
+                        <span className="text-black text-[20px] font-normal">{tagText}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
 
@@ -254,8 +320,16 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                 </span>
               </h3>
 
+
               <form onSubmit={(e) => e.preventDefault()}>
                 <div className="flex flex-col gap-4.5 mt-3 py-2">
+                  {/* Subtitle */}
+                  {subtitle && (
+                    <p className="text-black text-[24px] font-medium leading-[26px] mb-4">
+                      {subtitle}
+                    </p>
+                  )}
+
                   {/* Feature Title */}
                   {featureTitle && (
                     <span className="text-black font-satoshi text-[24px] font-bold leading-[26px]">{featureTitle}</span>
@@ -284,7 +358,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                     {productType === "antenna" && gainOptions.length > 0 && (
                       <div className="space-y-2">
                         <label className="text-black text-[20px] font-medium leading-[30px]">
-                          Gain
+                          Gains
                         </label>
                         <div className="flex flex-wrap gap-2">
                           {gainOptions.map((option, index) => {
@@ -294,13 +368,12 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                                 key={option.id}
                                 type="button"
                                 onClick={() => setSelectedVariantId(option.id)}
-                                className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${
-                                  isSelected
+                                className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${isSelected
                                     ? "border-[#2958A4] bg-[#2958A4] text-white"
                                     : "border-[#2958A4] bg-white text-gray-800"
-                                }`}
+                                  }`}
                               >
-                                {option.title}
+                                {option.title} dBi
                               </button>
                             );
                           })}
@@ -322,11 +395,10 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                                 key={option.id}
                                 type="button"
                                 onClick={() => setSelectedVariantId(option.id)}
-                                className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 ${
-                                  isSelected
+                                className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 ${isSelected
                                     ? "border-[#2958A4] bg-[#2958A4] text-white"
                                     : "border-[#2958A4] bg-white text-gray-800"
-                                }`}
+                                  }`}
                               >
                                 {option.title}
                               </button>
@@ -382,11 +454,10 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                       type="button"
                       onClick={handleAddToCart}
                       disabled={isAddingToCart || !selectedVariant}
-                      className={`w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] ${
-                        isAddingToCart || !selectedVariant
+                      className={`w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] ${isAddingToCart || !selectedVariant
                           ? "opacity-70 cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white"
                           : ""
-                      }`}
+                        }`}
                     >
                       {isAddingToCart ? "Adding..." : "Add to Cart"}
                     </button>
@@ -436,7 +507,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
       </div>
 
       {/* Description Section */}
-      <Description 
+      <Description
         product={product}
         metadata={{
           description: product.description,
@@ -453,6 +524,14 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
 
       {/* Newsletter */}
       <Newsletter />
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        images={thumbnailImages}
+        initialIndex={previewImg}
+      />
     </>
   );
 };

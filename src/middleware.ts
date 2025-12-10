@@ -23,10 +23,16 @@ async function getRegionMap(cacheId: string) {
     !regionMap.keys().next().value ||
     regionMapUpdated < Date.now() - 3600 * 1000
   ) {
+    if (!PUBLISHABLE_API_KEY) {
+      throw new Error(
+        "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is not set. Please set it in your .env.local file and restart the dev server."
+      )
+    }
+
     // Fetch regions from Medusa. We can't use the JS client here because middleware is running on Edge and the client needs a Node environment.
     const { regions } = await fetch(`${BACKEND_URL}/store/regions`, {
       headers: {
-        "x-publishable-api-key": PUBLISHABLE_API_KEY!,
+        "x-publishable-api-key": PUBLISHABLE_API_KEY,
       },
       next: {
         revalidate: 3600,
@@ -37,7 +43,11 @@ async function getRegionMap(cacheId: string) {
       const json = await response.json()
 
       if (!response.ok) {
-        throw new Error(json.message)
+        const errorMsg = json.message || json.error || `HTTP ${response.status}`
+        console.error("❌ Middleware: Failed to fetch regions:", errorMsg)
+        console.error("   Backend URL:", BACKEND_URL)
+        console.error("   Publishable Key:", PUBLISHABLE_API_KEY ? PUBLISHABLE_API_KEY.substring(0, 20) + "..." : "NOT SET")
+        throw new Error(`Failed to fetch regions: ${errorMsg}`)
       }
 
       return json

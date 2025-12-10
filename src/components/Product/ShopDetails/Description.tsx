@@ -49,6 +49,20 @@ export default function Description({ product, metadata }: DescriptionProps) {
               </div>
               <button
                 type="button"
+                onClick={() => {
+                  if (!datasheetPdf) return;
+                  
+                  // Use API route to proxy the download (avoids CORS issues)
+                  const downloadUrl = `/api/download-pdf?url=${encodeURIComponent(datasheetPdf)}`;
+                  
+                  // Create a temporary link and trigger download
+                  const link = document.createElement("a");
+                  link.href = downloadUrl;
+                  link.download = `${product.handle || "datasheet"}.pdf`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
                 disabled={!datasheetPdf}
                 className={`flex w-full items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-8 py-3 transition-colors mt-4 ${
                   datasheetPdf 
@@ -56,17 +70,7 @@ export default function Description({ product, metadata }: DescriptionProps) {
                     : "cursor-not-allowed bg-[#A1A9C3] opacity-70"
                 }`}
               >
-                {datasheetPdf ? (
-                  <a
-                    href={forceDownloadUrl || "#"}
-                    download
-                    className="w-full h-full flex items-center justify-center"
-                  >
-                    Download Data Sheet
-                  </a>
-                ) : (
-                  "Download Data Sheet"
-                )}
+                Download DataSheet
               </button>
             </div>
           )}

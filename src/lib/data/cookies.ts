@@ -18,6 +18,16 @@ export const getAuthHeaders = async (): Promise<
   }
 }
 
+export const getStoreHeaders = async (): Promise<Record<string, string>> => {
+  const authHeaders = await getAuthHeaders()
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+  
+  return {
+    ...authHeaders,
+    "x-publishable-api-key": publishableKey,
+  }
+}
+
 export const getCacheTag = async (tag: string): Promise<string> => {
   try {
     const cookies = await nextCookies()

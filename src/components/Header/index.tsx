@@ -8,6 +8,7 @@ import MobileDropdown from "./MobileDropdown";
 import { menuData } from "./menuData";
 import { HttpTypes } from "@medusajs/types";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { useCartSidebar } from "@components/Common/CartSidebar/CartSidebarProvider";
 
 type HeaderProps = {
   cart?: HttpTypes.StoreCart | null;
@@ -17,6 +18,7 @@ const Header = ({ cart }: HeaderProps) => {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const { openCart } = useCartSidebar();
 
   const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
@@ -91,8 +93,11 @@ const Header = ({ cart }: HeaderProps) => {
               {/* Right side buttons - Cart + Mobile Hamburger */}
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Cart Icon Button - Visible on all screens */}
-                <LocalizedClientLink
-                  href="/cart"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openCart();
+                  }}
                   className="relative w-10 h-10 flex items-center justify-center text-[#2958A4] hover:bg-gray-100 rounded-lg transition-colors"
                   aria-label="Open cart"
                 >
@@ -102,7 +107,7 @@ const Header = ({ cart }: HeaderProps) => {
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
                   )}
-                </LocalizedClientLink>
+                </button>
 
                 {/* Hamburger Toggle BTN - Visible on mobile/tablet, hidden on xl+ */}
                 <button

@@ -52,6 +52,9 @@ const nextConfig = {
           ]
         : []),
     ],
+    // Disable image optimization to allow any host (for EC2 IPs)
+    // In production, you should whitelist specific IPs or use a domain
+    unoptimized: true,
   },
 }
 

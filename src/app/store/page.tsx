@@ -1,6 +1,6 @@
 import { Metadata } from "next"
-import { listProducts, listProductsWithSort } from "@lib/data/products"
-import { getRegion, listRegions } from "@lib/data/regions"
+import { listProducts } from "@lib/data/products"
+import { listRegions } from "@lib/data/regions"
 import { listCategories } from "@lib/data/categories"
 import ShopWithSidebar from "@components/Store/ShopWithSidebar"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -22,37 +22,18 @@ export default async function StorePage(props: Params) {
   const searchParams = await props.searchParams
   const { sortBy, page, category } = searchParams
 
-  // Try to get region - first try "us", then try first available region
-  let region = await getRegion("us")
-  
-  // If "us" region not found, try to get the first available region
-  if (!region) {
-    try {
-      const regions = await listRegions()
-      if (regions && regions.length > 0) {
-        // Get the first region
-        region = regions[0]
-      }
-    } catch (error) {
-      console.error("Error fetching regions:", error)
-    }
-  }
-  
-  if (!region) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-lg text-[#2958A4] mb-2">Unable to load products.</p>
-          <p className="text-sm text-gray-600">
-            Please make sure regions are set up in your Medusa Admin panel.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   const sort = sortBy || "created_at"
-  const countryCode = region.countries?.[0]?.iso_2?.toLowerCase() || "us"
+  
+  // Try to get a region for display purposes, but don't require it
+  let region = null
+  try {
+    const regions = await listRegions()
+    if (regions && regions.length > 0) {
+      region = regions[0] // Use first available region
+    }
+  } catch (error) {
+    // Proceed without region
+  }
 
   // Fetch all categories with subcategories (like sanity does)
   let categories: any[] = []
@@ -82,6 +63,7 @@ export default async function StorePage(props: Params) {
   }
 
   // Fetch all products first (like sanity does with getAllProducts)
+  // Don't pass countryCode - let listProducts handle region automatically
   try {
     const allProductsResult = await listProducts({
       pageParam: 1,
@@ -90,48 +72,20 @@ export default async function StorePage(props: Params) {
         fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,*categories",
         // Note: Medusa store API only returns published products by default
       },
-      countryCode: countryCode,
+      // No countryCode or regionId - listProducts will handle it
     })
+    
     allProducts = allProductsResult.response.products || []
     allProductsCount = allProductsResult.response.count || 0
-    
-    // Debug logging - always log in development
-    console.log("🔍 Store Page Debug:", {
-      countryCode,
-      regionId: region.id,
-      regionName: region.name,
-      productsFetched: allProducts.length,
-      totalCount: allProductsCount,
-      firstProduct: allProducts[0] ? {
-        id: allProducts[0].id,
-        title: allProducts[0].title,
-        handle: allProducts[0].handle,
-        status: allProducts[0].status,
-        variantCount: allProducts[0].variants?.length || 0,
-        hasPrice: allProducts[0].variants?.some((v: any) => v.calculated_price?.calculated_amount) || false,
-        categories: allProducts[0].categories?.map((c: any) => c.name),
-      } : null,
-    })
-
-    // Additional debugging if no products
-    if (allProducts.length === 0) {
-      console.warn("⚠️ No products returned from API. Possible reasons:")
-      console.warn("   1. No products created in Medusa Admin")
-      console.warn("   2. Products are not PUBLISHED (status must be 'published')")
-      console.warn("   3. Products have no variants with prices")
-      console.warn("   4. Products are not available in the region")
-      console.warn("   5. Region ID mismatch:", region.id)
-    }
   } catch (error: any) {
-    console.error("❌ Error fetching all products:", error)
-    console.error("Error details:", error.message, error.stack)
+    console.error("Error fetching all products:", error)
     allProducts = []
     allProductsCount = 0
   }
 
   // Filter products by category if specified (server-side filtering like sanity)
   let filteredProducts = allProducts
-  if (category) {
+  if (category && allProducts.length > 0) {
     const categoryHandles = category.split(",")
     
     // Get all category IDs including subcategories
@@ -162,24 +116,13 @@ export default async function StorePage(props: Params) {
   const { sortProducts } = await import("@lib/util/sort-products")
   const sortedProducts = sortProducts(filteredProducts, sort)
 
-  // Debug: Log if no products found
-  if (sortedProducts.length === 0 && process.env.NODE_ENV === "development") {
-    console.warn("Store Page: No products found", {
-      allProductsCount,
-      filteredProductsCount: filteredProducts.length,
-      sortedProductsCount: sortedProducts.length,
-      countryCode,
-      regionId: region.id,
-    })
-  }
-
   // Always render ShopWithSidebar (like Sanity project) - it handles empty state internally
   return (
     <main>
       <ShopWithSidebar
         products={sortedProducts}
         categories={categories}
-        region={region}
+        region={region || undefined}
         totalCount={allProductsCount}
         allProducts={allProducts}
       />

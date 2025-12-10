@@ -5,7 +5,7 @@ import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
-import { getRegion, retrieveRegion } from "./regions"
+import { getRegion, retrieveRegion, listRegions } from "./regions"
 
 export const listProducts = async ({
   pageParam = 1,
@@ -22,27 +22,36 @@ export const listProducts = async ({
   nextPage: number | null
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductListParams
 }> => {
-  if (!countryCode && !regionId) {
-    throw new Error("Country code or region ID is required")
-  }
-
   const limit = queryParams?.limit || 12
   const _pageParam = Math.max(pageParam, 1)
   const offset = _pageParam === 1 ? 0 : (_pageParam - 1) * limit
 
-  let region: HttpTypes.StoreRegion | undefined | null
+  let region: HttpTypes.StoreRegion | undefined | null = null
 
-  if (countryCode) {
-    region = await getRegion(countryCode)
-  } else {
-    region = await retrieveRegion(regionId!)
+  // Always try to get a region - required for price calculations
+  if (countryCode || regionId) {
+    if (countryCode) {
+      region = await getRegion(countryCode)
+    } else if (regionId) {
+      region = await retrieveRegion(regionId)
+    }
+  }
+  
+  // If no region found yet, try to get first available region as fallback
+  if (!region) {
+    try {
+      const regions = await listRegions()
+      if (regions && regions.length > 0) {
+        region = regions[0]
+      }
+    } catch (error) {
+      // If we still can't get a region, we'll throw an error below
+    }
   }
 
-  if (!region) {
-    return {
-      response: { products: [], count: 0 },
-      nextPage: null,
-    }
+  // region_id is required for price calculations - throw error if we don't have it
+  if (!region?.id) {
+    throw new Error("Unable to determine region for product pricing. Please ensure at least one region is configured.")
   }
 
   const headers = {
@@ -53,30 +62,13 @@ export const listProducts = async ({
     ...(await getCacheOptions("products")),
   }
 
-  // Build query with all fields needed
   const query: any = {
     limit,
     offset,
-    region_id: region?.id,
+    fields:
+      "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,*tags,",
+    region_id: region.id, // Always include region_id - required for pricing
     ...queryParams,
-  }
-
-  // Merge fields if provided in queryParams
-  if (queryParams?.fields) {
-    query.fields = queryParams.fields
-  } else {
-    query.fields = "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,+tags,*categories"
-  }
-
-  // Debug logging in development
-  if (process.env.NODE_ENV === "development") {
-    console.log("🔍 listProducts API call:", {
-      regionId: region?.id,
-      regionName: region?.name,
-      limit,
-      offset,
-      query,
-    })
   }
 
   return sdk.client
@@ -91,33 +83,18 @@ export const listProducts = async ({
       }
     )
     .then(({ products, count }) => {
-      // Debug logging in development
-      if (process.env.NODE_ENV === "development") {
-        console.log("✅ listProducts API response:", {
-          productsCount: products?.length || 0,
-          totalCount: count,
-          firstProduct: products?.[0] ? {
-            id: products[0].id,
-            title: products[0].title,
-            status: products[0].status,
-            variantCount: products[0].variants?.length || 0,
-          } : null,
-        })
-      }
-
       const nextPage = count > offset + limit ? pageParam + 1 : null
 
       return {
         response: {
-          products: products || [],
-          count: count || 0,
+          products,
+          count,
         },
         nextPage: nextPage,
         queryParams,
       }
     })
     .catch((error: any) => {
-      console.error("❌ listProducts API error:", error)
       throw error
     })
 }

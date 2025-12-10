@@ -13,7 +13,7 @@ const PRODUCTS_PER_PAGE = 9
 type ShopWithSidebarProps = {
   products: HttpTypes.StoreProduct[]
   categories: HttpTypes.StoreProductCategory[]
-  region: HttpTypes.StoreRegion
+  region?: HttpTypes.StoreRegion
   totalCount: number
   allProducts?: HttpTypes.StoreProduct[] // All products for counting
 }
@@ -35,7 +35,8 @@ export default function ShopWithSidebar({
 
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * PRODUCTS_PER_PAGE
-    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE)
+    const paginated = filteredProducts.slice(start, start + PRODUCTS_PER_PAGE)
+    return paginated
   }, [filteredProducts, currentPage])
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE)
@@ -44,6 +45,9 @@ export default function ShopWithSidebar({
   useEffect(() => {
     setCurrentPage(1)
   }, [searchParams])
+
+  // Always show sidebar - it's positioned below header with sticky top-[108px]
+  // No scroll detection needed - sticky positioning handles it automatically
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -69,7 +73,7 @@ export default function ShopWithSidebar({
         <div className="flex gap-7.5">
           {/* Sidebar Start */}
           <div
-            className={`sidebar-content fixed xl:sticky xl:top-[108px] xl:self-start xl:z-1 z-[9999] left-0 top-0 xl:translate-x-0 xl:w-1/4 w-full ease-out duration-200 ${
+            className={`sidebar-content fixed xl:sticky xl:top-0 xl:self-start xl:z-[1] z-[9999] left-0 top-0 xl:translate-x-0 xl:w-1/4 w-full ease-out duration-200 ${
               productSidebar ? "translate-x-0 bg-white" : "-translate-x-full xl:translate-x-0"
             }`}
           >

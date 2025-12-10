@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import type { FAQ } from "@/data/types";
+
+type FAQ = {
+  id?: string;
+  question: string;
+  answer: string;
+  order?: number;
+};
 
 interface FaqData {
   title?: string;
@@ -17,11 +23,55 @@ interface FaqSectionProps {
   faqData?: FaqData | FAQ[] | null;
 }
 
+const DEFAULT_FAQS: FAQ[] = [
+  {
+    id: "1",
+    question: "What does ZDA Communications specialize in?",
+    answer: "We design and supply industrial-grade antennas, coaxial cables, and RF accessories engineered for reliable performance in demanding environments.",
+    order: 1,
+  },
+  {
+    id: "2",
+    question: "Which applications are your antennas designed for?",
+    answer: "Our antennas support fixed wireless, SCADA, utility monitoring, transportation, public safety, and other mission-critical wireless applications.",
+    order: 2,
+  },
+  {
+    id: "3",
+    question: "Do your antennas work with third-party equipment?",
+    answer: "Yes. Our products are 50-ohm and interface with common radios, modems, hotspots, routers, and signal boosters from major manufacturers, using standard RF connectors.",
+    order: 3,
+  },
+  {
+    id: "4",
+    question: "What connector types are available?",
+    answer: "N-Female is the standard connector for most of our antennas. We also support SMA, RP-SMA, N-Male, TNC, and other terminations on request.",
+    order: 4,
+  },
+  {
+    id: "5",
+    question: "What is antenna gain and why does it matter?",
+    answer: "Antenna gain describes how effectively an antenna focuses energy in a particular direction. Higher gain can improve range and signal quality when properly aligned.",
+    order: 5,
+  },
+  {
+    id: "6",
+    question: "What is VSWR and what are your typical values?",
+    answer: "VSWR (Voltage Standing Wave Ratio) indicates how efficiently power is transferred from the radio to the antenna. Our products are engineered for low VSWR to minimize reflected power.",
+    order: 6,
+  },
+];
+
 export default function FaqSection({ faqData }: FaqSectionProps) {
   // Handle both array format and object format
-  const faqs: FAQ[] = Array.isArray(faqData) 
+  let faqs: FAQ[] = Array.isArray(faqData) 
     ? faqData 
     : (faqData as FaqData)?.items || [];
+  
+  // Use default FAQs if no data provided
+  if (faqs.length === 0) {
+    faqs = DEFAULT_FAQS;
+  }
   
   const title = Array.isArray(faqData) 
     ? "Frequently Asked Questions" 

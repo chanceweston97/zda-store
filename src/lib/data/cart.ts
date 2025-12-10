@@ -13,7 +13,7 @@ import {
   removeCartId,
   setCartId,
 } from "./cookies"
-import { getRegion } from "./regions"
+import { getRegion, listRegions } from "./regions"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -51,13 +51,27 @@ export async function retrieveCart(cartId?: string, fields?: string) {
 }
 
 export async function getOrSetCart(countryCode: string) {
-  const region = await getRegion(countryCode)
+  // Normalize country code
+  const normalizedCode = countryCode?.toLowerCase() || "us"
+  let region = await getRegion(normalizedCode)
 
+  // If region not found, try to get first available region
   if (!region) {
-    throw new Error(`Region not found for country code: ${countryCode}`)
+    try {
+      const regions = await listRegions()
+      if (regions && regions.length > 0) {
+        region = regions[0]
+      }
+    } catch (error) {
+      // Ignore error, will throw below
+    }
   }
 
-  let cart = await retrieveCart(undefined, 'id,region_id')
+  if (!region) {
+    throw new Error(`Region not found for country code: ${normalizedCode}`)
+  }
+
+  let cart = await retrieveCart(undefined, 'id,region_id,region')
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -77,7 +91,9 @@ export async function getOrSetCart(countryCode: string) {
     revalidateTag(cartCacheTag)
   }
 
-  if (cart && cart?.region_id !== region.id) {
+  // Check if cart needs region update - handle both region_id and region.id
+  const cartRegionId = cart?.region_id || (cart as any)?.region?.id
+  if (cart && cartRegionId !== region.id) {
     await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
@@ -134,8 +150,11 @@ export async function addToCart({
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
-    .createLineItem(
+  try {
+    console.log("Adding to cart:", { cartId: cart.id, variantId, quantity })
+    
+    // Use the correct SDK method
+    const result = await sdk.store.cart.createLineItem(
       cart.id,
       {
         variant_id: variantId,
@@ -144,14 +163,53 @@ export async function addToCart({
       {},
       headers
     )
-    .then(async () => {
-      const cartCacheTag = await getCacheTag("carts")
-      revalidateTag(cartCacheTag)
 
-      const fulfillmentCacheTag = await getCacheTag("fulfillment")
-      revalidateTag(fulfillmentCacheTag)
-    })
-    .catch(medusaError)
+    console.log("Cart line item created successfully")
+
+    const cartCacheTag = await getCacheTag("carts")
+    revalidateTag(cartCacheTag)
+
+    const fulfillmentCacheTag = await getCacheTag("fulfillment")
+    revalidateTag(fulfillmentCacheTag)
+    
+    return result
+  } catch (error: any) {
+    console.error("========== ADD TO CART ERROR (Server) ==========")
+    console.error("Error type:", typeof error)
+    console.error("Error:", error)
+    console.error("Error message:", error?.message)
+    console.error("Error name:", error?.name)
+    console.error("Error stack:", error?.stack)
+    console.error("Error response:", error?.response)
+    console.error("Error response data:", error?.response?.data)
+    console.error("Error response status:", error?.response?.status)
+    console.error("Error cause:", error?.cause)
+    console.error("Context:", { variantId, cartId: cart.id, quantity })
+    
+    // Try to extract error message from various possible locations
+    let errorMessage = "Failed to add item to cart"
+    
+    if (error?.message) {
+      errorMessage = error.message
+    } else if (error?.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error?.response?.data?.error?.message) {
+      errorMessage = error.response.data.error.message
+    } else if (error?.response?.data?.error) {
+      errorMessage = String(error.response.data.error)
+    } else if (error?.response?.data) {
+      errorMessage = String(error.response.data)
+    } else if (typeof error === 'string') {
+      errorMessage = error
+    } else if (error?.toString) {
+      errorMessage = error.toString()
+    }
+    
+    console.error("Final error message:", errorMessage)
+    console.error("================================================")
+    
+    throw new Error(errorMessage)
+  }
 }
 
 export async function updateLineItem({

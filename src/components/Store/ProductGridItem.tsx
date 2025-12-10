@@ -10,7 +10,7 @@ import toast from "react-hot-toast"
 
 type ProductGridItemProps = {
   product: HttpTypes.StoreProduct
-  region: HttpTypes.StoreRegion
+  region?: HttpTypes.StoreRegion
 }
 
 export default function ProductGridItem({ product, region }: ProductGridItemProps) {
@@ -101,9 +101,9 @@ export default function ProductGridItem({ product, region }: ProductGridItemProp
         <span className="flex items-center gap-2 text-lg font-medium">
           {cheapestPrice ? (
             <span className="text-[#2958A4]">
-              {cheapestPrice.calculated_price?.calculated_amount
-                ? `$${(cheapestPrice.calculated_price.calculated_amount / 100).toFixed(2)}`
-                : "Price unavailable"}
+              {cheapestPrice.calculated_price_number
+                ? `$${(cheapestPrice.calculated_price_number / 100).toFixed(2)}`
+                : cheapestPrice.calculated_price || "Price unavailable"}
             </span>
           ) : (
             <span className="text-gray-400">Price unavailable</span>
