@@ -1,4 +1,6 @@
 const c = require("ansi-colors")
+const fs = require("fs")
+const path = require("path")
 
 const requiredEnvs = [
   {
@@ -10,6 +12,38 @@ const requiredEnvs = [
 ]
 
 function checkEnvVariables() {
+  // Try to load .env.local if it exists (for local development)
+  const envLocalPath = path.join(process.cwd(), ".env.local")
+  if (fs.existsSync(envLocalPath)) {
+    const envContent = fs.readFileSync(envLocalPath, "utf8")
+    envContent.split("\n").forEach((line) => {
+      const match = line.match(/^([^=:#]+)=(.*)$/)
+      if (match) {
+        const key = match[1].trim()
+        const value = match[2].trim().replace(/^["']|["']$/g, "")
+        if (!process.env[key]) {
+          process.env[key] = value
+        }
+      }
+    })
+  }
+
+  // Try to load .env if it exists (for server/production)
+  const envPath = path.join(process.cwd(), ".env")
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf8")
+    envContent.split("\n").forEach((line) => {
+      const match = line.match(/^([^=:#]+)=(.*)$/)
+      if (match) {
+        const key = match[1].trim()
+        const value = match[2].trim().replace(/^["']|["']$/g, "")
+        if (!process.env[key]) {
+          process.env[key] = value
+        }
+      }
+    })
+  }
+
   const missingEnvs = requiredEnvs.filter(function (env) {
     return !process.env[env.key]
   })
@@ -28,7 +62,7 @@ function checkEnvVariables() {
 
     console.error(
       c.yellow(
-        "\nPlease set these variables in your .env file or environment before starting the application.\n"
+        "\nPlease set these variables in your .env or .env.local file or environment before starting the application.\n"
       )
     )
 

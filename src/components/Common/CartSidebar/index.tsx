@@ -23,8 +23,10 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
     }
   }, [isOpen]);
 
-  const loadCart = async () => {
-    setIsLoading(true);
+  const loadCart = async (showLoading = true) => {
+    if (showLoading) {
+      setIsLoading(true);
+    }
     try {
       // Use fetch to get cart data from API
       const response = await fetch("/api/cart", {
@@ -41,7 +43,9 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
       console.error("Error loading cart:", error);
       setCart(null);
     } finally {
-      setIsLoading(false);
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -54,15 +58,20 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
       }
     }
 
+    // Handle cart updates
+    const handleCartUpdated = () => {
+      loadCart(false); // Don't show loading on cart updates
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       // Listen for cart updates
-      window.addEventListener("cart-updated", loadCart);
+      window.addEventListener("cart-updated", handleCartUpdated);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("cart-updated", loadCart);
+      window.removeEventListener("cart-updated", handleCartUpdated);
     };
   }, [isOpen]);
 
@@ -126,7 +135,7 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
               </div>
             ) : cartItems.length > 0 ? (
               cartItems.map((item) => (
-                <CartItem key={item.id} item={item} onUpdate={loadCart} onClose={onClose} />
+                <CartItem key={item.id} item={item} onUpdate={(showLoading = true) => loadCart(showLoading)} onClose={onClose} />
               ))
             ) : (
               <EmptyCart onClose={onClose} />
@@ -173,7 +182,7 @@ const CartItem = ({
   onUpdate, 
   onClose 
 }: { 
-  item: HttpTypes.StoreLineItem; 
+  item: HttpTypes.StoreCartLineItem; 
   onUpdate: () => void;
   onClose: () => void;
 }) => {
