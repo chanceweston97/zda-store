@@ -33,7 +33,7 @@ export default async function Footer() {
               <li>
                 <LocalizedClientLink
                   className="ease-out duration-200 hover:text-white"
-                  href="/categories/antennas"
+                  href="/store?category=antennas"
                 >
                   Antennas
                 </LocalizedClientLink>
@@ -41,7 +41,7 @@ export default async function Footer() {
               <li>
                 <LocalizedClientLink
                   className="ease-out duration-200 hover:text-white"
-                  href="/categories/cables"
+                  href="/store?category=cables"
                 >
                   Cables
                 </LocalizedClientLink>
