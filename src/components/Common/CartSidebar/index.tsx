@@ -191,7 +191,7 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
             <div className="flex items-center justify-between gap-5 mb-6">
               <p className="font-medium text-xl text-gray-900">Subtotal:</p>
               <p className="font-medium text-xl text-gray-900">
-                ${(totalPrice / 100).toFixed(2)}
+                ${totalPrice.toFixed(2)}
               </p>
             </div>
 
@@ -335,7 +335,7 @@ const CartItem = ({
               </LocalizedClientLink>
             </h3>
             <p className="text-sm text-gray-600">
-              Price: ${(unitPrice / 100).toFixed(2)}
+              Price: ${unitPrice.toFixed(2)}
             </p>
           </div>
         </div>
@@ -381,7 +381,7 @@ const CartItem = ({
         </div>
 
         <p className="text-gray-900 font-semibold text-sm">
-          Total: ${((unitPrice * localQuantity) / 100).toFixed(2)}
+          Total: ${(unitPrice * localQuantity).toFixed(2)}
         </p>
       </div>
     </div>
