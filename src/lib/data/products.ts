@@ -43,15 +43,30 @@ export const listProducts = async ({
       const regions = await listRegions()
       if (regions && regions.length > 0) {
         region = regions[0]
+      } else {
+        console.error("❌ [SERVER] listRegions() returned empty array or null")
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("❌ [SERVER] Error fetching regions in listProducts:", {
+        message: error?.message,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        stack: error?.stack,
+      })
       // If we still can't get a region, we'll throw an error below
     }
   }
 
   // region_id is required for price calculations - throw error if we don't have it
   if (!region?.id) {
-    throw new Error("Unable to determine region for product pricing. Please ensure at least one region is configured.")
+    const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+    const errorMessage = `Unable to determine region for product pricing. Please ensure at least one region is configured in your Medusa backend at ${backendUrl}. Check that:
+1. At least one region exists in Medusa Admin
+2. The region has at least one country assigned
+3. Your backend is accessible from the frontend
+4. CORS is properly configured on your backend`
+    console.error("❌ [SERVER]", errorMessage)
+    throw new Error(errorMessage)
   }
 
   const headers = {

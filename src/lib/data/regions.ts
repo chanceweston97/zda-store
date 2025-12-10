@@ -10,15 +10,31 @@ export const listRegions = async () => {
     ...(await getCacheOptions("regions")),
   }
 
-  return sdk.client
-    .fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
+  const backendUrl = process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
+  
+  try {
+    const response = await sdk.client.fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
       method: "GET",
       headers: await getStoreHeaders(),
       next,
       cache: "force-cache",
     })
-    .then(({ regions }) => regions)
-    .catch(medusaError)
+    
+    if (!response.regions || response.regions.length === 0) {
+      console.error("❌ [SERVER] listRegions: No regions found in response from", `${backendUrl}/store/regions`)
+    }
+    
+    return response.regions
+  } catch (error: any) {
+    console.error("❌ [SERVER] Error in listRegions:", {
+      message: error?.message,
+      status: error?.response?.status,
+      statusText: error?.response?.statusText,
+      url: `${backendUrl}/store/regions`,
+      publishableKey: process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? `${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.substring(0, 20)}...` : "NOT SET",
+    })
+    throw medusaError(error)
+  }
 }
 
 export const retrieveRegion = async (id: string) => {

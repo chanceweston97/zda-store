@@ -30,9 +30,15 @@ export default async function StorePage(props: Params) {
     const regions = await listRegions()
     if (regions && regions.length > 0) {
       region = regions[0] // Use first available region
+    } else {
+      console.warn("⚠️ [SERVER] No regions found in backend")
     }
-  } catch (error) {
-    // Proceed without region
+  } catch (error: any) {
+    console.error("⚠️ [SERVER] Error fetching regions in StorePage:", {
+      message: error?.message,
+      status: error?.response?.status,
+    })
+    // Proceed without region - listProducts will try to fetch regions itself
   }
 
   // Fetch all categories with subcategories (like sanity does)
