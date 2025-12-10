@@ -302,7 +302,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                 </div>
               )}
 
-              {/* Tags */}
+              {/* Tags - Show for antenna, connector, and cable products */}
               {tags && Array.isArray(tags) && tags.length > 0 && (
                 <ul className="flex flex-wrap items-center gap-2 mb-3">
                   {tags.map((tag, index) => {
@@ -397,7 +397,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                     {productType === "cable" && lengthOptions.length > 0 && (
                       <div className="space-y-2 mb-4">
                         <label className="text-black text-[20px] font-medium leading-[30px]">
-                          Length:
+                          Length
                         </label>
                         <div className="flex flex-wrap gap-2">
                           {lengthOptions.map((option) => {
@@ -412,7 +412,7 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                                     : "border-[#2958A4] bg-white text-gray-800"
                                   }`}
                               >
-                                {option.title}
+                                {option.title} ft
                               </button>
                             );
                           })}
@@ -546,8 +546,8 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
         </div>
       </div>
 
-      {/* Description Section - Hide for connector products */}
-      {productType !== "connector" && (
+      {/* Description Section - Hide for connector and cable products */}
+      {productType !== "connector" && productType !== "cable" && (
         <Description
           product={product}
           metadata={{

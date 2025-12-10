@@ -171,13 +171,13 @@ export default function CategoryDropdown({ categories, allProducts = [] }: Categ
     <div className="bg-white rounded-lg shadow-sm">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 w-full ${
+        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-6 w-full ${
           isOpen && "shadow-sm"
         }`}
       >
         <span className="text-[#2958A4] font-medium">Category</span>
         <svg
-          className={`w-4 h-4 text-[#2958A4] transition-transform duration-300 ${
+          className={`w-5 h-5 text-[#2958A4] transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -282,11 +282,11 @@ export default function CategoryDropdown({ categories, allProducts = [] }: Categ
                       e.stopPropagation()
                       toggleCategory(category.handle)
                     }}
-                    className="p-1 hover:bg-gray-100 rounded flex-shrink-0"
+                    className="px-6 py-1 hover:bg-gray-100 rounded flex-shrink-0"
                     aria-label="Toggle subcategories"
                   >
                     <svg
-                      className={`w-3 h-3 text-[#2958A4] transition-transform duration-300 ease-in-out ${
+                      className={`w-5 h-5 text-black transition-transform duration-300 ease-in-out ${
                         isCategoryOpen ? "rotate-180" : ""
                       }`}
                       fill="none"

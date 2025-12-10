@@ -16,6 +16,8 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
   const router = useRouter();
   const [cart, setCart] = useState<HttpTypes.StoreCart | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // Track local quantities for instant subtotal updates
+  const [localQuantities, setLocalQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -81,8 +83,30 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
     router.push("/checkout");
   };
 
-  const totalPrice = cart?.total || 0;
+  // Calculate subtotal from items with their local quantities for instant updates
+  const calculateSubtotal = () => {
+    if (!cart?.items) return 0;
+    return cart.items.reduce((sum, item) => {
+      // Use local quantity if available, otherwise use item.quantity
+      const quantity = localQuantities[item.id] || item.quantity;
+      const unitPrice = item.unit_price || 0;
+      return sum + (unitPrice * quantity);
+    }, 0);
+  };
+  
+  const totalPrice = calculateSubtotal();
   const cartItems = cart?.items || [];
+  
+  // Initialize local quantities when cart loads
+  useEffect(() => {
+    if (cart?.items) {
+      const initialQuantities: Record<string, number> = {};
+      cart.items.forEach((item) => {
+        initialQuantities[item.id] = item.quantity;
+      });
+      setLocalQuantities(initialQuantities);
+    }
+  }, [cart?.items?.length]); // Only update when items change (not on quantity updates)
 
   return (
     <>
@@ -134,9 +158,27 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
                 <p className="text-gray-500">Loading cart...</p>
               </div>
             ) : cartItems.length > 0 ? (
-              cartItems.map((item) => (
-                <CartItem key={item.id} item={item} onUpdate={(showLoading = true) => loadCart(showLoading)} onClose={onClose} />
-              ))
+              cartItems.map((item) => {
+                // Pass a callback that updates the cart and recalculates subtotal
+                const handleItemUpdate = (showLoading = false) => {
+                  loadCart(showLoading);
+                };
+                return (
+                  <CartItem 
+                    key={item.id} 
+                    item={item} 
+                    onUpdate={handleItemUpdate} 
+                    onClose={onClose}
+                    onQuantityChange={(itemId, newQuantity) => {
+                      // Update local quantity for instant subtotal update
+                      setLocalQuantities((prev) => ({
+                        ...prev,
+                        [itemId]: newQuantity,
+                      }));
+                    }}
+                  />
+                );
+              })
             ) : (
               <EmptyCart onClose={onClose} />
             )}
@@ -180,13 +222,14 @@ const CartSidebar = ({ isOpen, onClose }: CartSidebarProps) => {
 const CartItem = ({ 
   item, 
   onUpdate, 
-  onClose 
+  onClose,
+  onQuantityChange
 }: { 
   item: HttpTypes.StoreCartLineItem; 
-  onUpdate: () => void;
+  onUpdate: (showLoading?: boolean) => void;
   onClose: () => void;
+  onQuantityChange?: (itemId: string, quantity: number) => void;
 }) => {
-  const [isUpdating, setIsUpdating] = useState(false);
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
 
   // Update local quantity when item changes
@@ -197,10 +240,16 @@ const CartItem = ({
   const handleUpdateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1) return;
     
-    // Optimistically update local state
+    // Optimistically update local state immediately - no loading state
+    const previousQuantity = localQuantity;
     setLocalQuantity(newQuantity);
-    setIsUpdating(true);
     
+    // Notify parent to update subtotal instantly
+    if (onQuantityChange) {
+      onQuantityChange(item.id, newQuantity);
+    }
+    
+    // Update silently in background without showing loading
     try {
       const response = await fetch("/api/cart/update-item", {
         method: "POST",
@@ -212,27 +261,30 @@ const CartItem = ({
       });
 
       if (response.ok) {
-        // Reload cart to get updated totals
-        onUpdate();
+        // Reload cart silently to get updated totals
+        onUpdate(false);
         window.dispatchEvent(new Event("cart-updated"));
       } else {
         // Revert on error
-        setLocalQuantity(item.quantity);
+        setLocalQuantity(previousQuantity);
+        if (onQuantityChange) {
+          onQuantityChange(item.id, previousQuantity);
+        }
         const errorData = await response.json().catch(() => ({}));
         toast.error(errorData.error || "Failed to update quantity");
       }
     } catch (error: any) {
       // Revert on error
-      setLocalQuantity(item.quantity);
+      setLocalQuantity(previousQuantity);
+      if (onQuantityChange) {
+        onQuantityChange(item.id, previousQuantity);
+      }
       toast.error("Failed to update quantity. Please try again.");
       console.error("Error updating quantity:", error);
-    } finally {
-      setIsUpdating(false);
     }
   };
 
   const handleRemove = async () => {
-    setIsUpdating(true);
     try {
       const response = await fetch("/api/cart/remove-item", {
         method: "POST",
@@ -241,13 +293,15 @@ const CartItem = ({
       });
 
       if (response.ok) {
-        onUpdate();
+        onUpdate(false);
         window.dispatchEvent(new Event("cart-updated"));
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(errorData.error || "Failed to remove item");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error removing item:", error);
-    } finally {
-      setIsUpdating(false);
+      toast.error("Failed to remove item. Please try again.");
     }
   };
 
@@ -288,9 +342,8 @@ const CartItem = ({
 
         <button
           onClick={handleRemove}
-          disabled={isUpdating}
           aria-label="button for remove product from cart"
-          className="flex items-center justify-center rounded-full max-w-[38px] w-full h-[38px] bg-gray-100 border border-gray-300 text-gray-700 ease-out duration-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 shrink-0 disabled:opacity-50"
+          className="flex items-center justify-center rounded-full max-w-[38px] w-full h-[38px] bg-gray-100 border border-gray-300 text-gray-700 ease-out duration-200 hover:bg-red-50 hover:border-red-300 hover:text-red-600 shrink-0"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -303,7 +356,7 @@ const CartItem = ({
         <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
           <button
             onClick={() => handleUpdateQuantity(localQuantity - 1)}
-            disabled={isUpdating || localQuantity <= 1}
+            disabled={localQuantity <= 1}
             aria-label="Decrease quantity"
             className={`flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed`}
           >
@@ -318,9 +371,8 @@ const CartItem = ({
 
           <button
             onClick={() => handleUpdateQuantity(localQuantity + 1)}
-            disabled={isUpdating}
             aria-label="Increase quantity"
-            className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

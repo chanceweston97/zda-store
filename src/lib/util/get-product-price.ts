@@ -7,17 +7,20 @@ export const getPricesForVariant = (variant: any) => {
     return null
   }
 
-  // Medusa stores prices in cents, but convertToLocale expects dollars
-  // So we need to divide by 100 for convertToLocale, but keep the original for calculated_price_number
+  // Medusa calculated_amount appears to be in dollars, not cents
+  // So we pass it directly to convertToLocale without dividing
+  const calculatedAmount = variant.calculated_price.calculated_amount;
+  const originalAmount = variant.calculated_price.original_amount;
+  
   return {
-    calculated_price_number: variant.calculated_price.calculated_amount,
+    calculated_price_number: calculatedAmount,
     calculated_price: convertToLocale({
-      amount: variant.calculated_price.calculated_amount / 100,
+      amount: calculatedAmount,
       currency_code: variant.calculated_price.currency_code,
     }),
-    original_price_number: variant.calculated_price.original_amount,
+    original_price_number: originalAmount,
     original_price: convertToLocale({
-      amount: variant.calculated_price.original_amount / 100,
+      amount: originalAmount,
       currency_code: variant.calculated_price.currency_code,
     }),
     currency_code: variant.calculated_price.currency_code,
