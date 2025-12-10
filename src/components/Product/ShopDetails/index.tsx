@@ -110,6 +110,18 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
     return [];
   }, [productType, variants]);
 
+  // For connectors: variant options from variants
+  const connectorOptions = useMemo(() => {
+    if (productType === "connector" && variants.length > 0) {
+      return variants.map((variant) => ({
+        id: variant.id,
+        title: variant.title || "",
+        price: variant.calculated_price?.calculated_amount || 0,
+      }));
+    }
+    return [];
+  }, [productType, variants]);
+
   // Auto-select first variant
   useEffect(() => {
     if (variants.length > 0 && !selectedVariantId) {
@@ -408,6 +420,34 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
                       </div>
                     )}
 
+                    {/* Variant Options (Connector products only) */}
+                    {productType === "connector" && connectorOptions.length > 0 && (
+                      <div className="flex flex-col gap-2 mb-4">
+                        <label className="text-black text-[20px] font-medium leading-[30px]">
+                          Cable Type:
+                        </label>
+                        <div className="relative w-fit">
+                          <select
+                            value={selectedVariantId || ""}
+                            onChange={(e) => setSelectedVariantId(e.target.value)}
+                            className="w-fit min-w-[200px] rounded-lg border border-[#2958A4] bg-white text-[16px] font-medium text-gray-800 pl-4 pr-10 py-3 appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4]"
+                            style={{
+                              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232958A4' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                              backgroundRepeat: 'no-repeat',
+                              backgroundPosition: 'right 12px center',
+                              paddingRight: '2.5rem'
+                            }}
+                          >
+                            {connectorOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.title}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Quantity */}
                     <div className="space-y-2">
                       <label className="text-black text-[20px] font-medium leading-[30px]">
@@ -506,18 +546,20 @@ const ShopDetails = ({ product, region, images }: ShopDetailsProps) => {
         </div>
       </div>
 
-      {/* Description Section */}
-      <Description
-        product={product}
-        metadata={{
-          description: product.description,
-          specifications,
-          datasheetImage,
-          datasheetPdf,
-          features,
-          applications,
-        }}
-      />
+      {/* Description Section - Hide for connector products */}
+      {productType !== "connector" && (
+        <Description
+          product={product}
+          metadata={{
+            description: product.description,
+            specifications,
+            datasheetImage,
+            datasheetPdf,
+            features,
+            applications,
+          }}
+        />
+      )}
 
       {/* FAQ Section */}
       <FaqSection />

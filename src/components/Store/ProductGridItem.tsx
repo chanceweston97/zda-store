@@ -101,9 +101,7 @@ export default function ProductGridItem({ product, region }: ProductGridItemProp
         <span className="flex items-center gap-2 text-lg font-medium">
           {cheapestPrice ? (
             <span className="text-[#2958A4]">
-              {cheapestPrice.calculated_price_number
-                ? `$${(cheapestPrice.calculated_price_number / 100).toFixed(2)}`
-                : cheapestPrice.calculated_price || "Price unavailable"}
+              {cheapestPrice.calculated_price || "Price unavailable"}
             </span>
           ) : (
             <span className="text-gray-400">Price unavailable</span>
