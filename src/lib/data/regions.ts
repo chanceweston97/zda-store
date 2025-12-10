@@ -102,20 +102,33 @@ export const getRegion = async (countryCode: string) => {
 
     // Build region map with lowercase keys
     regions.forEach((region) => {
-      region.countries?.forEach((c) => {
-        const iso2 = c?.iso_2?.toLowerCase() ?? ""
-        if (iso2) {
-          regionMap.set(iso2, region)
+      if (region.countries && region.countries.length > 0) {
+        // Map countries to region
+        region.countries.forEach((c) => {
+          const iso2 = c?.iso_2?.toLowerCase() ?? ""
+          if (iso2) {
+            regionMap.set(iso2, region)
+          }
+        })
+      } else {
+        // If region has no countries, map common country codes to it
+        // This handles cases where regions exist but have no countries assigned
+        console.warn("⚠️ [SERVER] Region has no countries assigned:", region.id, region.name)
+        // Map "us" to this region as a fallback
+        if (!regionMap.has("us")) {
+          regionMap.set("us", region)
         }
-      })
+      }
     })
 
     // Try to get region by normalized country code
     let region = normalizedCode ? regionMap.get(normalizedCode) : null
     
     // If not found, try to get first available region as fallback
+    // This handles cases where regions exist but have no countries
     if (!region && regions.length > 0) {
       region = regions[0]
+      console.log("✅ [SERVER] Using first available region (no countries mapped):", region.id, region.name)
     }
 
     return region
