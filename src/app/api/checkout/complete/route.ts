@@ -470,10 +470,27 @@ export async function POST(req: NextRequest) {
       message: "Cart updated, ready for payment",
     });
   } catch (error: any) {
-    console.error("Error completing checkout:", error);
+    console.error("[Checkout Complete] ❌ Unhandled error:", error);
+    console.error("[Checkout Complete] Error stack:", error.stack);
+    console.error("[Checkout Complete] Error details:", {
+      message: error.message,
+      name: error.name,
+      code: error.code,
+    });
+    
+    // Always return JSON, even on errors
     return NextResponse.json(
-      { success: false, message: error.message || "Internal Server Error" },
-      { status: 500 }
+      { 
+        success: false, 
+        message: error.message || "Internal Server Error",
+        error: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
+      { 
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }

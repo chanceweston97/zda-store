@@ -132,7 +132,17 @@ const CheckoutPaymentArea = ({ amount, cart }: CheckoutPaymentAreaProps) => {
           }),
         });
 
-        const result = await response.json();
+        // Check if response is JSON
+        let result;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          result = await response.json();
+        } else {
+          // If not JSON, read as text to see what we got
+          const text = await response.text();
+          console.error("Non-JSON response from server:", text.substring(0, 200));
+          throw new Error("Server returned an invalid response. Please try again.");
+        }
 
         if (!result.success) {
           throw new Error(result.message || "Failed to create order");
@@ -142,8 +152,16 @@ const CheckoutPaymentArea = ({ amount, cart }: CheckoutPaymentAreaProps) => {
         router.push(`/order-confirmed?orderId=${result.order?.id || ""}`);
       } catch (error: any) {
         console.error("Error creating order:", error);
-        setErrorMessage(error.message || "Failed to create order. Please try again.");
-        toast.error(error.message || "Failed to create order");
+        let errorMessage = "Failed to create order. Please try again.";
+        
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error instanceof SyntaxError) {
+          errorMessage = "Server error: Invalid response. Please check server logs and try again.";
+        }
+        
+        setErrorMessage(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
