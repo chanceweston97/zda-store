@@ -14,11 +14,47 @@ type HeaderProps = {
   cart?: HttpTypes.StoreCart | null;
 };
 
-const Header = ({ cart }: HeaderProps) => {
+const Header = ({ cart: initialCart }: HeaderProps) => {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [cart, setCart] = useState<HttpTypes.StoreCart | null>(initialCart || null);
   const { openCart } = useCartSidebar();
+
+  // Load cart when cart-updated event is dispatched
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const response = await fetch("/api/cart", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCart(data.cart);
+        } else {
+          setCart(null);
+        }
+      } catch (error) {
+        console.error("Error loading cart:", error);
+        setCart(null);
+      }
+    };
+
+    // Load cart on mount
+    loadCart();
+
+    // Listen for cart updates
+    const handleCartUpdated = () => {
+      loadCart();
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdated);
+
+    return () => {
+      window.removeEventListener("cart-updated", handleCartUpdated);
+    };
+  }, []);
 
   const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 

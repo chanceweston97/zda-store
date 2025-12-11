@@ -7438,8 +7438,10 @@ __metadata:
     react: "npm:19.0.1"
     react-country-flag: "npm:^3.1.0"
     react-dom: "npm:19.0.1"
+    react-hook-form: "npm:^7.68.0"
     react-hot-toast: "npm:^2.6.0"
     server-only: "npm:^0.0.1"
+    stripe: "npm:^20.0.0"
     swiper: "npm:^12.0.3"
     tailwindcss: "npm:^3.0.23"
     tailwindcss-radix: "npm:^2.8.0"
@@ -8308,7 +8310,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.12.1":
+"qs@npm:^6.11.0, qs@npm:^6.12.1":
   version: 6.14.0
   resolution: "qs@npm:6.14.0"
   dependencies:
@@ -8480,6 +8482,15 @@ __metadata:
   peerDependencies:
     react: ^19.0.1
   checksum: 10/4cd463d0cad6a73e59f5b7746ad7d51b7c0d9db8816d8943201aab2741f20964015bec085801a7751ae35908326ae654e46d529b765604a677a3113d9aa71328
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.68.0":
+  version: 7.68.0
+  resolution: "react-hook-form@npm:7.68.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: 10/c9624924cd324ee5560de51715361d754d24591734b1cf2b87c95477d35f5ca01b10e94d477bebe215afd37914c5cdbd4a717ead910d8de67f346f517f5a8d92
   languageName: node
   linkType: hard
 
@@ -9258,6 +9269,20 @@ __metadata:
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: 10/492f73e27268f9b1c122733f28ecb0e7e8d8a531a6662efbd08e22cccb3f9475e90a1b82cab06a392f6afae6d2de636f977e231296400d0ec5304ba70f166443
+  languageName: node
+  linkType: hard
+
+"stripe@npm:^20.0.0":
+  version: 20.0.0
+  resolution: "stripe@npm:20.0.0"
+  dependencies:
+    qs: "npm:^6.11.0"
+  peerDependencies:
+    "@types/node": ">=16"
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+  checksum: 10/9e2ad3e4b983bf247f31d716a859fdeab77f32795324c948ed2b0d3f8c5ad78b21f1d74d8e4601693e0bdb5b9dcde7db4503badf73fcddfd17517488e7447253
   languageName: node
   linkType: hard
 
