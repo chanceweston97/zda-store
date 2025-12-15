@@ -1,9 +1,57 @@
 "use client";
 import { Product } from "@/types/product";
-import { PortableText } from "@portabletext/react";
 import { useState } from "react";
 import AdditionalInformation from "./AdditionalInformation";
 import Reviews from "./Reviews";
+
+// Helper function to render description (replaces PortableText)
+const renderContent = (content: any): React.ReactNode => {
+  if (!content) return null;
+  
+  if (typeof content === 'string') {
+    return <div className="whitespace-pre-line">{content}</div>;
+  }
+  
+  if (Array.isArray(content)) {
+    if (content.length === 0) return null;
+    
+    const isPortableText = content[0] && typeof content[0] === 'object' && '_type' in content[0];
+    
+    if (isPortableText) {
+      return (
+        <div>
+          {content.map((block: any, index: number) => {
+            if (block._type === 'block' && block.children) {
+              return (
+                <p key={index} className="mb-2">
+                  {block.children.map((child: any, childIndex: number) => {
+                    if (child.text) {
+                      return <span key={childIndex}>{child.text}</span>;
+                    }
+                    return null;
+                  })}
+                </p>
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+    
+    return (
+      <div>
+        {content.map((item: any, index: number) => (
+          <div key={index} className="mb-2">
+            {typeof item === 'string' ? item : JSON.stringify(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  return <div>{JSON.stringify(content)}</div>;
+};
 
 const DetailsTabs = ({ product }: { product: Product }) => {
   const [activeTab, setActiveTab] = useState("tabOne");
@@ -58,7 +106,7 @@ const DetailsTabs = ({ product }: { product: Product }) => {
               </h2>
 
               <div className="leading-7 text-base text-gray-6">
-                <PortableText value={product?.description!} />
+                {renderContent(product?.description)}
               </div>
             </div>
           </div>

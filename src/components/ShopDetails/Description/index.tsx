@@ -2,10 +2,64 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { PortableText } from "@portabletext/react";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
 import { CircleCheckIcon } from "@/assets/icons";
+
+// Helper function to render description/specifications (replaces PortableText)
+const renderContent = (content: any): React.ReactNode => {
+  if (!content) return null;
+  
+  // If it's a string, render it directly
+  if (typeof content === 'string') {
+    return <div className="whitespace-pre-line">{content}</div>;
+  }
+  
+  // If it's an array, render each item
+  if (Array.isArray(content)) {
+    if (content.length === 0) return null;
+    
+    // Check if it's an array of PortableText blocks (objects with _type)
+    const isPortableText = content[0] && typeof content[0] === 'object' && '_type' in content[0];
+    
+    if (isPortableText) {
+      // Extract text from PortableText blocks
+      return (
+        <div>
+          {content.map((block: any, index: number) => {
+            if (block._type === 'block' && block.children) {
+              return (
+                <p key={index} className="mb-2">
+                  {block.children.map((child: any, childIndex: number) => {
+                    if (child.text) {
+                      return <span key={childIndex}>{child.text}</span>;
+                    }
+                    return null;
+                  })}
+                </p>
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+    
+    // If it's an array of strings
+    return (
+      <div>
+        {content.map((item: any, index: number) => (
+          <div key={index} className="mb-2">
+            {typeof item === 'string' ? item : JSON.stringify(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  // Fallback: stringify objects
+  return <div>{JSON.stringify(content)}</div>;
+};
 
 type Props = {
     product: Product;
@@ -127,10 +181,10 @@ export default function Description({ product, metadata }: Props) {
                     {/* Tab content */}
                     <div className="text-[16px] leading-[26px] text-black flex-1">
                         {activeTab === "description" ? (
-                            (metadata?.description || product.description) && (metadata?.description || product.description).length > 0 ? (
+                            (metadata?.description || product.description) ? (
                                 <div>
                                     <div className="font-medium">
-                                        <PortableText value={metadata?.description || product.description} />
+                                        {renderContent(metadata?.description || product.description)}
                                     </div>
                                     {/* Features and Applications from admin panel (metadata) */}
                                     {(features || applications) && (
@@ -195,13 +249,7 @@ export default function Description({ product, metadata }: Props) {
                                 <p>No description available.</p>
                             )
                         ) : specifications ? (
-                            Array.isArray(specifications) && specifications.length > 0 ? (
-                                <PortableText value={specifications} />
-                            ) : typeof specifications === 'string' ? (
-                                <div className="whitespace-pre-line">{specifications}</div>
-                            ) : (
-                                <p>No specifications available.</p>
-                            )
+                            renderContent(specifications)
                         ) : (
                             <p>No specifications available.</p>
                         )}

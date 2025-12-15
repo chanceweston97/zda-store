@@ -1,47 +1,75 @@
 import { Blog } from "@/types/blogItem";
-import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 
-// Barebones lazy-loaded image component
-const SampleImageComponent = ({ value, isInline }: any) => {
-  // Handle local image URLs (strings) or Sanity-compatible objects
-  const imageUrl = typeof value === 'string' 
-    ? value 
-    : value?.asset?.url || value?.url || '';
+// Helper function to render body content (replaces PortableText)
+const renderContent = (content: any): React.ReactNode => {
+  if (!content) return null;
   
-  const width = value?.width || value?.asset?.metadata?.dimensions?.width || 800;
-  const height = value?.height || value?.asset?.metadata?.dimensions?.height || 600;
+  if (typeof content === 'string') {
+    return <div className="whitespace-pre-line">{content}</div>;
+  }
   
-  return (
-    <Image
-      src={imageUrl}
-      width={width}
-      height={height}
-      alt={value?.alt || "blog image"}
-      loading="lazy"
-      style={{
-        // Display alongside text if image appears inside a block text span
-        display: isInline ? "inline-block" : "block",
-
-        // Avoid jumping around with aspect-ratio CSS property
-        aspectRatio: width / height,
-      }}
-    />
-  );
-};
-
-const components = {
-  types: {
-    image: SampleImageComponent,
-  },
+  if (Array.isArray(content)) {
+    if (content.length === 0) return null;
+    
+    const isPortableText = content[0] && typeof content[0] === 'object' && '_type' in content[0];
+    
+    if (isPortableText) {
+      return (
+        <div>
+          {content.map((block: any, index: number) => {
+            if (block._type === 'block' && block.children) {
+              return (
+                <p key={index} className="mb-2">
+                  {block.children.map((child: any, childIndex: number) => {
+                    if (child.text) {
+                      return <span key={childIndex}>{child.text}</span>;
+                    }
+                    return null;
+                  })}
+                </p>
+              );
+            }
+            if (block._type === 'image') {
+              const imageUrl = typeof block.asset === 'string' 
+                ? block.asset 
+                : block.asset?.url || block.url || '';
+              const width = block.asset?.metadata?.dimensions?.width || 800;
+              const height = block.asset?.metadata?.dimensions?.height || 600;
+              return (
+                <Image
+                  key={index}
+                  src={imageUrl}
+                  width={width}
+                  height={height}
+                  alt={block.alt || "blog image"}
+                  loading="lazy"
+                  className="my-4"
+                />
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+    
+    return (
+      <div>
+        {content.map((item: any, index: number) => (
+          <div key={index} className="mb-2">
+            {typeof item === 'string' ? item : JSON.stringify(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  return <div>{JSON.stringify(content)}</div>;
 };
 
 const RenderBodyContent = ({ post }: { post: Blog }) => {
-  return (
-    <>
-      <PortableText value={post?.body || []} components={components} />
-    </>
-  );
+  return <>{renderContent(post?.body || [])}</>;
 };
 
 export default RenderBodyContent;

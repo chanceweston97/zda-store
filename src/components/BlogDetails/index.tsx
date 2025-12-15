@@ -1,11 +1,11 @@
 "use client";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Blog } from "@/types/blogItem";
-import { PortableText } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
 import SocialShare from "../Blog/SocialShare";
 import Breadcrumb from "../Common/Breadcrumb";
+import RenderBodyContent from "../Common/RenderBodyContent";
 
 const BlogDetails = ({ blogData }: { blogData: Blog }) => {
   return (
@@ -61,7 +61,7 @@ const BlogDetails = ({ blogData }: { blogData: Blog }) => {
               </h2>
 
               <div className="blog-details">
-                <PortableText value={blogData?.body as any} />
+                <RenderBodyContent post={blogData} />
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-10 mt-10">
