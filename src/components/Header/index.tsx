@@ -46,13 +46,18 @@ const Header = () => {
         const response = await fetch('/api/menu');
         if (response.ok) {
           const data = await response.json();
-          if (data && data.length > 0) {
+          // Only update if we got valid menu data with items
+          if (data && Array.isArray(data) && data.length > 0) {
             setMenuData(data);
           }
+          // If data is empty or invalid, keep static menu (don't update)
+        } else {
+          // API returned error status, keep static menu
+          console.warn('[Header] Menu API returned error, using static menu');
         }
       } catch (error) {
-        console.error('Error fetching menu:', error);
-        // Keep using static menuData on error
+        console.error('[Header] Error fetching menu:', error);
+        // Keep using static menuData on error - don't update state
       }
     }
 

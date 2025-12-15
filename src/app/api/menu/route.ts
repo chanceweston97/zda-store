@@ -6,9 +6,20 @@ export async function GET() {
   try {
     const categories = await getCategoriesWithSubcategories();
     
+    // If no categories, return empty array (frontend uses static menu)
+    if (!categories || categories.length === 0) {
+      console.warn("[Menu API] No categories found, returning empty menu");
+      return NextResponse.json([], {
+        status: 200, // Return 200 with empty array
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      });
+    }
+    
     // Build Products submenu from categories
     // Use handle if available (for Medusa), otherwise use slug.current
-    const productsSubmenu: Menu[] = categories.map((category, index) => {
+    const productsSubmenu: Menu[] = (categories || []).map((category, index) => {
       const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
       const categoryMenu: Menu = {
         id: 60 + index + 1,
@@ -73,7 +84,14 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error fetching menu data:", error);
-    return NextResponse.json([], { status: 500 });
+    console.error("[Menu API] Error fetching menu data:", error);
+    // Return empty array instead of 500 error to prevent frontend crashes
+    // Frontend will fall back to static menu
+    return NextResponse.json([], { 
+      status: 200, // Return 200 with empty array, not 500
+      headers: {
+        'Cache-Control': 'no-store', // Don't cache errors
+      },
+    });
   }
 }
