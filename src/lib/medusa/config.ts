@@ -8,6 +8,13 @@ const MEDUSA_BACKEND_URL =
   process.env.MEDUSA_BACKEND_URL ||
   "http://localhost:9000";
 
+// Log the configured URL (helps debug server-side issues)
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
+  console.log(`[MedusaConfig] Backend URL: ${MEDUSA_BACKEND_URL}`);
+  console.log(`[MedusaConfig] NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'not set'}`);
+  console.log(`[MedusaConfig] MEDUSA_BACKEND_URL: ${process.env.MEDUSA_BACKEND_URL || 'not set'}`);
+}
+
 const MEDUSA_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
 

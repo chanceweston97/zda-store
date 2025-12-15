@@ -76,6 +76,11 @@ class MedusaClient {
       ...options.headers,
     };
 
+    // Log the URL being fetched (only in development or if env var is set)
+    if (process.env.NODE_ENV !== 'production' || process.env.LOG_MEDUSA_FETCH === 'true') {
+      console.log(`[MedusaClient] Fetching: ${url}`);
+    }
+
     try {
       // Use Next.js fetch with caching (like front project)
       // Next.js extends global fetch with caching options
