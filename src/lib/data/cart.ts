@@ -67,6 +67,9 @@ export async function removeLineItem(cartId: string, lineItemId: string): Promis
   }
 }
 
+// Alias for deleteLineItem (some API routes use this name)
+export const deleteLineItem = removeLineItem;
+
 // Helper function that might be used by API routes  
 export async function getOrSetCart(regionId?: string): Promise<any> {
   const cartId = await getCartId();
