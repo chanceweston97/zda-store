@@ -256,17 +256,26 @@ class MedusaClient {
     queryParams.append("handle", handle);
     
     try {
-      const response = await this.fetch<{ product_categories: MedusaCategory[] }>(
-        `/store/product-categories?${queryParams.toString()}`
-      );
+      const url = `/store/product-categories?${queryParams.toString()}`;
+      console.log(`[MedusaClient] Fetching category: ${this.baseUrl}${url}`);
+      
+      const response = await this.fetch<{ product_categories: MedusaCategory[] }>(url);
       
       if (response.product_categories && response.product_categories.length > 0) {
         return { product_category: response.product_categories[0] };
       }
       
-      throw new Error(`Product category with handle: ${handle} was not found`);
+      // Category not found - return empty response instead of throwing
+      console.warn(`[MedusaClient] Category with handle "${handle}" not found`);
+      return { product_category: null as any };
     } catch (error: any) {
-      console.error(`[MedusaClient] Error fetching category by handle ${handle}:`, error);
+      console.error(`[MedusaClient] Error fetching category by handle ${handle}:`, {
+        error: error?.message || error,
+        status: error?.status,
+        statusText: error?.statusText,
+        url: `${this.baseUrl}/store/product-categories?handle=${handle}`,
+      });
+      // Re-throw to let caller handle it
       throw error;
     }
   }

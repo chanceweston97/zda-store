@@ -94,6 +94,7 @@ export async function getMedusaCategories(): Promise<any[]> {
  */
 export async function getMedusaCategoryByHandle(handle: string): Promise<any | null> {
   if (!isMedusaEnabled()) {
+    console.warn(`[getMedusaCategoryByHandle] Medusa is not enabled`);
     return null;
   }
 
@@ -110,8 +111,14 @@ export async function getMedusaCategoryByHandle(handle: string): Promise<any | n
     const product_categories = categoriesResponse.product_categories || (categoriesResponse as any).categories || [];
     
     return convertMedusaToSanityCategory(product_category, product_categories);
-  } catch (error) {
-    console.error("Error fetching category from Medusa:", error);
+  } catch (error: any) {
+    console.error(`[getMedusaCategoryByHandle] Error fetching category "${handle}" from Medusa:`, {
+      error: error?.message || error,
+      status: error?.status,
+      statusText: error?.statusText,
+      stack: error?.stack,
+    });
+    // Return null instead of throwing to prevent 500 errors
     return null;
   }
 }
