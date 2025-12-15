@@ -18,33 +18,51 @@ type Params = {
 };
 
 export async function generateStaticParams() {
-  const categories = await getCategories();
-  const categoriesWithSubs = await getCategoriesWithSubcategories();
-  
-  // Include both parent categories and subcategories
-  // Use handle if available, otherwise use slug.current
-  const allSlugs = [
-    ...categories.map((category) => ({ 
-      slug: (category as any).handle || category.slug?.current || category.slug 
-    })),
-    ...categoriesWithSubs.flatMap((category) => 
-      category.subcategories?.map((sub) => ({ 
-        slug: (sub as any).handle || sub.slug?.current || sub.slug 
-      })) || []
-    ),
-  ];
-  
-  // Remove duplicates
-  const uniqueSlugs = Array.from(
-    new Map(allSlugs.map((item) => [item.slug, item])).values()
-  );
-  
-  return uniqueSlugs;
+  try {
+    const categories = await getCategories();
+    const categoriesWithSubs = await getCategoriesWithSubcategories();
+    
+    // Include both parent categories and subcategories
+    // Use handle if available, otherwise use slug.current
+    const allSlugs = [
+      ...(categories || []).map((category) => ({ 
+        slug: (category as any).handle || category.slug?.current || category.slug 
+      })),
+      ...(categoriesWithSubs || []).flatMap((category) => 
+        category.subcategories?.map((sub) => ({ 
+          slug: (sub as any).handle || sub.slug?.current || sub.slug 
+        })) || []
+      ),
+    ];
+    
+    // Remove duplicates
+    const uniqueSlugs = Array.from(
+      new Map(allSlugs.map((item) => [item.slug, item])).values()
+    );
+    
+    return uniqueSlugs;
+  } catch (error) {
+    console.error("[generateStaticParams] Error generating static params:", error);
+    // Return empty array if generation fails (pages will be generated on-demand)
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
-  const categoryData = await getCategoryBySlug(slug);
+  let categoryData;
+  
+  try {
+    categoryData = await getCategoryBySlug(slug);
+  } catch (error) {
+    console.error("[generateMetadata] Error fetching category:", error);
+    // Return default metadata if category fetch fails
+    return {
+      title: "Category | ZDAComm - E-commerce Template",
+      description: "Browse our product categories",
+    };
+  }
+  
   const siteURL = process.env.NEXT_PUBLIC_SITE_URL;
 
   if (categoryData) {
@@ -118,16 +136,35 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   let allProducts: any[] = [];
 
   try {
+    // Try to fetch category
     categoryData = await getCategoryBySlug(slug);
     
-    // Get all products and filter by category (like shop page - server-side filtering)
+    // If category not found, return 404
+    if (!categoryData) {
+      const { notFound } = await import("next/navigation");
+      notFound();
+    }
+  } catch (error) {
+    console.error("[CategoryPage] Error fetching category:", error);
+    // Return not found if category fetch fails
+    const { notFound } = await import("next/navigation");
+    notFound();
+  }
+  
+  // Validate categoryData exists before accessing properties
+  if (!categoryData) {
+    const { notFound } = await import("next/navigation");
+    notFound();
+  }
+
+  // Try to fetch products separately - don't fail page if products fail
+  try {
     const { getAllProducts } = await import("@/lib/data/unified-data");
     allProducts = await getAllProducts() || [];
   } catch (error) {
-    console.error("[CategoryPage] Error fetching category or products:", error);
-    // Return not found if category doesn't exist or there's an error
-    const { notFound } = await import("next/navigation");
-    notFound();
+    console.error("[CategoryPage] Error fetching products:", error);
+    // Continue with empty products array if fetch fails
+    allProducts = [];
   }
   
   // Get the category ID - use id field if available
