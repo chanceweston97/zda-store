@@ -144,18 +144,37 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     
     // If category not found, return 404
     if (!categoryData) {
+      console.warn(`[CategoryPage] Category not found for slug: ${slug}`);
       const { notFound } = await import("next/navigation");
       notFound();
     }
-  } catch (error) {
-    console.error("[CategoryPage] Error fetching category:", error);
-    // Return not found if category fetch fails
+  } catch (error: any) {
+    // Enhanced error logging for production debugging
+    console.error("[CategoryPage] Error fetching category:", {
+      slug,
+      error: error?.message || String(error),
+      status: error?.status,
+      connectionError: error?.connectionError,
+      timeoutError: error?.timeoutError,
+      hint: error?.hint,
+      stack: process.env.NODE_ENV !== 'production' ? error?.stack : undefined,
+    });
+    
+    // If it's a connection error, log additional diagnostic info
+    if (error?.connectionError || error?.timeoutError) {
+      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'not set';
+      console.error(`[CategoryPage] Medusa connection issue detected. Backend URL: ${backendUrl}`);
+      console.error(`[CategoryPage] If this is production, ensure NEXT_PUBLIC_MEDUSA_BACKEND_URL is set correctly and rebuild.`);
+    }
+    
+    // Return not found if category fetch fails (prevents 500 error)
     const { notFound } = await import("next/navigation");
     notFound();
   }
   
   // Validate categoryData exists before accessing properties
   if (!categoryData) {
+    console.warn(`[CategoryPage] Category data is null for slug: ${slug}`);
     const { notFound } = await import("next/navigation");
     notFound();
   }
