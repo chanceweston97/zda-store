@@ -299,11 +299,12 @@ export async function getMedusaProducts(params?: {
   }
 
   try {
+    // Use same fields as front project for consistency
     const response = await medusaClient.getProducts({
-      limit: params?.limit || 100,
+      limit: params?.limit || 1000, // Use 1000 like front project to get all products
       offset: params?.offset || 0,
       region_id: params?.regionId,
-      fields: "*variants.calculated_price,*categories", // Include categories for filtering
+      fields: "*variants.calculated_price,+variants.inventory_quantity,*variants.images,+metadata,*tags,*categories", // Match front project fields
     });
 
     if (!response.products || response.products.length === 0) {

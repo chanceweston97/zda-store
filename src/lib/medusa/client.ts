@@ -87,16 +87,21 @@ class MedusaClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      // Use Next.js fetch with no-store to prevent static generation issues in production
-      // This ensures dynamic rendering when using yarn start
-      const response = await fetch(url, {
+      // Use Next.js fetch with force-cache for better performance (like front project)
+      // This allows Next.js to cache responses and improve performance
+      // For dynamic data, we rely on the cache TTL in unified-data.ts
+      const fetchOptions: RequestInit & { next?: { revalidate?: number } } = {
         ...options,
         headers,
-        // Use no-store to prevent static rendering in production mode
-        cache: "no-store",
+        // Use force-cache like front project for better performance
+        // Cache is invalidated by the in-memory cache TTL in unified-data.ts
+        cache: "force-cache",
+        next: { revalidate: 120 }, // Revalidate every 2 minutes (matches our cache TTL)
         // Add timeout for production environments
         signal: controller.signal,
-      } as RequestInit);
+      };
+      
+      const response = await fetch(url, fetchOptions);
       
       clearTimeout(timeoutId);
 

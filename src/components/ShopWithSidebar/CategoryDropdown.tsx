@@ -14,6 +14,7 @@ type PropsType = {
 const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   const [isOpen, setIsOpen] = useState(true);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -48,17 +49,22 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   // Calculate product counts per category (like front project)
   // For parent categories: ONLY sum of subcategory counts (not parent's own products)
   // For subcategories: count their own products
+  // OPTIMIZED: Build a map of product category IDs for O(1) lookup instead of filtering
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     
-    // Count products for a category by ID (like front project)
-    const countProductsForCategory = (categoryId: string): number => {
-      return allProducts.filter((product) => {
-        const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
-        return productCategoryIds.includes(categoryId);
-      }).length;
-    };
+    // Build a map: categoryId -> product count (O(n) instead of O(n*m))
+    const categoryProductMap = new Map<string, number>();
+    
+    // First pass: count products per category ID
+    allProducts.forEach((product) => {
+      const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
+      productCategoryIds.forEach((categoryId: string) => {
+        categoryProductMap.set(categoryId, (categoryProductMap.get(categoryId) || 0) + 1);
+      });
+    });
 
+    // Second pass: assign counts to category handles
     categories.forEach((category) => {
       const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
       const categoryId = category.id || category._id;
@@ -69,7 +75,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
         category.subcategories.forEach((sub: any) => {
           const subId = sub.id || sub._id;
           if (subId) {
-            const subCount = countProductsForCategory(subId);
+            const subCount = categoryProductMap.get(subId) || 0;
             subcategorySum += subCount;
             // Also store individual subcategory count
             const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
@@ -83,7 +89,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       } else {
         // If no subcategories, this is a leaf category - count its own products
         if (categoryId) {
-          counts[categoryHandle] = countProductsForCategory(categoryId);
+          counts[categoryHandle] = categoryProductMap.get(categoryId) || 0;
         }
       }
     });
@@ -101,6 +107,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   };
 
   const handleCategory = (categoryHandle: string, isChecked: boolean) => {
+    setIsNavigating(true);
     const params = new URLSearchParams(searchParams?.toString() || "");
     const categoryParam = params.get("category");
 
@@ -121,10 +128,14 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    
+    // Reset loading state after a short delay (page will reload anyway)
+    setTimeout(() => setIsNavigating(false), 100);
   };
 
   // Handle parent category click - toggle all subcategories at once
   const handleParentCategory = (subcategories: Category[], isChecked: boolean) => {
+    setIsNavigating(true);
     const params = new URLSearchParams(searchParams?.toString() || "");
     const categoryParam = params.get("category");
 
@@ -152,6 +163,9 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    
+    // Reset loading state after a short delay (page will reload anyway)
+    setTimeout(() => setIsNavigating(false), 100);
   };
 
   const isCategoryChecked = (categoryHandle: string) => {
@@ -189,7 +203,15 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   if (!categories.length) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-1">
+    <div className="bg-white rounded-lg shadow-1 relative">
+      {isNavigating && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+          <div className="flex items-center gap-2 text-blue">
+            <div className="w-4 h-4 border-2 border-blue border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm">Loading...</span>
+          </div>
+        </div>
+      )}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 w-full ${

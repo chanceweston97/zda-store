@@ -8,25 +8,43 @@ import { getAllProducts as getLocalProducts } from "@/lib/data/shop-utils";
 import { getMedusaProducts } from "@/lib/medusa/products";
 import { isMedusaEnabled } from "@/lib/medusa/config";
 import { medusaClient } from "@/lib/medusa/client";
+import { cache } from "react";
 
-// Cache products count to avoid extra API calls
+// In-memory cache for products and categories
+let cachedProducts: any[] | null = null;
+let cachedProductsTime: number = 0;
+let cachedCategories: any[] | null = null;
+let cachedCategoriesTime: number = 0;
 let cachedProductsCount: number | null = null;
 let cachedProductsCountTime: number = 0;
+
+// Cache TTL: 2 minutes for products/categories, 5 minutes for count
+const PRODUCTS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const CATEGORIES_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 const PRODUCTS_COUNT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Get all products from both local data and Medusa
  * Priority: Medusa (if enabled) > Local Data
+ * Uses in-memory cache to avoid refetching on every request
  */
-export async function getAllProducts() {
+export const getAllProducts = cache(async () => {
+  // Return cached products if still valid
+  if (cachedProducts !== null && Date.now() - cachedProductsTime < PRODUCTS_CACHE_TTL) {
+    return cachedProducts;
+  }
+
   const useMedusa = isMedusaEnabled();
 
   if (useMedusa) {
     try {
-      const medusaProducts = await getMedusaProducts({ limit: 100 });
+      // Use limit 1000 like front project to get all products at once
+      const medusaProducts = await getMedusaProducts({ limit: 1000 });
       
       if (medusaProducts && medusaProducts.length > 0) {
-        // Cache the count for getAllProductsCount
+        // Cache the products and count
+        cachedProducts = medusaProducts;
+        cachedProductsTime = Date.now();
         cachedProductsCount = medusaProducts.length;
         cachedProductsCountTime = Date.now();
         return medusaProducts;
@@ -49,12 +67,16 @@ export async function getAllProducts() {
   // Fallback to local data
   try {
     const localProducts = await getLocalProducts();
-    return localProducts || [];
+    const products = localProducts || [];
+    // Cache local products too
+    cachedProducts = products;
+    cachedProductsTime = Date.now();
+    return products;
   } catch (error) {
     console.error("[getAllProducts] Local data fetch also failed:", error);
     return []; // Return empty array instead of throwing
   }
-}
+});
 
 /**
  * Get product by slug
@@ -149,8 +171,14 @@ export async function getAllProductsCount(): Promise<number> {
 /**
  * Get categories with subcategories
  * Tries Medusa first, then local data
+ * Uses in-memory cache to avoid refetching on every request
  */
-export async function getCategoriesWithSubcategories() {
+export const getCategoriesWithSubcategories = cache(async () => {
+  // Return cached categories if still valid
+  if (cachedCategories !== null && Date.now() - cachedCategoriesTime < CATEGORIES_CACHE_TTL) {
+    return cachedCategories;
+  }
+
   const useMedusa = isMedusaEnabled();
 
   if (useMedusa) {
@@ -159,6 +187,9 @@ export async function getCategoriesWithSubcategories() {
       const categories = await getMedusaCategories();
       
       if (categories && categories.length > 0) {
+        // Cache categories
+        cachedCategories = categories;
+        cachedCategoriesTime = Date.now();
         return categories;
       }
     } catch (error: any) {
@@ -176,12 +207,16 @@ export async function getCategoriesWithSubcategories() {
   // Fallback to local data
   try {
     const { getCategoriesWithSubcategories: getLocalCategories } = await import("@/lib/data/shop-utils");
-    return getLocalCategories() || [];
+    const categories = getLocalCategories() || [];
+    // Cache local categories too
+    cachedCategories = categories;
+    cachedCategoriesTime = Date.now();
+    return categories;
   } catch (error) {
     console.error("[getCategoriesWithSubcategories] Local data fetch also failed:", error);
     return []; // Return empty array instead of throwing
   }
-}
+});
 
 /**
  * Get all categories (without subcategories structure)
@@ -221,4 +256,17 @@ export async function getCategoryBySlug(slug: string) {
  * Feature flag: Enable/disable Medusa integration
  */
 export const USE_MEDUSA = process.env.NEXT_PUBLIC_USE_MEDUSA === "true";
+
+/**
+ * Clear all caches (useful for testing or manual refresh)
+ */
+export function clearCaches() {
+  cachedProducts = null;
+  cachedProductsTime = 0;
+  cachedCategories = null;
+  cachedCategoriesTime = 0;
+  cachedProductsCount = null;
+  cachedProductsCountTime = 0;
+  console.log("[clearCaches] All caches cleared");
+}
 

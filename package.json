@@ -3,7 +3,7 @@
   "version": "1.3.3",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 8000",
     "build": "next build",
     "stripe:listen": "stripe listen --forward-to http://localhost:8000/api/webhook",
     "start": "NODE_ENV=production next start -p 8000",

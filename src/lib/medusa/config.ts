@@ -3,9 +3,11 @@
  * This file configures the connection to the Medusa backend
  */
 
+// Use MEDUSA_BACKEND_URL for server-side (like front project), fallback to NEXT_PUBLIC_ for client-side
+// This allows runtime configuration on server without rebuild
 const MEDUSA_BACKEND_URL =
-  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ||
   process.env.MEDUSA_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ||
   "http://localhost:9000";
 
 // Log the configured URL (helps debug server-side issues)
