@@ -257,7 +257,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
       return;
     }
 
-    const siteUrl = process.env.SITE_URL || "http://www.localhost:3000";
+    const siteUrl = process.env.SITE_URL || "http://www.localhost:8000";
     try {
       const { paymentIntent, error } = await stripe.confirmPayment({
         elements,

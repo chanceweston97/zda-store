@@ -346,7 +346,7 @@ export async function POST(req: NextRequest) {
               step2: "Check your .env file has: MEDUSA_ADMIN_API_KEY=sk_xxxxxxxxx (no spaces, no quotes)",
               step3: "Make sure you restarted your dev server after adding the key",
               step4: `Verify backend URL is correct: ${medusaBackendUrl}`,
-              step5: "Test the key by visiting: http://localhost:3000/api/test-admin-key",
+              step5: "Test the key by visiting: http://localhost:8000/api/test-admin-key",
             }
           },
           { status: 401 }

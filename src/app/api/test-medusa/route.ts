@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 /**
  * Simple test endpoint to check Medusa connection
- * Visit: http://localhost:3000/api/test-medusa
+ * Visit: http://localhost:8000/api/test-medusa
  */
 export async function GET() {
   const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "not set";

@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhook",
-    "start": "next start",
+    "stripe:listen": "stripe listen --forward-to http://localhost:8000/api/webhook",
+    "start": "NODE_ENV=production next start -p 8000",
     "lint": "next lint",
     "prestart": "test -d .next && echo 'Build found' || (echo '⚠️  Build not found. Run: yarn build' && exit 1)"
   },
