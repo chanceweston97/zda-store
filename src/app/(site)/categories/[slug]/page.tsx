@@ -114,11 +114,21 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   const { slug } = await params; // This is actually the handle from the URL
   const { date, sort } = await searchParams;
 
-  const categoryData = await getCategoryBySlug(slug);
-  
-  // Get all products and filter by category (like shop page - server-side filtering)
-  const { getAllProducts } = await import("@/lib/data/unified-data");
-  const allProducts = await getAllProducts();
+  let categoryData;
+  let allProducts: any[] = [];
+
+  try {
+    categoryData = await getCategoryBySlug(slug);
+    
+    // Get all products and filter by category (like shop page - server-side filtering)
+    const { getAllProducts } = await import("@/lib/data/unified-data");
+    allProducts = await getAllProducts() || [];
+  } catch (error) {
+    console.error("[CategoryPage] Error fetching category or products:", error);
+    // Return not found if category doesn't exist or there's an error
+    const { notFound } = await import("next/navigation");
+    notFound();
+  }
   
   // Get the category ID - use id field if available
   const categoryId = categoryData?.id || categoryData?._id;
@@ -133,7 +143,7 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     
     if (categoryData.subcategories && categoryData.subcategories.length > 0) {
       // Include all subcategory IDs
-      categoryData.subcategories.forEach((sub: any) => {
+      categoryData.subcategories.forEach((sub: { id?: string; _id?: string }) => {
         const subId = sub.id || sub._id;
         if (subId) allCategoryIds.push(subId);
       });

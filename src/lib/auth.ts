@@ -18,9 +18,10 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
   },
   // adapter: PrismaAdapter(prisma) as Adapter, // REMOVED: Prisma no longer available
-  secret: process.env.SECRET,
+  secret: process.env.SECRET || process.env.NEXTAUTH_SECRET || "fallback-secret-change-in-production",
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   providers: [
@@ -35,31 +36,25 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         // NOTE: Database functionality removed. This will always fail.
         // Migrate to Medusa auth or implement your own user management.
-        throw new Error("Authentication is not available. Database has been removed.");
+        // Return null instead of throwing to prevent 500 errors
+        return null;
       },
     }),
   ],
 
   callbacks: {
-    jwt: async (payload: any) => {
-      const { token, user } = payload;
-
+    jwt: async ({ token, user }) => {
       if (user) {
-        return {
-          ...token,
-          id: user.id,
-          role: user.role,
-        };
+        token.id = user.id;
+        token.role = (user as any).role;
       }
       return token;
     },
 
     session: async ({ session, token }) => {
-      if (session?.user) {
+      if (session?.user && token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
-
-        return session;
       }
       return session;
     },
