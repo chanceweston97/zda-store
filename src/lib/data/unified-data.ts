@@ -25,7 +25,7 @@ export async function getAllProducts() {
     try {
       const medusaProducts = await getMedusaProducts({ limit: 100 });
       
-      if (medusaProducts.length > 0) {
+      if (medusaProducts && medusaProducts.length > 0) {
         // Cache the count for getAllProductsCount
         cachedProductsCount = medusaProducts.length;
         cachedProductsCountTime = Date.now();
@@ -33,14 +33,27 @@ export async function getAllProducts() {
       } else {
         console.warn("[getAllProducts] No products returned from Medusa, falling back to local data");
       }
-    } catch (error) {
-      console.error("[getAllProducts] Medusa fetch failed, falling back to local data:", error);
+    } catch (error: any) {
+      // Enhanced error logging for production debugging
+      console.error("[getAllProducts] Medusa fetch failed, falling back to local data:", {
+        error: error?.message || String(error),
+        status: error?.status,
+        connectionError: error?.connectionError,
+        timeoutError: error?.timeoutError,
+        hint: error?.hint,
+        backendUrl: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'not set',
+      });
     }
   }
 
   // Fallback to local data
-  const localProducts = await getLocalProducts();
-  return localProducts;
+  try {
+    const localProducts = await getLocalProducts();
+    return localProducts || [];
+  } catch (error) {
+    console.error("[getAllProducts] Local data fetch also failed:", error);
+    return []; // Return empty array instead of throwing
+  }
 }
 
 /**
@@ -111,14 +124,26 @@ export async function getAllProductsCount(): Promise<number> {
       cachedProductsCount = productCount;
       cachedProductsCountTime = Date.now();
       return productCount;
-    } catch (error) {
-      console.error("Medusa fetch failed, falling back to local data:", error);
+    } catch (error: any) {
+      // Enhanced error logging
+      console.error("[getAllProductsCount] Medusa fetch failed, falling back to local data:", {
+        error: error?.message || String(error),
+        status: error?.status,
+        connectionError: error?.connectionError,
+        timeoutError: error?.timeoutError,
+        hint: error?.hint,
+      });
     }
   }
 
   // Fallback to local data
-  const { getAllProductsCount: getLocalProductsCount } = await import("@/lib/data/shop-utils");
-  return getLocalProductsCount();
+  try {
+    const { getAllProductsCount: getLocalProductsCount } = await import("@/lib/data/shop-utils");
+    return getLocalProductsCount() || 0;
+  } catch (error) {
+    console.error("[getAllProductsCount] Local data fetch also failed:", error);
+    return 0; // Return 0 instead of throwing
+  }
 }
 
 /**
@@ -133,17 +158,29 @@ export async function getCategoriesWithSubcategories() {
       const { getMedusaCategories } = await import("@/lib/medusa/categories");
       const categories = await getMedusaCategories();
       
-      if (categories.length > 0) {
+      if (categories && categories.length > 0) {
         return categories;
       }
-    } catch (error) {
-      console.error("[getCategoriesWithSubcategories] Medusa fetch failed, falling back to local data:", error);
+    } catch (error: any) {
+      // Enhanced error logging
+      console.error("[getCategoriesWithSubcategories] Medusa fetch failed, falling back to local data:", {
+        error: error?.message || String(error),
+        status: error?.status,
+        connectionError: error?.connectionError,
+        timeoutError: error?.timeoutError,
+        hint: error?.hint,
+      });
     }
   }
 
   // Fallback to local data
-  const { getCategoriesWithSubcategories: getLocalCategories } = await import("@/lib/data/shop-utils");
-  return getLocalCategories();
+  try {
+    const { getCategoriesWithSubcategories: getLocalCategories } = await import("@/lib/data/shop-utils");
+    return getLocalCategories() || [];
+  } catch (error) {
+    console.error("[getCategoriesWithSubcategories] Local data fetch also failed:", error);
+    return []; // Return empty array instead of throwing
+  }
 }
 
 /**

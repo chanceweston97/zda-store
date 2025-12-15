@@ -29,11 +29,48 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   const { category, sizes, minPrice, maxPrice, sort } = await searchParams;
 
   // Fetch all products and categories (like front project)
-  const [allProducts, categories, allProductsCount] = await Promise.all([
-    getAllProducts(),
-    getCategoriesWithSubcategories(),
-    getAllProductsCount(),
-  ]);
+  // Wrap in try-catch to prevent 500 errors if API calls fail
+  let allProducts: any[] = [];
+  let categories: any[] = [];
+  let allProductsCount = 0;
+
+  try {
+    const results = await Promise.allSettled([
+      getAllProducts(),
+      getCategoriesWithSubcategories(),
+      getAllProductsCount(),
+    ]);
+
+    // Handle products
+    if (results[0].status === 'fulfilled') {
+      allProducts = results[0].value || [];
+    } else {
+      console.error("[ShopPage] Error fetching products:", results[0].reason);
+      // Fallback to empty array - will show "No products found"
+    }
+
+    // Handle categories
+    if (results[1].status === 'fulfilled') {
+      categories = results[1].value || [];
+    } else {
+      console.error("[ShopPage] Error fetching categories:", results[1].reason);
+      categories = [];
+    }
+
+    // Handle product count
+    if (results[2].status === 'fulfilled') {
+      allProductsCount = results[2].value || 0;
+    } else {
+      console.error("[ShopPage] Error fetching product count:", results[2].reason);
+      allProductsCount = allProducts.length; // Use array length as fallback
+    }
+  } catch (error: any) {
+    console.error("[ShopPage] Unexpected error during data fetching:", {
+      error: error?.message || String(error),
+      stack: process.env.NODE_ENV !== 'production' ? error?.stack : undefined,
+    });
+    // Continue with empty arrays to prevent 500 error
+  }
 
   // Helper function to find category by handle (supports nested search)
   const findCategoryByHandle = (cats: any[], handle: string): any => {
