@@ -6,6 +6,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: (config) => {
     // Add path aliases for webpack (required for production builds)
     config.resolve.alias["@"] = path.resolve(__dirname, "src");

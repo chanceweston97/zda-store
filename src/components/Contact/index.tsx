@@ -75,7 +75,7 @@ export default function Contact() {
             </h1>
 
             <p className="mt-[60px] text-[#000] text-[24px] font-medium leading-[26px]">
-              Have a question or need assistance? We're here to help. Reach out to us and we'll get back to you as soon as possible.
+              Have a question or need assistance? We&apos;re here to help. Reach out to us and we&apos;ll get back to you as soon as possible.
             </p>
 
             <p className="mt-[50px] text-[#000] text-[24px] font-medium leading-[26px]">

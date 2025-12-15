@@ -44,7 +44,7 @@ export default function WorkWithUsSection() {
                     </Link>
                 </div>
                 <p className="text-white text-[24px] sm:text-[24px] leading-[26px] py-[40px]">
-                            From government fleets to amateur radio enthusiasts, we're your partner for antennas, custom cables, connectors, and more.
+                            From government fleets to amateur radio enthusiasts, we&apos;re your partner for antennas, custom cables, connectors, and more.
                         </p>
 
                 {/* Bottom row: 4 items */}
