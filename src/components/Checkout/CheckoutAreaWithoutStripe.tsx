@@ -9,7 +9,7 @@ import PaymentMethod from "./PaymentMethod";
 import Shipping from "./Shipping";
 import ShippingMethod from "./ShippingMethod";
 import { CheckoutInput, useCheckoutForm } from "./form";
-import Orders from "./orders";
+import Orders from "./Orders";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
