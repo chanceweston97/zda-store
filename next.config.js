@@ -1,8 +1,16 @@
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
   typescript: {
     ignoreBuildErrors: true,
+  },
+  webpack: (config) => {
+    // Add path aliases for webpack (required for production builds)
+    config.resolve.alias["@lib"] = path.resolve(__dirname, "src/lib");
+    config.resolve.alias["@modules"] = path.resolve(__dirname, "src/modules");
+    return config;
   },
   images: {
     remotePatterns: [
