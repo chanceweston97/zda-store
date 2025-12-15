@@ -8,8 +8,10 @@ const nextConfig = {
   },
   webpack: (config) => {
     // Add path aliases for webpack (required for production builds)
+    config.resolve.alias["@"] = path.resolve(__dirname, "src");
     config.resolve.alias["@lib"] = path.resolve(__dirname, "src/lib");
     config.resolve.alias["@modules"] = path.resolve(__dirname, "src/modules");
+    config.resolve.alias["@components"] = path.resolve(__dirname, "src/components");
     return config;
   },
   images: {
