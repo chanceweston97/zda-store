@@ -1,22 +1,13 @@
-import BlogDetails from "@/components/BlogDetails";
-import { getPost } from '@/sanity/sanity-blog-utils';
+import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+
 export const metadata: Metadata = {
   title: "Blog Details Page | ZDAComm |  Store",
-  description: "This is Blog Details Page for ZDAComm Template",
-  // other metadata
+  description: "Blog functionality has been removed",
 };
 
 const BlogDetailsPage = async () => {
-  const slug = "cooking-masterclass-creating-delicious-italian-pasta";
-
-  const blogData = await getPost(slug);
-
-  return (
-    <main>
-      <BlogDetails blogData={blogData} />
-    </main>
-  );
+  notFound();
 };
 
 export default BlogDetailsPage;

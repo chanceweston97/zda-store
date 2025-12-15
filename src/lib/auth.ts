@@ -1,12 +1,8 @@
-import bcrypt from "bcrypt";
 import { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-// Google and GitHub providers - commented out for now
-// import GitHubProvider from "next-auth/providers/github";
-// import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { Adapter } from "next-auth/adapters";
-import { prisma } from "@/lib/prismaDB";
+
+// NOTE: Prisma has been removed. This auth configuration will not work without a database adapter.
+// Consider using Medusa's built-in authentication instead.
 
 declare module "next-auth" {
   interface Session {
@@ -21,7 +17,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
   },
-  adapter: PrismaAdapter(prisma) as Adapter,
+  // adapter: PrismaAdapter(prisma) as Adapter, // REMOVED: Prisma no longer available
   secret: process.env.SECRET,
   session: {
     strategy: "jwt",
@@ -37,47 +33,11 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials) {
-        // check to see if eamil and password is there
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Please enter an email or password");
-        }
-
-        // check to see if user already exist
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        // if user was not found
-        if (!user || !user?.password) {
-          throw new Error("No user found");
-        }
-
-        // check to see if passwords match
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!passwordMatch) {
-          throw new Error("Incorrect password");
-        }
-
-        return user;
+        // NOTE: Database functionality removed. This will always fail.
+        // Migrate to Medusa auth or implement your own user management.
+        throw new Error("Authentication is not available. Database has been removed.");
       },
     }),
-
-    // Google and GitHub providers - commented out for now
-    // GitHubProvider({
-    //   clientId: process.env.GITHUB_CLIENT_ID as string,
-    //   clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    // }),
-
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID as string,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    // }),
   ],
 
   callbacks: {
@@ -104,6 +64,4 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-
-  // debug: process.env.NODE_ENV === "developement",
 };

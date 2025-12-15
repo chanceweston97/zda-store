@@ -1,4 +1,5 @@
-import { PortableTextBlock } from "sanity";
+// NOTE: Sanity PortableTextBlock removed. Using generic type instead.
+type PortableTextBlock = any;
 
 export type WishlistItem = {
   _id: string;
