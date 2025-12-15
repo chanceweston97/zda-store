@@ -6,6 +6,9 @@ import {
 } from "@/lib/data/unified-data";
 import { Metadata } from 'next';
 
+// Force dynamic rendering to prevent static generation in production
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: 'Shop Page | ZDAComm |  Store',
   description: 'This is Shop Page for ZDAComm Template',

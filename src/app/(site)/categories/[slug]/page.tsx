@@ -7,6 +7,9 @@ import {
 } from "@/lib/data/unified-data";
 import { imageBuilder } from "@/lib/data/shop-utils";
 
+// Force dynamic rendering to prevent static generation in production
+export const dynamic = "force-dynamic";
+
 type Params = {
   params: Promise<{
     slug: string;

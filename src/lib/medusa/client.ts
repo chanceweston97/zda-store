@@ -81,15 +81,15 @@ class MedusaClient {
       console.log(`[MedusaClient] Fetching: ${url}`);
     }
 
-    try {
-      // Use Next.js fetch with caching (like front project)
-      // Next.js extends global fetch with caching options
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        // Cache for 60 seconds to improve performance (Next.js 13+)
-        next: { revalidate: 60 },
-      } as RequestInit);
+        try {
+          // Use Next.js fetch with no-store to prevent static generation issues in production
+          // This ensures dynamic rendering when using yarn start
+          const response = await fetch(url, {
+            ...options,
+            headers,
+            // Use no-store to prevent static rendering in production mode
+            cache: "no-store",
+          } as RequestInit);
 
       if (!response.ok) {
         const errorText = await response.text();

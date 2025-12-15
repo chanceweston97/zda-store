@@ -2,6 +2,9 @@ import { getCategoriesWithSubcategories } from "@/lib/data/unified-data";
 import { Menu } from "@/types/Menu";
 import { NextResponse } from "next/server";
 
+// Force dynamic rendering to prevent static generation in production
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const categories = await getCategoriesWithSubcategories();
