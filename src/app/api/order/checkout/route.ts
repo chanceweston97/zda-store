@@ -5,11 +5,11 @@ export async function POST(req: NextRequest) {
   // Orders are now managed exclusively through Medusa.
   // This endpoint can be removed or kept for backward compatibility.
   
-  return NextResponse.json(
+      return NextResponse.json(
     { 
       success: false,
       message: "Order storage to local database is not available. Database (Prisma) has been removed. Orders are managed through Medusa checkout flow."
     },
     { status: 503 }
-  );
-}
+    );
+  }

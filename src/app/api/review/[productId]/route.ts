@@ -4,11 +4,11 @@ export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
-  return NextResponse.json(
+    return NextResponse.json(
     { 
       reviews: [],
       message: 'Reviews are not available. Database (Prisma) has been removed.' 
     },
     { status: 200 }
-  );
+    );
 }

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
       message: "Orders are managed through Medusa. Database (Prisma) has been removed."
     },
     { status: 200 }
-  );
+    );
 }
 
 export async function POST(req: NextRequest) {
@@ -16,5 +16,5 @@ export async function POST(req: NextRequest) {
       error: "Order updates are not available. Database (Prisma) has been removed. Use Medusa Admin API to manage orders."
     },
     { status: 503 }
-  );
+    );
 }
