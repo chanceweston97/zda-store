@@ -8,7 +8,6 @@ import { getAllProducts as getLocalProducts } from "@/lib/data/shop-utils";
 import { getMedusaProducts } from "@/lib/medusa/products";
 import { isMedusaEnabled } from "@/lib/medusa/config";
 import { medusaClient } from "@/lib/medusa/client";
-import { cache } from "react";
 
 // In-memory cache for products and categories
 let cachedProducts: any[] | null = null;
@@ -28,7 +27,7 @@ const PRODUCTS_COUNT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
  * Priority: Medusa (if enabled) > Local Data
  * Uses in-memory cache to avoid refetching on every request
  */
-export const getAllProducts = cache(async () => {
+export async function getAllProducts() {
   // Return cached products if still valid
   if (cachedProducts !== null && Date.now() - cachedProductsTime < PRODUCTS_CACHE_TTL) {
     return cachedProducts;
@@ -38,8 +37,7 @@ export const getAllProducts = cache(async () => {
 
   if (useMedusa) {
     try {
-      // Use limit 1000 like front project to get all products at once
-      const medusaProducts = await getMedusaProducts({ limit: 1000 });
+      const medusaProducts = await getMedusaProducts({ limit: 100 });
       
       if (medusaProducts && medusaProducts.length > 0) {
         // Cache the products and count
@@ -76,7 +74,7 @@ export const getAllProducts = cache(async () => {
     console.error("[getAllProducts] Local data fetch also failed:", error);
     return []; // Return empty array instead of throwing
   }
-});
+}
 
 /**
  * Get product by slug
@@ -173,7 +171,7 @@ export async function getAllProductsCount(): Promise<number> {
  * Tries Medusa first, then local data
  * Uses in-memory cache to avoid refetching on every request
  */
-export const getCategoriesWithSubcategories = cache(async () => {
+export async function getCategoriesWithSubcategories() {
   // Return cached categories if still valid
   if (cachedCategories !== null && Date.now() - cachedCategoriesTime < CATEGORIES_CACHE_TTL) {
     return cachedCategories;
@@ -216,7 +214,7 @@ export const getCategoriesWithSubcategories = cache(async () => {
     console.error("[getCategoriesWithSubcategories] Local data fetch also failed:", error);
     return []; // Return empty array instead of throwing
   }
-});
+}
 
 /**
  * Get all categories (without subcategories structure)
