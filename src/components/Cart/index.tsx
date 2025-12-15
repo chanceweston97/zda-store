@@ -1,86 +1,33 @@
+// @ts-nocheck
 "use client";
-
-import { useState, useEffect } from "react";
-import { HttpTypes } from "@medusajs/types";
-import Breadcrumb from "@components/Common/Breadcrumb";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { useShoppingCart } from "use-shopping-cart";
+import { CheckoutFormProvider, CheckoutInput } from "../Checkout/form";
+import Breadcrumb from "../Common/Breadcrumb";
 import Discount from "./Discount";
 import OrderSummary from "./OrderSummary";
 import SingleItem from "./SingleItem";
-import toast from "react-hot-toast";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
 
-type CartProps = {
-  initialCart?: HttpTypes.StoreCart | null;
-};
+const Cart = () => {
+  const { cartCount, cartDetails, clearCart } = useShoppingCart();
 
-const Cart = ({ initialCart }: CartProps) => {
-  const [cart, setCart] = useState<HttpTypes.StoreCart | null>(initialCart || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { register, formState, watch, control, handleSubmit, setValue } =
+    useForm<CheckoutInput>({
+      defaultValues: {
+        shippingMethod: {
+          name: "free",
+          price: 0,
+        },
+        paymentMethod: "cod",
+        couponDiscount: 0,
+      },
+    });
 
-  const loadCart = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/cart", {
-        method: "GET",
-        cache: "no-store",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCart(data.cart);
-      } else {
-        setCart(null);
-      }
-    } catch (error) {
-      console.error("Error loading cart:", error);
-      setCart(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
-    
-    // Listen for cart updates
-    const handleCartUpdated = () => {
-      loadCart();
-    };
-    window.addEventListener("cart-updated", handleCartUpdated);
-    
-    return () => {
-      window.removeEventListener("cart-updated", handleCartUpdated);
-    };
-  }, []);
-
-  const handleClearCart = async () => {
-    if (!cart?.items || cart.items.length === 0) return;
-
-    if (!confirm("Are you sure you want to clear your cart?")) return;
-
-    setIsLoading(true);
-    try {
-      // Remove all items one by one
-      const removePromises = cart.items.map((item) =>
-        fetch("/api/cart/remove-item", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lineId: item.id }),
-        })
-      );
-
-      await Promise.all(removePromises);
-      await loadCart();
-      window.dispatchEvent(new Event("cart-updated"));
-      toast.success("Cart cleared");
-    } catch (error: any) {
-      toast.error("Failed to clear cart. Please try again.");
-      console.error("Error clearing cart:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  function handleCheckout(data: CheckoutInput) {
+    // Handle the checkout logic here
+    console.log(data);
+  }
 
   return (
     <>
@@ -90,16 +37,12 @@ const Cart = ({ initialCart }: CartProps) => {
       </section>
 
       {/* <!-- ===== Breadcrumb Section End ===== --> */}
-      {cartCount > 0 ? (
+      {cartCount ? (
         <section className="overflow-hidden py-20 bg-gray-2">
-          <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="max-w-7xl  w-full mx-auto px-4 sm:px-8 xl:px-0">
             <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
               <h2 className="font-medium text-dark text-2xl">Your Cart</h2>
-              <button
-                onClick={handleClearCart}
-                disabled={isLoading}
-                className="text-[#2958A4] hover:underline disabled:opacity-50"
-              >
+              <button onClick={() => clearCart()} className="text-[#2958A4]">
                 Clear Shopping Cart
               </button>
             </div>
@@ -127,18 +70,36 @@ const Cart = ({ initialCart }: CartProps) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {cart?.items?.map((item) => (
-                      <SingleItem key={item.id} item={item} onUpdate={loadCart} />
-                    ))}
+                    {cartCount && (
+                      <>
+                        {Object.values(cartDetails ?? {}).map((item) => (
+                          <SingleItem key={item.id} item={item} />
+                        ))}
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            <form className="flex flex-col lg:flex-row gap-6 xl:gap-8 mt-9">
-              <Discount />
-              <OrderSummary cart={cart} />
-            </form>
+            <CheckoutFormProvider
+              value={{
+                register,
+                watch,
+                control,
+                setValue,
+                errors: formState.errors,
+                handleSubmit
+              }}
+            >
+              <form
+                className="flex flex-col lg:flex-row gap-6 xl:gap-8 mt-9"
+                onSubmit={handleSubmit(handleCheckout)}
+              >
+                <Discount />
+                <OrderSummary />
+              </form>
+            </CheckoutFormProvider>
           </div>
         </section>
       ) : (
@@ -175,14 +136,14 @@ const Cart = ({ initialCart }: CartProps) => {
               </svg>
             </div>
 
-            <p className="pb-6 text-gray-600">Your cart is empty!</p>
+            <p className="pb-6">Your cart is empty!</p>
 
-            <LocalizedClientLink
-              href="/store"
+            <Link
+              href="/shop"
               className="w-96 mx-auto inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
             >
               Continue Shopping
-            </LocalizedClientLink>
+            </Link>
           </div>
         </>
       )}
@@ -191,4 +152,3 @@ const Cart = ({ initialCart }: CartProps) => {
 };
 
 export default Cart;
-

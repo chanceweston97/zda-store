@@ -1,0 +1,187 @@
+/**
+ * Unified Data Layer
+ * This layer allows gradual migration from local data to Medusa
+ * It can use both data sources and merge results
+ */
+
+import { getAllProducts as getLocalProducts } from "@/lib/data/shop-utils";
+import { getMedusaProducts } from "@/lib/medusa/products";
+import { isMedusaEnabled } from "@/lib/medusa/config";
+import { medusaClient } from "@/lib/medusa/client";
+
+// Cache products count to avoid extra API calls
+let cachedProductsCount: number | null = null;
+let cachedProductsCountTime: number = 0;
+const PRODUCTS_COUNT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Get all products from both local data and Medusa
+ * Priority: Medusa (if enabled) > Local Data
+ */
+export async function getAllProducts() {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    try {
+      const medusaProducts = await getMedusaProducts({ limit: 100 });
+      
+      if (medusaProducts.length > 0) {
+        // Cache the count for getAllProductsCount
+        cachedProductsCount = medusaProducts.length;
+        cachedProductsCountTime = Date.now();
+        return medusaProducts;
+      } else {
+        console.warn("[getAllProducts] No products returned from Medusa, falling back to local data");
+      }
+    } catch (error) {
+      console.error("[getAllProducts] Medusa fetch failed, falling back to local data:", error);
+    }
+  }
+
+  // Fallback to local data
+  const localProducts = await getLocalProducts();
+  return localProducts;
+}
+
+/**
+ * Get product by slug
+ * Tries Medusa first, then local data
+ */
+export async function getProductBySlug(slug: string) {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    try {
+      const { getMedusaProductByHandle } = await import("@/lib/medusa/products");
+      const product = await getMedusaProductByHandle(slug);
+      if (product) {
+        return product;
+      }
+    } catch (error) {
+      console.error("Medusa fetch failed, falling back to local data:", error);
+    }
+  }
+
+  // Fallback to local data
+  const { getProduct } = await import("@/lib/data/shop-utils");
+  return getProduct(slug);
+}
+
+/**
+ * Get products by filter (for shop page filtering)
+ * This function is kept for backward compatibility but should not be used for Medusa
+ * For Medusa, filtering is done client-side in the shop page
+ * @deprecated - Use client-side filtering in shop page instead
+ */
+export async function getProductsByFilter(
+  query: string, 
+  tags: string[],
+  categories?: any[]
+): Promise<any[]> {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    // For Medusa, just return all products - filtering is done client-side
+    const { getMedusaProducts } = await import("@/lib/medusa/products");
+    return await getMedusaProducts({ limit: 100 });
+  }
+
+  // Fallback to local data
+  const { getProductsByFilter: getLocalProductsByFilter } = await import("@/lib/data/shop-utils");
+  return getLocalProductsByFilter(query, tags);
+}
+
+/**
+ * Get total products count
+ * Uses cached count if available to avoid extra API calls
+ */
+export async function getAllProductsCount(): Promise<number> {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    // Return cached count if still valid
+    if (cachedProductsCount !== null && Date.now() - cachedProductsCountTime < PRODUCTS_COUNT_CACHE_TTL) {
+      return cachedProductsCount;
+    }
+
+    try {
+      const { count } = await medusaClient.getProducts({ limit: 1 });
+      const productCount = count || 0;
+      // Cache the count
+      cachedProductsCount = productCount;
+      cachedProductsCountTime = Date.now();
+      return productCount;
+    } catch (error) {
+      console.error("Medusa fetch failed, falling back to local data:", error);
+    }
+  }
+
+  // Fallback to local data
+  const { getAllProductsCount: getLocalProductsCount } = await import("@/lib/data/shop-utils");
+  return getLocalProductsCount();
+}
+
+/**
+ * Get categories with subcategories
+ * Tries Medusa first, then local data
+ */
+export async function getCategoriesWithSubcategories() {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    try {
+      const { getMedusaCategories } = await import("@/lib/medusa/categories");
+      const categories = await getMedusaCategories();
+      
+      if (categories.length > 0) {
+        return categories;
+      }
+    } catch (error) {
+      console.error("[getCategoriesWithSubcategories] Medusa fetch failed, falling back to local data:", error);
+    }
+  }
+
+  // Fallback to local data
+  const { getCategoriesWithSubcategories: getLocalCategories } = await import("@/lib/data/shop-utils");
+  return getLocalCategories();
+}
+
+/**
+ * Get all categories (without subcategories structure)
+ * Tries Medusa first, then local data
+ */
+export async function getCategories() {
+  const categories = await getCategoriesWithSubcategories();
+  // Flatten subcategories into main array if needed, or return as-is
+  return categories;
+}
+
+/**
+ * Get category by slug
+ * Tries Medusa first, then local data
+ */
+export async function getCategoryBySlug(slug: string) {
+  const useMedusa = isMedusaEnabled();
+
+  if (useMedusa) {
+    try {
+      const { getMedusaCategoryByHandle } = await import("@/lib/medusa/categories");
+      const category = await getMedusaCategoryByHandle(slug);
+      if (category) {
+        return category;
+      }
+    } catch (error) {
+      console.error("Medusa fetch failed, falling back to local data:", error);
+    }
+  }
+
+  // Fallback to local data
+  const { getCategoryBySlug: getLocalCategoryBySlug } = await import("@/lib/data/shop-utils");
+  return getLocalCategoryBySlug(slug);
+}
+
+/**
+ * Feature flag: Enable/disable Medusa integration
+ */
+export const USE_MEDUSA = process.env.NEXT_PUBLIC_USE_MEDUSA === "true";
+

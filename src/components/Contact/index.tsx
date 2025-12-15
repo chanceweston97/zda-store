@@ -32,20 +32,10 @@ export default function Contact() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...data,
-          productOrService: "", // Contact form doesn't have product/service
-        }),
+        body: JSON.stringify(data),
       });
 
-      let result;
-      try {
-        result = await response.json();
-      } catch (parseError) {
-        setIsSubmitting(false);
-        toast.error("Server error: Invalid response format");
-        return;
-      }
+      const result = await response.json();
 
       if (response.ok) {
         // Check if email was sent successfully
@@ -54,9 +44,13 @@ export default function Contact() {
             console.log("✅ Email sent successfully");
           } else {
             console.warn("⚠️ Form submitted but email failed:", result.emailStatus.error);
+            // Still redirect but log the error
+            if (result.emailStatus.error) {
+              console.error("Email error details:", result.emailStatus);
+            }
           }
         }
-        toast.success("Message sent successfully!");
+        // Redirect to thank you page after successful submission
         router.push("/mail-success");
       } else {
         setIsSubmitting(false);
@@ -197,7 +191,11 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center rounded-full bg-[#2958A4] px-10 py-3 text-[16px] font-medium text-white shadow-sm transition-colors hover:bg-[#1F4480] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className={`inline-flex items-center justify-center rounded-full bg-[#2958A4] px-10 py-3 text-[16px] font-medium text-white shadow-sm transition-colors ${
+                    isSubmitting 
+                      ? "opacity-70 cursor-not-allowed" 
+                      : "hover:bg-[#1F4480]"
+                  }`}
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
@@ -236,4 +234,3 @@ export default function Contact() {
     </section>
   );
 }
-

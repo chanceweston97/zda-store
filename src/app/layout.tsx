@@ -1,26 +1,55 @@
-import { getBaseURL } from "@lib/util/env"
-import { Metadata } from "next"
-import Nav from "@modules/layout/templates/nav"
-import Footer from "@modules/layout/templates/footer"
-import { Toaster } from "react-hot-toast"
-import { CartSidebarProvider } from "@components/Common/CartSidebar/CartSidebarProvider"
-import "styles/globals.css"
+"use client";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getBaseURL()),
-}
+import PreLoader from "@/components/Common/PreLoader";
+import ScrollToTop from "@/components/Common/ScrollToTop";
+import CacheRefreshButton from "@/components/Common/CacheRefreshButton";
+import NextTopLoader from "nextjs-toploader";
+import { Toaster } from "react-hot-toast";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import "./css/style.css";
+import Providers from "./(site)/Providers";
+import { usePathname } from "next/navigation";
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin");
+
   return (
-    <html lang="en" data-mode="light">
+    <html lang="en" className="font-inter" suppressHydrationWarning>
       <body>
-        <CartSidebarProvider>
-          <Nav />
-          <main className="relative">{props.children}</main>
-          <Footer />
-          <Toaster position="top-right" />
-        </CartSidebarProvider>
+        {!isAdminRoute && <PreLoader />}
+
+        <Providers>
+          {!isAdminRoute && (
+            <NextTopLoader
+              color="#2958A4"
+              crawlSpeed={300}
+              showSpinner={false}
+              shadow="none"
+            />
+          )}
+
+          {!isAdminRoute && <Header />}
+
+          <Toaster position="top-center" reverseOrder={false} />
+
+          {children}
+        </Providers>
+
+        {!isAdminRoute && (
+          <>
+            <ScrollToTop />
+            <CacheRefreshButton />
+            <Footer />
+          </>
+        )}
       </body>
     </html>
-  )
+  );
 }
+

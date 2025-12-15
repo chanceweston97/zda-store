@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import { useScrollAnimation } from "../../hooks/useScrollAnimation";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { imageBuilder } from "@/lib/data/shop-utils";
 
 interface HeroSectionData {
   title?: string;
@@ -17,7 +18,7 @@ interface WhatWeFocusOnData {
     description: string;
   }>;
   closingText?: string;
-  image?: string;
+  image?: any;
 }
 
 interface LetsWorkTogetherData {
@@ -26,7 +27,7 @@ interface LetsWorkTogetherData {
   subtitle?: string;
   items?: string[];
   closingText?: string;
-  image?: string;
+  image?: any;
   buttons?: Array<{
     text: string;
     link: string;
@@ -41,7 +42,7 @@ export function AnimatedHeroSection({ heroData }: { heroData?: HeroSectionData |
   const description = heroData?.description || "Since 2008, we've focused on designing and supplying RF hardware—antennas, cables, connectors, attenuators, and custom builds—that helps homes, organizations, and field teams stay in touch when it matters most.";
 
   return (
-    <section className="w-full py-12 sm:py-16 lg:py-10">
+    <section className="w-full py-12 sm:py-16 lg:py-20 pt-[209px] sm:pt-[155px] lg:pt-[95px] xl:pt-[150px]">
       <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0">
         <div className="text-center">
           <h1 
@@ -85,7 +86,9 @@ export function AnimatedWhatWeFocusOn({ focusData }: { focusData?: WhatWeFocusOn
     { title: "Custom Cable Builds", description: "Practical, build-to-order cable solutions so you can get the exact lengths and terminations you need for your real-world deployment." },
   ];
   const closingText = focusData?.closingText || "Every product we offer is ultimately in service of the same idea: make it easier to build links that stay up.";
-  const imageUrl = focusData?.image || "/images/hero/wireless.png";
+  const imageUrl = focusData?.image
+    ? imageBuilder(focusData.image).url()
+    : "/images/hero/wireless.png";
 
   return (
     <section className="w-full py-12 sm:py-8 lg:py-10">
@@ -168,10 +171,12 @@ export function AnimatedLetsWorkTogether({ workData }: { workData?: LetsWorkToge
   ];
   const closingText = workData?.closingText || "Whether you're maintaining a mission-critical network or setting up a single link at a remote site, we want to make the RF side of your job simpler and more dependable.";
   const buttons = workData?.buttons || [
-    { text: "Explore Products", link: "/store" },
+    { text: "Explore Products", link: "/shop" },
     { text: "Contact Us", link: "/contact" },
   ];
-  const imageUrl = workData?.image || "/images/hero/wireless.png";
+  const imageUrl = workData?.image
+    ? imageBuilder(workData.image).url()
+    : "/images/hero/wireless.png";
 
   return (
     <section className="w-full py-12 sm:py-16 lg:py-20">
@@ -241,13 +246,13 @@ export function AnimatedLetsWorkTogether({ workData }: { workData?: LetsWorkToge
 
             <div className="mt-8 flex flex-wrap gap-4">
               {buttons.map((button, index) => (
-                <LocalizedClientLink
+                <Link
                   key={index}
                   href={button.link}
                   className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
                 >
                   {button.text}
-                </LocalizedClientLink>
+                </Link>
               ))}
             </div>
           </div>

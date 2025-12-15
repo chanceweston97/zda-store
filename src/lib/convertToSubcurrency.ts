@@ -3,4 +3,3 @@ function convertToSubcurrency(amount: number, factor = 100) {
 }
 
 export default convertToSubcurrency;
-

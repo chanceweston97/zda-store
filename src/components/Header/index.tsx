@@ -1,62 +1,34 @@
 "use client";
-
-import { CartIcon } from "./icons";
+import { CartIcon, HeartIcon, SearchIcon } from "@/assets/icons";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useShoppingCart } from "use-shopping-cart";
+import GlobalSearchModal from "../Common/GlobalSearch";
+import CustomSelect from "./CustomSelect";
 import Dropdown from "./Dropdown";
 import MobileDropdown from "./MobileDropdown";
-import { menuData } from "./menuData";
-import { HttpTypes } from "@medusajs/types";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import { useCartSidebar } from "@components/Common/CartSidebar/CartSidebarProvider";
+import { menuData as staticMenuData } from "./menuData";
+import { useAppSelector } from "@/redux/store";
+import { Menu } from "@/types/Menu";
 
-type HeaderProps = {
-  cart?: HttpTypes.StoreCart | null;
-};
-
-const Header = ({ cart: initialCart }: HeaderProps) => {
+const Header = () => {
+  const [menuData, setMenuData] = useState<Menu[]>(staticMenuData);
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [cart, setCart] = useState<HttpTypes.StoreCart | null>(initialCart || null);
-  const { openCart } = useCartSidebar();
 
-  // Load cart when cart-updated event is dispatched
-  useEffect(() => {
-    const loadCart = async () => {
-      try {
-        const response = await fetch("/api/cart", {
-          method: "GET",
-          cache: "no-store",
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setCart(data.cart);
-        } else {
-          setCart(null);
-        }
-      } catch (error) {
-        console.error("Error loading cart:", error);
-        setCart(null);
-      }
-    };
+  const { data: session } = useSession();
 
-    // Load cart on mount
-    loadCart();
+  const { handleCartClick, cartCount, totalPrice } = useShoppingCart();
+  const wishlistItems = useAppSelector((state) => state.wishlistReducer.items);
+  const wishlistCount = wishlistItems?.length || 0;
 
-    // Listen for cart updates
-    const handleCartUpdated = () => {
-      loadCart();
-    };
-
-    window.addEventListener("cart-updated", handleCartUpdated);
-
-    return () => {
-      window.removeEventListener("cart-updated", handleCartUpdated);
-    };
-  }, []);
-
-  const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  const handleOpenCartModal = () => {
+    handleCartClick();
+  };
 
   // Sticky menu
   const handleStickyMenu = () => {
@@ -67,6 +39,26 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
     }
   };
 
+  // Fetch menu data from API on mount
+  useEffect(() => {
+    async function fetchMenuData() {
+      try {
+        const response = await fetch('/api/menu');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setMenuData(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching menu:', error);
+        // Keep using static menuData on error
+      }
+    }
+
+    fetchMenuData();
+  }, []);
+
   useEffect(() => {
     setIsMounted(true);
     window.addEventListener("scroll", handleStickyMenu);
@@ -76,7 +68,7 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
   return (
     <>
       <header
-        className={`fixed left-0 top-0 w-full z-[999] bg-white transition-shadow ease-in-out duration-300 ${stickyMenu ? "shadow-sm" : ""}`}
+        className={`fixed left-0 top-0 w-full z-999 bg-white transition-shadow ease-in-out duration-300 ${stickyMenu ? "shadow-sm" : ""}`}
       >
         <div className="w-full px-4 mx-auto max-w-[1340px] sm:px-6 xl:px-0">
           {/* <!-- header top start --> */}
@@ -87,7 +79,7 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
             <div className="flex w-full items-center justify-between gap-4 lg:relative">
               {/* Logo */}
               <div className="flex-shrink-0">
-                <LocalizedClientLink className="shrink-0" href="/">
+                <Link className="shrink-0" href="/">
                   <Image
                     src="/images/logo/logo.png"
                     alt="Logo"
@@ -95,7 +87,7 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
                     height={61}
                     className="h-auto w-auto max-w-[120px] sm:max-w-[147px]"
                   />
-                </LocalizedClientLink>
+                </Link>
               </div>
 
               {/* Desktop Navigation - Hidden on mobile/tablet */}
@@ -112,12 +104,12 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
                         />
                       ) : (
                         <li key={i} className="group relative">
-                          <LocalizedClientLink
+                          <Link
                             href={menuItem.path!}
                             className="relative inline-flex hover:text-[#2958A4] text-[#2958A4] px-7 font-satoshi text-[18px] font-medium leading-7 tracking-[-0.36px] xl:py-3 before:absolute before:left-7 before:bottom-2 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-[calc(100%-3.5rem)]"
                           >
                             {menuItem.title}
-                          </LocalizedClientLink>
+                          </Link>
                         </li>
                       )
                     )}
@@ -130,12 +122,9 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Cart Icon Button - Visible on all screens */}
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    openCart();
-                  }}
-                  className="relative w-10 h-10 flex items-center justify-center text-[#2958A4] hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={handleOpenCartModal}
                   aria-label="Open cart"
+                  className="relative w-10 h-10 flex items-center justify-center text-[#2958A4] hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <CartIcon className="w-6 h-6" />
                   {isMounted && cartCount > 0 && (
@@ -169,6 +158,8 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
                 </button>
               </div>
             </div>
+
+
           </div>
           {/* <!-- header top end --> */}
         </div>
@@ -191,14 +182,14 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
             }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-3">
-              <LocalizedClientLink href="/">
+              <Link href="/">
                 <Image
                   src="/images/logo/logo.png"
                   alt="Logo"
                   width={130}
                   height={28}
                 />
-              </LocalizedClientLink>
+              </Link>
               <button
                 aria-label="Close menu"
                 className="w-10 h-10 bg-transparent text-dark-2 rounded-lg inline-flex items-center cursor-pointer justify-center hover:bg-gray-2"
@@ -210,6 +201,7 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  transform="rotate(0 0 0)"
                 >
                   <path
                     d="M6.21967 7.28033C5.92678 6.98744 5.92678 6.51256 6.21967 6.21967C6.51256 5.92678 6.98744 5.92678 7.28033 6.21967L11.999 10.9384L16.7176 6.2198C17.0105 5.92691 17.4854 5.92691 17.7782 6.2198C18.0711 6.51269 18.0711 6.98757 17.7782 7.28046L13.0597 11.999L17.7782 16.7176C18.0711 17.0105 18.0711 17.4854 17.7782 17.7782C17.4854 18.0711 17.0105 18.0711 16.7176 17.7782L11.999 13.0597L7.28033 17.7784C6.98744 18.0713 6.51256 18.0713 6.21967 17.7784C5.92678 17.4855 5.92678 17.0106 6.21967 16.7177L10.9384 11.999L6.21967 7.28033Z"
@@ -238,25 +230,31 @@ const Header = ({ cart: initialCart }: HeaderProps) => {
                         transitionDelay: navigationOpen ? `${i * 50}ms` : "0ms",
                       }}
                     >
-                      <LocalizedClientLink
+                      <Link
                         href={menuItem.path!}
                         className="flex items-center gap-2 text-sm font-medium text-dark py-2 px-3 rounded-md hover:bg-[#2958A4]/10 hover:text-[#2958A4] transition-colors"
                         onClick={() => setNavigationOpen(false)}
                       >
                         {menuItem.title}
-                      </LocalizedClientLink>
+                      </Link>
                     </li>
                   )
                 )}
               </ul>
-            </nav>
+            </nav>{" "}
+
           </aside>
         </div>
       </header>
+
+      {searchModalOpen && (
+        <GlobalSearchModal
+          searchModalOpen={searchModalOpen}
+          setSearchModalOpen={setSearchModalOpen}
+        />
+      )}
     </>
   );
 };
 
 export default Header;
-
-

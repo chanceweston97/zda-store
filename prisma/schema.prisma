@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?
+  passwordResetToken    String?   @unique
+  passwordResetTokenExp DateTime?
+  role                  String?   @default("USER")
+  accounts              Account[]
+  addresses             Address[]
+  sessions              Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Review {
+  id        String @id @default(cuid())
+  name      String
+  email     String
+  comment   String
+  ratings   Int
+  productID String
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  products        Json?
+  city            String?
+  country         String?
+  line1           String?
+  line2           String?
+  orderId         String?  @unique
+  orderTitle      String?
+  postalCode      String?
+  productQuantity String?
+  status          String?
+  totalPrice      Int?
+  userEmail       String?
+}
+
+model Coupon {
+  id             String @id @default(cuid())
+  name           String
+  code           String
+  discount       Int
+  maxRedemptions Int
+  timesRedemed   Int
+}
+
+model Address {
+  id      String      @id @default(cuid())
+  userId  String
+  name    String
+  email   String
+  phone   String
+  address String
+  type    AddressType @default(ALL)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+  ALL
+}
+
+enum EnumShippingStatus {
+  pending
+  processing
+  delivered
+  cancel
+}
+
+model Newsletter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model QuoteRequest {
+  id               String   @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String
+  phone            String
+  productOrService String   @default("")
+  company          String
+  message          String?
+  createdAt        DateTime @default(now())
+  status           String   @default("pending") // pending, contacted, completed, cancelled
+}

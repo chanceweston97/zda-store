@@ -1,0 +1,148 @@
+{
+  "_type": "connector",
+  "name": "TNC-Female",
+  "slug": {
+    "_type": "slug",
+    "current": "tnc-female"
+  },
+  "isActive": true,
+  "order": 13,
+  "pricing": [
+    {
+      "_key": "a5b4d43d3a50",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_100_ID",
+        "_type": "reference"
+      },
+      "price": 3.95
+    },
+    {
+      "_key": "4110b3854d39",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_195_ID",
+        "_type": "reference"
+      },
+      "price": 3.95
+    },
+    {
+      "_key": "288436e6b5f7",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_200_ID",
+        "_type": "reference"
+      },
+      "price": 3.95
+    },
+    {
+      "_key": "8182b96eb832",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_240_ID",
+        "_type": "reference"
+      },
+      "price": 4.45
+    },
+    {
+      "_key": "9375af829acb",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_400_ID",
+        "_type": "reference"
+      },
+      "price": 5.55
+    },
+    {
+      "_key": "890b89a755bf",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_600_ID",
+        "_type": "reference"
+      },
+      "price": 9.95
+    },
+    {
+      "_key": "39031205da2f",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_400_ULTRAFLEX_ID",
+        "_type": "reference"
+      },
+      "price": 5.55
+    },
+    {
+      "_key": "3ea50cdb38f4",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_195_ULTRAFLEX_ID",
+        "_type": "reference"
+      },
+      "price": 3.95
+    },
+    {
+      "_key": "d32cf73c4ea0",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_LMR_240_ULTRAFLEX_ID",
+        "_type": "reference"
+      },
+      "price": 4.45
+    },
+    {
+      "_key": "f8711a6b7017",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_58_ID",
+        "_type": "reference"
+      },
+      "price": 4.95
+    },
+    {
+      "_key": "8b3f06a927e6",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_142_ID",
+        "_type": "reference"
+      },
+      "price": 4.95
+    },
+    {
+      "_key": "84f1d4e65fd1",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_174_ID",
+        "_type": "reference"
+      },
+      "price": 3.95
+    },
+    {
+      "_key": "88eca76889b3",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_213_ID",
+        "_type": "reference"
+      },
+      "price": 4.95
+    },
+    {
+      "_key": "9be2d65176b7",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_223_ID",
+        "_type": "reference"
+      },
+      "price": 4.75
+    },
+    {
+      "_key": "5e2cbbb5c934",
+      "_type": "cablePricing",
+      "cableType": {
+        "_ref": "CABLE_TYPE_RG_316_ID",
+        "_type": "reference"
+      },
+      "price": 4.45
+    }
+  ]
+}
+

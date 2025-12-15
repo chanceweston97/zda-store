@@ -47,8 +47,12 @@ const Newsletter = () => {
 
   return (
     <section className="w-full flex justify-center pt-10">
-      <div className="w-full max-w-[1340px] bg-gradient-to-b from-[rgba(49,106,197,0)] to-[#2958A4] flex items-center px-[50px] py-[71px]">
+      <div className="w-full max-w-[1340px] 
+    bg-linear-to-b from-[rgba(49,106,197,0)] to-[#2958A4]
+    flex items-center px-[50px] py-[71px]">
+
         <div className="w-full max-w-[680px] text-center">
+
           <h2 className="text-[#2958A4] text-center text-5xl lg:text-[60px] font-medium leading-[66px] tracking-[-2.4px]">
             Subscribe For <br /> Latest News Now!
           </h2>
@@ -64,7 +68,8 @@ const Newsletter = () => {
               placeholder="Enter email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full max-w-[505px] rounded-[40px] bg-white/80 text-[#383838] px-6 py-2.5 placeholder-[#383838] outline-none"
+              className="w-full max-w-[505px] rounded-[40px] bg-white/80 text-[#383838] px-6 py-2.5
+          placeholder-[#383838] outline-none"
               required
               disabled={isLoading}
             />
@@ -103,11 +108,13 @@ const Newsletter = () => {
               )}
             </button>
           </form>
+
         </div>
+
       </div>
     </section>
+
   );
 };
 
 export default Newsletter;
-

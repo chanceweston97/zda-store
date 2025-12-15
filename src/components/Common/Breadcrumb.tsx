@@ -34,4 +34,3 @@ const Breadcrumb = ({ title, pages }: { title: string; pages: string[] }) => {
 };
 
 export default Breadcrumb;
-

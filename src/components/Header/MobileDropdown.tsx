@@ -1,12 +1,15 @@
-"use client";
-
+import Link from "next/link";
 import { useState } from "react";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
 import { ChevronDown } from "./icons";
-import { Menu } from "./menuData";
+
+interface MenuItem {
+  title: string;
+  path?: string;
+  submenu?: MenuItem[];
+}
 
 interface MobileDropdownProps {
-  menuItem: Menu;
+  menuItem: MenuItem;
   onClose: () => void;
 }
 
@@ -16,20 +19,18 @@ const MobileDropdown = ({ menuItem, onClose }: MobileDropdownProps) => {
   return (
     <li>
       <button
-        className="flex items-center w-full gap-2 text-sm cursor-pointer capitalize font-medium text-dark py-2 px-3 rounded-md hover:bg-[#2958A4]/10 hover:text-[#2958A4] transition-colors justify-between"
+        className="flex items-center w-full gap-2 text-sm cursor-pointer capitalize  font-medium text-dark py-2 px-3 rounded-md hover:bg-[#2958A4]/10 hover:text-[#2958A4] transition-colors justify-between"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-controls={`submenu-${menuItem.title}`}
       >
         <span className="flex items-center gap-2">{menuItem.title}</span>
 
-        {menuItem.submenu && (
-          <span
-            className={`transform transition-transform duration-300 ease-in-out text-[#2958A4] ${open ? "rotate-180" : "rotate-0"}`}
-          >
-            <ChevronDown />
-          </span>
-        )}
+        <span
+          className={`transform transition-transform duration-300 ease-in-out text-[#2958A4] ${open ? "rotate-180" : "rotate-0"}`}
+        >
+          <ChevronDown />
+        </span>
       </button>
       {menuItem.submenu && (
         <ul
@@ -43,13 +44,13 @@ const MobileDropdown = ({ menuItem, onClose }: MobileDropdownProps) => {
               <MobileDropdown key={idx} menuItem={sub} onClose={onClose} />
             ) : (
               <li key={idx}>
-                <LocalizedClientLink
+                <Link
                   href={sub.path!}
                   className="flex items-center gap-2 text-sm font-medium text-dark py-2 px-3 rounded-md hover:bg-[#2958A4]/10 hover:text-[#2958A4] transition-colors"
                   onClick={onClose}
                 >
                   {sub.title}
-                </LocalizedClientLink>
+                </Link>
               </li>
             )
           )}
@@ -60,5 +61,3 @@ const MobileDropdown = ({ menuItem, onClose }: MobileDropdownProps) => {
 };
 
 export default MobileDropdown;
-
-

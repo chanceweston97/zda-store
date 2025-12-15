@@ -14,7 +14,7 @@ type FormContextType = {
   watch: UseFormWatch<CheckoutInput>;
   control: Control<CheckoutInput, any>;
   setValue: UseFormSetValue<CheckoutInput>;
-  handleSubmit: UseFormHandleSubmit<CheckoutInput, undefined>;
+  handleSubmit: UseFormHandleSubmit<CheckoutInput, undefined>
 } | null;
 
 const FormContext = createContext<FormContextType>(null);
@@ -25,14 +25,18 @@ type PropsType = {
 };
 
 export function CheckoutFormProvider({ children, value }: PropsType) {
-  return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
+  return <FormContext.Provider value={value}>
+    {children}
+  </FormContext.Provider>;
 }
 
 export function useCheckoutForm() {
   const formContext = useContext(FormContext);
 
   if (!formContext) {
-    throw new Error('useCheckoutForm must be used within a CheckoutFormProvider');
+    throw new Error(
+      'useCheckoutForm must be used within a CheckoutFormProvider'
+    );
   }
 
   return formContext;
@@ -41,7 +45,7 @@ export function useCheckoutForm() {
 export type CheckoutInput = {
   billing: {
     firstName: string;
-    lastName: string;
+    lastName?: string;
     companyName?: string;
     regionName: string;
     address: {
@@ -49,7 +53,7 @@ export type CheckoutInput = {
       apartment?: string;
     };
     town: string;
-    country: string;
+    country?: string;
     phone: string;
     email: string;
     createAccount?: boolean;
@@ -74,5 +78,9 @@ export type CheckoutInput = {
   notes?: string;
   couponDiscount?: number;
   couponCode?: string;
+  products: {
+    id: string;
+    price: number;
+    quantity: number;
+  }[];
 };
-

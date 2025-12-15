@@ -1,19 +1,8 @@
-import { getStripe } from "@lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return NextResponse.json(
-        { 
-          error: "Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.",
-          details: "See STRIPE_SETUP.md for instructions"
-        },
-        { status: 500 }
-      );
-    }
-
     const { amount } = await request.json();
 
     // Validate amount
@@ -27,14 +16,14 @@ export async function POST(request: NextRequest) {
     // Ensure amount is an integer (Stripe requires integer cents)
     const amountInCents = Math.round(Number(amount));
 
-    if (amountInCents < 50) {
+    // Removed $0.50 minimum check - allow any amount > 0, Stripe will handle validation
+    if (amountInCents < 1) {
       return NextResponse.json(
-        { error: "Amount must be at least $0.50" },
+        { error: "Amount must be greater than $0.00" },
         { status: 400 }
       );
     }
 
-    const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: "usd",
@@ -53,4 +42,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

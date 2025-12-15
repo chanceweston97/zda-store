@@ -1,0 +1,18 @@
+import BlogGridWithSidebar from '@/components/BlogGridWithSidebar';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Blog Grid Page | ZDAComm |  Store',
+  description: 'This is Blog Grid Page for ZDAComm Template',
+  // other metadata
+};
+
+const BlogGridWithSidebarPage = () => {
+  return (
+    <>
+      <BlogGridWithSidebar />
+    </>
+  );
+};
+
+export default BlogGridWithSidebarPage;

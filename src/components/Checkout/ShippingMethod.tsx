@@ -1,25 +1,18 @@
-"use client";
-
 import Image from "next/image";
 import { Controller } from "react-hook-form";
-import { RadioInput } from "../ui/RadioInput";
+import { RadioInput } from "../ui/input/radio";
 import { useCheckoutForm } from "./form";
 
 const SHIPPING_METHODS = {
-  free: {
-    name: "Standard Shipping",
-    price: 0,
-    description: "Shipped Within 24 Business Hours",
-  },
   fedex: {
     name: "Fedex",
     price: 10.99,
-    description: "Standard Shipping",
+    image: "/images/checkout/fedex.svg",
   },
   dhl: {
     name: "DHL",
     price: 12.5,
-    description: "Standard Shipping",
+    image: "/images/checkout/dhl.svg",
   },
 };
 
@@ -44,12 +37,8 @@ export default function ShippingMethod() {
                   <div className="rounded-md border-[0.5px] shadow-1 border-gray-4 py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none peer-checked:shadow-none peer-checked:border-transparent peer-checked:bg-gray-2">
                     <div className="flex items-center">
                       <div>
-                        <p className="font-semibold text-dark">
-                          {SHIPPING_METHODS.free.name}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          {SHIPPING_METHODS.free.description}
-                        </p>
+                        <p className="font-semibold text-dark">Standard Shipping</p>
+                        <p className="text-custom-xs text-gray-6">Shipped Within 24 Business Hours</p>
                       </div>
                     </div>
                   </div>
@@ -104,7 +93,9 @@ export default function ShippingMethod() {
         </div>
 
         {errors.shippingMethod && (
-          <p className="mt-2 text-sm text-red">Please select a shipping method</p>
+          <p className="mt-2 text-sm text-red">
+            Please select a shipping method
+          </p>
         )}
       </div>
     </div>
@@ -112,21 +103,25 @@ export default function ShippingMethod() {
 }
 
 function ShippingMethodsCard({ method }: { method: "fedex" | "dhl" }) {
-  const data = SHIPPING_METHODS[method];
+  const data = SHIPPING_METHODS;
 
   return (
     <div className="rounded-md border-[0.5px] shadow-1 border-gray-4 py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none peer-checked:shadow-none peer-checked:border-transparent peer-checked:bg-gray-2">
       <div className="flex items-center">
         <div className="pr-4">
-          <p className="font-semibold text-dark">{data.name}</p>
+          <Image
+            src={data[method].image}
+            alt={"Logo of " + data[method].name}
+            width={64}
+            height={18}
+          />
         </div>
 
         <div className="pl-4 border-l border-gray-4">
-          <p className="font-semibold text-dark">${data.price.toFixed(2)}</p>
-          <p className="text-xs text-gray-600">{data.description}</p>
+          <p className="font-semibold text-dark">${data[method].price}</p>
+          <p className="text-custom-xs">Standard Shipping</p>
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
-import { InputGroup } from "../ui/InputGroup";
+import { InputGroup } from "../ui/input";
 import { useCheckoutForm } from "./form";
 import { ChevronDown } from "./icons";
 
@@ -10,7 +8,6 @@ export default function Shipping() {
   const [dropdown, setDropdown] = useState(false);
   const { register, control, setValue, watch } = useCheckoutForm();
   const shipToDifferentAddress = watch("shipToDifferentAddress");
-
   useEffect(() => {
     if (dropdown) {
       setValue("shipToDifferentAddress", true);
@@ -34,10 +31,14 @@ export default function Shipping() {
         />
       </div>
 
+      {/* <!-- dropdown menu --> */}
       {dropdown && (
         <div className="p-6 border-t border-gray-3">
           <div className="mb-5">
-            <label htmlFor="shipping-country-name" className="block mb-1.5">
+            <label
+              htmlFor="shipping-country-name"
+              className="block mb-1.5"
+            >
               Country/ Region
               <span className="text-red">*</span>
             </label>
@@ -45,18 +46,18 @@ export default function Shipping() {
             <div className="relative">
               <select
                 {...register("shipping.countryName", {
-                  required: shipToDifferentAddress ? "Country is required" : false,
+                  required: shipToDifferentAddress
+                    ? "Country is required"
+                    : false,
                 })}
                 id="shipping-country-name"
-                className="w-full bg-gray-1 rounded-full border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-[#2958A4]/20"
+                className="w-full bg-gray-1 rounded-full border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               >
                 <option value="">Select a country</option>
-                <option value="us">United States</option>
-                <option value="uk">United Kingdom</option>
-                <option value="ca">Canada</option>
-                <option value="au">Australia</option>
+                <option value="australia">Australia</option>
+                <option value="america">America</option>
+                <option value="england">England</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 
@@ -81,7 +82,7 @@ export default function Shipping() {
                 type="text"
                 {...register("shipping.address.apartment")}
                 placeholder="Apartment, suite, unit, etc. (optional)"
-                className="rounded-full mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-[#2958A4]/20"
+                className="rounded-full mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               />
             </div>
           </div>
@@ -153,4 +154,3 @@ export default function Shipping() {
     </div>
   );
 }
-

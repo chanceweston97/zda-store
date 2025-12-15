@@ -1,16 +1,13 @@
-"use client";
-
-import { HttpTypes } from "@medusajs/types";
 import Link from "next/link";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { useShoppingCart } from "use-shopping-cart";
+import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
 
-type OrderSummaryProps = {
-  cart: HttpTypes.StoreCart | null;
-};
-
-const OrderSummary = ({ cart }: OrderSummaryProps) => {
-  const cartItems = cart?.items || [];
-  const subtotal = cart?.subtotal || 0;
+const OrderSummary = () => {
+  const {
+    cartCount,
+    cartDetails,
+    totalPrice = 0
+  } = useShoppingCart();
 
   return (
     <div className="lg:max-w-2/5 w-full">
@@ -32,26 +29,23 @@ const OrderSummary = ({ cart }: OrderSummaryProps) => {
           </div>
 
           {/* <!-- product item --> */}
-          {cartItems.length > 0 && (
+          {cartCount && (
             <>
-              {cartItems.map((item) => {
-                const itemTotal = (item.unit_price || 0) * item.quantity;
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between py-5 border-b border-gray-3"
-                  >
-                    <div>
-                      <p className="text-dark">{item.title}</p>
-                    </div>
-                    <div>
-                      <p className="text-dark text-right">
-                        ${itemTotal.toFixed(2)}
-                      </p>
-                    </div>
+              {Object.values(cartDetails ?? {}).map((product, key) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between py-5 border-b border-gray-3"
+                >
+                  <div>
+                    <p className="text-dark">{product.name}</p>
                   </div>
-                );
-              })}
+                  <div>
+                    <p className="text-dark text-right">
+                      ${formatPrice(convertCartPriceToDollars(product.price) * product.quantity)}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </>
           )}
 
@@ -62,18 +56,18 @@ const OrderSummary = ({ cart }: OrderSummaryProps) => {
             </div>
             <div>
               <p className="font-medium text-lg text-dark text-right">
-                ${subtotal.toFixed(2)}
+                ${totalPrice ? formatPrice(convertCartPriceToDollars(totalPrice)) : '0.00'}
               </p>
             </div>
           </div>
 
           {/* <!-- checkout button --> */}
-          <LocalizedClientLink
+          <Link
             href="/checkout"
             className="w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] mt-7.5"
           >
             Process to Checkout
-          </LocalizedClientLink>
+          </Link>
         </div>
       </div>
     </div>
@@ -81,4 +75,3 @@ const OrderSummary = ({ cart }: OrderSummaryProps) => {
 };
 
 export default OrderSummary;
-

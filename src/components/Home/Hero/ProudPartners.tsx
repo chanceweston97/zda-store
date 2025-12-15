@@ -3,79 +3,98 @@
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode } from "swiper/modules";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { imageBuilder } from "@/lib/data/shop-utils";
 import "swiper/css";
 import "swiper/css/free-mode";
-import type { ProudPartners } from "@/data/types";
+
+type Brand = { name: string; logo: string };
+
+const defaultBrands: Brand[] = [
+  { name: "Motus", logo: "/images/hero/motus.png" },
+  { name: "Motus", logo: "/images/hero/motus.png" },
+  { name: "Motus", logo: "/images/hero/motus.png" },
+  { name: "Motus", logo: "/images/hero/motus.png" },
+  { name: "Motus", logo: "/images/hero/motus.png" },
+];
+
+interface ProudPartnersData {
+  _id?: string;
+  name?: string;
+  isActive?: boolean;
+  title?: string;
+  partners?: Array<{
+    name: string;
+    logo: any;
+  }>;
+}
 
 interface ProudPartnersProps {
-  partnersData?: ProudPartners | null;
+  partnersData?: ProudPartnersData | null;
 }
 
 export default function ProudPartners({ partnersData }: ProudPartnersProps) {
-  const title = partnersData?.title || "Proud Suppliers Of";
-  const partners = partnersData?.partners || [
-    { name: "IWT", logo: "/images/partners/iwt.svg" },
-    { name: "XetaWave", logo: "/images/partners/xetawave.svg" },
-    { name: "APS", logo: "/images/partners/aps.svg" },
-    { name: "Motus", logo: "/images/partners/motus.png" },
-    { name: "ABC", logo: "/images/partners/abc.svg" },
-    { name: "Rancho", logo: "/images/partners/rancho.png" },
-  ];
+  const titleRef = useScrollAnimation({ threshold: 0.2 });
+  const carouselRef = useScrollAnimation({ threshold: 0.2 });
+
+  // Fallback values if no data from Sanity
+  const title = partnersData?.title || "Proud Partners Of";
+  const partners = partnersData?.partners?.map((partner) => ({
+    name: partner.name,
+    logo: partner.logo ? imageBuilder(partner.logo).url() : "/images/hero/motus.png",
+  })) || defaultBrands;
 
   return (
     <section className="w-full py-12 sm:pt-0">
-      <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0">
+      <div className="mx-auto max-w-[1340px]">
         {/* Heading */}
-        <h2 className="text-[#2958A4] text-[40px] font-medium text-center mb-8">
+        <h2 
+          ref={titleRef.ref}
+          className={`text-[#2958A4] font-satoshi text-[40px] lg:text-[56px] font-medium leading-[76px] tracking-[-2.24px] text-center transition-all duration-1000 ease-out ${
+            titleRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
           {title}
         </h2>
 
         {/* Carousel */}
-        <div className="mt-8">
+        <div 
+          ref={carouselRef.ref}
+          className={`mt-8 transition-all duration-1000 ease-out delay-300 ${
+            carouselRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
           <Swiper
             modules={[Autoplay, FreeMode]}
-            loop={true}
-            freeMode={true}
-            autoplay={{
-              delay: 0,
-              disableOnInteraction: false,
-              pauseOnMouseEnter: true,
-            }}
-            speed={4500}
+            loop
+            freeMode
+            autoplay={{ delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }}
+            speed={4500}                 // smooth continuous scroll
             slidesPerView={2}
             spaceBetween={24}
             breakpoints={{
-              640: {
-                slidesPerView: 3,
-                spaceBetween: 28,
-              },
-              768: {
-                slidesPerView: 4,
-                spaceBetween: 32,
-              },
-              1024: {
-                slidesPerView: 5,
-                spaceBetween: 36,
-              },
-              1280: {
-                slidesPerView: 6,
-                spaceBetween: 40,
-              },
+              640: { slidesPerView: 3, spaceBetween: 28 },
+              768: { slidesPerView: 4, spaceBetween: 32 },
+              1024:{ slidesPerView: 5, spaceBetween: 36 },
             }}
             className="!overflow-hidden"
             aria-label="Brand partners carousel"
           >
-            {/* Duplicate partners for seamless loop */}
-            {[...partners, ...partners].map((partner, i) => (
-              <SwiperSlide key={`${partner.name}-${i}`}>
-                <div className="flex items-center justify-center h-20">
+            {/* duplicate once to ensure seamless loop */}
+            {[...partners, ...partners].map((b, i) => (
+              <SwiperSlide key={`${b.name}-${i}`}>
+                <div className="flex items-center justify-center">
                   <Image
-                    src={partner.logo}
-                    alt={partner.name}
+                    src={b.logo}
+                    alt={b.name}
                     width={180}
                     height={56}
-                    className="h-14 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-                    priority={i < partners.length}
+                    className="h-14 w-auto object-contain"
+                    priority={i < 5}
                   />
                 </div>
               </SwiperSlide>
@@ -86,4 +105,3 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
     </section>
   );
 }
-

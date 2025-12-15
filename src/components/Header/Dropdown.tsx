@@ -1,8 +1,6 @@
-"use client";
-
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
-import { Menu } from "./menuData";
+import { Menu } from "@/types/Menu";
 
 type DropdownProps = {
   menuItem: Menu;
@@ -19,7 +17,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
   return (
     <li className="group relative">
       {/* TOP-LEVEL MENU LINK (CLICKABLE) */}
-      <LocalizedClientLink
+      <Link
         href={menuItem.path || "#"}
         className={`
           inline-flex items-center gap-1.5 capitalize
@@ -48,12 +46,12 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
             strokeLinejoin="round"
           />
         </svg>
-      </LocalizedClientLink>
+      </Link>
 
       {/* DROPDOWN – FADE + SLIDE, HOVER-ONLY, NO GAP */}
       <ul
         className={`
-          absolute left-1/2 -translate-x-1/2 top-full z-[1000] w-auto min-w-fit bg-white p-2 shadow-lg border border-gray-200
+          absolute left-1/2 -translate-x-1/2 top-full z-[1000] w-auto min-w-fit rounded-lg bg-gray-1 p-2 shadow-lg border border-gray-3
           origin-top transition-all duration-300 ease-in-out
           opacity-0 -translate-y-2 pointer-events-none
           group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto
@@ -67,14 +65,25 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
             <li 
               key={i} 
               className={hasSubmenu ? "group/submenu relative" : ""}
+              ref={(el) => {
+                if (hasSubmenu && el) {
+                  const dropdown = el.closest('ul');
+                  if (dropdown) {
+                    const nestedSubmenu = el.querySelector('ul');
+                    if (nestedSubmenu) {
+                      (nestedSubmenu as HTMLElement).style.minWidth = `${dropdown.clientWidth}px`;
+                    }
+                  }
+                }
+              }}
             >
-              <LocalizedClientLink
+              <Link
                 href={item.path || "#"}
                 className={`
-                  flex items-center gap-1.5 w-full px-4 py-2 text-sm text-[#2958A4]
+                  flex items-center gap-1.5 w-full rounded-md px-4 py-2 text-sm text-[#2958A4]
                   transition-colors duration-150
-                  hover:text-[#2958A4]
-                  ${isActiveChild && "text-[#2958A4]"}
+                  hover:bg-gray-100 hover:text-[#2958A4]
+                  ${isActiveChild && "bg-gray-100 text-[#2958A4]"}
                 `}
               >
                 <span className={`relative inline-block before:absolute before:left-0 before:bottom-0 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-full ${isActiveChild ? "before:w-full" : ""} group-hover/submenu:before:w-full`}>
@@ -96,7 +105,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
                     />
                   </svg>
                 )}
-              </LocalizedClientLink>
+              </Link>
 
               {/* NESTED SUBMENU - Connected seamlessly with no gap */}
               {hasSubmenu && (
@@ -108,7 +117,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
                   />
                   <ul
                     className={`
-                      absolute left-full top-0 z-[1001] w-auto min-w-[200px] bg-white p-2 shadow-lg border border-gray-200
+                      absolute left-full top-0 z-[1001] w-auto min-w-[200px] rounded-lg bg-gray-1 p-2 shadow-lg border border-gray-3
                       transition-all duration-300 ease-in-out
                       opacity-0 translate-x-[-8px] pointer-events-none
                       group-hover/submenu:opacity-100 group-hover/submenu:translate-x-0 group-hover/submenu:pointer-events-auto
@@ -119,19 +128,19 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
 
                     return (
                       <li key={j} className="whitespace-nowrap">
-                        <LocalizedClientLink
+                        <Link
                           href={subItem.path || "#"}
                           className={`
-                            flex items-center w-full px-4 py-2 text-sm text-[#2958A4]
+                            flex items-center w-full rounded-md px-4 py-2 text-sm text-[#2958A4]
                             transition-colors duration-150
-                            hover:text-[#2958A4]
-                            ${isActiveSubChild && "text-[#2958A4]"}
+                            hover:bg-gray-100 hover:text-[#2958A4]
+                            ${isActiveSubChild && "bg-gray-100 text-[#2958A4]"}
                           `}
                         >
                           <span className={`relative inline-block before:absolute before:left-0 before:bottom-0 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-full ${isActiveSubChild ? "before:w-full" : ""}`}>
                             {subItem.title}
                           </span>
-                        </LocalizedClientLink>
+                        </Link>
                       </li>
                     );
                   })}
@@ -147,5 +156,3 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
 };
 
 export default Dropdown;
-
-

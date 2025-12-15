@@ -1,30 +1,21 @@
-import { ArrowUpRightMini } from "@medusajs/icons"
-import { Text } from "@medusajs/ui"
-import { Metadata } from "next"
-import Link from "next/link"
+import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "404",
-  description: "Something went wrong",
-}
-
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
-    <div className="flex flex-col gap-4 items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi text-ui-fg-base">Page not found</h1>
-      <p className="text-small-regular text-ui-fg-base">
-        The page you tried to access does not exist.
+    <div className="flex flex-col items-center justify-center py-20 mt-10">
+      <h1 className="text-[120px] font-bold text-[#2958A4]">404</h1>
+
+      <p className="mt-4 text-[22px] text-[#2958A4] text-center max-w-xl">
+        Oops! Something is not right. Let&apos;s get back on track.
       </p>
+
       <Link
-        className="flex gap-x-1 items-center group"
         href="/"
+        className="mt-6 inline-flex items-center justify-center rounded-full bg-[#2958A4] px-8 py-3 text-[16px] font-medium text-white hover:bg-[#1F4480]"
       >
-        <Text className="text-ui-fg-interactive">Go to frontpage</Text>
-        <ArrowUpRightMini
-          className="group-hover:rotate-45 ease-in-out duration-150"
-          color="var(--fg-interactive)"
-        />
+        Contact Us
       </Link>
     </div>
-  )
+  );
 }
+

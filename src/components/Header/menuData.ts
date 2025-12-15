@@ -1,41 +1,35 @@
-export type Menu = {
-  id: number;
-  title: string;
-  path?: string;
-  newTab: boolean;
-  submenu?: Menu[];
-};
+import { Menu } from "@/types/Menu";
 
 export const menuData: Menu[] = [
   {
     id: 1,
     title: "Products",
     newTab: false,
-    path: "/store",
+    path: "/shop",
     submenu: [
       {
         id: 61,
         title: "Antennas",
         newTab: false,
-        path: "/store?category=antennas",
+        path: "/categories/antennas",
         submenu: [
           {
             id: 611,
             title: "Yagi Antennas",
             newTab: false,
-            path: "/store?category=yagi-antennas",
+            path: "/categories/yagi-antennas",
           },
           {
             id: 612,
             title: "Omni Antennas",
             newTab: false,
-            path: "/store?category=omni-antennas",
+            path: "/categories/omni-antennas",
           },
           {
             id: 613,
             title: "Parabolic Antennas",
             newTab: false,
-            path: "/store?category=parabolic-antennas",
+            path: "/categories/parabolic-antennas",
           },
         ],
       },
@@ -43,15 +37,17 @@ export const menuData: Menu[] = [
         id: 62,
         title: "Cables",
         newTab: false,
-        path: "/store?category=cables",
+        path: "/categories/cables",
       },
       {
         id: 64,
         title: "Connectors",
         newTab: false,
-        path: "/store?category=connectors",
+        path: "/categories/connectors",
       },
-    ],
+    
+    
+    ]
   },
   {
     id: 2,
@@ -66,17 +62,16 @@ export const menuData: Menu[] = [
     path: "/request-a-quote",
   },
   {
-    id: 4,
+    id: 3,
     title: "Our Story",
     newTab: false,
     path: "/our-story",
   },
   {
-    id: 5,
+    id: 3,
     title: "Contact Us",
     newTab: false,
     path: "/contact",
   },
+ 
 ];
-
-
