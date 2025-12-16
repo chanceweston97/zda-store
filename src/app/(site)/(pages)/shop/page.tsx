@@ -34,6 +34,13 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   let categories: any[] = [];
   let allProductsCount = 0;
 
+  // Log Medusa configuration for debugging (server-side only)
+  if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
+    const { isMedusaEnabled } = await import("@/lib/medusa/config");
+    console.log("[ShopPage] Medusa enabled:", isMedusaEnabled());
+    console.log("[ShopPage] Backend URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL);
+  }
+
   try {
     const results = await Promise.allSettled([
       getAllProducts(),
@@ -44,8 +51,15 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
     // Handle products
     if (results[0].status === 'fulfilled') {
       allProducts = results[0].value || [];
+      if (allProducts.length === 0) {
+        console.warn("[ShopPage] getAllProducts returned empty array - check Medusa connection and product data");
+      }
     } else {
       console.error("[ShopPage] Error fetching products:", results[0].reason);
+      if (results[0].reason instanceof Error) {
+        console.error("[ShopPage] Error message:", results[0].reason.message);
+        console.error("[ShopPage] Error stack:", results[0].reason.stack);
+      }
       // Fallback to empty array - will show "No products found"
     }
 
