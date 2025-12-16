@@ -98,9 +98,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
-      - run: yarn install --frozen-lockfile
+      - name: Enable Corepack and setup Yarn 4.6
+        run: |
+          corepack enable
+          corepack prepare yarn@4.6.0 --activate
+
+      - run: yarn install --immutable
       - run: yarn build
 
       - run: tar -czf build.tar.gz .next public package.json yarn.lock
@@ -125,5 +129,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/front/zda-store
+            # Ensure Yarn 4.6 is available
+            corepack enable || true
+            corepack prepare yarn@4.6.0 --activate || true
             tar -xzf build.tar.gz
             pm2 restart frontend || pm2 start "yarn start" --name frontend
