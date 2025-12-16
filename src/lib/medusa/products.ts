@@ -20,16 +20,6 @@ async function getCachedRegionId(): Promise<string | null> {
  * Convert Medusa product to Sanity product format
  */
 function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any {
-  // Debug: Log what we're receiving from Medusa (subtitle is a direct product field per API schema)
-  console.log('[convertMedusaToSanityProduct] Raw Medusa product:', {
-    hasMetadata: !!medusaProduct.metadata,
-    metadataKeys: medusaProduct.metadata ? Object.keys(medusaProduct.metadata) : [],
-    datasheetImage: medusaProduct.metadata?.datasheetImage,
-    datasheetPdf: medusaProduct.metadata?.datasheetPdf,
-    subtitle: (medusaProduct as any).subtitle,
-    subtitleFromMetadata: medusaProduct.metadata?.subtitle,
-  });
-  
   const cheapestPrice = medusaProduct.variants?.[0]?.calculated_price?.calculated_amount || 0;
   const price = cheapestPrice / 100; // Convert from cents to dollars
 

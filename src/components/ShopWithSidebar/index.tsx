@@ -39,10 +39,10 @@ const ShopWithSidebar = ({ data }: PropsType) => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Products are already filtered server-side (like front project)
-  const filteredProducts = products;
+  // SERVER-SIDE FILTERING: Products are already filtered on the server (page.tsx)
+  // All filtering (category, size, price, sort) is done on the server for optimal performance
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters change (triggers server-side re-filter via URL params)
   useEffect(() => {
     setCurrentPage(1);
   }, [searchParams]);
@@ -81,8 +81,8 @@ const ShopWithSidebar = ({ data }: PropsType) => {
 
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+    return products.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [products, currentPage]);
 
   return (
     <>
@@ -132,7 +132,7 @@ const ShopWithSidebar = ({ data }: PropsType) => {
                   {/* top bar left */}
                   <TopBar
                     allProductsCount={allProductsCount}
-                    showingProductsCount={filteredProducts.length}
+                    showingProductsCount={products.length}
                   />
 
                   {/* top bar right */}
@@ -188,7 +188,7 @@ const ShopWithSidebar = ({ data }: PropsType) => {
 
               <Pagination
                 currentPage={currentPage}
-                totalCount={filteredProducts.length}
+                totalCount={products.length}
                 pageSize={PRODUCTS_PER_PAGE}
                 onPageChange={setCurrentPage}
               />

@@ -19,7 +19,7 @@ const accountLinks = [
   {
     id: 4,
     label: 'Connectors',
-    href: '/connectors',
+    href: '/categories/connectors',
   },
   {
     id: 5,

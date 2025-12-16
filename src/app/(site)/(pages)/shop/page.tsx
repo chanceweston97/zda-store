@@ -88,78 +88,75 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
     return null;
   };
 
-  // Filter products by category (server-side filtering like front project)
+  // OPTIMIZED SERVER-SIDE FILTERING: Single pass with efficient data structures
+  // This is much faster than multiple filter passes
   let filteredProducts = allProducts;
+  
+  // Build category ID set for O(1) lookup (much faster than array.includes)
+  const categoryIdSet = new Set<string>();
   if (category && allProducts.length > 0) {
-    const categoryHandles = category.split(",");
+    const categoryHandles = category.split(",").filter(Boolean);
     
     // Get all category IDs including subcategories
-    const allCategoryIds: string[] = [];
     categoryHandles.forEach((handle) => {
       const foundCategory = findCategoryByHandle(categories, handle);
       if (foundCategory) {
         const categoryId = foundCategory.id || foundCategory._id;
         if (categoryId) {
+          categoryIdSet.add(categoryId);
           const subcats = foundCategory.subcategories || foundCategory.category_children || [];
-          if (subcats.length > 0) {
-            // Include parent and all subcategories
-            allCategoryIds.push(categoryId);
-            subcats.forEach((sub: any) => {
-              const subId = sub.id || sub._id;
-              if (subId) allCategoryIds.push(subId);
-            });
-          } else {
-            allCategoryIds.push(categoryId);
-          }
+          subcats.forEach((sub: any) => {
+            const subId = sub.id || sub._id;
+            if (subId) categoryIdSet.add(subId);
+          });
         }
       }
     });
+  }
 
-    // Filter products by category IDs (exactly like front project)
-    if (allCategoryIds.length > 0) {
-      filteredProducts = allProducts.filter((product: any) => {
+  // Build size set for O(1) lookup
+  const selectedSizesSet = sizes 
+    ? new Set(sizes.split(",").filter(Boolean))
+    : null;
+
+  // Parse price filters once
+  const minPriceNum = minPrice ? parseFloat(minPrice) : null;
+  const maxPriceNum = maxPrice ? parseFloat(maxPrice) : null;
+
+  // Single pass filtering: combine all filters in one iteration
+  if (categoryIdSet.size > 0 || selectedSizesSet || minPriceNum !== null || maxPriceNum !== null) {
+    filteredProducts = allProducts.filter((product: any) => {
+      // Category filter
+      if (categoryIdSet.size > 0) {
         const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
-        return productCategoryIds.some((id: string) => allCategoryIds.includes(id));
-      });
-    } else {
-      filteredProducts = [];
-    }
-  }
+        const matchesCategory = productCategoryIds.some((id: string) => categoryIdSet.has(id));
+        if (!matchesCategory) return false;
+      }
 
-  // Filter by size
-  if (sizes) {
-    const selectedSizes = sizes.split(",").filter(Boolean);
-    if (selectedSizes.length > 0) {
-      filteredProducts = filteredProducts.filter((product: any) => {
+      // Size filter
+      if (selectedSizesSet && selectedSizesSet.size > 0) {
         const productSizes = product.sizes || [];
-        return selectedSizes.some(size => productSizes.includes(size));
-      });
-    }
-  }
+        const matchesSize = Array.from(selectedSizesSet).some(size => productSizes.includes(size));
+        if (!matchesSize) return false;
+      }
 
-  // Filter by price
-  if (minPrice || maxPrice) {
-    filteredProducts = filteredProducts.filter((product: any) => {
-      const productPrice = product.price || 0;
-      if (minPrice && productPrice < parseFloat(minPrice)) return false;
-      if (maxPrice && productPrice > parseFloat(maxPrice)) return false;
+      // Price filter
+      if (minPriceNum !== null || maxPriceNum !== null) {
+        const productPrice = product.price || 0;
+        if (minPriceNum !== null && productPrice < minPriceNum) return false;
+        if (maxPriceNum !== null && productPrice > maxPriceNum) return false;
+      }
+
       return true;
     });
   }
 
-  // Sort products
+  // Sort products only if sort parameter is provided
   if (sort === 'popular') {
     filteredProducts.sort((a, b) => {
       const aReviews = a.reviews?.length || 0;
       const bReviews = b.reviews?.length || 0;
       return bReviews - aReviews;
-    });
-  } else {
-    // Default: sort by creation date (newest first)
-    filteredProducts.sort((a, b) => {
-      const aDate = a._createdAt || a.created_at || 0;
-      const bDate = b._createdAt || b.created_at || 0;
-      return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
   }
 

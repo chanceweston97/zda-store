@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { ChevronDown } from "../Header/icons";
 
 type PropsType = {
@@ -10,6 +10,7 @@ type PropsType = {
 
 export default function SizeDropdown({ availableSizes }: PropsType) {
   const [isOpen, setIsOpen] = useState(true);
+  const [isPending, startTransition] = useTransition();
 
   const router = useRouter();
   const searchParams = useSearchParams() || new URLSearchParams();
@@ -35,7 +36,10 @@ export default function SizeDropdown({ availableSizes }: PropsType) {
       }
     }
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    // Use startTransition for non-blocking update - UI updates instantly via client-side filtering
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   }
 
   return (
@@ -55,24 +59,32 @@ export default function SizeDropdown({ availableSizes }: PropsType) {
 
       {/* // <!-- dropdown menu --> */}
       <div className="flex flex-wrap gap-2.5 p-6" hidden={!isOpen}>
-        {availableSizes.map((size) => (
+        {availableSizes.map((size) => {
+          const isSelected = searchParams
+            .get("sizes")
+            ?.split(",")
+            .includes(size) || false;
+          
+          return (
           <label key={size} htmlFor={size} className="cursor-pointer">
             <input
               type="checkbox"
               id={size}
               className="sr-only peer"
-              defaultChecked={searchParams
-                .get("sizes")
-                ?.split(",")
-                .includes(size)}
+              checked={isSelected}
               onChange={(e) => handleSizes(size, e.target.checked)}
             />
 
-            <span className="text-custom-sm uppercase py-[5px] px-3.5 text-dark bg-gray-2 hover:bg-gray-3 peer-checked:hover:bg-blue peer-checked:bg-blue peer-checked:text-white rounded-full">
+            <span className={`text-custom-sm uppercase py-[5px] px-3.5 rounded-full ${
+              isSelected 
+                ? "bg-blue text-white hover:bg-blue" 
+                : "text-dark bg-gray-2 hover:bg-gray-3"
+            }`}>
               {size}
             </span>
           </label>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

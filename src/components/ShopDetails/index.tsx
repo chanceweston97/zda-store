@@ -636,7 +636,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
             {/* LEFT: GALLERY */}
             <div className="w-full lg:w-1/2">
-              <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 p-4 sm:p-7.5 relative flex items-center justify-center">
+              <div className="lg:min-h-[512px] rounded-lg border border-gray-3 p-4 sm:p-7.5 relative flex items-center justify-center">
                 <div>
                   <button
                     onClick={handlePreviewSlider}

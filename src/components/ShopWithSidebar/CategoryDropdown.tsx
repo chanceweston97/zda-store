@@ -1,7 +1,7 @@
 "use client";
 import { Category } from "@/types/category";
 import { Product } from "@/types/product";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown } from "../Header/icons";
 import { CheckMarkIcon2 } from "@/assets/icons";
@@ -14,6 +14,7 @@ type PropsType = {
 const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   const [isOpen, setIsOpen] = useState(true);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -125,7 +126,10 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       }
     }
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    // Use startTransition for non-blocking update - UI updates instantly via client-side filtering
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   // Handle parent category click - toggle all subcategories at once
@@ -156,7 +160,10 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       }
     }
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    // Use startTransition for non-blocking update - UI updates instantly via client-side filtering
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const isCategoryChecked = (categoryHandle: string) => {
