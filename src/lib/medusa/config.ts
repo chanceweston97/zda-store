@@ -23,7 +23,7 @@ if (shouldLog) {
   // Warn if using localhost in production (common mistake)
   if (process.env.NODE_ENV === 'production' && MEDUSA_BACKEND_URL.includes('localhost')) {
     console.error(`[MedusaConfig] ⚠️ WARNING: Using localhost in production! This will fail on the server.`);
-    console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL to your server IP (e.g., http://18.191.243.236:9000)`);
+    console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL to your server IP`);
     console.error(`[MedusaConfig] Then rebuild: yarn build`);
   }
 }

@@ -40,12 +40,12 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: '18.191.243.236',
+        hostname: '18.224.229.214',
         port: '9000',
       },
       {
         protocol: 'https',
-        hostname: '18.191.243.236',
+        hostname: '18.224.229.214',
         port: '9000',
       },
       {

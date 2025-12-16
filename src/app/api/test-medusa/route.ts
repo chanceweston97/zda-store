@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { medusaConfig, validateMedusaConfig } from "@/lib/medusa/config";
 
-/**
- * Simple test endpoint to check Medusa connection
- * Visit: http://localhost:8000/api/test-medusa
- * Or on server: http://18.191.243.236:8000/api/test-medusa
- */
 export async function GET() {
   const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "not set";
   const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "not set";
@@ -95,13 +90,13 @@ export async function GET() {
         "2. Verify .env file has correct NEXT_PUBLIC_MEDUSA_BACKEND_URL (not localhost)",
         "3. Rebuild after changing env vars: yarn build",
         "4. Restart: pm2 restart FrontEnd",
-        "5. Test Medusa directly: curl http://18.191.243.236:9000/store/products?limit=1",
+        "5. Test Medusa directly: curl http://18.224.229.214:9000/store/products?limit=1",
       ],
       ifConnectionRefused: [
         "1. Check if Medusa backend is running: pm2 status",
         "2. Check Medusa logs: pm2 logs medusaBackend",
         "3. Verify firewall allows internal connections",
-        "4. Test from server: curl http://18.191.243.236:9000/store/products?limit=1",
+        "4. Test from server: curl http://18.224.229.214:9000/store/products?limit=1",
       ],
     },
   });

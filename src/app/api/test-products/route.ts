@@ -2,10 +2,6 @@ import { NextResponse } from "next/server";
 import { getAllProducts, getAllProductsCount, getCategoriesWithSubcategories } from "@/lib/data/unified-data";
 import { isMedusaEnabled } from "@/lib/medusa/config";
 
-/**
- * Diagnostic endpoint to test product fetching
- * Visit: http://18.191.243.236:8000/api/test-products
- */
 export async function GET() {
   const results: any = {
     timestamp: new Date().toISOString(),

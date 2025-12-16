@@ -1,142 +1,84 @@
-# name: Deploy Backend to EC2
-
-# on:
-#   push:
-#     branches: ["main"]   # deploys whenever you push to main
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v3
-
-#     - name: Create target directory
-#       uses: appleboy/ssh-action@v0.1.7
-#       with:
-#         host: ${{ secrets.EC2_HOST }}
-#         username: ${{ secrets.EC2_USER }}
-#         key: ${{ secrets.EC2_KEY }}
-#         script: mkdir -p ${{ secrets.APP_PATH }}
-
-#     - name: Copy files to EC2
-#       uses: appleboy/scp-action@v0.1.4
-#       with:
-#         host: ${{ secrets.EC2_HOST }}
-#         username: ${{ secrets.EC2_USER }}
-#         key: ${{ secrets.EC2_KEY }}
-#         source: "."
-#         target: ${{ secrets.APP_PATH }}
-
-#     - name: SSH into server and perform deploy commands
-#       uses: appleboy/ssh-action@v0.1.7
-#       with:
-#         host: ${{ secrets.EC2_HOST }}
-#         username: ${{ secrets.EC2_USER }}
-#         key: ${{ secrets.EC2_KEY }}
-#         script: |
-#           export NVM_DIR="$HOME/.nvm"
-#           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#           cd ${{ secrets.APP_PATH }}
-#           git pull || true
-#           corepack enable || true
-#           corepack prepare yarn@4.6.0 --activate || true
-#           yarn install --immutable
-          
-#           # Set required environment variables BEFORE build
-#           BACKEND_URL="http://${{ secrets.EC2_HOST }}:9000"
-#           export MEDUSA_BACKEND_URL="$BACKEND_URL"
-#           export NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}"
-          
-#           # Create .env.local file for Next.js
-#           echo "MEDUSA_BACKEND_URL=$BACKEND_URL" > .env.local
-#           echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> .env.local
-          
-#           # Build the application (will use env vars from .env.local and process.env)
-#           yarn build
-          
-#           # Create PM2 ecosystem file with environment variables
-#           cat > ecosystem.config.js << EOF
-#           module.exports = {
-#             apps: [{
-#               name: 'FrontEnd',
-#               script: 'yarn',
-#               args: 'start',
-#               cwd: '${{ secrets.APP_PATH }}',
-#               env: {
-#                 NODE_ENV: 'production',
-#                 MEDUSA_BACKEND_URL: '$BACKEND_URL',
-#                 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: '${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}'
-#               }
-#             }]
-#           };
-#           EOF
-          
-#           # Restart PM2
-#           pm2 delete FrontEnd 2>/dev/null || true
-#           pm2 start ecosystem.config.js
-#           pm2 save
-          
-#           # Show PM2 status and logs
-#           pm2 status
-#           echo "=== FrontEnd PM2 Logs (last 20 lines) ==="
-#           pm2 logs FrontEnd --lines 20 --nostream || true
-name: Deploy Frontend
+name: Deploy Backend to EC2
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]   # deploys whenever you push to main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Enable Corepack and setup Yarn 4.6
-        run: |
-          corepack enable
-          corepack prepare yarn@4.6.0 --activate
-
-      - run: yarn install --immutable
-      - name: Build Next.js app
-        env:
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          MEDUSA_BACKEND_URL: ${{ secrets.MEDUSA_BACKEND_URL }}
-          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
-        run: yarn build
-
-      - run: tar -czf build.tar.gz .next public package.json yarn.lock
-
-      - uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build.tar.gz"
-          target: "/home/ubuntu/front/zda-store"
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~/front/zda-store
-            # Ensure Yarn 4.6 is available
-            corepack enable || true
-            corepack prepare yarn@4.6.0 --activate || true
-            tar -xzf build.tar.gz
-            pm2 restart frontend || pm2 start "yarn start" --name frontend
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create target directory
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: mkdir -p ${{ secrets.APP_PATH }}
+
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        source: "."
+        target: ${{ secrets.APP_PATH }}
+
+    - name: SSH into server and perform deploy commands
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          cd ${{ secrets.APP_PATH }}
+          git pull || true
+          corepack enable || true
+          corepack prepare yarn@4.6.0 --activate || true
+          yarn install --immutable
+          
+          # Set required environment variables BEFORE build
+          BACKEND_URL="http://${{ secrets.EC2_HOST }}:9000"
+          export MEDUSA_BACKEND_URL="$BACKEND_URL"
+          export NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}"
+          
+          # Create .env.local file for Next.js
+          echo "MEDUSA_BACKEND_URL=$BACKEND_URL" > .env.local
+          echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> .env.local
+          
+          # Build the application (will use env vars from .env.local and process.env)
+          yarn build
+          
+          # Create PM2 ecosystem file with environment variables
+          cat > ecosystem.config.js << EOF
+          module.exports = {
+            apps: [{
+              name: 'FrontEnd',
+              script: 'yarn',
+              args: 'start',
+              cwd: '${{ secrets.APP_PATH }}',
+              env: {
+                NODE_ENV: 'production',
+                MEDUSA_BACKEND_URL: '$BACKEND_URL',
+                NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: '${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}'
+              }
+            }]
+          };
+          EOF
+          
+          # Restart PM2
+          pm2 delete FrontEnd 2>/dev/null || true
+          pm2 start ecosystem.config.js
+          pm2 save
+          
+          # Show PM2 status and logs
+          pm2 status
+          echo "=== FrontEnd PM2 Logs (last 20 lines) ==="
+          pm2 logs FrontEnd --lines 20 --nostream || true
