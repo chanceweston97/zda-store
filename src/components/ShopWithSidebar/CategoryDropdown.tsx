@@ -14,7 +14,6 @@ type PropsType = {
 const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   const [isOpen, setIsOpen] = useState(true);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
-  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -107,7 +106,6 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   };
 
   const handleCategory = (categoryHandle: string, isChecked: boolean) => {
-    setIsNavigating(true);
     const params = new URLSearchParams(searchParams?.toString() || "");
     const categoryParam = params.get("category");
 
@@ -128,14 +126,10 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    
-    // Reset loading state after a short delay (page will reload anyway)
-    setTimeout(() => setIsNavigating(false), 100);
   };
 
   // Handle parent category click - toggle all subcategories at once
   const handleParentCategory = (subcategories: Category[], isChecked: boolean) => {
-    setIsNavigating(true);
     const params = new URLSearchParams(searchParams?.toString() || "");
     const categoryParam = params.get("category");
 
@@ -163,9 +157,6 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    
-    // Reset loading state after a short delay (page will reload anyway)
-    setTimeout(() => setIsNavigating(false), 100);
   };
 
   const isCategoryChecked = (categoryHandle: string) => {
@@ -203,15 +194,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   if (!categories.length) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-1 relative">
-      {isNavigating && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
-          <div className="flex items-center gap-2 text-blue">
-            <div className="w-4 h-4 border-2 border-blue border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm">Loading...</span>
-          </div>
-        </div>
-      )}
+    <div className="bg-white rounded-lg shadow-1">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 w-full ${

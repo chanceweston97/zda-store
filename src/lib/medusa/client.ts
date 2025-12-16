@@ -83,22 +83,12 @@ class MedusaClient {
     }
 
     try {
-      // Create abort controller for timeout (compatible with older Node.js versions)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
-      // Use Next.js fetch with no-store to prevent static generation issues in production
-      // This ensures dynamic rendering when using yarn start
+      // Simple fetch without timeout to avoid server hangs
       const response = await fetch(url, {
         ...options,
         headers,
-        // Use no-store to prevent static rendering in production mode
         cache: "no-store",
-        // Add timeout for production environments
-        signal: controller.signal,
       } as RequestInit);
-      
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -130,36 +120,9 @@ class MedusaClient {
       const data = await response.json();
       return data;
     } catch (error: any) {
-      // Enhanced error logging for production debugging
-      const errorDetails: any = {
-        message: error?.message || String(error),
-        name: error?.name || 'UnknownError',
-        url: url,
-        backendUrl: this.baseUrl,
-      };
-      
-      // Check for common connection errors
-      if (error?.message?.includes('fetch failed') || error?.message?.includes('ECONNREFUSED')) {
-        errorDetails.connectionError = true;
-        errorDetails.hint = 'Check if Medusa backend is running and accessible at ' + this.baseUrl;
-      }
-      
-      if (error?.name === 'AbortError' || error?.message?.includes('timeout')) {
-        errorDetails.timeoutError = true;
-        errorDetails.hint = 'Request timed out. Check if Medusa backend is responding.';
-      }
-      
-      // Always log errors for debugging
-      console.error(`[MedusaClient] Fetch error:`, errorDetails);
-      
-      // Re-throw with enhanced error message
-      const enhancedError = new Error(
-        errorDetails.hint 
-          ? `${errorDetails.message} - ${errorDetails.hint}`
-          : errorDetails.message
-      );
-      Object.assign(enhancedError, errorDetails);
-      throw enhancedError;
+      // Simple error logging - avoid complex error handling that might cause hangs
+      console.error(`[MedusaClient] Fetch error:`, error?.message || error);
+      throw error;
     }
   }
 
