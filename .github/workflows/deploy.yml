@@ -12,17 +12,31 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Test SSH connection
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          echo "SSH connection successful!"
+          echo "Host: ${{ secrets.EC2_HOST }}"
+          echo "User: ${{ secrets.EC2_USER }}"
+          echo "Current directory: $(pwd)"
+          echo "APP_PATH: ${{ secrets.APP_PATH }}"
+
     - name: Copy files to EC2
-      uses: appleboy/scp-action@v0.1.4
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         source: "."
         target: ${{ secrets.APP_PATH }}
+        strip_components: 0
 
     - name: SSH into server and perform deploy commands
-      uses: appleboy/ssh-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
