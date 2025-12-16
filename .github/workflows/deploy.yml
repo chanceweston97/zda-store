@@ -105,7 +105,13 @@ jobs:
           corepack prepare yarn@4.6.0 --activate
 
       - run: yarn install --immutable
-      - run: yarn build
+      - name: Build Next.js app
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MEDUSA_BACKEND_URL: ${{ secrets.MEDUSA_BACKEND_URL }}
+          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+        run: yarn build
 
       - run: tar -czf build.tar.gz .next public package.json yarn.lock
 
