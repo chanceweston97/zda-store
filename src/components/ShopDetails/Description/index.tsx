@@ -77,35 +77,83 @@ export default function Description({ product, metadata }: Props) {
         "description"
     );
 
+    // Helper function to fix old IP addresses in URLs
+    const fixImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || typeof url !== 'string') return url || null;
+      
+      // Get current backend URL from environment
+      const currentBackendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
+                               process.env.MEDUSA_BACKEND_URL || 
+                               'http://18.224.229.214:9000';
+      
+      // Extract the base URL (protocol + hostname + port)
+      let currentUrl: URL;
+      try {
+        currentUrl = new URL(currentBackendUrl);
+      } catch (e) {
+        return url;
+      }
+      
+      const currentHost = currentUrl.host; // includes port if present
+      
+      // List of old IPs to replace
+      const oldIPs = [
+        '18.191.243.236:9000',
+        '18.191.243.236',
+      ];
+      
+      let fixedUrl = url;
+      
+      // Replace old IPs with current backend URL
+      for (const oldIP of oldIPs) {
+        if (fixedUrl.includes(oldIP)) {
+          fixedUrl = fixedUrl.replace(oldIP, currentHost);
+          // Also replace http/https if needed to match current protocol
+          if (currentUrl.protocol === 'https:' && fixedUrl.startsWith('http://')) {
+            fixedUrl = fixedUrl.replace('http://', 'https://');
+          } else if (currentUrl.protocol === 'http:' && fixedUrl.startsWith('https://')) {
+            fixedUrl = fixedUrl.replace('https://', 'http://');
+          }
+          break;
+        }
+      }
+      
+      return fixedUrl;
+    };
+
     // Get datasheet image and PDF from metadata prop or product
     const datasheetImage = metadata?.datasheetImage || 
                           (product as any).datasheetImage || 
                           (product.metadata as any)?.datasheetImage || 
                           null;
     
-    // Use direct URL if it's already a URL, otherwise use imageBuilder
+    // Fix old IP addresses and use direct URL if it's already a URL, otherwise use imageBuilder
     const datasheetImageUrl = datasheetImage 
-        ? (datasheetImage.startsWith('http') ? datasheetImage : imageBuilder(datasheetImage).url())
+        ? (datasheetImage.startsWith('http') ? fixImageUrl(datasheetImage) : imageBuilder(datasheetImage).url())
         : null;
 
-    const datasheetPdfUrl = metadata?.datasheetPdf || 
-                           (product as any).datasheetPdf || 
-                           (product.metadata as any)?.datasheetPdf || 
-                           (product as any).datasheetPdfUrl || 
-                           null;
+    const datasheetPdfUrl = fixImageUrl(
+      metadata?.datasheetPdf || 
+      (product as any).datasheetPdf || 
+      (product.metadata as any)?.datasheetPdf || 
+      (product as any).datasheetPdfUrl || 
+      null
+    );
     
     // Get features and applications from metadata prop
     const features = metadata?.features || product.features;
     const applications = metadata?.applications || product.applications;
     const specifications = metadata?.specifications || product.specifications;
     console.log("PRODUCTS", product)
+    const [imageError, setImageError] = useState(false);
+
     return (
         <section className="pb-5 pt-10">
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-stretch xl:px-0">
                 {/* LEFT COLUMN – DATASHEET */}
                 <div className="flex w-full flex-col gap-4 lg:w-[35%]">
                     {/* Datasheet preview + button */}
-                    {datasheetImageUrl && (
+                    {datasheetImageUrl && !imageError ? (
                         <div className="relative overflow-hidden rounded-[20px] bg-gray-100 h-full flex flex-col">
                             <div className="flex-1 relative">
                                 <Image
@@ -114,6 +162,7 @@ export default function Description({ product, metadata }: Props) {
                                     width={400}
                                     height={518}
                                     className="h-full w-full object-contain cursor-pointer"
+                                    onError={() => setImageError(true)}
                                     onClick={() => {
                                         if (!datasheetPdfUrl) return;
                                         window.open(datasheetPdfUrl, "_blank", "noopener,noreferrer");
@@ -145,6 +194,12 @@ export default function Description({ product, metadata }: Props) {
                             >
                                 Download Data Sheet
                             </button>
+                        </div>
+                    ) : (
+                        <div className="relative overflow-hidden rounded-[20px] bg-gray-100 h-full flex flex-col items-center justify-center p-8 min-h-[400px]">
+                            <p className="text-gray-500 text-[18px] font-medium text-center">
+                                No Datasheet Image Available
+                            </p>
                         </div>
                     )}
                 </div>

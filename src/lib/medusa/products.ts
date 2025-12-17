@@ -29,15 +29,20 @@ function fixImageUrl(url: string | undefined | null): string {
                            'http://18.224.229.214:9000';
   
   // Extract the base URL (protocol + hostname + port)
-  const currentUrl = new URL(currentBackendUrl);
-  const currentBase = `${currentUrl.protocol}//${currentUrl.host}`;
+  let currentUrl: URL;
+  try {
+    currentUrl = new URL(currentBackendUrl);
+  } catch (e) {
+    // If URL parsing fails, return original
+    return url;
+  }
+  
+  const currentHost = currentUrl.host; // includes port if present
   
   // List of old IPs to replace
   const oldIPs = [
     '18.191.243.236:9000',
     '18.191.243.236',
-    'http://18.191.243.236:9000',
-    'https://18.191.243.236:9000',
   ];
   
   let fixedUrl = url;
@@ -45,10 +50,12 @@ function fixImageUrl(url: string | undefined | null): string {
   // Replace old IPs with current backend URL
   for (const oldIP of oldIPs) {
     if (fixedUrl.includes(oldIP)) {
-      fixedUrl = fixedUrl.replace(oldIP, currentUrl.host);
+      fixedUrl = fixedUrl.replace(oldIP, currentHost);
       // Also replace http/https if needed to match current protocol
       if (currentUrl.protocol === 'https:' && fixedUrl.startsWith('http://')) {
         fixedUrl = fixedUrl.replace('http://', 'https://');
+      } else if (currentUrl.protocol === 'http:' && fixedUrl.startsWith('https://')) {
+        fixedUrl = fixedUrl.replace('https://', 'http://');
       }
       break;
     }
@@ -168,8 +175,9 @@ export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any 
   // These come from Custom Fields in Medusa admin panel
   const metadata = medusaProduct.metadata || {};
   
-  const datasheetImage = metadata.datasheetImage || null;
-  const datasheetPdf = metadata.datasheetPdf || null;
+  // Fix old IP addresses in datasheet URLs
+  const datasheetImage = metadata.datasheetImage ? fixImageUrl(metadata.datasheetImage) : null;
+  const datasheetPdf = metadata.datasheetPdf ? fixImageUrl(metadata.datasheetPdf) : null;
   
   // Extract features and applications from metadata (like front project - keep as strings)
   // Front project line 65-66: features/applications are strings, joined if arrays

@@ -839,15 +839,6 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                     </div>
                   )}
 
-                  {/* Applications - Display as plain text under features (hide for cable products) */}
-                  {!isCableProduct && (product as any).applications && typeof (product as any).applications === 'string' && (product as any).applications.trim() && (
-                    <div className="mt-2">
-                      <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                        {(product as any).applications}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="mt-2 w-full space-y-4">
                       {/* Gain - Full Width Row (Antenna products only) */}
                       {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && (
