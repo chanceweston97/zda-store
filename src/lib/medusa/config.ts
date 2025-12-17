@@ -19,6 +19,10 @@ const MEDUSA_BACKEND_URL =
       })()
     : "http://localhost:9000"); // Only use localhost in development
 
+// Get publishable key from environment variables
+const MEDUSA_PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
+
 // Log the configured URL (helps debug server-side issues)
 // Always log in production if LOG_MEDUSA_FETCH is enabled, or in development
 const shouldLog = typeof window === 'undefined' && (
@@ -45,9 +49,6 @@ if (shouldLog) {
     console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY in your .env.local file`);
   }
 }
-
-const MEDUSA_PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
 
 export const medusaConfig = {
   backendUrl: MEDUSA_BACKEND_URL,
