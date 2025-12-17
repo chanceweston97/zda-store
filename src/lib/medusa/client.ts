@@ -82,6 +82,13 @@ class MedusaClient {
       console.log(`[MedusaClient] Fetching: ${url}`);
     }
 
+    // Warn if using localhost in production
+    if (process.env.NODE_ENV === 'production' && this.baseUrl.includes('localhost')) {
+      console.error(`[MedusaClient] ⚠️ WARNING: Backend URL is localhost in production! This will fail.`);
+      console.error(`[MedusaClient] Current backend URL: ${this.baseUrl}`);
+      console.error(`[MedusaClient] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL to your server IP (e.g., http://18.224.229.214:9000)`);
+    }
+
     try {
       // Simple fetch without timeout to avoid server hangs
       const response = await fetch(url, {
@@ -106,7 +113,17 @@ class MedusaClient {
           error: errorData,
           url: url,
           backendUrl: this.baseUrl,
+          endpoint: endpoint,
         });
+        
+        // Provide helpful error message for common issues
+        if (response.status === 404) {
+          console.error(`[MedusaClient] 404 Not Found - Check if endpoint exists: ${endpoint}`);
+          console.error(`[MedusaClient] Verify Medusa backend is running at: ${this.baseUrl}`);
+        } else if (response.status === 0 || response.status === 500) {
+          console.error(`[MedusaClient] Connection error - Check if Medusa backend is accessible at: ${this.baseUrl}`);
+          console.error(`[MedusaClient] If on server, ensure NEXT_PUBLIC_MEDUSA_BACKEND_URL is set correctly`);
+        }
         
         const errorMessage = errorData.message || errorData.error?.message || `HTTP error! status: ${response.status}`;
         const error = new Error(errorMessage);
@@ -120,7 +137,14 @@ class MedusaClient {
       const data = await response.json();
       return data;
     } catch (error: any) {
-      // Simple error logging - avoid complex error handling that might cause hangs
+      // Enhanced error logging for network issues
+      if (error?.message?.includes('fetch') || error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND') {
+        console.error(`[MedusaClient] Network error - Cannot connect to Medusa backend at: ${this.baseUrl}`);
+        console.error(`[MedusaClient] Verify:`);
+        console.error(`[MedusaClient]   1. Medusa backend is running`);
+        console.error(`[MedusaClient]   2. NEXT_PUBLIC_MEDUSA_BACKEND_URL is set correctly (not localhost in production)`);
+        console.error(`[MedusaClient]   3. Backend is accessible from this server`);
+      }
       console.error(`[MedusaClient] Fetch error:`, error?.message || error);
       throw error;
     }

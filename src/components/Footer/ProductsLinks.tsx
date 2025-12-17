@@ -24,7 +24,7 @@ const accountLinks = [
   {
     id: 5,
     label: 'All',
-    href: '/shop-with-wide-sidebar',
+    href: '/shop',
   }
 ]
 export default function ProductsLinks() {
