@@ -58,6 +58,11 @@ jobs:
           # Create .env.local file for Next.js
           echo "MEDUSA_BACKEND_URL=$BACKEND_URL" > .env.local
           echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> .env.local
+          echo "NEXT_PUBLIC_MEDUSA_BACKEND_URL=$BACKEND_URL" >> .env.local
+          
+          # Clear .next directory to remove old cached builds with old IP addresses
+          echo "Clearing .next directory to remove cached builds..."
+          rm -rf .next
           
           # Build the application (will use env vars from .env.local and process.env)
           yarn build
@@ -73,6 +78,7 @@ jobs:
               env: {
                 NODE_ENV: 'production',
                 MEDUSA_BACKEND_URL: '$BACKEND_URL',
+                NEXT_PUBLIC_MEDUSA_BACKEND_URL: '$BACKEND_URL',
                 NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: '${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}'
               }
             }]
