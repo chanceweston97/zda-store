@@ -6,33 +6,75 @@
 import { medusaClient, MedusaProduct } from "./client";
 import { isMedusaEnabled } from "./config";
 
-// Helper to get cached region ID
+// Helper to get cached region ID (optional - regions not required for basic fetching)
 async function getCachedRegionId(): Promise<string | null> {
   try {
     return await medusaClient.getCachedRegionId();
   } catch (error) {
-    console.warn("[getMedusaProductByHandle] Could not get cached region ID:", error);
+    // Silently ignore - regions are optional
     return null;
   }
 }
 
 /**
+ * Replace old IP addresses in image URLs with the current backend URL
+ * This fixes issues when the backend IP address changes
+ */
+function fixImageUrl(url: string | undefined | null): string {
+  if (!url || typeof url !== 'string') return url || '';
+  
+  // Get current backend URL from environment
+  const currentBackendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
+                           process.env.MEDUSA_BACKEND_URL || 
+                           'http://18.224.229.214:9000';
+  
+  // Extract the base URL (protocol + hostname + port)
+  const currentUrl = new URL(currentBackendUrl);
+  const currentBase = `${currentUrl.protocol}//${currentUrl.host}`;
+  
+  // List of old IPs to replace
+  const oldIPs = [
+    '18.191.243.236:9000',
+    '18.191.243.236',
+    'http://18.191.243.236:9000',
+    'https://18.191.243.236:9000',
+  ];
+  
+  let fixedUrl = url;
+  
+  // Replace old IPs with current backend URL
+  for (const oldIP of oldIPs) {
+    if (fixedUrl.includes(oldIP)) {
+      fixedUrl = fixedUrl.replace(oldIP, currentUrl.host);
+      // Also replace http/https if needed to match current protocol
+      if (currentUrl.protocol === 'https:' && fixedUrl.startsWith('http://')) {
+        fixedUrl = fixedUrl.replace('http://', 'https://');
+      }
+      break;
+    }
+  }
+  
+  return fixedUrl;
+}
+
+/**
  * Convert Medusa product to Sanity product format
  */
-function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any {
+export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any {
   const cheapestPrice = medusaProduct.variants?.[0]?.calculated_price?.calculated_amount || 0;
   const price = cheapestPrice / 100; // Convert from cents to dollars
 
   // Convert images - Medusa images are URLs, not Sanity asset references
+  // Fix old IP addresses in image URLs
   const thumbnails = medusaProduct.images?.length > 0
     ? medusaProduct.images.map((img) => ({
-        image: img.url, // Direct URL, not asset reference
+        image: fixImageUrl(img.url), // Fix URL and use it directly
         color: null,
       }))
     : medusaProduct.thumbnail
     ? [
         {
-          image: medusaProduct.thumbnail,
+          image: fixImageUrl(medusaProduct.thumbnail),
           color: null,
         },
       ]
@@ -40,7 +82,7 @@ function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any {
 
   const previewImages = medusaProduct.images?.length > 0
     ? medusaProduct.images.map((img) => ({
-        image: img.url,
+        image: fixImageUrl(img.url),
         color: null,
       }))
     : thumbnails;
@@ -285,10 +327,12 @@ export async function getMedusaProducts(params?: {
   regionId?: string;
 }): Promise<any[]> {
   if (!isMedusaEnabled()) {
+    console.warn("[getMedusaProducts] Medusa is not enabled, returning empty array");
     return [];
   }
 
   try {
+    console.log("[getMedusaProducts] Calling medusaClient.getProducts()...");
     const response = await medusaClient.getProducts({
       limit: params?.limit || 100,
       offset: params?.offset || 0,
@@ -296,17 +340,29 @@ export async function getMedusaProducts(params?: {
       fields: "*variants.calculated_price,*categories", // Include categories for filtering
     });
 
+    console.log(`[getMedusaProducts] Received response with ${response.products?.length || 0} products`);
+
     if (!response.products || response.products.length === 0) {
       console.warn("[getMedusaProducts] No products in Medusa response");
+      console.warn("[getMedusaProducts] Response:", JSON.stringify(response, null, 2));
       return [];
     }
 
     const converted = response.products.map(convertMedusaToSanityProduct);
+    console.log(`[getMedusaProducts] Successfully converted ${converted.length} products`);
     return converted;
   } catch (error) {
     console.error("[getMedusaProducts] Error fetching products from Medusa:", error);
     if (error instanceof Error) {
       console.error("[getMedusaProducts] Error details:", error.message);
+      console.error("[getMedusaProducts] Error stack:", error.stack);
+      // Check if it's a network/connection error
+      if ((error as any).url) {
+        console.error("[getMedusaProducts] Failed URL:", (error as any).url);
+      }
+      if ((error as any).status) {
+        console.error("[getMedusaProducts] HTTP Status:", (error as any).status);
+      }
     }
     return [];
   }

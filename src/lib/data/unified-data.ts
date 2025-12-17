@@ -16,23 +16,43 @@ import { medusaClient } from "@/lib/medusa/client";
 export async function getAllProducts() {
   const useMedusa = isMedusaEnabled();
 
+  // Log Medusa status (always log in production for debugging)
+  if (typeof window === 'undefined') {
+    console.log("[getAllProducts] Medusa enabled:", useMedusa);
+    if (!useMedusa) {
+      console.warn("[getAllProducts] Medusa is disabled - will use local data fallback");
+      console.warn("[getAllProducts] Set NEXT_PUBLIC_USE_MEDUSA=true to enable Medusa");
+    }
+  }
+
   if (useMedusa) {
     try {
+      console.log("[getAllProducts] Fetching products from Medusa...");
       const medusaProducts = await getMedusaProducts({ limit: 100 });
       
       if (medusaProducts && medusaProducts.length > 0) {
+        console.log(`[getAllProducts] Successfully fetched ${medusaProducts.length} products from Medusa`);
         return medusaProducts;
       } else {
         console.warn("[getAllProducts] No products returned from Medusa, falling back to local data");
       }
     } catch (error: any) {
       console.error("[getAllProducts] Medusa fetch failed, falling back to local data:", error?.message || error);
+      if (error?.url) {
+        console.error("[getAllProducts] Failed URL:", error.url);
+      }
     }
   }
 
   // Fallback to local data
   try {
+    console.log("[getAllProducts] Attempting to fetch local products...");
     const localProducts = await getLocalProducts();
+    if (localProducts && localProducts.length > 0) {
+      console.log(`[getAllProducts] Fetched ${localProducts.length} products from local data`);
+    } else {
+      console.warn("[getAllProducts] No local products found");
+    }
     return localProducts || [];
   } catch (error) {
     console.error("[getAllProducts] Local data fetch also failed:", error);

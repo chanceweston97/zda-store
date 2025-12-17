@@ -9,7 +9,7 @@ import { isMedusaEnabled } from "./config";
 /**
  * Convert Medusa category to Sanity category format
  */
-function convertMedusaToSanityCategory(medusaCategory: MedusaCategory, allCategories: MedusaCategory[]): any {
+export function convertMedusaToSanityCategory(medusaCategory: MedusaCategory, allCategories: MedusaCategory[]): any {
   // Find parent category if exists
   const parent = medusaCategory.parent_category_id
     ? allCategories.find((c) => c.id === medusaCategory.parent_category_id)

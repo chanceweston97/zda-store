@@ -70,6 +70,15 @@ export const isMedusaEnabled = () => {
   // Check if explicitly enabled via environment variable
   const useMedusa = process.env.NEXT_PUBLIC_USE_MEDUSA === "true";
   
+  // Always log in production to help debug
+  if (typeof window === 'undefined' && (process.env.NODE_ENV === 'production' || process.env.LOG_MEDUSA_FETCH === 'true')) {
+    if (!useMedusa) {
+      console.warn(`[isMedusaEnabled] Medusa is DISABLED because NEXT_PUBLIC_USE_MEDUSA is not set to "true"`);
+      console.warn(`[isMedusaEnabled] Current value: ${process.env.NEXT_PUBLIC_USE_MEDUSA || "not set"}`);
+      console.warn(`[isMedusaEnabled] To enable: Set NEXT_PUBLIC_USE_MEDUSA=true in your environment variables`);
+    }
+  }
+  
   if (!useMedusa) {
     return false;
   }
@@ -79,6 +88,22 @@ export const isMedusaEnabled = () => {
     MEDUSA_BACKEND_URL &&
     MEDUSA_PUBLISHABLE_KEY
   );
+  
+  // Always log config status in production
+  if (typeof window === 'undefined' && (process.env.NODE_ENV === 'production' || process.env.LOG_MEDUSA_FETCH === 'true')) {
+    if (!hasConfig) {
+      console.error(`[isMedusaEnabled] Medusa is enabled but missing required config:`);
+      if (!MEDUSA_BACKEND_URL) {
+        console.error(`[isMedusaEnabled]   - NEXT_PUBLIC_MEDUSA_BACKEND_URL is not set`);
+      }
+      if (!MEDUSA_PUBLISHABLE_KEY) {
+        console.error(`[isMedusaEnabled]   - NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is not set`);
+      }
+    } else {
+      console.log(`[isMedusaEnabled] Medusa is ENABLED and configured`);
+      console.log(`[isMedusaEnabled] Backend URL: ${MEDUSA_BACKEND_URL}`);
+    }
+  }
   
   // Validate config on first check (only log once)
   if (hasConfig && typeof window === 'undefined') {

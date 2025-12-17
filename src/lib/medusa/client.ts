@@ -159,13 +159,9 @@ class MedusaClient {
     region_id?: string;
     fields?: string;
   }): Promise<{ products: MedusaProduct[]; count: number }> {
-    // Use cached region ID if not provided (avoids fetching on every request)
-    let regionId = params?.region_id;
-    
-    if (!regionId) {
-      const cached = await this.getCachedRegionId();
-      regionId = cached || undefined;
-    }
+    // Skip region ID for now - not required for basic product fetching
+    // Region is optional and can be added later if needed for pricing
+    const regionId = params?.region_id;
 
     const queryParams = new URLSearchParams();
     if (params?.limit) queryParams.append("limit", params.limit.toString());
@@ -228,6 +224,8 @@ class MedusaClient {
 
   /**
    * Get cached region ID (avoids fetching on every request)
+   * NOTE: Region fetching is optional - returns null if regions can't be fetched
+   * This allows products to be fetched without region information
    */
   async getCachedRegionId(): Promise<string | null> {
     // Return cached region if still valid
@@ -235,7 +233,8 @@ class MedusaClient {
       return this.cachedRegionId;
     }
 
-    // Fetch and cache region
+    // Try to fetch and cache region, but don't fail if it doesn't work
+    // Regions are optional for basic product fetching
     try {
       const regions = await this.getRegions();
       if (regions.regions && regions.regions.length > 0) {
@@ -244,7 +243,11 @@ class MedusaClient {
         return this.cachedRegionId;
       }
     } catch (error) {
-      console.warn(`[MedusaClient] Could not fetch regions for caching:`, error);
+      // Silently ignore region fetching errors - regions are optional
+      // Products can still be fetched without region information
+      if (process.env.LOG_MEDUSA_FETCH === 'true') {
+        console.warn(`[MedusaClient] Could not fetch regions (optional):`, error);
+      }
     }
     return null;
   }
