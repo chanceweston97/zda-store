@@ -70,6 +70,15 @@ class MedusaClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    
+    // Check if publishable key is set
+    if (!this.publishableKey || this.publishableKey.trim() === '') {
+      console.error(`[MedusaClient] ❌ CRITICAL: Publishable API key is missing!`);
+      console.error(`[MedusaClient] NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || 'NOT SET'}`);
+      console.error(`[MedusaClient] Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY in your .env.local file`);
+      throw new Error('Publishable API key is not configured. Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY in your environment variables.');
+    }
+    
     const headers = {
       "Content-Type": "application/json",
       "x-publishable-api-key": this.publishableKey,
@@ -81,6 +90,7 @@ class MedusaClient {
     if (shouldLog) {
       console.log(`[MedusaClient] Fetching: ${url}`);
       console.log(`[MedusaClient] Base URL: ${this.baseUrl}`);
+      console.log(`[MedusaClient] Publishable Key: ${this.publishableKey.substring(0, 20)}... (${this.publishableKey.length} chars)`);
     }
 
     // CRITICAL: Fail loudly if using localhost in production

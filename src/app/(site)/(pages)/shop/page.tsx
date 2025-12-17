@@ -42,6 +42,7 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
     console.log("[ShopPage] NODE_ENV:", process.env.NODE_ENV);
     console.log("[ShopPage] NEXT_PUBLIC_MEDUSA_BACKEND_URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "NOT SET");
     console.log("[ShopPage] MEDUSA_BACKEND_URL:", process.env.MEDUSA_BACKEND_URL || "NOT SET");
+    console.log("[ShopPage] NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:", process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? `${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.substring(0, 20)}... (${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.length} chars)` : "NOT SET");
     
     // CRITICAL: Check if using localhost in production
     if (process.env.NODE_ENV === 'production' && backendUrl.includes('localhost')) {

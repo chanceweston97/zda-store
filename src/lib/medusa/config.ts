@@ -30,12 +30,19 @@ if (shouldLog) {
   console.log(`[MedusaConfig] Backend URL: ${MEDUSA_BACKEND_URL}`);
   console.log(`[MedusaConfig] NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'not set'}`);
   console.log(`[MedusaConfig] MEDUSA_BACKEND_URL: ${process.env.MEDUSA_BACKEND_URL || 'not set'}`);
+  console.log(`[MedusaConfig] NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? `${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.substring(0, 20)}... (${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.length} chars)` : 'NOT SET'}`);
   
   // Warn if using localhost in production (common mistake)
   if (process.env.NODE_ENV === 'production' && MEDUSA_BACKEND_URL.includes('localhost')) {
     console.error(`[MedusaConfig] ⚠️ WARNING: Using localhost in production! This will fail on the server.`);
     console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL to your server IP`);
     console.error(`[MedusaConfig] Then rebuild: yarn build`);
+  }
+  
+  // Warn if publishable key is missing
+  if (!MEDUSA_PUBLISHABLE_KEY || MEDUSA_PUBLISHABLE_KEY.trim() === '') {
+    console.error(`[MedusaConfig] ❌ CRITICAL: NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is not set!`);
+    console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY in your .env.local file`);
   }
 }
 
