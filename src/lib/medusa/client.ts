@@ -76,17 +76,21 @@ class MedusaClient {
       ...options.headers,
     };
 
-    // Log the URL being fetched (only in development or if env var is set)
-    const shouldLog = process.env.NODE_ENV !== 'production' || process.env.LOG_MEDUSA_FETCH === 'true';
+    // Always log in production to help debug
+    const shouldLog = process.env.NODE_ENV !== 'production' || process.env.LOG_MEDUSA_FETCH === 'true' || true;
     if (shouldLog) {
       console.log(`[MedusaClient] Fetching: ${url}`);
+      console.log(`[MedusaClient] Base URL: ${this.baseUrl}`);
     }
 
-    // Warn if using localhost in production
+    // CRITICAL: Fail loudly if using localhost in production
     if (process.env.NODE_ENV === 'production' && this.baseUrl.includes('localhost')) {
-      console.error(`[MedusaClient] ⚠️ WARNING: Backend URL is localhost in production! This will fail.`);
+      const errorMsg = `[MedusaClient] ❌ CRITICAL: Backend URL is localhost in production! This WILL FAIL.`;
+      console.error(errorMsg);
       console.error(`[MedusaClient] Current backend URL: ${this.baseUrl}`);
-      console.error(`[MedusaClient] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL to your server IP (e.g., http://18.224.229.214:9000)`);
+      console.error(`[MedusaClient] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://18.224.229.214:9000 in .env.local`);
+      console.error(`[MedusaClient] Then rebuild: yarn build`);
+      // Don't throw error, but log it clearly - the fetch will fail anyway
     }
 
     try {

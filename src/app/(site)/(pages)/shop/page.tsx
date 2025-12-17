@@ -33,9 +33,24 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   let allProductsCount = 0;
 
   // Log Medusa configuration for debugging (server-side only)
+  // ALWAYS log in production to help debug
   if (typeof window === 'undefined') {
+    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_BACKEND_URL || "not set";
+    console.log("[ShopPage] ========================================");
     console.log("[ShopPage] Fetching products directly from Medusa backend API");
-    console.log("[ShopPage] Backend URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_BACKEND_URL || "not set");
+    console.log("[ShopPage] Backend URL:", backendUrl);
+    console.log("[ShopPage] NODE_ENV:", process.env.NODE_ENV);
+    console.log("[ShopPage] NEXT_PUBLIC_MEDUSA_BACKEND_URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "NOT SET");
+    console.log("[ShopPage] MEDUSA_BACKEND_URL:", process.env.MEDUSA_BACKEND_URL || "NOT SET");
+    
+    // CRITICAL: Check if using localhost in production
+    if (process.env.NODE_ENV === 'production' && backendUrl.includes('localhost')) {
+      console.error("[ShopPage] ❌❌❌ CRITICAL ERROR: Using localhost in production! ❌❌❌");
+      console.error("[ShopPage] This will FAIL on the server!");
+      console.error("[ShopPage] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://18.224.229.214:9000 in .env.local");
+      console.error("[ShopPage] Then rebuild: yarn build");
+    }
+    console.log("[ShopPage] ========================================");
   }
 
   try {

@@ -3,10 +3,21 @@
  * This file configures the connection to the Medusa backend
  */
 
+// Get backend URL from environment variables
+// IMPORTANT: In production, NEXT_PUBLIC_MEDUSA_BACKEND_URL MUST be set
 const MEDUSA_BACKEND_URL =
   process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ||
   process.env.MEDUSA_BACKEND_URL ||
-  "http://localhost:9000";
+  (process.env.NODE_ENV === 'production' 
+    ? (() => {
+        // In production, throw error if not set (don't fallback to localhost)
+        console.error(`[MedusaConfig] ❌ CRITICAL ERROR: NEXT_PUBLIC_MEDUSA_BACKEND_URL is not set in production!`);
+        console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://18.224.229.214:9000 in your .env.local file`);
+        console.error(`[MedusaConfig] Then rebuild: yarn build`);
+        // Still return localhost as fallback, but log the error
+        return "http://localhost:9000";
+      })()
+    : "http://localhost:9000"); // Only use localhost in development
 
 // Log the configured URL (helps debug server-side issues)
 // Always log in production if LOG_MEDUSA_FETCH is enabled, or in development

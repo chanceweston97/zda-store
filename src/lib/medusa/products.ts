@@ -66,7 +66,7 @@ export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any 
 
   // Convert images - Medusa images are URLs, not Sanity asset references
   // Fix old IP addresses in image URLs
-  const thumbnails = medusaProduct.images?.length > 0
+  const thumbnails = (medusaProduct.images && medusaProduct.images.length > 0)
     ? medusaProduct.images.map((img) => ({
         image: fixImageUrl(img.url), // Fix URL and use it directly
         color: null,
@@ -80,7 +80,7 @@ export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any 
       ]
     : [];
 
-  const previewImages = medusaProduct.images?.length > 0
+  const previewImages = (medusaProduct.images && medusaProduct.images.length > 0)
     ? medusaProduct.images.map((img) => ({
         image: fixImageUrl(img.url),
         color: null,
@@ -99,10 +99,10 @@ export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any 
         id: primaryCategory.id,
         name: primaryCategory.name,
         slug: {
-          current: primaryCategory.handle || primaryCategory.slug?.current || "",
+          current: primaryCategory.handle || (primaryCategory as any).slug?.current || "",
         },
         title: primaryCategory.name,
-        handle: primaryCategory.handle || primaryCategory.slug?.current || "",
+        handle: primaryCategory.handle || (primaryCategory as any).slug?.current || "",
       }
     : undefined;
     
