@@ -38,12 +38,12 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
   ];
   const imageUrl = introductionData?.image
     ? imageBuilder(introductionData.image).url()
-    : "/images/hero/wireless.png";
+    : "/images/hero/Xetawave-1.webp";
 
   return (
     <section className="w-full flex flex-col lg:flex-row justify-between gap-8 lg:gap-7 py-12 lg:pb-0">
       {/* LEFT CONTENT */}
-      <div className="max-w-2xl shrink-0">
+      <div className="max-w-2xl d-flex flex-col justify-center">
         {/* Heading */}
         <h2 
           ref={titleRef.ref}

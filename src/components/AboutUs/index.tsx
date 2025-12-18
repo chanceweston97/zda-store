@@ -13,7 +13,7 @@ export default function AboutUs() {
         <div className="max-w-2xl shrink-0">
           {/* Heading */}
           <h2 className="text-[#2958A4] text-[60px] font-medium leading-[76px] tracking-[-2.4px]">
-            Enabling Wireless Networks Since 2008
+            Enabling Wireless Networks Since 20084
           </h2>
 
           {/* Paragraph */}
@@ -46,7 +46,7 @@ export default function AboutUs() {
         {/* RIGHT IMAGE */}
         <div className="shrink-0 mx-auto lg:mx-0">
           <img
-            src="/images/hero/wireless.png"
+            src="/images/hero/"
             alt="Network intro"
             className="w-[645px] h-[447px] object-contain shrink-0"
           />
