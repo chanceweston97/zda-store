@@ -54,13 +54,13 @@ const DEFAULT_FAQS: FaqItem[] = [
   {
     question: "What is antenna gain and why does it matter?",
     answer:
-      "Antenna gain describes how effectively an antenna focuses energy in a particular direction. Higher gain can improve range and signal quality when properly aligned.",
+      "Gain (dBi) indicates how effectively an antenna focuses energy. Higher gain narrows the beam to improve signal at the point of capture or coverage, useful for long or noisy links.",
     order: 5,
   },
   {
     question: "What is VSWR and what are your typical values?",
     answer:
-      "VSWR (Voltage Standing Wave Ratio) indicates how efficiently power is transferred from the radio to the antenna. Our products are engineered for low VSWR to minimize reflected power.",
+      "VSWR measures impedance match quality. Lower is better. Our antennas are QC-verified to meet ≤ 1.5:1 typical, reducing return loss and protecting connected radios.",
     order: 6,
   },
 ];

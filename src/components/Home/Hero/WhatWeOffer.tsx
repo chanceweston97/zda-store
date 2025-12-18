@@ -37,10 +37,10 @@ export default function WhatWeOffer({ whatWeOfferData }: WhatWeOfferProps) {
     const secondRowRef = useScrollAnimation({ threshold: 0.2 });
     const thirdRowRef = useScrollAnimation({ threshold: 0.2 });
 
-    // Fallback values if no data from Sanity
+    // Fallback values if no data from CMS
     const title = whatWeOfferData?.title || "What We Offer";
     const headerButton = whatWeOfferData?.headerButton || {
-        text: "Explore Productws",
+        text: "Explore Products",
         link: "/shop",
     };
 
@@ -50,31 +50,34 @@ export default function WhatWeOffer({ whatWeOfferData }: WhatWeOfferProps) {
             title: "Antennas",
             tags: ["Yagi", "Omnidirectional", "Grid Parabolic", "Rubber Ducky"],
             description: "Directional and omnidirectional options engineered for reliable coverage—from VHF/UHF to LTE/5G sub-6 GHz. Field-ready builds with verified VSWR for clean links in real-world conditions.",
-            button: { text: "Explore Antennas", link: "/products/antennas" },
-            image: "/images/hero/wireless.png",
+            button: { text: "Explore Antennas", link: "/shop?category=antennas" },
+            image: "/images/hero/what-we-offer/antennas.webp",
             imagePosition: "right" as const,
         },
         {
             title: "Coaxial Cables",
             tags: ["LMR/RG Cables", "Any Length", "Standard Connectors", "Bulk Spools"],
             description: "Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.",
-            button: { text: "Explore Cables", link: "/products/antennas" },
-            image: "/images/hero/wireless.png",
+            button: { text: "Explore Cables", link: "/shop?category=cables" },
+            image: "/images/hero/what-we-offer/cables.webp",
             imagePosition: "left" as const,
         },
         {
             title: "Connectors & Accessories",
             tags: ["Connectors", "Surge Arrestors", "Splitters", "Attenuators"],
             description: "Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.",
-            button: { text: "Explore Accessories", link: "/products/antennas" },
-            image: "/images/hero/wireless.png",
+            button: { text: "Explore Accessories", link: "/shop?category=connectors" },
+            image: "/images/hero/what-we-offer/connectors.webp",
             imagePosition: "right" as const,
         },
     ];
 
     const offerItems = whatWeOfferData?.offerItems?.map((item) => ({
         ...item,
-        image: item.image ? imageBuilder(item.image).url() : "/images/hero/wireless.png",
+        // If image is already a string URL, use it directly; otherwise use imageBuilder
+        image: typeof item.image === 'string' 
+            ? item.image 
+            : (item.image ? imageBuilder(item.image).url() : "/images/hero/wireless.png"),
         imagePosition: item.imagePosition || "right",
     })) || defaultItems;
 

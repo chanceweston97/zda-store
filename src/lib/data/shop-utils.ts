@@ -165,13 +165,137 @@ export async function getOrderById(orderId: string) {
   return null;
 }
 
-export const getHeroBanners = async () => heroBanners;
-export const getHeroSliders = async () => heroBanners; // Alias
-export const getHeroIntroduction = async () => heroIntroduction;
-export const getProudPartners = async () => proudPartners;
-export const getWhatWeOffer = async () => whatWeOffer;
+// Get backend URL for CMS API
+const getBackendUrl = () => {
+  return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
+         process.env.MEDUSA_BACKEND_URL || 
+         "http://localhost:9000";
+};
+
+export const getHeroBanners = async () => {
+  try {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/store/cms`, { next: { revalidate: 60 } });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.heroes && data.heroes.length > 0) {
+        return data.heroes;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching hero banners from Medusa:", error);
+  }
+  return heroBanners;
+};
+
+export const getHeroSliders = async () => await getHeroBanners(); // Alias
+
+export const getHeroIntroduction = async () => {
+  try {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/store/cms`, { next: { revalidate: 60 } });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.instructions) {
+        return data.instructions;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching hero introduction from Medusa:", error);
+  }
+  return heroIntroduction;
+};
+
+export const getProudPartners = async () => {
+  try {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/store/cms`, { next: { revalidate: 60 } });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.proudPartners && data.proudPartners.partners) {
+        // Transform Medusa format to frontend format
+        return {
+          title: data.proudPartners.title || "Proud Partners Of",
+          partners: data.proudPartners.partners.map((p: any) => ({
+            name: p.name,
+            logo: typeof p.logo === 'string' ? p.logo : p.logo,
+          })),
+          isActive: data.proudPartners.is_active,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching proud partners from Medusa:", error);
+  }
+  // Fallback to default partners with local logos
+  return {
+    title: "Proud Partners Of",
+    partners: [
+      { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
+      { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
+      { name: "APS", logo: "/images/hero/partners/aps.svg" },
+      { name: "ABC", logo: "/images/hero/partners/ab.svg" },
+      { name: "Rancho", logo: "/images/hero/partners/rancho.webp" },
+      { name: "Motus", logo: "/images/hero/partners/motus.png" },
+    ],
+    isActive: true,
+  };
+};
+
+export const getWhatWeOffer = async () => {
+  // Try to fetch from Medusa CMS API first
+  try {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/store/cms`, { 
+      next: { revalidate: 60 },
+      cache: 'no-store' // Always fetch fresh data
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.whatWeOffer && data.whatWeOffer.offer_items && data.whatWeOffer.offer_items.length > 0) {
+        // Transform Medusa format to frontend format
+        return {
+          title: data.whatWeOffer.title || "What We Offer",
+          headerButton: {
+            text: data.whatWeOffer.header_button_text || "Explore Products",
+            link: data.whatWeOffer.header_button_link || "/shop",
+          },
+          offerItems: data.whatWeOffer.offer_items.map((item: any) => ({
+            title: item.title,
+            tags: item.tags || [],
+            description: item.description,
+            button: item.button || { text: "Explore", link: "/shop" },
+            image: typeof item.image === 'string' ? item.image : (item.image?.url || "/images/hero/wireless.png"),
+            imagePosition: item.imagePosition || item.image_position || "right",
+          })),
+          isActive: data.whatWeOffer.is_active !== false,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching what we offer from Medusa:", error);
+  }
+  
+  // Fallback to local data
+  return whatWeOffer;
+};
 export const getOurStory = async () => ourStory;
-export const getFaq = async () => ({ items: faqs });
+export const getFaq = async () => {
+  try {
+    const backendUrl = getBackendUrl();
+    const response = await fetch(`${backendUrl}/store/cms`, { next: { revalidate: 60 } });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.faq && data.faq.items) {
+        return { items: data.faq.items };
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching FAQ from Medusa:", error);
+  }
+  return { items: faqs };
+};
 export const getCountdown = async () => countdown;
 
 export async function getCoupons() {

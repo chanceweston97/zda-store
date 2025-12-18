@@ -141,21 +141,22 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
     allProductsCount = 0;
   }
 
-  // Helper function to find category by handle (supports nested search)
-  const findCategoryByHandle = (cats: any[], handle: string): any => {
-    for (const cat of cats) {
+  // OPTIMIZED: Build a map of handle -> category for O(1) lookup instead of recursive search
+  // This is much faster than calling findCategoryByHandle in a loop
+  const categoryMap = new Map<string, any>();
+  const buildCategoryMap = (cats: any[]) => {
+    cats.forEach((cat) => {
       const catHandle = (cat as any).handle || cat.slug?.current || cat.slug;
-      if (catHandle === handle) {
-        return cat;
+      if (catHandle) {
+        categoryMap.set(catHandle, cat);
       }
       const subcats = cat.subcategories || cat.category_children || [];
       if (subcats.length > 0) {
-        const found = findCategoryByHandle(subcats, handle);
-        if (found) return found;
+        buildCategoryMap(subcats);
       }
-    }
-    return null;
+    });
   };
+  buildCategoryMap(categories);
 
   // OPTIMIZED SERVER-SIDE FILTERING: Single pass with efficient data structures
   // This is much faster than multiple filter passes
@@ -166,9 +167,9 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   if (category && allProducts.length > 0) {
     const categoryHandles = category.split(",").filter(Boolean);
     
-    // Get all category IDs including subcategories
+    // Get all category IDs including subcategories using the map (O(1) lookup)
     categoryHandles.forEach((handle) => {
-      const foundCategory = findCategoryByHandle(categories, handle);
+      const foundCategory = categoryMap.get(handle);
       if (foundCategory) {
         const categoryId = foundCategory.id || foundCategory._id;
         if (categoryId) {

@@ -11,11 +11,12 @@ import "swiper/css/free-mode";
 type Brand = { name: string; logo: string };
 
 const defaultBrands: Brand[] = [
-  { name: "Motus", logo: "/images/hero/motus.png" },
-  { name: "Motus", logo: "/images/hero/motus.png" },
-  { name: "Motus", logo: "/images/hero/motus.png" },
-  { name: "Motus", logo: "/images/hero/motus.png" },
-  { name: "Motus", logo: "/images/hero/motus.png" },
+  { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
+  { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
+  { name: "APS", logo: "/images/hero/partners/aps.svg" },
+  { name: "Motus", logo: "/images/hero/partners/motus.svg" },
+  { name: "abc", logo: "/images/hero/partners/abc.png" },
+  { name: "rancho", logo: "/images/hero/partners/rancho.png" },
 ];
 
 interface ProudPartnersData {
@@ -37,11 +38,14 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
   const titleRef = useScrollAnimation({ threshold: 0.2 });
   const carouselRef = useScrollAnimation({ threshold: 0.2 });
 
-  // Fallback values if no data from Sanity
+  // Fallback values if no data from CMS
   const title = partnersData?.title || "Proud Partners Of";
   const partners = partnersData?.partners?.map((partner) => ({
     name: partner.name,
-    logo: partner.logo ? imageBuilder(partner.logo).url() : "/images/hero/motus.png",
+    // If logo is already a string URL, use it directly; otherwise use imageBuilder
+    logo: typeof partner.logo === 'string' 
+      ? partner.logo 
+      : (partner.logo ? imageBuilder(partner.logo).url() : "/images/hero/partners/motus.svg"),
   })) || defaultBrands;
 
   return (

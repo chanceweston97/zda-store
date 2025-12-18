@@ -20,20 +20,21 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   const searchParams = useSearchParams();
 
   // Auto-open categories that have checked subcategories
+  // OPTIMIZED: Only update when category param actually changes, not on every searchParams change
+  const categoryParam = searchParams?.get("category");
   useEffect(() => {
-    const categoryParam = searchParams?.get("category");
     if (categoryParam) {
-      const checkedCategories = categoryParam.split(",");
+      const checkedCategories = new Set(categoryParam.split(",").filter(Boolean));
       const newOpenCategories: Record<string, boolean> = {};
       
       categories.forEach((category) => {
         if (category.subcategories && category.subcategories.length > 0) {
-          // Check if any subcategory is checked
+          // Check if any subcategory is checked (using Set for O(1) lookup)
           const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
           const hasCheckedSubcategory = category.subcategories.some(
             (sub: any) => {
               const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
-              return checkedCategories.includes(subHandle);
+              return checkedCategories.has(subHandle);
             }
           );
           if (hasCheckedSubcategory) {
@@ -42,9 +43,18 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
         }
       });
       
-      setOpenCategories((prev) => ({ ...prev, ...newOpenCategories }));
+      setOpenCategories((prev) => {
+        // Only update if something actually changed
+        const hasChanges = Object.keys(newOpenCategories).some(
+          key => prev[key] !== newOpenCategories[key]
+        );
+        return hasChanges ? { ...prev, ...newOpenCategories } : prev;
+      });
+    } else {
+      // Clear open categories when no category param
+      setOpenCategories({});
     }
-  }, [searchParams, categories]);
+  }, [categoryParam, categories]);
 
   // Calculate product counts per category (like front project)
   // For parent categories: ONLY sum of subcategory counts (not parent's own products)
@@ -166,29 +176,33 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     });
   };
 
-  const isCategoryChecked = (categoryHandle: string) => {
+  // OPTIMIZED: Memoize checked categories set to avoid recreating on every call
+  const checkedCategoriesSet = useMemo(() => {
     const categoryParam = searchParams?.get("category");
-    return categoryParam?.split(",").includes(categoryHandle) || false;
+    return categoryParam ? new Set(categoryParam.split(",").filter(Boolean)) : new Set();
+  }, [searchParams]);
+
+  const isCategoryChecked = (categoryHandle: string) => {
+    return checkedCategoriesSet.has(categoryHandle);
   };
 
   // Check if all subcategories are selected for a parent category
+  // OPTIMIZED: Use the memoized checkedCategoriesSet
   const areAllSubcategoriesChecked = (category: Category) => {
     if (!category.subcategories || category.subcategories.length === 0) {
       return false;
     }
     
-    const categoryParam = searchParams?.get("category");
-    if (!categoryParam) {
+    if (checkedCategoriesSet.size === 0) {
       return false;
     }
     
-    const checkedCategories = categoryParam.split(",");
     const allSubcategoryHandles = category.subcategories.map((sub: any) => 
       (sub as any).handle || sub.slug?.current || sub.slug
     );
     
-    // Check if ALL subcategories are in the checked categories list
-    return allSubcategoryHandles.every((subHandle) => checkedCategories.includes(subHandle));
+    // Check if ALL subcategories are in the checked categories set
+    return allSubcategoryHandles.every((subHandle) => checkedCategoriesSet.has(subHandle));
   };
 
   const getCategoryProductCount = (category: Category) => {
