@@ -77,8 +77,17 @@ jobs:
             # Create PM2 ecosystem config file
             APP_PATH="${{ secrets.APP_PATH }}"
             
-            echo "Creating PM2 ecosystem.config.js..."
-            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "node",\n      args: "~/.corepack/v1/yarn/4.6.0/yarn.js start",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$APP_PATH" > ecosystem.config.js
+            # Find yarn path (prefer corepack, fallback to yarn in PATH)
+            if [ -f "$HOME/.corepack/v1/yarn/4.6.0/yarn.js" ]; then
+              YARN_SCRIPT="node"
+              YARN_ARGS="$HOME/.corepack/v1/yarn/4.6.0/yarn.js start"
+            else
+              YARN_SCRIPT="yarn"
+              YARN_ARGS="start"
+            fi
+            
+            echo "Creating PM2 ecosystem.config.js (script: $YARN_SCRIPT, args: $YARN_ARGS)"
+            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "%s",\n      args: "%s",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$YARN_SCRIPT" "$YARN_ARGS" "$APP_PATH" > ecosystem.config.js
 
             # Restart store via PM2 using ecosystem config
             echo "Starting store with PM2..."
