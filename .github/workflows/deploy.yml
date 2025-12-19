@@ -1,96 +1,58 @@
-name: Deploy Backend to EC2
+name: Deploy Frontend (Store) to EC2
 
 on:
   push:
-    branches: ["main"]   # deploys whenever you push to main
+    branches: ["main"]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Test SSH connection
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          echo "SSH connection successful!"
-          echo "Host: ${{ secrets.EC2_HOST }}"
-          echo "User: ${{ secrets.EC2_USER }}"
-          echo "Current directory: $(pwd)"
-          echo "APP_PATH: ${{ secrets.APP_PATH }}"
+      - name: Copy frontend to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "."
+          target: ${{ secrets.APP_PATH }}
+          strip_components: 0
 
-    - name: Copy files to EC2
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        source: "."
-        target: ${{ secrets.APP_PATH }}
-        strip_components: 0
+      - name: Build & restart frontend on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
 
-    - name: SSH into server and perform deploy commands
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          cd ${{ secrets.APP_PATH }}
-          git pull || true
-          corepack enable || true
-          corepack prepare yarn@4.6.0 --activate || true
-          yarn install --immutable
-          
-          # Set required environment variables BEFORE build
-          BACKEND_URL="http://${{ secrets.EC2_HOST }}:9000"
-          export MEDUSA_BACKEND_URL="$BACKEND_URL"
-          export NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY="${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}"
-          
-          # Create .env.local file for Next.js
-          echo "MEDUSA_BACKEND_URL=$BACKEND_URL" > .env.local
-          echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> .env.local
-          echo "NEXT_PUBLIC_MEDUSA_BACKEND_URL=$BACKEND_URL" >> .env.local
-          
-          # Clear .next directory to remove old cached builds with old IP addresses
-          echo "Clearing .next directory to remove cached builds..."
-          rm -rf .next
-          
-          # Build the application (will use env vars from .env.local and process.env)
-          yarn build
-          
-          # Create PM2 ecosystem file with environment variables
-          cat > ecosystem.config.js << EOF
-          module.exports = {
-            apps: [{
-              name: 'FrontEnd',
-              script: 'yarn',
-              args: 'start',
-              cwd: '${{ secrets.APP_PATH }}',
-              env: {
-                NODE_ENV: 'production',
-                MEDUSA_BACKEND_URL: '$BACKEND_URL',
-                NEXT_PUBLIC_MEDUSA_BACKEND_URL: '$BACKEND_URL',
-                NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: '${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}'
-              }
-            }]
-          };
-          EOF
-          
-          # Restart PM2
-          pm2 delete FrontEnd 2>/dev/null || true
-          pm2 start ecosystem.config.js
-          pm2 save
-          
-          # Show PM2 status and logs
-          pm2 status
-          echo "=== FrontEnd PM2 Logs (last 20 lines) ==="
-          pm2 logs FrontEnd --lines 20 --nostream || true
+            cd ${{ secrets.APP_PATH }}
+
+            # Load Node (NVM)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+            # Ensure Yarn 4.6.0
+            corepack enable
+            corepack prepare yarn@4.6.0 --activate
+
+            # Install deps
+            yarn install --immutable
+
+            # Clean old build
+            rm -rf .next
+
+            # Build (uses .env.production on server)
+            NODE_ENV=production yarn build
+
+            # Restart frontend via PM2
+            pm2 delete FrontEnd || true
+            pm2 start yarn --name FrontEnd -- start
+            pm2 save
+
+            echo "✅ Frontend deployed successfully"

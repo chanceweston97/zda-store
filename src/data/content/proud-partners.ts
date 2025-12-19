@@ -3,7 +3,7 @@ import { ProudPartners } from "../types";
 
 export const proudPartners: ProudPartners = {
   id: "proud-partners-1",
-  title: "Proud Partners Of",
+  title: "Proud Suppliers Of",
   isActive: true,
   partners: [
     { name: "IWT", logo: "/images/hero/partners/iwt.svg" },

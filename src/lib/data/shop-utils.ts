@@ -215,7 +215,7 @@ export const getProudPartners = async () => {
       if (data.proudPartners && data.proudPartners.partners) {
         // Transform Medusa format to frontend format
         return {
-          title: data.proudPartners.title || "Proud Partners Of",
+          title: data.proudPartners.title || "Proud Suppliers Of",
           partners: data.proudPartners.partners.map((p: any) => ({
             name: p.name,
             logo: typeof p.logo === 'string' ? p.logo : p.logo,
@@ -229,7 +229,7 @@ export const getProudPartners = async () => {
   }
   // Fallback to default partners with local logos
   return {
-    title: "Proud Partners Of",
+    title: "Proud Suppliers Of",
     partners: [
       { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
       { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },

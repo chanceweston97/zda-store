@@ -39,7 +39,7 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
   const carouselRef = useScrollAnimation({ threshold: 0.2 });
 
   // Fallback values if no data from CMS
-  const title = partnersData?.title || "Proud Partners Of";
+  const title = partnersData?.title || "Proud Suppliers Of";
   const partners = partnersData?.partners?.map((partner) => ({
     name: partner.name,
     // If logo is already a string URL, use it directly; otherwise use imageBuilder
