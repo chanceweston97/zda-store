@@ -74,9 +74,16 @@ jobs:
             echo "Building application..."
             yarn build
 
-            # Restart frontend via PM2
-            pm2 delete FrontEnd || true
-            pm2 start yarn --name FrontEnd -- start
+            # Create PM2 ecosystem config file
+            APP_PATH="${{ secrets.APP_PATH }}"
+            
+            echo "Creating PM2 ecosystem.config.js..."
+            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "node",\n      args: "~/.corepack/v1/yarn/4.6.0/yarn.js start",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$APP_PATH" > ecosystem.config.js
+
+            # Restart store via PM2 using ecosystem config
+            echo "Starting store with PM2..."
+            pm2 delete store || true
+            pm2 start ecosystem.config.js
             pm2 save
 
-            echo "✅ Frontend deployed successfully"
+            echo "✅ Store deployed successfully"
