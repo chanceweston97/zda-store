@@ -9,7 +9,11 @@ const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_PROJECT_ID as string;
 const algoliaSearchApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY as string;
 const algoliaIndexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX as string;
 
-const algoliaClient = algoliasearch(algoliaAppId, algoliaSearchApiKey);
+// Only initialize Algolia if all required env vars are present
+const isAlgoliaConfigured = algoliaAppId && algoliaSearchApiKey && algoliaIndexName;
+const algoliaClient = isAlgoliaConfigured 
+  ? algoliasearch(algoliaAppId, algoliaSearchApiKey)
+  : null;
 
 const GlobalSearchModal = (props: any) => {
   const { searchModalOpen, setSearchModalOpen, currentFilter } = props;
@@ -50,9 +54,14 @@ const GlobalSearchModal = (props: any) => {
             </button>
 
             <div className="h-auto max-h-[calc(100vh-70px)] overflow-y-auto rounded-b-[15px]">
+              {!isAlgoliaConfigured ? (
+                <div className="p-10 text-center text-gray-500">
+                  <p>Search is not configured. Please set Algolia environment variables.</p>
+                </div>
+              ) : (
               <InstantSearch
                 insights={false}
-                searchClient={algoliaClient}
+                searchClient={algoliaClient!}
                 indexName={algoliaIndexName}
               >
                 <SearchBox
@@ -87,6 +96,7 @@ const GlobalSearchModal = (props: any) => {
                   </div>
                 </div>
               </InstantSearch>
+              )}
             </div>
           </div>
         </div>

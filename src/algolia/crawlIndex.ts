@@ -5,8 +5,10 @@ const appID = process.env.NEXT_PUBLIC_ALGOLIA_PROJECT_ID ?? "";
 const apiKEY = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY ?? "";
 const INDEX = process.env.NEXT_PUBLIC_ALGOLIA_INDEX ?? "";
 
-const client = algoliasearch(appID, apiKEY);
-const index = client.initIndex(INDEX);
+// Only initialize Algolia if all required env vars are present
+const isAlgoliaConfigured = appID && apiKEY && INDEX;
+const client = isAlgoliaConfigured ? algoliasearch(appID, apiKEY) : null;
+const index = isAlgoliaConfigured && client ? client.initIndex(INDEX) : null;
 
 export const structuredAlgoliaHtmlData = async ({
   pageUrl = "",
@@ -66,6 +68,10 @@ export const structuredAlgoliaHtmlData = async ({
 };
 
 async function addToAlgolia(record: any) {
+  if (!index) {
+    console.warn("Algolia is not configured. Skipping index update. Set NEXT_PUBLIC_ALGOLIA_PROJECT_ID, NEXT_PUBLIC_ALGOLIA_API_KEY, and NEXT_PUBLIC_ALGOLIA_INDEX environment variables.");
+    return;
+  }
   try {
     await index.saveObject(record, {
       autoGenerateObjectIDIfNotExist: true,
@@ -77,6 +83,10 @@ async function addToAlgolia(record: any) {
 }
 
 export const updateIndex = async (data: any) => {
+  if (!index) {
+    console.warn("Algolia is not configured. Skipping index update. Set NEXT_PUBLIC_ALGOLIA_PROJECT_ID, NEXT_PUBLIC_ALGOLIA_API_KEY, and NEXT_PUBLIC_ALGOLIA_INDEX environment variables.");
+    return;
+  }
   try {
     await index.partialUpdateObject(data);
   } catch (error) {

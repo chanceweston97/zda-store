@@ -53,6 +53,16 @@ const nextConfig = {
         hostname: 'localhost',
         port: '9000',
       },
+      {
+        protocol: 'https',
+        hostname: 'admin.zdacomm.com',
+        port: '',
+      },
+      {
+        protocol: 'http',
+        hostname: '18.191.243.236',
+        port: '9000',
+      },
     ],
   },
 };
