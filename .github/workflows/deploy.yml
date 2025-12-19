@@ -33,21 +33,31 @@ jobs:
 
             cd ${{ secrets.APP_PATH }}
 
-            # Load Node (NVM)
+            # Load shell environment (for yarn/node paths)
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc" || true
+            [ -s "$HOME/.profile" ] && . "$HOME/.profile" || true
 
-            # Ensure Yarn 4.6.0
-            corepack enable
-            corepack prepare yarn@4.6.0 --activate
+            # Ensure yarn is in PATH
+            if ! command -v yarn &> /dev/null; then
+              # Try common yarn locations
+              if [ -f "$HOME/.yarn/bin/yarn" ]; then
+                export PATH="$HOME/.yarn/bin:$PATH"
+              elif [ -f "/usr/local/bin/yarn" ]; then
+                export PATH="/usr/local/bin:$PATH"
+              fi
+            fi
 
-            # Install deps
+            echo "Installing dependencies..."
+            echo "Yarn path: $(which yarn || echo 'not found')"
             yarn install --immutable
 
             # Clean old build
             rm -rf .next
 
             # Build (uses .env.production on server)
+            echo "Building application..."
             NODE_ENV=production yarn build
 
             # Restart frontend via PM2
