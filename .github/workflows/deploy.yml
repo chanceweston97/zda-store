@@ -56,9 +56,23 @@ jobs:
             # Clean old build
             rm -rf .next
 
-            # Build (uses .env.production on server)
+            # Load environment variables from .env.production if it exists
+            # This is required for Next.js build (e.g., STRIPE_SECRET_KEY)
+            if [ -f ".env.production" ]; then
+              echo "Loading environment variables from .env.production..."
+              set -a
+              source .env.production
+              set +a
+            else
+              echo "⚠️  Warning: .env.production not found. Build may fail if required env vars are missing."
+            fi
+
+            # Set environment variables before build (Next.js reads these during build)
+            export NODE_ENV=production
+
+            # Build application
             echo "Building application..."
-            NODE_ENV=production yarn build
+            yarn build
 
             # Restart frontend via PM2
             pm2 delete FrontEnd || true
