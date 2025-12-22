@@ -636,25 +636,26 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
             {/* LEFT: GALLERY */}
             <div className="w-full lg:w-1/2">
-              <div className="lg:min-h-[512px] rounded-lg border border-gray-3 p-4 sm:p-7.5 relative flex items-center justify-center">
-                <div>
-                  <button
-                    onClick={handlePreviewSlider}
-                    aria-label="button for zoom"
-                    className="gallery__Image w-11 h-11 rounded-full bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-[#2958A4] absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
-                  >
-                    <FullScreenIcon className="w-6 h-6" />
-                  </button>
+              <div className="relative min-h-[400px] lg:min-h-[512px] rounded-lg border border-gray-3 flex items-center justify-center">
+                <button
+                  onClick={handlePreviewSlider}
+                  aria-label="button for zoom"
+                  className="gallery__Image w-11 h-11 rounded-full bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-[#2958A4] absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
+                >
+                  <FullScreenIcon className="w-6 h-6" />
+                </button>
 
-                  {mainImageUrl && (
+                {mainImageUrl && (
+                  <div className="relative w-full lg:h-[512px] rounded-lg overflow-hidden">
                     <Image
                       src={mainImageUrl}
                       alt={product.name}
-                      width={400}
-                      height={400}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                     />
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
