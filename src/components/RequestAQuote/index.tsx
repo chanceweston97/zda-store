@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FaqSection from "../Home/Faq";
 import Newsletter from "../Common/Newsletter";
+import { medusaConfig } from "@/lib/medusa/config";
 
 type QuoteForm = {
     firstName: string;
@@ -54,7 +55,9 @@ export default function RequestAQuote({
         };
         
         try {
-            const response = await fetch("/api/quote-request", {
+            // Call backend API
+            const backendUrl = medusaConfig.backendUrl;
+            const response = await fetch(`${backendUrl}/store/quote-request`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

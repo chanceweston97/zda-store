@@ -47,12 +47,23 @@ async function getAccessToken(): Promise<string> {
 
     if (!response.ok) {
       const errorText = await response.text();
+      let errorDetails;
+      try {
+        errorDetails = JSON.parse(errorText);
+      } catch {
+        errorDetails = { error_description: errorText };
+      }
+      
       console.error("❌ Failed to get access token:", {
         status: response.status,
         statusText: response.statusText,
-        error: errorText,
+        error: errorDetails,
+        errorDescription: errorDetails.error_description || errorDetails.error || errorText,
+        hint: errorDetails.error_codes ? `Error codes: ${errorDetails.error_codes.join(", ")}` : undefined,
       });
-      throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
+      
+      const errorMessage = errorDetails.error_description || errorDetails.error || `Failed to get access token: ${response.status} ${response.statusText}`;
+      throw new Error(errorMessage);
     }
 
     const tokenData = await response.json();
@@ -151,7 +162,7 @@ export const sendEmail = async (data: EmailPayload) => {
         errorData = JSON.parse(errorText);
       } catch {
         errorData = { message: errorText || "Unknown error" };
-      }
+  }
 
       console.error("❌ Failed to send email via Microsoft Graph API:", {
         status: response.status,

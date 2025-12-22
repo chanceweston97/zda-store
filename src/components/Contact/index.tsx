@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { medusaConfig } from "@/lib/medusa/config";
 
 type ContactForm = {
   firstName: string;
@@ -27,7 +28,9 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch("/api/quote-request", {
+      // Call backend API
+      const backendUrl = medusaConfig.backendUrl;
+      const response = await fetch(`${backendUrl}/store/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
