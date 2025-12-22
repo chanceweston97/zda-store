@@ -48,13 +48,25 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
       },
       body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
     })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((err) => {
-            const errorMsg = err.error || "Failed to create payment intent";
-            console.error("Payment intent API error:", errorMsg, err);
-            throw new Error(errorMsg);
+      .then(async (res) => {
+        // Check content type to handle HTML error pages (404, 500, etc.)
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          console.error("Payment intent API returned non-JSON response:", {
+            status: res.status,
+            statusText: res.statusText,
+            contentType,
+            bodyPreview: text.substring(0, 200),
           });
+          throw new Error(`Server error (${res.status}): API endpoint returned ${contentType || 'unknown content type'} instead of JSON. Please check server logs.`);
+        }
+
+        if (!res.ok) {
+          const err = await res.json();
+          const errorMsg = err.error || "Failed to create payment intent";
+          console.error("Payment intent API error:", errorMsg, err);
+          throw new Error(errorMsg);
         }
         return res.json();
       })

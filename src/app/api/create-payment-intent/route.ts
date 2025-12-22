@@ -1,8 +1,26 @@
-import { stripe } from "@/lib/stripe";
+import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      console.error("STRIPE_SECRET_KEY is not configured");
+      return NextResponse.json(
+        { 
+          error: "Payment service is not configured. Please contact support.",
+          details: "missing_stripe_key"
+        },
+        { status: 500 }
+      );
+    }
+
+    // Initialize Stripe instance
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: "2023-10-16",
+    });
+
     const { amount } = await request.json();
 
     // Validate amount
