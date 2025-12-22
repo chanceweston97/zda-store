@@ -19,22 +19,46 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Auto-open categories that have checked subcategories
-  // OPTIMIZED: Only update when category param actually changes, not on every searchParams change
+  // ✅ INSTANT UI: Local state for selected categories (updates immediately)
   const categoryParam = searchParams?.get("category");
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(() => {
+    return categoryParam ? new Set(categoryParam.split(",").filter(Boolean)) : new Set();
+  });
+
+  // Sync local state with URL params (only when URL changes from outside)
   useEffect(() => {
     if (categoryParam) {
-      const checkedCategories = new Set(categoryParam.split(",").filter(Boolean));
+      const urlCategories = new Set(categoryParam.split(",").filter(Boolean));
+      setSelectedCategories((prev) => {
+        // Only update if different (prevents unnecessary re-renders)
+        if (urlCategories.size !== prev.size || 
+            ![...urlCategories].every(cat => prev.has(cat))) {
+          return urlCategories;
+        }
+        return prev;
+      });
+    } else {
+      setSelectedCategories((prev) => {
+        if (prev.size > 0) {
+          return new Set();
+        }
+        return prev;
+      });
+    }
+  }, [categoryParam]);
+
+  // Auto-open categories that have checked subcategories
+  useEffect(() => {
+    if (selectedCategories.size > 0) {
       const newOpenCategories: Record<string, boolean> = {};
       
       categories.forEach((category) => {
         if (category.subcategories && category.subcategories.length > 0) {
-          // Check if any subcategory is checked (using Set for O(1) lookup)
           const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
           const hasCheckedSubcategory = category.subcategories.some(
             (sub: any) => {
               const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
-              return checkedCategories.has(subHandle);
+              return selectedCategories.has(subHandle);
             }
           );
           if (hasCheckedSubcategory) {
@@ -44,17 +68,15 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       });
       
       setOpenCategories((prev) => {
-        // Only update if something actually changed
         const hasChanges = Object.keys(newOpenCategories).some(
           key => prev[key] !== newOpenCategories[key]
         );
         return hasChanges ? { ...prev, ...newOpenCategories } : prev;
       });
     } else {
-      // Clear open categories when no category param
       setOpenCategories({});
     }
-  }, [categoryParam, categories]);
+  }, [selectedCategories, categories]);
 
   // Calculate product counts per category (like front project)
   // For parent categories: ONLY sum of subcategory counts (not parent's own products)
@@ -117,16 +139,27 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   };
 
   const handleCategory = (categoryHandle: string, isChecked: boolean) => {
-    const params = new URLSearchParams(searchParams?.toString() || "");
-    const categoryParam = params.get("category");
+    // ✅ INSTANT UI: Update local state immediately (checkbox appears checked instantly)
+    setSelectedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (isChecked) {
+        newSet.add(categoryHandle);
+      } else {
+        newSet.delete(categoryHandle);
+      }
+      return newSet;
+    });
 
+    // ✅ OPTIMISTIC UPDATE: Update URL in background (non-blocking)
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    
     if (isChecked) {
-      const existingCategories = categoryParam ? categoryParam.split(",").filter(Boolean) : [];
+      const existingCategories = params.get("category")?.split(",").filter(Boolean) || [];
       if (!existingCategories.includes(categoryHandle)) {
         params.set("category", [...existingCategories, categoryHandle].join(","));
       }
     } else {
-      const existingCategories = categoryParam?.split(",").filter(Boolean) || [];
+      const existingCategories = params.get("category")?.split(",").filter(Boolean) || [];
       const newCategories = existingCategories.filter((id) => id !== categoryHandle);
 
       if (newCategories.length > 0) {
@@ -136,7 +169,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       }
     }
 
-    // Use startTransition for non-blocking update - UI updates instantly via client-side filtering
+    // Use startTransition for non-blocking URL update
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     });
@@ -144,22 +177,30 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
 
   // Handle parent category click - toggle all subcategories at once
   const handleParentCategory = (subcategories: Category[], isChecked: boolean) => {
+    // ✅ INSTANT UI: Update local state immediately
+    const subcategoryHandles = subcategories.map((sub: any) => 
+      (sub as any).handle || sub.slug?.current || sub.slug
+    );
+    
+    setSelectedCategories((prev) => {
+      const newSet = new Set(prev);
+      if (isChecked) {
+        subcategoryHandles.forEach(handle => newSet.add(handle));
+      } else {
+        subcategoryHandles.forEach(handle => newSet.delete(handle));
+      }
+      return newSet;
+    });
+
+    // ✅ OPTIMISTIC UPDATE: Update URL in background
     const params = new URLSearchParams(searchParams?.toString() || "");
     const categoryParam = params.get("category");
 
     if (isChecked) {
-      // Add all subcategories
-      const subcategoryHandles = subcategories.map((sub: any) => 
-        (sub as any).handle || sub.slug?.current || sub.slug
-      );
       const existingCategories = categoryParam ? categoryParam.split(",").filter(Boolean) : [];
       const newCategories = [...new Set([...existingCategories, ...subcategoryHandles])];
       params.set("category", newCategories.join(","));
     } else {
-      // Remove all subcategories
-      const subcategoryHandles = subcategories.map((sub: any) => 
-        (sub as any).handle || sub.slug?.current || sub.slug
-      );
       const existingCategories = categoryParam?.split(",").filter(Boolean) || [];
       const newCategories = existingCategories.filter((id) => !subcategoryHandles.includes(id));
 
@@ -170,30 +211,23 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       }
     }
 
-    // Use startTransition for non-blocking update - UI updates instantly via client-side filtering
     startTransition(() => {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     });
   };
 
-  // OPTIMIZED: Memoize checked categories set to avoid recreating on every call
-  const checkedCategoriesSet = useMemo(() => {
-    const categoryParam = searchParams?.get("category");
-    return categoryParam ? new Set(categoryParam.split(",").filter(Boolean)) : new Set();
-  }, [searchParams]);
-
+  // ✅ Use local state for instant UI feedback
   const isCategoryChecked = (categoryHandle: string) => {
-    return checkedCategoriesSet.has(categoryHandle);
+    return selectedCategories.has(categoryHandle);
   };
 
   // Check if all subcategories are selected for a parent category
-  // OPTIMIZED: Use the memoized checkedCategoriesSet
   const areAllSubcategoriesChecked = (category: Category) => {
     if (!category.subcategories || category.subcategories.length === 0) {
       return false;
     }
     
-    if (checkedCategoriesSet.size === 0) {
+    if (selectedCategories.size === 0) {
       return false;
     }
     
@@ -201,8 +235,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       (sub as any).handle || sub.slug?.current || sub.slug
     );
     
-    // Check if ALL subcategories are in the checked categories set
-    return allSubcategoryHandles.every((subHandle) => checkedCategoriesSet.has(subHandle));
+    return allSubcategoryHandles.every((subHandle) => selectedCategories.has(subHandle));
   };
 
   const getCategoryProductCount = (category: Category) => {

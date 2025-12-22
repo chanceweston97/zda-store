@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import CategoryDropdown from "./CategoryDropdown";
@@ -42,10 +42,15 @@ const ShopWithSidebar = ({ data }: PropsType) => {
   // SERVER-SIDE FILTERING: Products are already filtered on the server (page.tsx)
   // All filtering (category, size, price, sort) is done on the server for optimal performance
 
-  // Reset to page 1 when filters change (triggers server-side re-filter via URL params)
+  // ✅ OPTIMIZED: Only reset pagination when category changes, not on every searchParams change
+  // This prevents unnecessary re-renders when only page number or sort changes
+  const categoryParam = searchParams.get("category");
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchParams]);
+    // Only reset if category actually changed (not on page/sort changes)
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [categoryParam]); // Only depend on category, not all searchParams
 
   const availableSizes = useMemo(() => {
     const sizes = allProducts.flatMap((product) => product.sizes || []);
@@ -111,16 +116,13 @@ const ShopWithSidebar = ({ data }: PropsType) => {
                 {/* filter box */}
                 <ClearFilters />
 
-                <Suspense>
-                  <CategoryDropdown categories={categories} allProducts={allProducts} />
-                </Suspense>
+                {/* ✅ REMOVED Suspense: Filters don't need Suspense, it adds delay */}
+                <CategoryDropdown categories={categories} allProducts={allProducts} />
 
                 {/* gender box */}
                 {/* <GenderDropdown genders={genders} /> */}
 
-                <Suspense>
-                  <SizeDropdown availableSizes={availableSizes} />
-                </Suspense>
+                <SizeDropdown availableSizes={availableSizes} />
               </div>
             </div>
             {/* Sidebar End */}

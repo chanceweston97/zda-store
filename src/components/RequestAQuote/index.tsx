@@ -57,10 +57,19 @@ export default function RequestAQuote({
         try {
             // Call backend API
             const backendUrl = medusaConfig.backendUrl;
+            const publishableKey = medusaConfig.publishableKey;
+            
+            if (!publishableKey) {
+                setIsSubmitting(false);
+                toast.error("API configuration error. Please refresh the page and try again.");
+                return;
+            }
+            
             const response = await fetch(`${backendUrl}/store/quote-request`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "x-publishable-api-key": publishableKey,
                 },
                 body: JSON.stringify(submitData),
             });

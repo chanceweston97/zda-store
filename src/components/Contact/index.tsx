@@ -30,15 +30,34 @@ export default function Contact() {
     try {
       // Call backend API
       const backendUrl = medusaConfig.backendUrl;
+      const publishableKey = medusaConfig.publishableKey;
+      
+      if (!publishableKey) {
+        setIsSubmitting(false);
+        toast.error("API configuration error. Please refresh the page and try again.");
+        return;
+      }
+      
       const response = await fetch(`${backendUrl}/store/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-publishable-api-key": publishableKey,
         },
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        // If response is not JSON, get text instead
+        const errorText = await response.text();
+        setIsSubmitting(false);
+        console.error("Failed to parse response:", errorText);
+        toast.error("Server error: " + (errorText || "Invalid response format"));
+        return;
+      }
 
       if (response.ok) {
         // Check if email was sent successfully
@@ -57,7 +76,20 @@ export default function Contact() {
         router.push("/mail-success");
       } else {
         setIsSubmitting(false);
-        toast.error(result.message || "Failed to submit your message. Please try again.");
+        // Show more detailed error message if available
+        let errorMessage = result.message || "Failed to submit your message. Please try again.";
+        
+        if (result.emailStatus?.error) {
+          errorMessage = `${errorMessage}\n\nError: ${result.emailStatus.error}`;
+          console.error("Contact form error details:", {
+            message: result.message,
+            emailStatus: result.emailStatus,
+            fullResponse: result
+          });
+        }
+        
+        toast.error(errorMessage);
+        console.error("Contact form error response:", result);
       }
     } catch (error: any) {
       setIsSubmitting(false);
