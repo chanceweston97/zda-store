@@ -269,7 +269,7 @@ export default function Description({ product, metadata }: Props) {
                                     </div>
                                     {/* Features and Applications from admin panel (metadata) */}
                                     {(features || applications) && (
-                                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
                                             {/* FEATURES */}
                                             {features && (
                                                 <div className="col-span-1">
