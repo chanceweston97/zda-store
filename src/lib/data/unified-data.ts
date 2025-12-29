@@ -34,7 +34,8 @@ export async function getAllProducts() {
       if (wcProducts && wcProducts.length > 0) {
         // Filter out hidden products (already filtered in getProducts, but double-check)
         const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
-        const converted = visibleProducts.map(convertWCToSanityProduct);
+        // Convert products (now async to fetch variations)
+        const converted = await Promise.all(visibleProducts.map(convertWCToSanityProduct));
         console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         return converted;
       } else {
@@ -100,8 +101,10 @@ export async function getProductBySlug(slug: string) {
           console.log(`[getProductBySlug] Product ${slug} is hidden, skipping`);
           throw new Error("Product is hidden");
         }
-        const converted = convertWCToSanityProduct(wcProduct);
-        console.log(`[getProductBySlug] Successfully fetched product from WooCommerce: ${slug}`);
+        // Use convertWCToSanityProductWithVariations for PDP to get full variant details
+        const { convertWCToSanityProductWithVariations } = await import("@/lib/woocommerce/products");
+        const converted = await convertWCToSanityProductWithVariations(wcProduct);
+        console.log(`[getProductBySlug] Successfully fetched product with variations from WooCommerce: ${slug}`);
         return converted;
       }
     } catch (error) {

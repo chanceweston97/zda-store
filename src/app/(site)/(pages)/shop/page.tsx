@@ -66,8 +66,9 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
         if (wcProducts && wcProducts.length > 0) {
           // Filter out hidden products (already filtered in getProducts, but double-check here)
           const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
-          allProducts = visibleProducts.map(convertWCToSanityProduct);
-          allProductsCount = visibleProducts.length;
+          // Convert products (now async to fetch variations)
+          allProducts = await Promise.all(visibleProducts.map(convertWCToSanityProduct));
+          allProductsCount = allProducts.length;
           console.log(`[ShopPage] Successfully fetched ${allProducts.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         } else {
           console.warn("[ShopPage] No products in WooCommerce");

@@ -119,6 +119,190 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
 }
 
 /**
+ * Convert WooCommerce product with full variation details
+ * This is used for PDP where we need complete variant information
+ */
+export async function convertWCToSanityProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
+  console.log(`[convertWCToSanityProductWithVariations] Starting conversion for product ${wcProduct.id}`);
+  console.log(`[convertWCToSanityProductWithVariations] Product has ${wcProduct.variations?.length || 0} variations`);
+  
+  // First do the basic conversion
+  const baseProduct = await convertWCToSanityProduct(wcProduct);
+  
+  // If product has variations, fetch full variation details
+  if (wcProduct.variations && wcProduct.variations.length > 0) {
+    try {
+      console.log(`[convertWCToSanityProductWithVariations] Fetching variations for product ${wcProduct.id}...`);
+      const variations = await getProductVariations(wcProduct.id);
+      console.log(`[convertWCToSanityProductWithVariations] Fetched ${variations.length} variations:`, JSON.stringify(variations, null, 2));
+      
+      // Update variants with full variation data
+      const fullVariants = variations.map((variation: any) => {
+        const variationPrice = parseFloat(variation.price || variation.regular_price || variation.sale_price || "0");
+        
+        // Build variant title from attributes (e.g., "Color: Red, Size: Large" or "Gain: 8dBi")
+        let variantTitle = wcProduct.name;
+        if (variation.attributes && Array.isArray(variation.attributes) && variation.attributes.length > 0) {
+          const attributeStrings = variation.attributes
+            .filter((attr: any) => attr.name && attr.option)
+            .map((attr: any) => `${attr.name}: ${attr.option}`);
+          if (attributeStrings.length > 0) {
+            variantTitle = attributeStrings.join(", ");
+          }
+        } else if (variation.name && variation.name !== wcProduct.name) {
+          variantTitle = variation.name;
+        }
+        
+        // Extract gain value for sorting (e.g., "Gain: 8dBi" -> 8, or "8dBi" -> 8)
+        let gainValue = 0;
+        const gainMatch = variantTitle.match(/(\d+(?:\.\d+)?)\s*dBi/i);
+        if (gainMatch) {
+          gainValue = parseFloat(gainMatch[1]);
+        } else if (variation.attributes && Array.isArray(variation.attributes)) {
+          // Try to extract from attributes
+          const gainAttr = variation.attributes.find((attr: any) => 
+            attr.name?.toLowerCase() === 'gain' || attr.slug?.toLowerCase() === 'gain'
+          );
+          if (gainAttr?.option) {
+            const match = gainAttr.option.match(/(\d+(?:\.\d+)?)/);
+            if (match) gainValue = parseFloat(match[1]);
+          }
+        }
+        
+        const variant = {
+          id: variation.id.toString(),
+          title: variantTitle,
+          sku: variation.sku || "",
+          price: variationPrice, // In dollars
+          calculated_price: {
+            calculated_amount: variationPrice * 100, // Convert to cents
+            currency_code: "USD",
+          },
+          inventory_quantity: variation.stock_quantity || 0,
+          options: variation.attributes || [],
+          gainValue: gainValue, // Store gain value for sorting
+          menu_order: variation.menu_order || 0, // Store menu_order as fallback
+          metadata: {
+            ...baseProduct.metadata,
+            variation_id: variation.id,
+            variation_attributes: variation.attributes,
+          },
+        };
+        console.log(`[convertWCToSanityProductWithVariations] Variant ${variant.id}:`, {
+          title: variant.title,
+          price: variant.price,
+          calculated_amount: variant.calculated_price.calculated_amount,
+          gainValue: gainValue,
+          menu_order: variation.menu_order,
+          attributes: variation.attributes,
+        });
+        return variant;
+      });
+      
+      // Sort variants by gain value (smallest to largest), then by menu_order as fallback
+      fullVariants.sort((a: any, b: any) => {
+        // If both have gain values, sort by gain
+        if (a.gainValue > 0 && b.gainValue > 0) {
+          return a.gainValue - b.gainValue;
+        }
+        // If only one has gain value, prioritize it
+        if (a.gainValue > 0 && b.gainValue === 0) return -1;
+        if (a.gainValue === 0 && b.gainValue > 0) return 1;
+        // Fallback to menu_order
+        return (a.menu_order || 0) - (b.menu_order || 0);
+      });
+      
+      console.log(`[convertWCToSanityProductWithVariations] Sorted variants by gain value:`, 
+        fullVariants.map((v: any) => ({ id: v.id, title: v.title, gainValue: v.gainValue }))
+      );
+      
+      // Replace placeholder variants with full variant data
+      baseProduct.variants = fullVariants;
+      
+      console.log(`[convertWCToSanityProductWithVariations] Successfully converted ${fullVariants.length} variations for product ${wcProduct.id}`);
+      console.log(`[convertWCToSanityProductWithVariations] Final product variants:`, JSON.stringify(fullVariants, null, 2));
+    } catch (error) {
+      console.error(`[convertWCToSanityProductWithVariations] Error fetching variations:`, error);
+      // Keep the placeholder variants if fetch fails
+    }
+  }
+  
+  console.log(`[convertWCToSanityProductWithVariations] Final product:`, {
+    id: baseProduct._id,
+    name: baseProduct.name,
+    shortDescription: baseProduct.shortDescription,
+    variantsCount: baseProduct.variants?.length || 0,
+  });
+  
+  return baseProduct;
+}
+
+/**
+ * Resolve WordPress media ID to URL
+ * WordPress REST API endpoint: /wp-json/wp/v2/media/{id}
+ */
+async function resolveMediaId(mediaId: number | string | null | undefined): Promise<string | null> {
+  if (!mediaId) return null;
+  
+  // If it's already a URL, return it
+  if (typeof mediaId === 'string' && (mediaId.startsWith('http://') || mediaId.startsWith('https://'))) {
+    return mediaId;
+  }
+  
+  // If it's not a number, return null
+  const id = typeof mediaId === 'string' ? parseInt(mediaId, 10) : mediaId;
+  if (isNaN(id) || id <= 0) {
+    return null;
+  }
+  
+  try {
+    const WC_SITE_URL = process.env.NEXT_PUBLIC_WC_SITE_URL || "";
+    if (!WC_SITE_URL) {
+      console.warn(`[resolveMediaId] WC_SITE_URL not configured, cannot resolve media ID ${id}`);
+      return null;
+    }
+    
+    // WordPress REST API endpoint for media
+    const mediaUrl = `${WC_SITE_URL}/wp-json/wp/v2/media/${id}`;
+    
+    const response = await fetch(mediaUrl);
+    if (!response.ok) {
+      console.warn(`[resolveMediaId] Failed to fetch media ${id}: ${response.status} ${response.statusText}`);
+      return null;
+    }
+    
+    const mediaData = await response.json();
+    // WordPress media object has 'source_url' field
+    const url = mediaData.source_url || mediaData.guid?.rendered || null;
+    
+    if (url) {
+      console.log(`[resolveMediaId] Resolved media ID ${id} to URL: ${url}`);
+    } else {
+      console.warn(`[resolveMediaId] Media ${id} has no source_url or guid`);
+    }
+    
+    return url;
+  } catch (error) {
+    console.error(`[resolveMediaId] Error resolving media ID ${id}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get product variations for a specific product
+ */
+export async function getProductVariations(productId: number): Promise<any[]> {
+  try {
+    // WC_API_URL already includes /wp-json/wc/v3, so just use /products/{id}/variations
+    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`);
+    return variations || [];
+  } catch (error) {
+    console.error(`[getProductVariations] Error fetching variations for product ${productId}:`, error);
+    return [];
+  }
+}
+
+/**
  * Get product categories
  */
 export async function getCategories(): Promise<Array<{
@@ -144,7 +328,7 @@ export async function getCategories(): Promise<Array<{
  * Convert WooCommerce product to Sanity/Medusa format for compatibility
  * This matches the format expected by the shop page components
  */
-export function convertWCToSanityProduct(wcProduct: WooCommerceProduct): any {
+export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
@@ -215,28 +399,105 @@ export function convertWCToSanityProduct(wcProduct: WooCommerceProduct): any {
     : (Array.isArray(metadataObj.applications) ? metadataObj.applications.join('\n') : null);
 
   const specifications = metadataObj.specifications || null;
-  const subtitle = stripHTML(metadataObj.subtitle || metadataObj.shortDescription || wcProduct.short_description || ""); // Strip HTML from subtitle
+  // Use subtitle from metadata as shortDescription (priority: subtitle > shortDescription > short_description)
+  const subtitle = stripHTML(metadataObj.subtitle || metadataObj.shortDescription || wcProduct.short_description || "");
   const featureTitle = metadataObj.featureTitle ? stripHTML(metadataObj.featureTitle) : null; // Strip HTML from featureTitle
-  const datasheetImage = metadataObj.datasheetImage || null;
-  const datasheetPdf = metadataObj.datasheetPdf || null;
+  
+  // Get datasheet fields - they might be IDs (numbers) or URLs (strings)
+  // Check ACF fields first (they might be in acf object or directly in metadata)
+  const datasheetImageRaw = metadataObj.datasheetImage || 
+                            metadataObj.datasheet_image || 
+                            metadataObj._datasheet_image ||
+                            (wcProduct as any).acf?.datasheet_image ||
+                            null;
+  const datasheetPdfRaw = metadataObj.datasheetPdf || 
+                          metadataObj.datasheet_pdf || 
+                          metadataObj._datasheet_pdf ||
+                          (wcProduct as any).acf?.datasheet_pdf ||
+                          null;
+  
+  // Resolve media IDs to URLs if needed
+  // If the value is a number or numeric string, it's likely a media ID
+  const isMediaId = (value: any): boolean => {
+    if (!value) return false;
+    if (typeof value === 'number') return true;
+    if (typeof value === 'string') {
+      // Check if it's a numeric string (not a URL)
+      const num = parseInt(value, 10);
+      return !isNaN(num) && num > 0 && !value.startsWith('http');
+    }
+    return false;
+  };
+  
+  // Resolve datasheet image
+  let datasheetImage: string | null = null;
+  if (datasheetImageRaw) {
+    if (isMediaId(datasheetImageRaw)) {
+      datasheetImage = await resolveMediaId(datasheetImageRaw);
+    } else if (typeof datasheetImageRaw === 'string') {
+      datasheetImage = datasheetImageRaw;
+    }
+  }
+  
+  // Resolve datasheet PDF
+  let datasheetPdf: string | null = null;
+  if (datasheetPdfRaw) {
+    if (isMediaId(datasheetPdfRaw)) {
+      datasheetPdf = await resolveMediaId(datasheetPdfRaw);
+    } else if (typeof datasheetPdfRaw === 'string') {
+      datasheetPdf = datasheetPdfRaw;
+    }
+  }
+  
+  console.log(`[convertWCToSanityProduct] Datasheet fields for product ${wcProduct.id}:`, {
+    imageRaw: datasheetImageRaw,
+    imageResolved: datasheetImage,
+    pdfRaw: datasheetPdfRaw,
+    pdfResolved: datasheetPdf,
+  });
 
   // Handle variants - WooCommerce uses variations
-  // For now, we'll create a simple variant structure
-  // In a full implementation, you'd fetch variations separately
+  // For performance, we'll fetch variations only when needed (e.g., on PDP)
+  // For product lists, we'll create a placeholder variant structure
+  // Variations will be fetched on-demand when viewing the product detail page
   const variants: any[] = [];
+  
+  // Check if product has variations
   if (wcProduct.variations && wcProduct.variations.length > 0) {
-    // Note: Variations need to be fetched separately via WooCommerce API
-    // For now, create a placeholder
+    // For now, create placeholder variants with the variation IDs
+    // The PDP can fetch full variation details when needed
+    // This improves performance for product listing pages
+    wcProduct.variations.forEach((variationId: number) => {
+      variants.push({
+        id: variationId.toString(),
+        title: wcProduct.name,
+        sku: wcProduct.sku || "",
+        price: price, // Will be updated when variation is fetched
+        calculated_price: {
+          calculated_amount: price * 100,
+          currency_code: "USD",
+        },
+        inventory_quantity: 0,
+        options: [],
+        metadata: {
+          ...metadataObj,
+          variation_id: variationId,
+          _needsVariationFetch: true, // Flag to fetch full variation data later
+        },
+      });
+    });
+  } else {
+    // For simple products without variations, create a single variant
     variants.push({
       id: wcProduct.id.toString(),
       title: wcProduct.name,
       sku: wcProduct.sku || "",
-      price: price, // Already in dollars
+      price: price,
       calculated_price: {
-        calculated_amount: price * 100, // Convert to cents for calculated_price
+        calculated_amount: price * 100,
         currency_code: "USD",
       },
-      inventory_quantity: 0, // Would need to fetch from WooCommerce
+      inventory_quantity: 0,
       options: [],
       metadata: metadataObj,
     });
@@ -263,7 +524,7 @@ export function convertWCToSanityProduct(wcProduct: WooCommerceProduct): any {
     previewImages,
     category,
     description,
-    shortDescription: subtitle || stripHTML(wcProduct.short_description || wcProduct.description || ""), // Strip HTML from short description
+    shortDescription: subtitle, // Use subtitle from metadata (from WordPress admin)
     inStock: wcProduct.status === "publish", // Published products are in stock
     status: wcProduct.status === "publish",
     tags: [], // WooCommerce uses tags differently, extract if needed
@@ -290,6 +551,9 @@ export function convertWCToSanityProduct(wcProduct: WooCommerceProduct): any {
     categories: allCategories,
     handle: wcProduct.slug,
     sku: wcProduct.sku,
+    // Include datasheet fields at top level for easy access in components
+    datasheetImage: datasheetImage,
+    datasheetPdf: datasheetPdf,
   };
 }
 

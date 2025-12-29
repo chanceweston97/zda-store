@@ -64,6 +64,18 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  
+  // Console log product details from API for debugging
+  useEffect(() => {
+    console.log("========================================");
+    console.log("[ShopDetails] Product Details from API:");
+    console.log("Product:", JSON.stringify(product, null, 2));
+    console.log("Product Variants:", JSON.stringify((product as any).variants, null, 2));
+    console.log("Product Short Description:", product.shortDescription);
+    console.log("Product Subtitle:", (product as any).subtitle);
+    console.log("========================================");
+  }, [product]);
+  
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -290,7 +302,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     return 0;
   };
 
-  // Auto-select first length option (for cables) or first variant (for simple connectors)
+  // Auto-select first length option (for cables) or first variant (for simple connectors or antenna products)
   useEffect(() => {
     if (isCableProduct && lengthOptions.length > 0 && selectedLengthIndex < 0) {
       setSelectedLengthIndex(0);
@@ -298,6 +310,11 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       setSelectedLength(getLengthValue(firstLength));
     } else if (isSimpleConnector && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
       setSelectedLengthIndex(0);
+    } else if (product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
+      // Auto-select first variant for antenna products with variants (WooCommerce)
+      // Variants are already sorted by gain value (smallest to largest)
+      setSelectedLengthIndex(0);
+      console.log("[ShopDetails] Auto-selected first variant for antenna product:", (product as any).variants[0]);
     }
   }, [lengthOptions, selectedLengthIndex, isCableProduct, isSimpleConnector, product]);
 
@@ -381,8 +398,13 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     if (isSimpleConnector) {
       if (selectedLengthIndex >= 0 && (product as any).variants && (product as any).variants[selectedLengthIndex]) {
         const selectedVariant = (product as any).variants[selectedLengthIndex];
+        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
         if (selectedVariant?.calculated_price?.calculated_amount) {
           return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
+        }
+        // WooCommerce variations have price directly in dollars
+        if (selectedVariant?.price) {
+          return selectedVariant.price;
         }
       }
       return (product as any).connectorPrice ?? product.price ?? 0;
@@ -425,7 +447,31 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       return cableTypePricePerFoot;
     }
     
-    // For antenna products, use gain options
+    // For antenna products with variants (WooCommerce): use price from selected variant
+    if (product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0) {
+      // Use selectedLengthIndex to track selected variant (for antenna products, this represents the selected gain/variant)
+      if (selectedLengthIndex >= 0 && (product as any).variants[selectedLengthIndex]) {
+        const selectedVariant = (product as any).variants[selectedLengthIndex];
+        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
+        if (selectedVariant?.calculated_price?.calculated_amount) {
+          return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
+        }
+        // WooCommerce variations have price directly in dollars
+        if (selectedVariant?.price) {
+          return selectedVariant.price;
+        }
+      }
+      // Fallback to first variant's price if no selection
+      const firstVariant = (product as any).variants[0];
+      if (firstVariant?.calculated_price?.calculated_amount) {
+        return firstVariant.calculated_price.calculated_amount / 100;
+      }
+      if (firstVariant?.price) {
+        return firstVariant.price;
+      }
+    }
+    
+    // For antenna products, use gain options (legacy/Medusa format)
     if (gainIndex < 0 || !currentGainOption) {
       // Fallback to first gain option's price, or product price if no gain options
       const firstGain = product.gainOptions?.[0];
@@ -493,6 +539,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       cableType: (product as any).variants[selectedLengthIndex].title || (product as any).variants[selectedLengthIndex].sku,
     }),
   };
+
+  // Console log when variant selection changes (must be after selectedLengthIndex, dynamicPrice, and totalPrice are declared)
+  useEffect(() => {
+    if (selectedLengthIndex >= 0 && (product as any).variants && (product as any).variants[selectedLengthIndex]) {
+      const selectedVariant = (product as any).variants[selectedLengthIndex];
+      console.log("[ShopDetails] Selected Variant Changed:");
+      console.log("Selected Variant Index:", selectedLengthIndex);
+      console.log("Selected Variant:", JSON.stringify(selectedVariant, null, 2));
+      console.log("Variant Price:", selectedVariant.price);
+      console.log("Variant Calculated Price:", selectedVariant.calculated_price?.calculated_amount);
+      console.log("Dynamic Price:", dynamicPrice);
+      console.log("Total Price:", totalPrice);
+    }
+  }, [selectedLengthIndex, product, dynamicPrice, totalPrice]);
 
   // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
@@ -826,16 +886,16 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                 </span>
               </h3>
 
+              {/* Short Description - Under price (from WordPress admin) */}
+              {product.shortDescription && (
+                <p className="text-black text-[24px] font-medium leading-[26px] mb-4">
+                  {product.shortDescription}
+                </p>
+              )}
+
               <form onSubmit={(e) => e.preventDefault()}>
                 <div className="flex flex-col mt-3 py-2">
-                  {/* Subtitle - Under price (hide for cable products) */}
-                  {!isCableProduct && (product as any).subtitle && (
-                    <p className="text-black text-[24px] font-medium leading-[26px] mb-4">
-                      {(product as any).subtitle}
-                    </p>
-                  )}
-
-                  {/* Features - Display as plain text under subtitle (hide for cable products) */}
+                  {/* Features - Display as plain text (hide for cable products) */}
                   {!isCableProduct && (product as any).features && typeof (product as any).features === 'string' && (product as any).features.trim() && (
                     <div className="mt-2">
                       <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
@@ -845,8 +905,43 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                   )}
 
                   <div className="mt-2 w-full space-y-4">
-                      {/* Gain - Full Width Row (Antenna products only) */}
-                      {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && (
+                      {/* Gain/Variants - Full Width Row (Antenna products only) */}
+                      {/* For WooCommerce products with variations, show variants instead of gainOptions */}
+                      {!isConnectorProduct && !isCableProduct && product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && (
+                        <div className="space-y-2">
+                          <label className="text-black text-[20px] font-medium leading-[30px]">
+                            Gains
+                          </label>
+
+                          <div className="flex flex-wrap gap-2">
+                            {(product as any).variants.map((variant: any, index: number) => {
+                              if (!variant) return null;
+                              // Extract gain value from variant title (e.g., "Gain: 8dBi" -> "8dBi")
+                              const variantTitle = variant.title || "";
+                              const gainMatch = variantTitle.match(/(\d+(?:\.\d+)?)\s*dBi/i);
+                              const gainValue = gainMatch ? gainMatch[1] : variantTitle.replace("Gain: ", "");
+                              const isSelected = selectedLengthIndex === index;
+                              
+                              return (
+                                <button
+                                  key={variant.id || index}
+                                  type="button"
+                                  onClick={() => setSelectedLengthIndex(index)}
+                                  className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${
+                                    isSelected
+                                      ? "border-[#2958A4] bg-[#2958A4] text-white"
+                                      : "border-[#2958A4] bg-white text-gray-800"
+                                  }`}
+                                >
+                                  {gainValue} dBi
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      {/* Legacy gainOptions display (for Medusa products) */}
+                      {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] font-medium leading-[30px]">
                             Gains

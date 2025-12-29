@@ -15,11 +15,30 @@ const renderContent = (content: any): React.ReactNode => {
     // Check if string contains HTML tags
     const hasHTML = /<[a-z][\s\S]*>/i.test(content);
     if (hasHTML) {
-      // Render HTML using dangerouslySetInnerHTML
-      return <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />;
+      // Process HTML to ensure proper spacing
+      // Replace \n with <br/> for line breaks, and ensure <p> tags have proper spacing
+      let processedContent = content;
+      
+      // Replace \n with <br/> tags (but not inside HTML tags)
+      processedContent = processedContent.replace(/\n/g, '<br/>');
+      
+      // Ensure <p> tags have proper margin-bottom for spacing
+      processedContent = processedContent.replace(/<p>/g, '<p style="margin-bottom: 1em;">');
+      
+      // Render HTML using dangerouslySetInnerHTML with proper styling
+      return (
+        <div 
+          className="prose max-w-none" 
+          style={{ 
+            lineHeight: '1.6',
+            whiteSpace: 'pre-wrap' // Preserve whitespace and line breaks
+          }}
+          dangerouslySetInnerHTML={{ __html: processedContent }} 
+        />
+      );
     }
-    // Plain text - render with line breaks
-    return <div className="whitespace-pre-line">{content}</div>;
+    // Plain text - render with line breaks preserved
+    return <div className="whitespace-pre-line" style={{ lineHeight: '1.6' }}>{content}</div>;
   }
   
   // If it's an array, render each item
@@ -36,7 +55,7 @@ const renderContent = (content: any): React.ReactNode => {
           {content.map((block: any, index: number) => {
             if (block._type === 'block' && block.children) {
               return (
-                <p key={index} className="mb-2">
+                <p key={index} className="mb-4" style={{ lineHeight: '1.6' }}>
                   {block.children.map((child: any, childIndex: number) => {
                     if (child.text) {
                       return <span key={childIndex}>{child.text}</span>;
@@ -56,7 +75,7 @@ const renderContent = (content: any): React.ReactNode => {
     return (
       <div>
         {content.map((item: any, index: number) => (
-          <div key={index} className="mb-2">
+          <div key={index} className="mb-4" style={{ lineHeight: '1.6' }}>
             {typeof item === 'string' ? item : JSON.stringify(item)}
           </div>
         ))}
@@ -65,7 +84,7 @@ const renderContent = (content: any): React.ReactNode => {
   }
   
   // Fallback: stringify objects
-  return <div>{JSON.stringify(content)}</div>;
+  return <div style={{ lineHeight: '1.6' }}>{JSON.stringify(content)}</div>;
 };
 
 type Props = {
