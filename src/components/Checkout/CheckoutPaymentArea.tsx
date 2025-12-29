@@ -19,7 +19,8 @@ import { useShoppingCart } from "use-shopping-cart";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
 const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
-  const { handleSubmit } = useCheckoutForm();
+  const { handleSubmit, watch } = useCheckoutForm();
+  const paymentMethod = watch("paymentMethod") || "cod"; // Default to COD
 
   const { data: session } = useSession();
 
@@ -31,8 +32,17 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
   const [loading, setLoading] = useState(false);
   const { cartDetails } = useShoppingCart();
 
-  // Create a PaymentIntent as soon as the page loads
+  // Create a PaymentIntent only when Stripe payment method is selected
+  // For COD, we don't need a payment intent
   useEffect(() => {
+    // Only create payment intent for Stripe payments (paymentMethod === "bank")
+    // For COD, skip payment intent creation
+    if (paymentMethod !== "bank") {
+      setClientSecret(""); // Clear client secret for non-Stripe methods
+      setErrorMessage(""); // Clear any payment intent errors for COD
+      return;
+    }
+
     if (amount <= 0) {
       console.error("Invalid amount for payment intent:", amount);
       setErrorMessage(`Invalid amount: $${amount.toFixed(2)}. Please check your cart.`);
@@ -87,7 +97,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
         const errorMessage = error.message || "Failed to initialize payment. Please refresh the page.";
         setErrorMessage(errorMessage);
       });
-  }, [amount]);
+  }, [amount, paymentMethod]);
 
   // Handle checkout
   const handleCheckout = async (data: CheckoutInput) => {
@@ -250,16 +260,19 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
       return;
     }
 
-    if (!stripe || !elements) {
-      setErrorMessage("Payment system not ready. Please refresh the page.");
-      setLoading(false);
-      return;
-    }
+    // For Stripe payments, check if Stripe is ready
+    if (data.paymentMethod === "bank") {
+      if (!stripe || !elements) {
+        setErrorMessage("Payment system not ready. Please refresh the page.");
+        setLoading(false);
+        return;
+      }
 
-    if (!clientSecret) {
-      setErrorMessage("Payment not initialized. Please refresh the page.");
-      setLoading(false);
-      return;
+      if (!clientSecret) {
+        setErrorMessage("Payment not initialized. Please refresh the page.");
+        setLoading(false);
+        return;
+      }
     }
 
     // Continue with Stripe Payment if NOT COD
@@ -309,8 +322,8 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
     setLoading(false);
   };
 
-  // Check if Stripe is loaded
-  if (!stripe || !elements) {
+  // Check if Stripe is loaded (only needed for Stripe payments)
+  if (paymentMethod === "bank" && (!stripe || !elements)) {
     return (
       <div className="mt-48 text-center">
         <div className="flex items-center justify-center h-80">
@@ -325,8 +338,8 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
     );
   }
 
-  // Show error if payment intent creation failed
-  if (!clientSecret && errorMessage) {
+  // Show error if payment intent creation failed (only for Stripe)
+  if (paymentMethod === "bank" && !clientSecret && errorMessage) {
     return (
       <div className="mt-48 text-center">
         <div className="flex items-center justify-center h-80">
@@ -343,8 +356,8 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
     );
   }
 
-  // Still loading payment intent
-  if (!clientSecret) {
+  // Still loading payment intent (only for Stripe)
+  if (paymentMethod === "bank" && !clientSecret) {
     return (
       <div className="mt-48 text-center">
         <div className="flex items-center justify-center h-80">
