@@ -289,9 +289,40 @@ export default function Description({ product, metadata }: Props) {
                                                                 ))}
                                                             </ul>
                                                         ) : typeof features === 'string' && features.trim() ? (
-                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                                                                {features}
-                                                            </p>
+                                                            (() => {
+                                                                // Check if string contains HTML list
+                                                                const hasHTMLList = /<ul|<li/i.test(features);
+                                                                if (hasHTMLList) {
+                                                                    // Parse HTML and extract list items
+                                                                    const parser = new DOMParser();
+                                                                    const doc = parser.parseFromString(features, 'text/html');
+                                                                    const listItems = doc.querySelectorAll('li');
+                                                                    
+                                                                    if (listItems.length > 0) {
+                                                                        return (
+                                                                            <ul className="space-y-2">
+                                                                                {Array.from(listItems).map((li, index) => {
+                                                                                    const text = li.textContent || li.innerText || '';
+                                                                                    return (
+                                                                                        <li key={index} className="flex items-start gap-2">
+                                                                                            <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                                                {text.trim()}
+                                                                                            </span>
+                                                                                        </li>
+                                                                                    );
+                                                                                })}
+                                                                            </ul>
+                                                                        );
+                                                                    }
+                                                                }
+                                                                // Plain text - render as is
+                                                                return (
+                                                                    <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                                        {features}
+                                                                    </p>
+                                                                );
+                                                            })()
                                                         ) : null}
                                                     </div>
                                                 </div>
@@ -316,9 +347,40 @@ export default function Description({ product, metadata }: Props) {
                                                                 ))}
                                                             </ul>
                                                         ) : typeof applications === 'string' && applications.trim() ? (
-                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                                                                {applications}
-                                                            </p>
+                                                            (() => {
+                                                                // Check if string contains HTML list
+                                                                const hasHTMLList = /<ul|<li/i.test(applications);
+                                                                if (hasHTMLList) {
+                                                                    // Parse HTML and extract list items
+                                                                    const parser = new DOMParser();
+                                                                    const doc = parser.parseFromString(applications, 'text/html');
+                                                                    const listItems = doc.querySelectorAll('li');
+                                                                    
+                                                                    if (listItems.length > 0) {
+                                                                        return (
+                                                                            <ul className="space-y-2">
+                                                                                {Array.from(listItems).map((li, index) => {
+                                                                                    const text = li.textContent || li.innerText || '';
+                                                                                    return (
+                                                                                        <li key={index} className="flex items-start gap-2">
+                                                                                            <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                                                {text.trim()}
+                                                                                            </span>
+                                                                                        </li>
+                                                                                    );
+                                                                                })}
+                                                                            </ul>
+                                                                        );
+                                                                    }
+                                                                }
+                                                                // Plain text - render as is
+                                                                return (
+                                                                    <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                                        {applications}
+                                                                    </p>
+                                                                );
+                                                            })()
                                                         ) : null}
                                                     </div>
                                                 </div>

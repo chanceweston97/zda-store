@@ -893,16 +893,74 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                 </p>
               )}
 
-              <form onSubmit={(e) => e.preventDefault()}>
-                <div className="flex flex-col mt-3 py-2">
-                  {/* Features - Display as plain text (hide for cable products) */}
-                  {!isCableProduct && (product as any).features && typeof (product as any).features === 'string' && (product as any).features.trim() && (
-                    <div className="mt-2">
+              {/* Features - Under price (from WordPress admin) */}
+              {!isCableProduct && (product as any).features && (() => {
+                const features = (product as any).features;
+                
+                // Check if features is an array
+                if (Array.isArray(features) && features.length > 0) {
+                  return (
+                    <div className="mb-4">
+                      <ul className="space-y-2">
+                        {features.map((feature: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-black text-[16px] leading-[24px]">•</span>
+                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+                
+                // Check if features is a string with HTML list
+                if (typeof features === 'string' && features.trim()) {
+                  const hasHTMLList = /<ul|<li/i.test(features);
+                  if (hasHTMLList) {
+                    // Parse HTML and extract list items
+                    if (typeof window !== 'undefined') {
+                      const parser = new DOMParser();
+                      const doc = parser.parseFromString(features, 'text/html');
+                      const listItems = doc.querySelectorAll('li');
+                      
+                      if (listItems.length > 0) {
+                        return (
+                          <div className="mb-4">
+                            <ul className="space-y-2">
+                              {Array.from(listItems).map((li, index) => {
+                                const text = li.textContent || li.innerText || '';
+                                return (
+                                  <li key={index} className="flex items-start gap-2">
+                                    <span className="text-black text-[16px] leading-[24px]">•</span>
+                                    <span className="text-black text-[16px] font-medium leading-[26px]">
+                                      {text.trim()}
+                                    </span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      }
+                    }
+                  }
+                  // Plain text - render as is
+                  return (
+                    <div className="mb-4">
                       <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                        {(product as any).features}
+                        {features}
                       </p>
                     </div>
-                  )}
+                  );
+                }
+                
+                return null;
+              })()}
+
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div className="flex flex-col mt-3 py-2">
 
                   <div className="mt-2 w-full space-y-4">
                       {/* Gain/Variants - Full Width Row (Antenna products only) */}
