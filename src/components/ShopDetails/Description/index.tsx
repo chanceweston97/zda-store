@@ -332,9 +332,9 @@ export default function Description({ product, metadata }: Props) {
                                                                 }
                                                                 // Plain text - render as is
                                                                 return (
-                                                                    <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                                                                        {features}
-                                                                    </p>
+                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                                {features}
+                                                            </p>
                                                                 );
                                                             })()
                                                         ) : null}
@@ -390,9 +390,9 @@ export default function Description({ product, metadata }: Props) {
                                                                 }
                                                                 // Plain text - render as is
                                                                 return (
-                                                                    <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                                                                        {applications}
-                                                                    </p>
+                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                                {applications}
+                                                            </p>
                                                                 );
                                                             })()
                                                         ) : null}
@@ -470,26 +470,49 @@ export default function Description({ product, metadata }: Props) {
                                                     <style>{`
                                                         .specifications-content table {
                                                             width: 100%;
-                                                            border-collapse: collapse;
-                                                            margin-top: 1rem;
-                                                            border: 1px solid #ddd;
-                                                        }
-                                                        .specifications-content table th,
-                                                        .specifications-content table td {
-                                                            border: 1px solid #ddd;
-                                                            padding: 12px;
-                                                            text-align: left;
-                                                            font-size: 16px;
+                                                            border-collapse: separate;
+                                                            border-spacing: 0;
+                                                            margin-top: 1.5rem;
+                                                            margin-bottom: 1.5rem;
+                                                            border: none;
+                                                            background: transparent;
                                                         }
                                                         .specifications-content table th {
-                                                            background-color: #f5f5f5;
-                                                            font-weight: 600;
+                                                            border: none;
+                                                            border-bottom: 1px solid #e5e7eb;
+                                                            padding: 14px 16px;
+                                                            text-align: left;
+                                                            font-size: 14px;
+                                                            line-height: 1.5;
+                                                            vertical-align: top;
+                                                            background-color: #2958A4;
+                                                            color: white;
+                                                            font-weight: 700;
                                                         }
-                                                        .specifications-content table tr:nth-child(even) {
-                                                            background-color: #f9f9f9;
+                                                        .specifications-content table td {
+                                                            border: none;
+                                                            border-bottom: 1px solid #e5e7eb;
+                                                            border-right: 1px solid #e5e7eb;
+                                                            padding: 14px 16px;
+                                                            text-align: left;
+                                                            font-size: 14px;
+                                                            line-height: 1.5;
+                                                            vertical-align: top;
+                                                            color: #374151;
+                                                            font-weight: 400;
+                                                            background-color: white;
+                                                        }
+                                                        .specifications-content table td:last-child {
+                                                            border-right: none;
+                                                        }
+                                                        .specifications-content table tr:last-child td {
+                                                            border-bottom: none;
                                                         }
                                                         .specifications-content table tr:has(td:empty) {
                                                             display: none;
+                                                        }
+                                                        .specifications-content table tbody tr:hover {
+                                                            background-color: #f9fafb;
                                                         }
                                                         .specifications-content .tabs-contents {
                                                             display: block;

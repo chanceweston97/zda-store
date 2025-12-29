@@ -968,7 +968,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                       {!isConnectorProduct && !isCableProduct && product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] font-medium leading-[30px]">
-                            Gains
+                            Gain
                           </label>
 
                           <div className="flex flex-wrap gap-2">
@@ -985,10 +985,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   key={variant.id || index}
                                   type="button"
                                   onClick={() => setSelectedLengthIndex(index)}
-                                  className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${
+                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] font-bold transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
                                     isSelected
-                                      ? "border-[#2958A4] bg-[#2958A4] text-white"
-                                      : "border-[#2958A4] bg-white text-gray-800"
+                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
+                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
                                   }`}
                                 >
                                   {gainValue} dBi
@@ -1002,7 +1002,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                       {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] font-medium leading-[30px]">
-                            Gains
+                            Gain
                           </label>
 
                           <div className="flex flex-wrap gap-2">
@@ -1018,10 +1018,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   key={gainOption.id || index}
                                   type="button"
                                   onClick={() => setGainIndex(index)}
-                                  className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${
+                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] font-bold transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
                                     isSelected
-                                      ? "border-[#2958A4] bg-[#2958A4] text-white"
-                                      : "border-[#2958A4] bg-white text-gray-800"
+                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
+                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
                                   }`}
                                 >
                                   {gainTitle} dBi
