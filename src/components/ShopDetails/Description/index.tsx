@@ -332,7 +332,7 @@ export default function Description({ product, metadata }: Props) {
                                             {applications && (
                                                 <div className="col-span-1">
                                                     <h4 className="text-black text-[19px] font-bold leading-7 tracking-[-0.38px]">
-                                                        Application
+                                                        Applications
                                                     </h4>
                                                     <div className="mt-2">
                                                         {Array.isArray(applications) && applications.length > 0 ? (
@@ -392,7 +392,67 @@ export default function Description({ product, metadata }: Props) {
                                 <p>No description available.</p>
                             )
                         ) : specifications ? (
-                            renderContent(specifications)
+                            (() => {
+                                // Handle specifications - can be string, array, or HTML
+                                if (typeof specifications === 'string' && specifications.trim()) {
+                                    // Check if string contains HTML list
+                                    const hasHTMLList = /<ul|<li/i.test(specifications);
+                                    if (hasHTMLList) {
+                                        // Parse HTML and extract list items
+                                        const parser = new DOMParser();
+                                        const doc = parser.parseFromString(specifications, 'text/html');
+                                        const listItems = doc.querySelectorAll('li');
+                                        
+                                        if (listItems.length > 0) {
+                                            return (
+                                                <ul className="space-y-2">
+                                                    {Array.from(listItems).map((li, index) => {
+                                                        const text = li.textContent || li.innerText || '';
+                                                        return (
+                                                            <li key={index} className="flex items-start gap-2">
+                                                                <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                    {text.trim()}
+                                                                </span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            );
+                                        }
+                                    }
+                                    // If it's HTML but not a list, use renderContent
+                                    const hasHTML = /<[a-z][\s\S]*>/i.test(specifications);
+                                    if (hasHTML) {
+                                        return renderContent(specifications);
+                                    }
+                                    // Plain text
+                                    return (
+                                        <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                            {specifications}
+                                        </p>
+                                    );
+                                }
+                                
+                                // If it's an array
+                                if (Array.isArray(specifications) && specifications.length > 0) {
+                                    return (
+                                        <ul className="space-y-2">
+                                            {specifications.map((spec: string, index: number) => (
+                                                <li key={index} className="flex items-start gap-2">
+                                                    <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                    <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                        {spec}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    );
+                                }
+                                
+                                // Fallback to renderContent for other formats
+                                return renderContent(specifications);
+                            })()
                         ) : (
                             <p>No specifications available.</p>
                         )}
