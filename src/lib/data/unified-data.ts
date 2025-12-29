@@ -32,8 +32,10 @@ export async function getAllProducts() {
       const wcProducts = await getProducts({ per_page: 100 });
       
       if (wcProducts && wcProducts.length > 0) {
-        const converted = wcProducts.map(convertWCToSanityProduct);
-        console.log(`[getAllProducts] Successfully fetched ${converted.length} products from WooCommerce`);
+        // Filter out hidden products (already filtered in getProducts, but double-check)
+        const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
+        const converted = visibleProducts.map(convertWCToSanityProduct);
+        console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         return converted;
       } else {
         console.warn("[getAllProducts] No products returned from WooCommerce, falling back to Medusa");
@@ -93,6 +95,11 @@ export async function getProductBySlug(slug: string) {
       console.log(`[getProductBySlug] Fetching product from WooCommerce: ${slug}`);
       const wcProduct = await getWCProductBySlug(slug);
       if (wcProduct) {
+        // Double-check catalog visibility (should already be filtered, but be safe)
+        if (wcProduct.catalog_visibility === "hidden") {
+          console.log(`[getProductBySlug] Product ${slug} is hidden, skipping`);
+          throw new Error("Product is hidden");
+        }
         const converted = convertWCToSanityProduct(wcProduct);
         console.log(`[getProductBySlug] Successfully fetched product from WooCommerce: ${slug}`);
         return converted;

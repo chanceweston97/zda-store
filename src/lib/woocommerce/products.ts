@@ -39,6 +39,7 @@ export interface WooCommerceProduct {
   }>;
   type?: string;
   status?: string;
+  catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
 }
 
 /**
@@ -65,7 +66,11 @@ export async function getProducts(params?: {
   // WC_API_URL already includes /wp-json/wc/v3, so just use /products
   const endpoint = `/products${query ? `?${query}` : ""}`;
   
-  return wcFetch<WooCommerceProduct[]>(endpoint);
+  const products = await wcFetch<WooCommerceProduct[]>(endpoint);
+  
+  // Filter out products with catalog_visibility = "hidden"
+  // These products should not appear in shop pages
+  return products.filter(product => product.catalog_visibility !== "hidden");
 }
 
 /**
@@ -85,16 +90,28 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
   try {
     // First try to get products with the slug
     // WooCommerce search might not find by slug directly, so we'll fetch and filter
+    // Note: getProducts already filters hidden products, so we don't need to filter again
     const products = await getProducts({ per_page: 100 });
     const product = products.find(p => p.slug === slug);
     
     if (product) {
+      // Double-check catalog visibility (should already be filtered, but be safe)
+      if (product.catalog_visibility === "hidden") {
+        return null;
+      }
       return product;
     }
     
     // If not found in first 100, try searching (though search might not match slug)
     const searchResults = await getProducts({ search: slug, per_page: 10 });
-    return searchResults.find(p => p.slug === slug) || null;
+    const foundProduct = searchResults.find(p => p.slug === slug);
+    
+    // Double-check catalog visibility
+    if (foundProduct && foundProduct.catalog_visibility === "hidden") {
+      return null;
+    }
+    
+    return foundProduct || null;
   } catch (error) {
     console.error(`[getProductBySlug] Error fetching product by slug ${slug}:`, error);
     return null;

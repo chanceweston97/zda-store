@@ -64,9 +64,11 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
       if (productsResponse.status === 'fulfilled') {
         const wcProducts = productsResponse.value;
         if (wcProducts && wcProducts.length > 0) {
-          allProducts = wcProducts.map(convertWCToSanityProduct);
-          allProductsCount = wcProducts.length;
-          console.log(`[ShopPage] Successfully fetched ${allProducts.length} products from WooCommerce`);
+          // Filter out hidden products (already filtered in getProducts, but double-check here)
+          const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
+          allProducts = visibleProducts.map(convertWCToSanityProduct);
+          allProductsCount = visibleProducts.length;
+          console.log(`[ShopPage] Successfully fetched ${allProducts.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         } else {
           console.warn("[ShopPage] No products in WooCommerce");
           allProducts = [];
