@@ -16,22 +16,33 @@ const renderContent = (content: any): React.ReactNode => {
     const hasHTML = /<[a-z][\s\S]*>/i.test(content);
     if (hasHTML) {
       // Process HTML to ensure proper spacing
-      // Replace \n with <br/> for line breaks, and ensure <p> tags have proper spacing
       let processedContent = content;
       
-      // Replace \n with <br/> tags (but not inside HTML tags)
-      processedContent = processedContent.replace(/\n/g, '<br/>');
+      // Check if content contains tables - if so, don't add <br/> tags
+      const hasTables = /<table[^>]*>/i.test(content);
+      const hasParagraphs = /<p[^>]*>/i.test(content);
       
-      // Ensure <p> tags have proper margin-bottom for spacing
-      processedContent = processedContent.replace(/<p>/g, '<p style="margin-bottom: 1em;">');
+      // Only replace \n with <br/> for paragraph-based content (descriptions), not for tables
+      if (hasParagraphs && !hasTables) {
+        // Replace \n with <br/> tags for paragraph content
+        processedContent = processedContent.replace(/\n/g, '<br/>');
+        // Ensure <p> tags have proper margin-bottom for spacing
+        processedContent = processedContent.replace(/<p>/g, '<p style="margin-bottom: 1em;">');
+      } else if (hasTables) {
+        // For table content, clean up whitespace but don't add <br/> tags
+        // Remove excessive newlines and whitespace between tags
+        processedContent = processedContent.replace(/>\s+</g, '><');
+        // Remove leading/trailing whitespace
+        processedContent = processedContent.trim();
+      }
       
       // Render HTML using dangerouslySetInnerHTML with proper styling
+      // Add table styling for better display
       return (
         <div 
           className="prose max-w-none" 
           style={{ 
             lineHeight: '1.6',
-            whiteSpace: 'pre-wrap' // Preserve whitespace and line breaks
           }}
           dangerouslySetInnerHTML={{ __html: processedContent }} 
         />
@@ -170,7 +181,10 @@ export default function Description({ product, metadata }: Props) {
     const features = metadata?.features || product.features;
     const applications = metadata?.applications || product.applications;
     const specifications = metadata?.specifications || product.specifications;
-    console.log("PRODUCTS", product)
+    console.log("PRODUCTS", product);
+    console.log("SPECIFICATIONS:", specifications);
+    console.log("SPECIFICATIONS TYPE:", typeof specifications);
+    console.log("SPECIFICATIONS IS ARRAY:", Array.isArray(specifications));
     const [imageError, setImageError] = useState(false);
 
     return (
@@ -391,71 +405,148 @@ export default function Description({ product, metadata }: Props) {
                             ) : (
                                 <p>No description available.</p>
                             )
-                        ) : specifications ? (
-                            (() => {
-                                // Handle specifications - can be string, array, or HTML
-                                if (typeof specifications === 'string' && specifications.trim()) {
-                                    // Check if string contains HTML list
-                                    const hasHTMLList = /<ul|<li/i.test(specifications);
-                                    if (hasHTMLList) {
-                                        // Parse HTML and extract list items
-                                        const parser = new DOMParser();
-                                        const doc = parser.parseFromString(specifications, 'text/html');
-                                        const listItems = doc.querySelectorAll('li');
+                        ) : activeTab === "specifications" ? (
+                            specifications ? (
+                                (() => {
+                                    console.log("[Specifications Tab] Rendering specifications:", specifications);
+                                    
+                                    // Handle specifications - can be string, array, or HTML
+                                    if (typeof specifications === 'string' && specifications.trim()) {
+                                        // Check if string contains HTML (table, list, or other HTML)
+                                        const hasHTML = /<[a-z][\s\S]*>/i.test(specifications);
                                         
-                                        if (listItems.length > 0) {
+                                        if (hasHTML) {
+                                            // Check if it's an HTML list
+                                            const hasHTMLList = /<ul|<li/i.test(specifications);
+                                            
+                                            if (hasHTMLList) {
+                                                // Parse HTML and extract list items
+                                                const parser = new DOMParser();
+                                                const doc = parser.parseFromString(specifications, 'text/html');
+                                                const listItems = doc.querySelectorAll('li');
+                                                
+                                                if (listItems.length > 0) {
+                                                    return (
+                                                        <ul className="space-y-2">
+                                                            {Array.from(listItems).map((li, index) => {
+                                                                const text = li.textContent || li.innerText || '';
+                                                                return (
+                                                                    <li key={index} className="flex items-start gap-2">
+                                                                        <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                            {text.trim()}
+                                                                        </span>
+                                                                    </li>
+                                                                );
+                                                            })}
+                                                        </ul>
+                                                    );
+                                                }
+                                            }
+                                            
+                                            // For HTML content (tables, divs, etc.), use renderContent
+                                            // This will properly render tables and other HTML elements
+                                            // Extract the active tab content if it exists (remove wrapper divs)
+                                            let cleanedSpecs = specifications;
+                                            
+                                            // Extract the active tab content if it exists
+                                            if (cleanedSpecs.includes('tab-content is-active') || cleanedSpecs.includes('is-active')) {
+                                                try {
+                                                    const parser = new DOMParser();
+                                                    const doc = parser.parseFromString(cleanedSpecs, 'text/html');
+                                                    const activeTab = doc.querySelector('.tab-content.is-active') || doc.querySelector('[class*="is-active"]');
+                                                    if (activeTab) {
+                                                        // Get the inner HTML of the active tab (the table)
+                                                        cleanedSpecs = activeTab.innerHTML;
+                                                        console.log("[Specifications] Extracted active tab content:", cleanedSpecs);
+                                                    }
+                                                } catch (e) {
+                                                    console.warn("[Specifications] Error parsing HTML, using original:", e);
+                                                }
+                                            }
+                                            
                                             return (
-                                                <ul className="space-y-2">
-                                                    {Array.from(listItems).map((li, index) => {
-                                                        const text = li.textContent || li.innerText || '';
-                                                        return (
-                                                            <li key={index} className="flex items-start gap-2">
-                                                                <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                <span className="text-black text-[16px] font-medium leading-[26px]">
-                                                                    {text.trim()}
-                                                                </span>
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
+                                                <>
+                                                    <style>{`
+                                                        .specifications-content table {
+                                                            width: 100%;
+                                                            border-collapse: collapse;
+                                                            margin-top: 1rem;
+                                                            border: 1px solid #ddd;
+                                                        }
+                                                        .specifications-content table th,
+                                                        .specifications-content table td {
+                                                            border: 1px solid #ddd;
+                                                            padding: 12px;
+                                                            text-align: left;
+                                                            font-size: 16px;
+                                                        }
+                                                        .specifications-content table th {
+                                                            background-color: #f5f5f5;
+                                                            font-weight: 600;
+                                                        }
+                                                        .specifications-content table tr:nth-child(even) {
+                                                            background-color: #f9f9f9;
+                                                        }
+                                                        .specifications-content table tr:has(td:empty) {
+                                                            display: none;
+                                                        }
+                                                        .specifications-content .tabs-contents {
+                                                            display: block;
+                                                        }
+                                                        .specifications-content .tab-content {
+                                                            display: block;
+                                                        }
+                                                        .specifications-content .tab-content[aria-hidden="true"] {
+                                                            display: none !important;
+                                                        }
+                                                    `}</style>
+                                                    <div className="font-medium specifications-content">
+                                                        {renderContent(cleanedSpecs)}
+                                                    </div>
+                                                </>
                                             );
                                         }
+                                        
+                                        // Plain text
+                                        return (
+                                            <div className="font-medium">
+                                                <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                    {specifications}
+                                                </p>
+                                            </div>
+                                        );
                                     }
-                                    // If it's HTML but not a list, use renderContent
-                                    const hasHTML = /<[a-z][\s\S]*>/i.test(specifications);
-                                    if (hasHTML) {
-                                        return renderContent(specifications);
+                                    
+                                    // If it's an array
+                                    if (Array.isArray(specifications) && specifications.length > 0) {
+                                        return (
+                                            <ul className="space-y-2">
+                                                {specifications.map((spec: string, index: number) => (
+                                                    <li key={index} className="flex items-start gap-2">
+                                                        <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                            {spec}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        );
                                     }
-                                    // Plain text
+                                    
+                                    // Fallback to renderContent for other formats
                                     return (
-                                        <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
-                                            {specifications}
-                                        </p>
+                                        <div className="font-medium">
+                                            {renderContent(specifications)}
+                                        </div>
                                     );
-                                }
-                                
-                                // If it's an array
-                                if (Array.isArray(specifications) && specifications.length > 0) {
-                                    return (
-                                        <ul className="space-y-2">
-                                            {specifications.map((spec: string, index: number) => (
-                                                <li key={index} className="flex items-start gap-2">
-                                                    <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                    <span className="text-black text-[16px] font-medium leading-[26px]">
-                                                        {spec}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    );
-                                }
-                                
-                                // Fallback to renderContent for other formats
-                                return renderContent(specifications);
-                            })()
-                        ) : (
-                            <p>No specifications available.</p>
-                        )}
+                                })()
+                            ) : (
+                                <p className="text-black text-[16px] font-medium leading-[26px]">
+                                    No specifications available.
+                                </p>
+                            )
+                        ) : null}
                     </div>
                 </div>
             </div>
