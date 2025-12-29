@@ -189,40 +189,63 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     allProducts = [];
   }
   
-  // Get the category ID - use id field if available
-  const categoryId = categoryData?.id || categoryData?._id;
-  const categoryHandle = (categoryData as any)?.handle || categoryData?.slug?.current || slug;
+  // Get the category ID - use id field if available (convert to string for consistency)
+  const categoryId = categoryData?.id?.toString() || categoryData?._id?.toString();
+  const categoryHandle = (categoryData as any)?.handle || categoryData?.slug?.current || categoryData?.slug || slug;
   
-  // Filter products by category ID (Medusa uses category IDs for filtering)
+  console.log(`[CategoryPage] Filtering products for category:`, {
+    slug,
+    categoryId,
+    categoryHandle,
+    categoryTitle: categoryData?.title || categoryData?.name,
+  });
+  
+  // Filter products by category ID (WooCommerce and Medusa use category IDs for filtering)
   let filteredProducts = allProducts;
   
   if (categoryData && categoryId) {
-    // Get all category IDs including subcategories
+    // Get all category IDs including subcategories (normalize to strings)
     const allCategoryIds: string[] = [categoryId];
     
     if (categoryData.subcategories && categoryData.subcategories.length > 0) {
       // Include all subcategory IDs
-      categoryData.subcategories.forEach((sub: { id?: string; _id?: string }) => {
-        const subId = sub.id || sub._id;
+      categoryData.subcategories.forEach((sub: { id?: string | number; _id?: string | number }) => {
+        const subId = (sub.id?.toString()) || (sub._id?.toString());
         if (subId) allCategoryIds.push(subId);
       });
     }
     
+    console.log(`[CategoryPage] Filtering by category IDs:`, allCategoryIds);
+    
     // Filter products by category IDs (exactly like shop page)
+    // WooCommerce products have category IDs as strings, so we compare as strings
     filteredProducts = allProducts.filter((product: any) => {
-      const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
-      return productCategoryIds.some((id: string) => allCategoryIds.includes(id));
+      const productCategoryIds = product.categories?.map((cat: any) => {
+        // Normalize category ID to string for comparison
+        const catId = cat.id?.toString() || cat._id?.toString();
+        return catId;
+      }).filter(Boolean) || [];
+      
+      const matches = productCategoryIds.some((id: string) => allCategoryIds.includes(id));
+      return matches;
     });
+    
+    console.log(`[CategoryPage] Found ${filteredProducts.length} products matching category IDs`);
   } else if (categoryHandle) {
-    // Fallback: filter by handle if ID not available
+    // Fallback: filter by handle/slug if ID not available
+    console.log(`[CategoryPage] Filtering by category handle: ${categoryHandle}`);
     filteredProducts = allProducts.filter((product: any) => {
       const productCategoryHandles = product.categories?.map((cat: any) => 
-        (cat as any).handle || cat.slug?.current
+        (cat as any).handle || cat.slug?.current || cat.slug
       ).filter(Boolean) || [];
-      return productCategoryHandles.includes(categoryHandle);
+      const matches = productCategoryHandles.includes(categoryHandle);
+      return matches;
     });
+    
+    console.log(`[CategoryPage] Found ${filteredProducts.length} products matching category handle`);
   } else {
     // No category found, show empty
+    console.warn(`[CategoryPage] No category ID or handle found for slug: ${slug}`);
     filteredProducts = [];
   }
 

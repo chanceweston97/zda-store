@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    console.log("[Menu API] Fetching categories...");
     const categories = await getCategoriesWithSubcategories();
+    
+    console.log(`[Menu API] Received ${categories?.length || 0} categories`);
     
     // If no categories, return empty array (frontend uses static menu)
     if (!categories || categories.length === 0) {
@@ -26,18 +29,19 @@ export async function GET() {
       const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
       const categoryMenu: Menu = {
         id: 60 + index + 1,
-        title: category.title,
+        title: category.title || category.name || `Category ${index + 1}`,
         newTab: false,
         path: `/categories/${categoryHandle}`,
       };
 
       // Add subcategories if they exist
       if (category.subcategories && category.subcategories.length > 0) {
+        console.log(`[Menu API] Category "${categoryMenu.title}" has ${category.subcategories.length} subcategories`);
         categoryMenu.submenu = category.subcategories.map((sub, subIndex) => {
           const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
           return {
             id: (60 + index + 1) * 10 + subIndex + 1,
-            title: sub.title,
+            title: sub.title || sub.name || `Subcategory ${subIndex + 1}`,
             newTab: false,
             path: `/categories/${subHandle}`,
           };
@@ -46,6 +50,8 @@ export async function GET() {
 
       return categoryMenu;
     });
+    
+    console.log(`[Menu API] Built menu with ${productsSubmenu.length} category items`);
 
     const menuData: Menu[] = [
       {
