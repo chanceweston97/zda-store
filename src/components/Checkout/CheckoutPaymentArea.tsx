@@ -16,6 +16,7 @@ import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useShoppingCart } from "use-shopping-cart";
+import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
 const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
   const { handleSubmit } = useCheckoutForm();
@@ -139,10 +140,10 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
       }
     }
 
-    // Helper function to create order via Medusa
+    // Helper function to create order via WooCommerce or Medusa
     const createOrder = async (paymentStatus: "pending" | "paid", paymentIntentId?: string) => {
       try {
-        // Convert cart items to format expected by Medusa checkout
+        // Convert cart items to format expected by checkout
         const cartItems = Object.values(cartDetails ?? {}).map((item) => ({
           id: item.id,
           name: item.name,
@@ -154,10 +155,10 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
           metadata: item.metadata,
         }));
 
-        // NOTE: Custom checkout (Option 3) disabled due to API key authentication issues
-        // Using regular checkout flow which stores metadata correctly
-        // Custom cable details will be in line item metadata for admin viewing
-        const checkoutEndpoint = "/api/checkout/complete";
+        // Use WooCommerce endpoint if enabled, otherwise use Medusa
+        const checkoutEndpoint = isWooCommerceEnabled() 
+          ? "/api/woocommerce/checkout/complete"
+          : "/api/checkout/complete";
 
         const response = await fetch(checkoutEndpoint, {
           method: "POST",
@@ -165,29 +166,29 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
           body: JSON.stringify({
             email: session?.user?.email || data.billing?.email,
             shipping_address: {
+              firstName: data.shipToDifferentAddress ? (data.shipping?.firstName || data.shipping?.address?.firstName || data.billing.firstName) : data.billing.firstName,
+              lastName: data.shipToDifferentAddress ? (data.shipping?.lastName || data.shipping?.address?.lastName || data.billing.lastName) : data.billing.lastName,
+              street: data.shipToDifferentAddress ? (data.shipping?.address?.street || data.billing.address.street) : data.billing.address.street,
+              apartment: data.shipToDifferentAddress ? (data.shipping?.address?.apartment || data.billing.address.apartment || "") : (data.billing.address.apartment || ""),
+              town: data.shipToDifferentAddress ? (data.shipping?.town || data.billing.town) : data.billing.town,
+              country: data.shipToDifferentAddress ? (data.shipping?.country || data.billing.regionName || data.billing.country) : (data.billing.regionName || data.billing.country),
+              country_code: data.shipToDifferentAddress ? (data.shipping?.country || data.billing.regionName || data.billing.country) : (data.billing.regionName || data.billing.country),
+              regionName: data.shipToDifferentAddress ? (data.shipping?.regionName || data.shipping?.country || data.billing.regionName) : data.billing.regionName,
+              postalCode: data.shipToDifferentAddress ? (data.shipping?.postalCode || data.billing.postalCode || "00000") : (data.billing.postalCode || "00000"),
+              phone: data.shipToDifferentAddress ? (data.shipping?.phone || data.billing.phone || "") : (data.billing.phone || ""),
+            },
+            billing_address: {
               firstName: data.billing.firstName,
               lastName: data.billing.lastName,
               street: data.billing.address.street,
-              apartment: data.billing.address.apartment,
+              apartment: data.billing.address.apartment || "",
               town: data.billing.town,
               country: data.billing.regionName || data.billing.country,
               country_code: data.billing.regionName || data.billing.country,
               regionName: data.billing.regionName,
               postalCode: data.billing.postalCode || "00000",
-              phone: data.billing.phone,
+              phone: data.billing.phone || "",
             },
-            billing_address: data.shipToDifferentAddress ? {
-              firstName: data.shipping.address?.street ? data.billing.firstName : data.billing.firstName,
-              lastName: data.shipping.address?.street ? data.billing.lastName : data.billing.lastName,
-              street: data.shipping.address?.street || data.billing.address.street,
-              apartment: data.shipping.address?.apartment || data.billing.address.apartment,
-              town: data.shipping.town || data.billing.town,
-              country: data.shipping.country || data.billing.regionName || data.billing.country,
-              country_code: data.shipping.country || data.billing.regionName || data.billing.country,
-              regionName: data.shipping.country || data.billing.regionName,
-              postalCode: data.shipping.postalCode || data.billing.postalCode || "00000",
-              phone: data.shipping.phone || data.billing.phone,
-            } : undefined,
             payment_method: paymentStatus === "paid" ? "stripe" : "cod",
             same_as_billing: !data.shipToDifferentAddress,
             cartItems,

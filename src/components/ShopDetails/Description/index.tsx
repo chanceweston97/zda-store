@@ -10,8 +10,15 @@ import { CircleCheckIcon } from "@/assets/icons";
 const renderContent = (content: any): React.ReactNode => {
   if (!content) return null;
   
-  // If it's a string, render it directly
+  // If it's a string, check if it contains HTML
   if (typeof content === 'string') {
+    // Check if string contains HTML tags
+    const hasHTML = /<[a-z][\s\S]*>/i.test(content);
+    if (hasHTML) {
+      // Render HTML using dangerouslySetInnerHTML
+      return <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />;
+    }
+    // Plain text - render with line breaks
     return <div className="whitespace-pre-line">{content}</div>;
   }
   

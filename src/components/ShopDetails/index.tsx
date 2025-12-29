@@ -321,11 +321,14 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   };
 
   const getGainPrice = (option: any, index: number): number => {
-    // New format: object with price (price is in cents from Medusa calculated_amount)
-    // Front project line 141: uses calculated_amount directly, then divides by 100 for display
+    // New format: object with price
+    // For Medusa: price is in cents, convert to dollars
+    // For WooCommerce: price might be in dollars already (check if > 1000, assume cents if so)
     if (option && typeof option === 'object' && option !== null && 'price' in option && typeof option.price === 'number') {
-      // Price is stored in cents, convert to dollars for display
-      return option.price / 100;
+      const optionPrice = option.price;
+      // If price is >= 1000, assume it's in cents (Medusa format)
+      // If price is < 1000, assume it's already in dollars (WooCommerce format)
+      return optionPrice >= 1000 ? optionPrice / 100 : optionPrice;
     }
     // Old format: fallback to first gain option's price with calculation
     const firstGainOption = product.gainOptions?.[0];
@@ -424,12 +427,13 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     
     // For antenna products, use gain options
     if (gainIndex < 0 || !currentGainOption) {
-      // Fallback to first gain option's price, or 0 if no gain options
+      // Fallback to first gain option's price, or product price if no gain options
       const firstGain = product.gainOptions?.[0];
       if (firstGain) {
         return getGainPrice(firstGain, 0);
       }
-      return 0;
+      // If no gain options, use product price (for WooCommerce products without variants)
+      return product.price ?? 0;
     }
     return getGainPrice(currentGainOption, gainIndex);
   }, [currentGainOption, gainIndex, product.gainOptions, isConnectorProduct, isStandaloneConnector, isSimpleConnector, isCableProduct, selectedLength, selectedLengthIndex, lengthOptions, cableTypePricePerFoot, connectorPrice, product.price, selectedCableTypeSlug, standaloneConnectorPrice, (product as any).variants]);
@@ -818,7 +822,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
               {/* Price */}
               <h3 className="font-medium text-custom-1 mb-4">
                 <span className="text-black text-[36px] font-medium leading-9 tracking-[-1.08px] uppercase">
-                  ${formatPrice(totalPrice * 100)}
+                  ${formatPrice(totalPrice)}
                 </span>
               </h3>
 
@@ -1115,7 +1119,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               <div className="flex justify-between items-center">
                                 <span className="text-black text-[18px] font-medium">Connector Price:</span>
                                 <span className="text-[#2958A4] text-[24px] font-bold">
-                                  ${formatPrice(standaloneConnectorPrice * 100)}
+                                  ${formatPrice(standaloneConnectorPrice)}
                                 </span>
                               </div>
                             </div>

@@ -151,7 +151,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         </h3>
 
         <span className="flex items-center gap-2 text-lg font-medium">
-          <span className="text-dark">${formatPrice(productPrice * 100)}</span>
+          <span className="text-dark">${formatPrice(productPrice)}</span>
         </span>
       </Link>
     </div>

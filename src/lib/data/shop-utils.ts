@@ -304,9 +304,12 @@ export async function getCoupons() {
 }
 
 // Cable Customizer Functions
+// Import local cable customizer data
+import cableCustomizerData from "./cable-customizer-data";
+
 export async function getCableSeries() {
-  // Import from cable-customizer data if available
-  return [];
+  // Return cable series from local data
+  return cableCustomizerData.cableSeries || [];
 }
 
 export async function getCableProducts() {
@@ -318,18 +321,19 @@ export async function getConnectorProducts() {
 }
 
 export async function getCableTypes() {
-  // Import from cable-customizer data if available
-  return [];
+  // Return cable types from local data
+  return cableCustomizerData.cableTypes || [];
 }
 
 export async function getCableTypesBySeries(seriesSlug: string) {
-  // Import from cable-customizer data if available
-  return [];
+  // Filter cable types by series slug
+  const allTypes = cableCustomizerData.cableTypes || [];
+  return allTypes.filter((type) => type.series === seriesSlug);
 }
 
 export async function getConnectors() {
-  // Import from cable-customizer data if available
-  return [];
+  // Return connectors from local data
+  return cableCustomizerData.connectors || [];
 }
 
 // Image builder - maintains compatibility with Sanity image format

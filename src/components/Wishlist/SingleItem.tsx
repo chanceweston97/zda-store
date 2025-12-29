@@ -82,7 +82,7 @@ const SingleItem = ({ item }: any) => {
       {/* Price */}
       <td className="py-4 px-6">
         <p className="text-lg font-semibold text-dark">
-          ${formatPrice(productPrice * 100)}
+          ${formatPrice(productPrice)}
         </p>
       </td>
 

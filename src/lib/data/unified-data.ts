@@ -8,23 +8,42 @@ import { getAllProducts as getLocalProducts } from "@/lib/data/shop-utils";
 import { getMedusaProducts } from "@/lib/medusa/products";
 import { isMedusaEnabled } from "@/lib/medusa/config";
 import { medusaClient } from "@/lib/medusa/client";
+import { getProducts, getProductBySlug as getWCProductBySlug, convertWCToSanityProduct } from "@/lib/woocommerce/products";
+import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
 /**
- * Get all products from both local data and Medusa
- * Priority: Medusa (if enabled) > Local Data
+ * Get all products from WooCommerce, Medusa, or local data
+ * Priority: WooCommerce (if enabled) > Medusa (if enabled) > Local Data
  */
 export async function getAllProducts() {
+  const useWooCommerce = isWooCommerceEnabled();
   const useMedusa = isMedusaEnabled();
 
-  // Log Medusa status (always log in production for debugging)
+  // Log status (always log in production for debugging)
   if (typeof window === 'undefined') {
+    console.log("[getAllProducts] WooCommerce enabled:", useWooCommerce);
     console.log("[getAllProducts] Medusa enabled:", useMedusa);
-    if (!useMedusa) {
-      console.warn("[getAllProducts] Medusa is disabled - will use local data fallback");
-      console.warn("[getAllProducts] Set NEXT_PUBLIC_USE_MEDUSA=true to enable Medusa");
+  }
+
+  // Try WooCommerce first
+  if (useWooCommerce) {
+    try {
+      console.log("[getAllProducts] Fetching products from WooCommerce...");
+      const wcProducts = await getProducts({ per_page: 100 });
+      
+      if (wcProducts && wcProducts.length > 0) {
+        const converted = wcProducts.map(convertWCToSanityProduct);
+        console.log(`[getAllProducts] Successfully fetched ${converted.length} products from WooCommerce`);
+        return converted;
+      } else {
+        console.warn("[getAllProducts] No products returned from WooCommerce, falling back to Medusa");
+      }
+    } catch (error: any) {
+      console.error("[getAllProducts] WooCommerce fetch failed, falling back to Medusa:", error?.message || error);
     }
   }
 
+  // Try Medusa if WooCommerce is not enabled or failed
   if (useMedusa) {
     try {
       console.log("[getAllProducts] Fetching products from Medusa...");
@@ -62,20 +81,38 @@ export async function getAllProducts() {
 
 /**
  * Get product by slug
- * Tries Medusa first, then local data
+ * Tries WooCommerce first, then Medusa, then local data
  */
 export async function getProductBySlug(slug: string) {
+  const useWooCommerce = isWooCommerceEnabled();
   const useMedusa = isMedusaEnabled();
 
+  // Try WooCommerce first
+  if (useWooCommerce) {
+    try {
+      console.log(`[getProductBySlug] Fetching product from WooCommerce: ${slug}`);
+      const wcProduct = await getWCProductBySlug(slug);
+      if (wcProduct) {
+        const converted = convertWCToSanityProduct(wcProduct);
+        console.log(`[getProductBySlug] Successfully fetched product from WooCommerce: ${slug}`);
+        return converted;
+      }
+    } catch (error) {
+      console.error(`[getProductBySlug] WooCommerce fetch failed for ${slug}, trying Medusa:`, error);
+    }
+  }
+
+  // Try Medusa if WooCommerce is not enabled or failed
   if (useMedusa) {
     try {
       const { getMedusaProductByHandle } = await import("@/lib/medusa/products");
       const product = await getMedusaProductByHandle(slug);
       if (product) {
+        console.log(`[getProductBySlug] Successfully fetched product from Medusa: ${slug}`);
         return product;
       }
     } catch (error) {
-      console.error("Medusa fetch failed, falling back to local data:", error);
+      console.error(`[getProductBySlug] Medusa fetch failed for ${slug}, falling back to local data:`, error);
     }
   }
 

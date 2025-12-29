@@ -304,6 +304,9 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     // Create a unique ID for this custom cable configuration
     const customId = `custom-cable-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
+    // Create unique key to prevent cart item merging (timestamp-based)
+    const uniqueKey = `cc_${Date.now()}`;
+    
     const cartItem = {
       id: customId,
       name: cableName,
@@ -312,7 +315,21 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
       image: "/images/cable-customizer/hero-cable.png",
       price_id: null,
       slug: "custom-cable",
+      // WooCommerce product ID for custom cables (virtual product)
+      product_id: 3365,
+      // Unique key to prevent cart item merging
+      unique_key: uniqueKey,
       metadata: {
+        // WooCommerce product ID (for convertCartItemToWC function)
+        woocommerce_product_id: 3365,
+        wc_product_id: 3365,
+        // WooCommerce meta_data format (will be converted in convertCartItemToWC)
+        cable: cableType.name,
+        length: `${config.length}ft`,
+        from: connector1.name,
+        to: connector2.name,
+        display_name: cableName,
+        // Additional metadata for internal use
         cableSeries: config.cableSeries,
         cableType: config.cableType,
         cableTypeName: cableType.name,
@@ -320,8 +337,9 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         connector1Name: connector1.name,
         connector2: config.connector2,
         connector2Name: connector2.name,
-        length: config.length,
+        lengthInFeet: config.length, // Use different key to avoid conflict
         isCustom: true,
+        unique_key: uniqueKey,
       },
     };
 

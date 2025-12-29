@@ -2,6 +2,9 @@ import ShopWithSidebar from "@/components/ShopWithSidebar";
 import { medusaClient } from "@/lib/medusa/client";
 import { convertMedusaToSanityProduct } from "@/lib/medusa/products";
 import { convertMedusaToSanityCategory } from "@/lib/medusa/categories";
+import { getProducts, convertWCToSanityProduct } from "@/lib/woocommerce/products";
+import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
+import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { Metadata } from 'next';
 
 // Force dynamic rendering to prevent static generation in production
@@ -26,116 +29,120 @@ type PageProps = {
 const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   const { category, sizes, minPrice, maxPrice, sort } = await searchParams;
 
-  // Fetch products and categories directly from Medusa backend API
-  // No fallback to local data - call backend API directly
+  // Fetch products and categories from WooCommerce or Medusa
   let allProducts: any[] = [];
   let categories: any[] = [];
   let allProductsCount = 0;
 
-  // Log Medusa configuration for debugging (server-side only)
-  // ALWAYS log in production to help debug
+  const useWooCommerce = isWooCommerceEnabled();
+
+  // Log configuration for debugging (server-side only)
   if (typeof window === 'undefined') {
-    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_BACKEND_URL || "not set";
     console.log("[ShopPage] ========================================");
-    console.log("[ShopPage] Fetching products directly from Medusa backend API");
-    console.log("[ShopPage] Backend URL:", backendUrl);
-    console.log("[ShopPage] NODE_ENV:", process.env.NODE_ENV);
-    console.log("[ShopPage] NEXT_PUBLIC_MEDUSA_BACKEND_URL:", process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "NOT SET");
-    console.log("[ShopPage] MEDUSA_BACKEND_URL:", process.env.MEDUSA_BACKEND_URL || "NOT SET");
-    console.log("[ShopPage] NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:", process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ? `${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.substring(0, 20)}... (${process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY.length} chars)` : "NOT SET");
-    
-    // CRITICAL: Check if using localhost in production
-    if (process.env.NODE_ENV === 'production' && backendUrl.includes('localhost')) {
-      console.error("[ShopPage] ❌❌❌ CRITICAL ERROR: Using localhost in production! ❌❌❌");
-      console.error("[ShopPage] This will FAIL on the server!");
-      console.error("[ShopPage] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://18.224.229.214:9000 in .env.local");
-      console.error("[ShopPage] Then rebuild: yarn build");
+    if (useWooCommerce) {
+      console.log("[ShopPage] Using WooCommerce for products");
+      console.log("[ShopPage] WC_API_URL:", process.env.NEXT_PUBLIC_WC_API_URL || "NOT SET");
+    } else {
+      console.log("[ShopPage] Using Medusa for products");
+      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || process.env.MEDUSA_BACKEND_URL || "not set";
+      console.log("[ShopPage] Backend URL:", backendUrl);
     }
     console.log("[ShopPage] ========================================");
   }
 
   try {
-    // Call Medusa API directly - bypass isMedusaEnabled() check
-    console.log("[ShopPage] Calling medusaClient.getProducts() directly...");
-    
-    // Fetch products and categories in parallel
-    const [productsResponse, categoriesResponse, countResponse] = await Promise.allSettled([
-      // Fetch products directly from Medusa backend API
-      medusaClient.getProducts({
-        limit: 100,
-        fields: "*variants.calculated_price,*categories",
-      }),
-      // Fetch categories directly from Medusa backend API
-      medusaClient.getCategories(),
-      // Get product count
-      medusaClient.getProducts({ limit: 1 }),
-    ]);
+    if (useWooCommerce) {
+      // Fetch from WooCommerce
+      console.log("[ShopPage] Fetching products from WooCommerce...");
+      
+      const [productsResponse, categoriesResponse] = await Promise.allSettled([
+        getProducts({ per_page: 100 }),
+        getWooCommerceCategories(),
+      ]);
 
-    // Handle products
-    if (productsResponse.status === 'fulfilled') {
-      const productsData = productsResponse.value;
-      if (productsData?.products && productsData.products.length > 0) {
-        // Convert Medusa products to Sanity format
-        allProducts = productsData.products.map(convertMedusaToSanityProduct);
-        console.log(`[ShopPage] Successfully fetched ${allProducts.length} products from Medusa backend`);
+      // Handle products
+      if (productsResponse.status === 'fulfilled') {
+        const wcProducts = productsResponse.value;
+        if (wcProducts && wcProducts.length > 0) {
+          allProducts = wcProducts.map(convertWCToSanityProduct);
+          allProductsCount = wcProducts.length;
+          console.log(`[ShopPage] Successfully fetched ${allProducts.length} products from WooCommerce`);
+        } else {
+          console.warn("[ShopPage] No products in WooCommerce");
+          allProducts = [];
+        }
       } else {
-        console.warn("[ShopPage] No products in Medusa response - check if products exist in database");
+        console.error("[ShopPage] Error fetching products from WooCommerce:", productsResponse.reason);
         allProducts = [];
       }
-    } else {
-      console.error("[ShopPage] Error fetching products from Medusa backend:", productsResponse.reason);
-      if (productsResponse.reason instanceof Error) {
-        console.error("[ShopPage] Error message:", productsResponse.reason.message);
-        console.error("[ShopPage] Error stack:", productsResponse.reason.stack);
-        if ((productsResponse.reason as any).url) {
-          console.error("[ShopPage] Failed URL:", (productsResponse.reason as any).url);
-        }
-      }
-      allProducts = [];
-    }
 
-    // Handle categories
-    if (categoriesResponse.status === 'fulfilled') {
-      const categoriesData = categoriesResponse.value;
-      const product_categories = categoriesData?.product_categories || (categoriesData as any)?.categories || [];
-      
-      if (product_categories.length > 0) {
-        // Convert all categories
-        const converted = product_categories.map((cat: any) =>
-          convertMedusaToSanityCategory(cat, product_categories)
-        );
-        // Filter to only return top-level categories (no parent)
-        categories = converted.filter((cat: any) => !cat.parent);
-        console.log(`[ShopPage] Successfully fetched ${categories.length} categories from Medusa backend`);
+      // Handle categories
+      if (categoriesResponse.status === 'fulfilled') {
+        categories = categoriesResponse.value;
+        console.log(`[ShopPage] Successfully fetched ${categories.length} categories from WooCommerce`);
       } else {
-        console.warn("[ShopPage] No categories in Medusa response");
+        console.error("[ShopPage] Error fetching categories from WooCommerce:", categoriesResponse.reason);
         categories = [];
       }
     } else {
-      console.error("[ShopPage] Error fetching categories from Medusa backend:", categoriesResponse.reason);
-      if (categoriesResponse.reason instanceof Error) {
-        console.error("[ShopPage] Error message:", categoriesResponse.reason.message);
-        if ((categoriesResponse.reason as any).url) {
-          console.error("[ShopPage] Failed URL:", (categoriesResponse.reason as any).url);
-        }
-      }
-      categories = [];
-    }
+      // Fetch from Medusa (original code)
+      console.log("[ShopPage] Fetching products from Medusa...");
+      
+      const [productsResponse, categoriesResponse, countResponse] = await Promise.allSettled([
+        medusaClient.getProducts({
+          limit: 100,
+          fields: "*variants.calculated_price,*categories",
+        }),
+        medusaClient.getCategories(),
+        medusaClient.getProducts({ limit: 1 }),
+      ]);
 
-    // Handle product count
-    if (countResponse.status === 'fulfilled') {
-      allProductsCount = countResponse.value?.count || allProducts.length;
-      console.log(`[ShopPage] Product count from Medusa backend: ${allProductsCount}`);
-    } else {
-      console.error("[ShopPage] Error fetching product count from Medusa backend:", countResponse.reason);
-      allProductsCount = allProducts.length; // Use array length as fallback
+      // Handle products
+      if (productsResponse.status === 'fulfilled') {
+        const productsData = productsResponse.value;
+        if (productsData?.products && productsData.products.length > 0) {
+          allProducts = productsData.products.map(convertMedusaToSanityProduct);
+          console.log(`[ShopPage] Successfully fetched ${allProducts.length} products from Medusa`);
+        } else {
+          console.warn("[ShopPage] No products in Medusa response");
+          allProducts = [];
+        }
+      } else {
+        console.error("[ShopPage] Error fetching products from Medusa:", productsResponse.reason);
+        allProducts = [];
+      }
+
+      // Handle categories
+      if (categoriesResponse.status === 'fulfilled') {
+        const categoriesData = categoriesResponse.value;
+        const product_categories = categoriesData?.product_categories || (categoriesData as any)?.categories || [];
+        
+        if (product_categories.length > 0) {
+          const converted = product_categories.map((cat: any) =>
+            convertMedusaToSanityCategory(cat, product_categories)
+          );
+          categories = converted.filter((cat: any) => !cat.parent);
+          console.log(`[ShopPage] Successfully fetched ${categories.length} categories from Medusa`);
+        } else {
+          categories = [];
+        }
+      } else {
+        console.error("[ShopPage] Error fetching categories from Medusa:", categoriesResponse.reason);
+        categories = [];
+      }
+
+      // Handle product count
+      if (countResponse.status === 'fulfilled') {
+        allProductsCount = countResponse.value?.count || allProducts.length;
+      } else {
+        allProductsCount = allProducts.length;
+      }
     }
   } catch (error: any) {
-    console.error("[ShopPage] Unexpected error during Medusa API calls:", {
+    console.error("[ShopPage] Unexpected error:", {
       error: error?.message || String(error),
       stack: process.env.NODE_ENV !== 'production' ? error?.stack : undefined,
     });
-    // Continue with empty arrays to prevent 500 error
     allProducts = [];
     categories = [];
     allProductsCount = 0;

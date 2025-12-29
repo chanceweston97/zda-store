@@ -59,6 +59,11 @@ const nextConfig = {
         port: '',
       },
       {
+        protocol: 'https',
+        hostname: 'zdacomm.com',
+        port: '',
+      },
+      {
         protocol: 'http',
         hostname: '18.191.243.236',
         port: '9000',

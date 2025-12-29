@@ -117,9 +117,9 @@ const SingleItem = ({ item }: { item: Product }) => {
           </h3>
 
           <span className="flex items-center justify-center gap-2 text-lg font-medium">
-            <span className="text-dark">${formatPrice(productPrice * 100)}</span>
+            <span className="text-dark">${formatPrice(productPrice)}</span>
             {item.discountedPrice && item.discountedPrice < productPrice && (
-              <span className="line-through text-dark-4">${formatPrice(productPrice * 100)}</span>
+              <span className="line-through text-dark-4">${formatPrice(productPrice)}</span>
             )}
           </span>
         </div>

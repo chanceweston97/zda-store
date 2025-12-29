@@ -236,7 +236,7 @@ const QuickViewModal = () => {
 
                       <span className="flex items-center gap-2">
                         <span className="text-xl font-semibold text-dark xl:text-heading-4">
-                          ${formatPrice(getProductPrice(product) * quantity * 100)}
+                          ${formatPrice(getProductPrice(product) * quantity)}
                         </span>
                       </span>
                     </div>
