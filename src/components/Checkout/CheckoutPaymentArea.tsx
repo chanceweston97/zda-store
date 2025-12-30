@@ -52,14 +52,21 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
     // Reset error message when retrying
     setErrorMessage("");
 
+    // Create AbortController for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
     fetch("/api/create-payment-intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
+      signal: controller.signal,
     })
       .then(async (res) => {
+        clearTimeout(timeoutId);
+        
         // Check content type to handle HTML error pages (404, 500, etc.)
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
@@ -70,14 +77,34 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
             contentType,
             bodyPreview: text.substring(0, 200),
           });
-          throw new Error(`Server error (${res.status}): API endpoint returned ${contentType || 'unknown content type'} instead of JSON. Please check server logs.`);
+          
+          // Handle 504 Gateway Timeout specifically
+          if (res.status === 504) {
+            throw new Error("Payment service is temporarily unavailable. Please try again in a moment or use Cash on Delivery.");
+          }
+          
+          throw new Error(`Server error (${res.status}): Payment service unavailable. Please try again or use Cash on Delivery.`);
         }
 
         if (!res.ok) {
-          const err = await res.json();
-          const errorMsg = err.error || "Failed to create payment intent";
-          console.error("Payment intent API error:", errorMsg, err);
-          throw new Error(errorMsg);
+          try {
+            const err = await res.json();
+            const errorMsg = err.error || "Failed to create payment intent";
+            console.error("Payment intent API error:", errorMsg, err);
+            
+            // Handle 504 specifically
+            if (res.status === 504) {
+              throw new Error("Payment service is temporarily unavailable. Please try again in a moment or use Cash on Delivery.");
+            }
+            
+            throw new Error(errorMsg);
+          } catch (parseError) {
+            // If JSON parsing fails, use status-based error
+            if (res.status === 504) {
+              throw new Error("Payment service is temporarily unavailable. Please try again in a moment or use Cash on Delivery.");
+            }
+            throw new Error(`Payment service error (${res.status}). Please try again or use Cash on Delivery.`);
+          }
         }
         return res.json();
       })
@@ -93,10 +120,23 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
         }
       })
       .catch((error) => {
+        clearTimeout(timeoutId);
         console.error("Error creating payment intent:", error);
-        const errorMessage = error.message || "Failed to initialize payment. Please refresh the page.";
-        setErrorMessage(errorMessage);
+        
+        // Handle abort/timeout errors
+        if (error.name === 'AbortError' || error.message?.includes('timeout') || error.message?.includes('temporarily unavailable')) {
+          setErrorMessage("Payment service is temporarily unavailable. Please try again in a moment or use Cash on Delivery.");
+        } else {
+          const errorMessage = error.message || "Failed to initialize payment. Please try again or use Cash on Delivery.";
+          setErrorMessage(errorMessage);
+        }
       });
+      
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [amount, paymentMethod]);
 
   // Handle checkout
@@ -339,6 +379,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
   }
 
   // Show error if payment intent creation failed (only for Stripe)
+  // Don't block checkout for COD - errors should only show for Stripe
   if (paymentMethod === "bank" && !clientSecret && errorMessage) {
     return (
       <div className="mt-48 text-center">
@@ -347,9 +388,23 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
             <p className="mt-4 text-lg font-semibold text-red mb-4">
               {errorMessage}
             </p>
-            <p className="text-sm text-gray-600">
-              Please refresh the page or contact support if the issue persists.
+            <p className="text-sm text-gray-600 mb-4">
+              Please try again or switch to Cash on Delivery.
             </p>
+            <button
+              onClick={() => {
+                setErrorMessage("");
+                // Trigger re-fetch by updating payment method
+                const event = new Event('input', { bubbles: true });
+                const paymentMethodInput = document.querySelector('input[value="cod"]') as HTMLInputElement;
+                if (paymentMethodInput) {
+                  paymentMethodInput.click();
+                }
+              }}
+              className="px-4 py-2 bg-[#2958A4] text-white rounded hover:bg-[#1F4480] transition-colors"
+            >
+              Switch to Cash on Delivery
+            </button>
           </div>
         </div>
       </div>
