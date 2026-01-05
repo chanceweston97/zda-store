@@ -23,6 +23,7 @@ const PaymentMethod = ({ amount }: { amount: number }) => {
                 <RadioInput
                   {...field}
                   value="bank"
+                  defaultChecked
                   label={<PaymentMethodCard method="bank" />}
                 />
               )}
@@ -36,7 +37,6 @@ const PaymentMethod = ({ amount }: { amount: number }) => {
               <RadioInput
                 {...field}
                 value="cod"
-                defaultChecked
                 label={<PaymentMethodCard method="cod" />}
               />
             )}

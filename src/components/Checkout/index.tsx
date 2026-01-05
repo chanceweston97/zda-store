@@ -43,7 +43,7 @@ export default function CheckoutMain() {
           name: "free",
           price: 0,
         },
-        paymentMethod: "cod",
+        paymentMethod: "bank",
         couponDiscount: 0,
         couponCode: "",
         billing: {
