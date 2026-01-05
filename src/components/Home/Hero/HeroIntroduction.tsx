@@ -59,7 +59,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
         {/* Paragraph */}
         <p 
           ref={textRef.ref}
-          className={`mt-6 text-[#4F6866] text-[18px] font-normal leading-7 tracking-[-0.36px] transition-all duration-1000 ease-out delay-200 ${
+          className={`mt-6 text-[#383838] text-[18px] font-normal leading-7 tracking-[-0.36px] transition-all duration-1000 ease-out delay-200 ${
             textRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'

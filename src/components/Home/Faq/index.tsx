@@ -94,7 +94,7 @@ export default function FaqSection({ faqData }: FaqSectionProps) {
   const rightFaqs = faqsWithIds.filter((x) => x.id % 2 === 0);
 
   return (
-    <section className="pb-10">
+    <section className="py-10">
       <div className="mx-auto max-w-[1340px] px-6 sm:px-0">
         {/* Header */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

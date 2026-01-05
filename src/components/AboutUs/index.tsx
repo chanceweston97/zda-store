@@ -17,7 +17,7 @@ export default function AboutUs() {
           </h2>
 
           {/* Paragraph */}
-          <p className="mt-6 text-[#4F6866] text-[18px] font-normal leading-7 tracking-[-0.36px]">
+          <p className="mt-6 text-[#383838] text-[18px] font-normal leading-7 tracking-[-0.36px]">
             At ZDA Communications, we care about one thing above all: reliable wireless
             performance. We design and supply industrial-grade antennas, cabling, and RF
             accessories—plus practical tools like custom cable builds—that help homes,

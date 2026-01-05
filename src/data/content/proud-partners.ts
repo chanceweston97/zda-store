@@ -9,8 +9,8 @@ export const proudPartners: ProudPartners = {
     { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
     { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
     { name: "APS", logo: "/images/hero/partners/aps.svg" },
-    { name: "Motus", logo: "/images/hero/partners/motus.svg" },
-    { name: "rancho", logo: "/images/hero/partners/rancho.png" },
+    { name: "Motus", logo: "/images/hero/partners/motus.png" },
+    { name: "rancho", logo: "/images/hero/partners/rancho.webp" },
   ],
 };
 

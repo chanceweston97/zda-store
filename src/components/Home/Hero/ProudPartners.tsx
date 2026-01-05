@@ -14,9 +14,9 @@ const defaultBrands: Brand[] = [
   { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
   { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
   { name: "APS", logo: "/images/hero/partners/aps.svg" },
-  { name: "Motus", logo: "/images/hero/partners/motus.svg" },
+  { name: "Motus", logo: "/images/hero/partners/motus.png" },
   { name: "abc", logo: "/images/hero/partners/abc.png" },
-  { name: "rancho", logo: "/images/hero/partners/rancho.png" },
+  { name: "rancho", logo: "/images/hero/partners/rancho.webp" },
 ];
 
 interface ProudPartnersData {

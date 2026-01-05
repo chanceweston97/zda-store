@@ -39,10 +39,10 @@ export default function XetaWaveReseller() {
             <div className="w-full lg:w-[450px] lg:shrink-0">
               <div className="bg-white rounded-[20px] h-[300px] sm:h-[350px] lg:h-[412px] flex flex-col">
                 <div className="p-[30px] flex flex-col h-full">
-                  <p className="text-[#2958A4] font-satoshi text-[24px] font-medium leading-[28px] mb-4">
+                  <p className="text-[#383838] font-satoshi text-[18px] leading-[28px] mb-4">
                     Xetawave industrial radios support licensed and unlicensed sub-GHz bands, ethernet, and are engineered for SCADA, telemetry, and remote monitoring.
                   </p>
-                  <p className="text-[#2958A4] font-satoshi text-[24px] font-medium leading-[28px] mb-6 grow">
+                  <p className="text-[#383838] font-satoshi text-[18px] leading-[28px] mb-6 grow">
                     Our antennas are even better with Xetawave radios. As an authorized reseller, we can help you build the whole link end-to-end.
                   </p>
                   
