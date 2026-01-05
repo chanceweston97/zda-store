@@ -1,11 +1,13 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
+import FaqSection from "@/components/Home/Faq";
+import Newsletter from "@/components/Common/Newsletter";
 import {
   getCategories,
   getCategoryBySlug,
   getCategoriesWithSubcategories,
 } from "@/lib/data/unified-data";
-import { imageBuilder } from "@/lib/data/shop-utils";
+import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
 
 // Force dynamic rendering to prevent static generation in production
 export const dynamic = "force-dynamic";
@@ -274,9 +276,13 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
         .trim()
     : "Category Page";
 
+  const faqData = await getFaq();
+
   return (
     <main>
       <ShopWithoutSidebar shopData={filteredProducts} />
+      <FaqSection faqData={faqData} />
+      <Newsletter />
     </main>
   );
 };
