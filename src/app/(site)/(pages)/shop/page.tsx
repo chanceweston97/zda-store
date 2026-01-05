@@ -1,10 +1,13 @@
 import ShopWithSidebar from "@/components/ShopWithSidebar";
+import FaqSection from "@/components/Home/Faq";
+import Newsletter from "@/components/Common/Newsletter";
 import { medusaClient } from "@/lib/medusa/client";
 import { convertMedusaToSanityProduct } from "@/lib/medusa/products";
 import { convertMedusaToSanityCategory } from "@/lib/medusa/categories";
 import { getProducts, convertWCToSanityProduct } from "@/lib/woocommerce/products";
 import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
+import { getFaq } from "@/lib/data/shop-utils";
 import { Metadata } from 'next';
 
 // Force dynamic rendering to prevent static generation in production
@@ -240,6 +243,8 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
     });
   }
 
+  const faqData = await getFaq();
+
   return (
     <main>
       <ShopWithSidebar
@@ -250,6 +255,8 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
           allProductsCount,
         }}
       />
+      <FaqSection faqData={faqData} />
+      <Newsletter />
     </main>
   );
 };
