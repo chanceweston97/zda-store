@@ -13,19 +13,48 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          if [ -d "frontend" ]; then
+            echo "frontend directory exists"
+            ls -la frontend/ | head -20
+          else
+            echo "frontend directory does NOT exist"
+          fi
+
       - name: Create deployment archive
         run: |
-          tar --exclude='node_modules' \
-              --exclude='.next' \
-              --exclude='.git' \
-              --exclude='.github' \
-              --exclude='coverage' \
-              --exclude='build' \
-              --exclude='out' \
-              --exclude='logs' \
-              --exclude='*.log' \
-              --exclude='*.tar.gz' \
-              -czf frontend-deploy.tar.gz .
+          if [ -d "frontend" ]; then
+            # Repository root contains frontend/ subdirectory
+            cd frontend
+            tar --exclude='node_modules' \
+                --exclude='.next' \
+                --exclude='.git' \
+                --exclude='.github' \
+                --exclude='coverage' \
+                --exclude='build' \
+                --exclude='out' \
+                --exclude='logs' \
+                --exclude='*.log' \
+                --exclude='*.tar.gz' \
+                -czf ../frontend-deploy.tar.gz .
+          else
+            # Repository root IS the frontend directory
+            tar --exclude='node_modules' \
+                --exclude='.next' \
+                --exclude='.git' \
+                --exclude='.github' \
+                --exclude='coverage' \
+                --exclude='build' \
+                --exclude='out' \
+                --exclude='logs' \
+                --exclude='*.log' \
+                --exclude='*.tar.gz' \
+                -czf frontend-deploy.tar.gz .
+          fi
 
       - name: Copy frontend to EC2
         uses: appleboy/scp-action@v0.1.7
