@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { wcFetch, isWooCommerceEnabled } from "@/lib/woocommerce/client";
+import { wcFetch } from "@/lib/woocommerce/client";
+import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
 /**
  * Sync cart items to WooCommerce
