@@ -422,6 +422,8 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
     if (!value) return false;
     if (typeof value === 'number') return true;
     if (typeof value === 'string') {
+      // Skip ACF field keys (they start with 'field_')
+      if (value.startsWith('field_')) return false;
       // Check if it's a numeric string (not a URL)
       const num = parseInt(value, 10);
       return !isNaN(num) && num > 0 && !value.startsWith('http');
@@ -429,23 +431,44 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
     return false;
   };
   
+  // Helper to check if value is an ACF field key
+  const isACFFieldKey = (value: any): boolean => {
+    return typeof value === 'string' && value.startsWith('field_');
+  };
+  
   // Resolve datasheet image
   let datasheetImage: string | null = null;
   if (datasheetImageRaw) {
-    if (isMediaId(datasheetImageRaw)) {
+    // Skip ACF field keys - they need to be resolved differently
+    if (isACFFieldKey(datasheetImageRaw)) {
+      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetImage is an ACF field key (${datasheetImageRaw}), not a media ID. This needs to be resolved from ACF field data.`);
+      datasheetImage = null; // ACF field keys can't be resolved this way
+    } else if (isMediaId(datasheetImageRaw)) {
       datasheetImage = await resolveMediaId(datasheetImageRaw);
-    } else if (typeof datasheetImageRaw === 'string') {
+    } else if (typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
       datasheetImage = datasheetImageRaw;
+    } else {
+      // Invalid format, skip it
+      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetImage format:`, datasheetImageRaw);
+      datasheetImage = null;
     }
   }
   
   // Resolve datasheet PDF
   let datasheetPdf: string | null = null;
   if (datasheetPdfRaw) {
-    if (isMediaId(datasheetPdfRaw)) {
+    // Skip ACF field keys - they need to be resolved differently
+    if (isACFFieldKey(datasheetPdfRaw)) {
+      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetPdf is an ACF field key (${datasheetPdfRaw}), not a media ID. This needs to be resolved from ACF field data.`);
+      datasheetPdf = null; // ACF field keys can't be resolved this way
+    } else if (isMediaId(datasheetPdfRaw)) {
       datasheetPdf = await resolveMediaId(datasheetPdfRaw);
-    } else if (typeof datasheetPdfRaw === 'string') {
+    } else if (typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
       datasheetPdf = datasheetPdfRaw;
+    } else {
+      // Invalid format, skip it
+      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetPdf format:`, datasheetPdfRaw);
+      datasheetPdf = null;
     }
   }
   

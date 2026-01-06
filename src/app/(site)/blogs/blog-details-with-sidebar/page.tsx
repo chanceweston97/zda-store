@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Blog Details Page | ZDAComm |  Store',
+  title: 'Blog Details Page | ZDA Communications',
   description: 'Blog functionality has been removed',
 };
 

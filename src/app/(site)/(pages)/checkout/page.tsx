@@ -4,7 +4,7 @@ import Checkout from "@/components/Checkout";
 import { Metadata } from "next";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 export const metadata: Metadata = {
-  title: "Checkout Page | ZDAComm |  Store",
+  title: "Checkout Page | ZDA Communications",
   description: "This is Checkout Page for ZDAComm Template",
   // other metadata
 };

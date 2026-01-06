@@ -3,7 +3,7 @@ import MailSuccess from "@/components/MailSuccess";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Mail Success Page | ZDAComm |  Store",
+  title: "Mail Success Page | ZDA Communications",
   description: "This is Mail Success Page for ZDAComm Template",
   // other metadata
 };

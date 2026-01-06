@@ -3,7 +3,7 @@ import { Wishlist } from "@/components/Wishlist";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Wishlist Page | ZDAComm |  Store",
+  title: "Wishlist Page | ZDA Communications",
   description: "This is Wishlist Page for ZDAComm Template",
   // other metadata
 };

@@ -5,7 +5,7 @@ import { getFaq } from "@/lib/data/shop-utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Page | ZDAComm |  Store",
+  title: "Contact Page | ZDA Communications",
   description: "This is Contact Page for ZDAComm Template",
   // other metadata
 };

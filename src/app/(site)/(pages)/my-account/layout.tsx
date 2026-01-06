@@ -7,7 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'My Account | ZDAComm |  Store',
+  title: 'My Account | ZDA Communications',
   description: 'This is My Account page for ZDAComm Template',
   // other metadata
 };

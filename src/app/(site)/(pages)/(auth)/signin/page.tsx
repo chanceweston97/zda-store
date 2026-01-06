@@ -2,7 +2,7 @@ import Signin from "@/components/Auth/Signin";
 import React from "react";
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Signin Page | ZDAComm |  Store",
+  title: "Signin Page | ZDA Communications",
   description: "This is Signin Page for ZDAComm Template",
   // other metadata
 };

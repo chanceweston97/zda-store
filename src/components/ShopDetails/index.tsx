@@ -98,18 +98,47 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   const getImageUrl = (img: any | undefined | null): string | null => {
     if (!img) return null;
     try {
-      // If img is already a string URL (from Medusa), return it directly
-      if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
-        return img;
+      let url: string | null = null;
+      
+      // If img is already a string URL (from Medusa/WordPress), validate it
+      if (typeof img === 'string') {
+        if (img.startsWith('http://') || img.startsWith('https://')) {
+          // Validate it's a proper URL before returning
+          try {
+            new URL(img); // This will throw if invalid
+            url = img;
+          } catch {
+            // Invalid URL, skip it
+            return null;
+          }
+        } else {
+          // Relative URL or invalid format, skip it
+          return null;
+        }
+      } else {
+        // Otherwise, try to use imageBuilder for Sanity assets
+        const builtUrl = imageBuilder(img).url();
+        if (builtUrl && typeof builtUrl === 'string' && builtUrl.length > 0) {
+          // Validate the built URL
+          if (builtUrl.startsWith('http://') || builtUrl.startsWith('https://')) {
+            try {
+              new URL(builtUrl); // This will throw if invalid
+              url = builtUrl;
+            } catch {
+              // Invalid URL, skip it
+              return null;
+            }
+          } else {
+            // Relative URL, skip it
+            return null;
+          }
+        }
       }
-      // Otherwise, try to use imageBuilder for Sanity assets
-      const url = imageBuilder(img).url();
-      return url && url.length > 0 ? url : null;
-    } catch {
-      // If imageBuilder fails, check if img is a string URL
-      if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
-        return img;
-      }
+      
+      return url;
+    } catch (error) {
+      // If anything fails, return null to prevent invalid URLs
+      console.warn('[ShopDetails] Failed to get image URL:', error, img);
       return null;
     }
   };
@@ -147,6 +176,13 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   
   // Cable product: from cableType document, needs length selection
   const isCableProduct = product.productType === "cable";
+  
+  // Debug: Log product type for troubleshooting
+  useEffect(() => {
+    if (product.productType) {
+      console.log(`[ShopDetails] Product type: ${product.productType}, isCableProduct: ${isCableProduct}`);
+    }
+  }, [product.productType, isCableProduct]);
   
   // For connector products (products with productType="connector")
   const productCableSeries = product.cableSeries?.name || "";
@@ -304,10 +340,96 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
   // Auto-select first length option (for cables) or first variant (for simple connectors or antenna products)
   useEffect(() => {
-    if (isCableProduct && lengthOptions.length > 0 && selectedLengthIndex < 0) {
-      setSelectedLengthIndex(0);
-      const firstLength = lengthOptions[0];
-      setSelectedLength(getLengthValue(firstLength));
+    // For cable products with variants (WooCommerce) - work like antennas: sort and select index 0
+    if (isCableProduct && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
+      // Sort variants by length (smallest to largest) - same as display sorting
+      const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
+        const getLengthNumber = (variant: any): number => {
+          const title = variant.title || "";
+          const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+          return match ? parseFloat(match[1]) : 0;
+        };
+        return getLengthNumber(a) - getLengthNumber(b);
+      });
+      
+      // After sorting, the first variant (index 0) is the smallest - select it
+      // Find its original index in the unsorted array for price calculation
+      if (sortedVariants.length > 0) {
+        const firstVariant = sortedVariants[0];
+        
+        // Extract length from first variant to find matching variant in original array
+        const firstVariantTitle = firstVariant.title || "";
+        const firstCleaned = firstVariantTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+        const firstMatch = firstCleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+        const firstLength = firstMatch ? parseFloat(firstMatch[1]) : 0;
+        
+        console.log("[ShopDetails] Finding smallest variant - sorted first:", {
+          title: firstVariantTitle,
+          length: firstLength,
+          id: firstVariant.id
+        });
+        
+        // Find original index by matching length value (most reliable method)
+        let originalIndex = (product as any).variants.findIndex((v: any) => {
+          const vTitle = v.title || "";
+          const vCleaned = vTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+          const vMatch = vCleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+          const vLength = vMatch ? parseFloat(vMatch[1]) : 0;
+          return vLength === firstLength && firstLength > 0;
+        });
+        
+        // Fallback: try matching by ID
+        if (originalIndex < 0 && firstVariant.id) {
+          originalIndex = (product as any).variants.findIndex((v: any) => v.id === firstVariant.id);
+        }
+        
+        // Fallback: try matching by title
+        if (originalIndex < 0) {
+          originalIndex = (product as any).variants.findIndex((v: any) => v.title === firstVariantTitle);
+        }
+        
+        // Fallback: try matching by reference
+        if (originalIndex < 0) {
+          originalIndex = (product as any).variants.findIndex((v: any) => v === firstVariant);
+        }
+        
+        if (originalIndex >= 0) {
+          setSelectedLengthIndex(originalIndex);
+          const lengthValue = firstMatch ? `${firstMatch[1]} ft` : firstCleaned;
+          setSelectedLength(lengthValue);
+          console.log("[ShopDetails] ✅ Auto-selected smallest length variant (original index:", originalIndex, "):", firstVariantTitle, "→", lengthValue);
+        } else {
+          console.error("[ShopDetails] ❌ Could not find original index for smallest variant. Variants:", (product as any).variants.map((v: any) => v.title));
+          // Don't set selectedLengthIndex - let display logic handle selection
+        }
+      }
+    } else if (isCableProduct && lengthOptions.length > 0 && selectedLengthIndex < 0) {
+      // For cable products with lengthOptions (Medusa) - sort and select smallest
+      const sortedLengthOptions = [...lengthOptions].sort((a: any, b: any) => {
+        const getLengthNumber = (option: any): number => {
+          const value = getLengthValue(option);
+          if (!value) return 0;
+          const cleaned = value.replace(/^Length:\s*/i, "").replace(/\s*dBi/gi, "").trim();
+          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+          return match ? parseFloat(match[1]) : 0;
+        };
+        return getLengthNumber(a) - getLengthNumber(b);
+      });
+      
+      if (sortedLengthOptions.length > 0) {
+        const firstLength = sortedLengthOptions[0];
+        const originalIndex = lengthOptions.findIndex((opt: any) => 
+          (opt.variantId && opt.variantId === firstLength.variantId) ||
+          (opt.id && opt.id === firstLength.id) ||
+          opt === firstLength
+        );
+        if (originalIndex >= 0) {
+          setSelectedLengthIndex(originalIndex);
+          setSelectedLength(getLengthValue(firstLength));
+          console.log("[ShopDetails] Auto-selected smallest length option for cable product:", firstLength);
+        }
+      }
     } else if (isSimpleConnector && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
       setSelectedLengthIndex(0);
     } else if (product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
@@ -316,7 +438,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       setSelectedLengthIndex(0);
       console.log("[ShopDetails] Auto-selected first variant for antenna product:", (product as any).variants[0]);
     }
-  }, [lengthOptions, selectedLengthIndex, isCableProduct, isSimpleConnector, product]);
+  }, [lengthOptions, selectedLengthIndex, isCableProduct, isSimpleConnector, product, (product as any).variants]);
 
   // Parse length from string (e.g., "25 ft" -> 25)
   const parseLengthInFeet = (lengthStr: string): number => {
@@ -428,6 +550,40 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
         return unitPrice; // Return exact price without rounding
       }
       return product.price ?? 0;
+    }
+    
+    // For cable products with variants (WooCommerce): use price from selected variant
+    if (isCableProduct && (product as any).variants && (product as any).variants.length > 0) {
+      if (selectedLengthIndex >= 0 && (product as any).variants[selectedLengthIndex]) {
+        const selectedVariant = (product as any).variants[selectedLengthIndex];
+        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
+        if (selectedVariant?.calculated_price?.calculated_amount) {
+          return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
+        }
+        // WooCommerce variations have price directly in dollars
+        if (selectedVariant?.price) {
+          return selectedVariant.price;
+        }
+      }
+      // Fallback to first variant's price if no selection (sorted by length, smallest first)
+      const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
+        const getLengthNumber = (variant: any): number => {
+          const title = variant.title || "";
+          const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+          return match ? parseFloat(match[1]) : 0;
+        };
+        return getLengthNumber(a) - getLengthNumber(b);
+      });
+      if (sortedVariants.length > 0) {
+        const firstVariant = sortedVariants[0];
+        if (firstVariant?.calculated_price?.calculated_amount) {
+          return firstVariant.calculated_price.calculated_amount / 100;
+        }
+        if (firstVariant?.price) {
+          return firstVariant.price;
+        }
+      }
     }
     
     // For cable products: calculate price from pricePerFoot × selected length
@@ -963,11 +1119,99 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                 <div className="flex flex-col mt-3 py-2">
 
                   <div className="mt-2 w-full space-y-4">
-                      {/* Gain/Variants - Full Width Row (Antenna products only) */}
-                      {/* For WooCommerce products with variations, show variants instead of gainOptions */}
-                      {!isConnectorProduct && !isCableProduct && product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && (
+                      {/* Length/Variants - Full Width Row (Cable products with variants) */}
+                      {/* For WooCommerce cable products with variations, show length options */}
+                      {/* Check if product is cable OR if variants contain "Length:" in title */}
+                      {(() => {
+                        const hasVariants = (product as any).variants && (product as any).variants.length > 0;
+                        const hasLengthVariants = hasVariants && (product as any).variants.some((v: any) => v.title && /Length:/i.test(v.title));
+                        return (isCableProduct || hasLengthVariants) && hasVariants;
+                      })() && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] font-medium leading-[30px]">
+                            Length
+                          </label>
+
+                          <div className="flex flex-wrap gap-2">
+                            {(() => {
+                              // Sort variants by length value (smallest to largest)
+                              const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
+                                const getLengthNumber = (variant: any): number => {
+                                  const title = variant.title || "";
+                                  const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+                                  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                  return match ? parseFloat(match[1]) : 0;
+                                };
+                                return getLengthNumber(a) - getLengthNumber(b);
+                              });
+                              
+                              return sortedVariants.map((variant: any, sortedIndex: number) => {
+                                // Find the original index for selection tracking
+                                const originalVariantIndex = (product as any).variants.findIndex((v: any) => 
+                                  (v.id && variant.id && v.id === variant.id) || 
+                                  v === variant
+                                );
+                                if (!variant) return null;
+                                // Extract length value from variant title (e.g., "Length: 10 ft dBi" -> "10 ft")
+                                const variantTitle = variant.title || "";
+                                console.log(`[ShopDetails] Processing variant title: "${variantTitle}"`);
+                                // Remove "Length:" prefix if present (case insensitive, anywhere in string)
+                                let cleanedTitle = variantTitle.replace(/Length:\s*/gi, "").trim();
+                                // Remove "dBi" if present (case insensitive)
+                                cleanedTitle = cleanedTitle.replace(/\s*dBi/gi, "").trim();
+                                // Try to extract length (e.g., "10 ft", "25 ft", "1000 ft")
+                                const lengthMatch = cleanedTitle.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                let lengthValue;
+                                if (lengthMatch) {
+                                  // Format as "10 ft" (no dBi, no "Length:" prefix)
+                                  lengthValue = `${lengthMatch[1]} ft`;
+                                } else {
+                                  // Fallback: ensure "ft" is present, remove any remaining "Length:" or "dBi"
+                                  let fallback = cleanedTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+                                  lengthValue = fallback.includes('ft') ? fallback : `${fallback} ft`;
+                                }
+                                console.log(`[ShopDetails] Extracted length value: "${lengthValue}" from "${variantTitle}"`);
+                                // Use original index for selection check - if nothing selected yet, select first (smallest) after sorting
+                                const isSelected = originalVariantIndex >= 0 && (
+                                  selectedLengthIndex === originalVariantIndex || 
+                                  (selectedLengthIndex < 0 && sortedIndex === 0)
+                                );
+                              
+                                return (
+                                  <button
+                                    key={variant.id || originalVariantIndex}
+                                    type="button"
+                                    onClick={() => {
+                                      // Set to original index so price calculation works correctly
+                                      setSelectedLengthIndex(originalVariantIndex >= 0 ? originalVariantIndex : sortedIndex);
+                                      setSelectedLength(lengthValue);
+                                    }}
+                                  className={`rounded-lg border flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
+                                    isSelected
+                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
+                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
+                                  }`}
+                                >
+                                    {lengthValue}
+                                  </button>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Gain/Variants - Full Width Row (Antenna products only) */}
+                      {/* For WooCommerce products with variations, show variants instead of gainOptions */}
+                      {/* Only show Gain if NOT a cable product and variants don't contain "Length:" */}
+                      {!isConnectorProduct && 
+                       !isCableProduct && 
+                       product.productType === "antenna" && 
+                       (product as any).variants && 
+                       (product as any).variants.length > 0 &&
+                       !(product as any).variants.some((v: any) => v.title && /Length:/i.test(v.title)) && (
+                        <div className="space-y-2">
+                          <label className="text-black text-[20px] leading-[30px]">
                             Gain
                           </label>
 
@@ -985,7 +1229,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   key={variant.id || index}
                                   type="button"
                                   onClick={() => setSelectedLengthIndex(index)}
-                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] font-bold transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
+                                  className={`rounded-lg border flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
                                     isSelected
                                       ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
                                       : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
@@ -1001,7 +1245,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                       {/* Legacy gainOptions display (for Medusa products) */}
                       {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
-                          <label className="text-black text-[20px] font-medium leading-[30px]">
+                          <label className="text-black text-[20px] leading-[30px]">
                             Gain
                           </label>
 
@@ -1018,7 +1262,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   key={gainOption.id || index}
                                   type="button"
                                   onClick={() => setGainIndex(index)}
-                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] font-bold transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
+                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
                                     isSelected
                                       ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
                                       : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
@@ -1075,7 +1319,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                           {lengthOptions.length > 0 && (
                             <div className="space-y-2 mb-4">
                               <label className="text-black text-[20px] font-medium leading-[30px]">
-                                Length:
+                                Length
                               </label>
                               <div className="flex flex-wrap gap-2">
                                 {lengthOptions.map((lengthOption, index) => {
@@ -1083,8 +1327,11 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   const lengthValue = getLengthValue(lengthOption);
                                   if (!lengthValue) return null;
                                   const isSelected = selectedLengthIndex === index;
-                                  // Ensure "ft" is in the display value
-                                  const displayValue = lengthValue.includes('ft') ? lengthValue : `${lengthValue} ft`;
+                                  // Remove "Length:" prefix if present, and remove "dBi"
+                                  let cleanValue = lengthValue.replace(/^Length:\s*/i, "").trim();
+                                  cleanValue = cleanValue.replace(/\s*dBi/gi, "").trim();
+                                  // Ensure "ft" is in the display value (no dBi for cables)
+                                  let displayValue = cleanValue.includes('ft') ? cleanValue : `${cleanValue} ft`;
                                   return (
                                     <button
                                       key={index}
@@ -1314,39 +1561,62 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                       )}
 
                       {/* Length - Full Width Row (Cable products only) - Same style as Gains */}
-                      {isCableProduct && lengthOptions.length > 0 && (
+                      {isCableProduct && lengthOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] font-medium leading-[30px]">
                             Length
                           </label>
 
                           <div className="flex flex-wrap gap-2">
-                            {lengthOptions.map((lengthOption: any, index: number) => {
-                              if (lengthOption === null || lengthOption === undefined) return null;
-                              const lengthValue = getLengthValue(lengthOption);
-                              if (!lengthValue) return null;
-                              const isSelected = selectedLengthIndex === index;
-                              // Ensure "ft" is in the display value (like "10 ft")
-                              const displayValue = lengthValue.includes('ft') ? lengthValue : `${lengthValue} ft`;
+                            {(() => {
+                              // Sort lengthOptions by numeric length value (smallest to largest)
+                              const sortedLengthOptions = [...lengthOptions].sort((a: any, b: any) => {
+                                const getLengthNumber = (option: any): number => {
+                                  const value = getLengthValue(option);
+                                  if (!value) return 0;
+                                  const cleaned = value.replace(/^Length:\s*/i, "").replace(/\s*dBi/gi, "").trim();
+                                  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                  return match ? parseFloat(match[1]) : 0;
+                                };
+                                return getLengthNumber(a) - getLengthNumber(b);
+                              });
                               
-                              return (
-                                <button
-                                  key={lengthOption.variantId || lengthOption.id || index}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedLengthIndex(index);
-                                    setSelectedLength(lengthValue);
-                                  }}
+                              return sortedLengthOptions.map((lengthOption: any, sortedIndex: number) => {
+                                // Find original index for selection tracking
+                                const originalIndex = lengthOptions.findIndex((opt: any) => 
+                                  (opt.variantId && opt.variantId === lengthOption.variantId) ||
+                                  (opt.id && opt.id === lengthOption.id) ||
+                                  opt === lengthOption
+                                );
+                                if (lengthOption === null || lengthOption === undefined) return null;
+                                const lengthValue = getLengthValue(lengthOption);
+                                if (!lengthValue) return null;
+                                const actualIndex = originalIndex >= 0 ? originalIndex : sortedIndex;
+                                const isSelected = selectedLengthIndex === actualIndex;
+                                // Remove "Length:" prefix if present, and remove "dBi"
+                                let cleanValue = lengthValue.replace(/^Length:\s*/i, "").trim();
+                                cleanValue = cleanValue.replace(/\s*dBi/gi, "").trim();
+                                // Ensure "ft" is in the display value (no dBi for cables)
+                                let displayValue = cleanValue.includes('ft') ? cleanValue : `${cleanValue} ft`;
+                                return (
+                                  <button
+                                    key={lengthOption.variantId || lengthOption.id || actualIndex}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedLengthIndex(actualIndex);
+                                      setSelectedLength(lengthValue);
+                                    }}
                                   className={`rounded border flex items-center justify-center text-center text-[16px] leading-[26px] font-medium transition-all duration-200 whitespace-nowrap px-4 py-2 w-20 ${
                                     isSelected
                                       ? "border-[#2958A4] bg-[#2958A4] text-white"
                                       : "border-[#2958A4] bg-white text-gray-800"
                                   }`}
                                 >
-                                  {displayValue}
-                                </button>
-                              );
-                            })}
+                                    {displayValue}
+                                  </button>
+                                );
+                              });
+                            })()}
                           </div>
                         </div>
                       )}

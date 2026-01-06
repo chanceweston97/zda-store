@@ -11,8 +11,8 @@ import { getFaq } from "@/lib/data/shop-utils";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ZDAComm |  Store",
-  description: "This is Home for ZDAComm Store",
+  title: "ZDA Communications",
+  description: "ZDA Communications",
   // other metadata
 };
 

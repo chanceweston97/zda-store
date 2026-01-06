@@ -4,7 +4,7 @@ import { getProductsByFilter } from "@/lib/data/shop-utils";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shop Page | ZDAComm |  Store',
+  title: 'Shop Page | ZDA Communications',
   description: 'This is Shop Page for ZDAComm Template',
   // other metadata
 };

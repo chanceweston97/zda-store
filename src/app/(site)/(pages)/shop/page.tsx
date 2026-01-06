@@ -14,7 +14,7 @@ import { Metadata } from 'next';
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: 'Shop Page | ZDAComm |  Store',
+  title: 'Shop Page | ZDA Communications',
   description: 'This is Shop Page for ZDAComm Template',
   // other metadata
 };
