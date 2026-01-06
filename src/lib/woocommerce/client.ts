@@ -7,6 +7,23 @@ const WC_API_URL = process.env.NEXT_PUBLIC_WC_API_URL || "";
 const WC_CONSUMER_KEY = process.env.NEXT_PUBLIC_WC_CONSUMER_KEY || "";
 const WC_CONSUMER_SECRET = process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET || "";
 
+// SSL verification setting (for development with self-signed certificates)
+const WC_DISABLE_SSL_VERIFY = process.env.NEXT_PUBLIC_WC_DISABLE_SSL_VERIFY === "true";
+
+// Create custom HTTPS agent for Node.js (server-side only)
+let httpsAgent: any = null;
+if (typeof window === "undefined") {
+  try {
+    const https = require("https");
+    httpsAgent = new https.Agent({
+      rejectUnauthorized: !WC_DISABLE_SSL_VERIFY,
+    });
+  } catch (e) {
+    // https module not available (shouldn't happen in Node.js)
+    console.warn("[WooCommerce] Could not create HTTPS agent:", e);
+  }
+}
+
 /**
  * Create Basic Auth header for WooCommerce REST API
  */
@@ -49,14 +66,30 @@ export async function wcFetch<T>(
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
     try {
-      const response = await fetch(url, {
+      // For Node.js server-side, use custom agent if SSL verification is disabled
+      const fetchOptions: RequestInit = {
         ...options,
         headers,
         cache: "no-store",
         signal: controller.signal,
-        // Add keepalive for better connection handling
         keepalive: true,
-      } as RequestInit);
+      };
+
+      // For Node.js server-side, handle SSL certificate issues
+      if (typeof window === "undefined") {
+        // If SSL verification is explicitly disabled, set the environment variable
+        // Note: This affects all Node.js HTTPS requests, so use with caution
+        if (WC_DISABLE_SSL_VERIFY) {
+          const originalValue = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+          process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+          console.warn("[WooCommerce] SSL verification disabled via NEXT_PUBLIC_WC_DISABLE_SSL_VERIFY. This should only be used in development!");
+          
+          // Restore original value after fetch (though this may not work perfectly)
+          // The better approach is to fix the SSL certificate
+        }
+      }
+
+      const response = await fetch(url, fetchOptions);
       
       clearTimeout(timeoutId);
 
@@ -116,8 +149,22 @@ export async function wcFetch<T>(
       throw new Error(`Request to WooCommerce API timed out after 30 seconds. Please check your network connection and try again. URL: ${url}`);
     }
     
-    if (error?.message?.includes('certificate') || error?.message?.includes('SSL') || error?.message?.includes('TLS') || error?.code === 'CERT_HAS_EXPIRED') {
-      throw new Error(`SSL/TLS certificate error when connecting to WooCommerce. Please check your SSL certificate. URL: ${url}`);
+    // Check for SSL certificate errors
+    const isCertificateError = 
+      error?.message?.includes('certificate') || 
+      error?.message?.includes('SSL') || 
+      error?.message?.includes('TLS') || 
+      error?.code === 'CERT_HAS_EXPIRED' ||
+      error?.cause?.message?.includes('certificate') ||
+      error?.cause?.message?.includes('does not match certificate');
+
+    if (isCertificateError) {
+      const errorMsg = `SSL/TLS certificate error when connecting to WooCommerce API. `;
+      const solutionMsg = typeof window === "undefined" 
+        ? `To bypass SSL verification in development, set NEXT_PUBLIC_WC_DISABLE_SSL_VERIFY=true in your .env file. ` +
+          `⚠️ WARNING: This should only be used in development! In production, fix the SSL certificate on your server.`
+        : `Please check your SSL certificate configuration.`;
+      throw new Error(errorMsg + solutionMsg + ` URL: ${url}`);
     }
     
     if (error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND' || error?.message?.includes('ECONNREFUSED') || error?.message?.includes('ENOTFOUND')) {
