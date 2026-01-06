@@ -96,15 +96,17 @@ export async function POST(req: NextRequest) {
     // Contact Form 7 REST API expects multipart/form-data format
     // Field names must match your Contact Form 7 form fields
     const formData = new FormData();
-    formData.append("your-name", `${firstName.trim()} ${lastName.trim()}`);
+    // Contact form uses separate "first-name" and "last-name" fields
+    formData.append("first-name", firstName.trim());
+    formData.append("last-name", lastName.trim());
     formData.append("your-email", email.trim());
-    formData.append("your-phone", phone.trim());
-    formData.append("your-company", company.trim());
+    // Contact form uses "your-tel" for phone number
+    formData.append("your-tel", phone.trim());
+    // Contact form uses "your-subject" for company name
+    formData.append("your-subject", company.trim());
     if (message) {
       formData.append("your-message", message.trim());
     }
-    // Add any additional fields your Contact Form 7 form expects
-    // Note: Adjust field names to match your Contact Form 7 form configuration
 
     console.log("📤 Sending to Contact Form 7:", {
       endpoint: cf7Endpoint,

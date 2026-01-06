@@ -20,19 +20,19 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: |
-            .
-            !node_modules
-            !.next
-            !.git
-            !.github
-            !coverage
-            !build
-            !out
-            !logs
-            !*.log
-            !*.tar.gz
+            frontend/
+            !frontend/node_modules
+            !frontend/.next
+            !frontend/.git
+            !frontend/.github
+            !frontend/coverage
+            !frontend/build
+            !frontend/out
+            !frontend/logs
+            !frontend/*.log
+            !frontend/*.tar.gz
           target: ${{ secrets.APP_PATH }}
-          strip_components: 0
+          strip_components: 1
           rm: true
           overwrite: true
 
