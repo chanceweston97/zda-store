@@ -40,7 +40,11 @@ jobs:
                 --exclude='logs' \
                 --exclude='*.log' \
                 --exclude='*.tar.gz' \
-                -czf ../frontend-deploy.tar.gz .
+                --exclude='.yarn' \
+                --exclude='yarn-error.log' \
+                --exclude='npm-debug.log' \
+                --warning=no-file-changed \
+                -czf ../frontend-deploy.tar.gz . || true
           else
             # Repository root IS the frontend directory
             tar --exclude='node_modules' \
@@ -53,7 +57,11 @@ jobs:
                 --exclude='logs' \
                 --exclude='*.log' \
                 --exclude='*.tar.gz' \
-                -czf frontend-deploy.tar.gz .
+                --exclude='.yarn' \
+                --exclude='yarn-error.log' \
+                --exclude='npm-debug.log' \
+                --warning=no-file-changed \
+                -czf frontend-deploy.tar.gz . || true
           fi
 
       - name: Copy frontend to EC2
