@@ -13,28 +13,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create deployment archive
+        run: |
+          cd frontend
+          tar --exclude='node_modules' \
+              --exclude='.next' \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='coverage' \
+              --exclude='build' \
+              --exclude='out' \
+              --exclude='logs' \
+              --exclude='*.log' \
+              --exclude='*.tar.gz' \
+              -czf ../frontend-deploy.tar.gz .
+
       - name: Copy frontend to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: |
-            frontend/
-            !frontend/node_modules
-            !frontend/.next
-            !frontend/.git
-            !frontend/.github
-            !frontend/coverage
-            !frontend/build
-            !frontend/out
-            !frontend/logs
-            !frontend/*.log
-            !frontend/*.tar.gz
+          source: "frontend-deploy.tar.gz"
           target: ${{ secrets.APP_PATH }}
-          strip_components: 1
+          strip_components: 0
           rm: true
           overwrite: true
+
+      - name: Extract and cleanup on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            tar -xzf frontend-deploy.tar.gz
+            rm -f frontend-deploy.tar.gz
 
       - name: Build & restart frontend on EC2
         uses: appleboy/ssh-action@v1.0.3

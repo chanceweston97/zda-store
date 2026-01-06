@@ -6,11 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
  * 
  * Endpoint: POST /wp-json/contact-form-7/v1/contact-forms/{FORM_ID}/feedback
  * CMS URL: cms.zdacomm.com
+ * Route: /api/quote-request
  */
 
 // Route segment config
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// Force reload - ensure Next.js picks up this route
 
 // Get CMS URL and Form ID from environment variables
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
