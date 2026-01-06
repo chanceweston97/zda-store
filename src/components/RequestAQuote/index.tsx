@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FaqSection from "../Home/Faq";
 import Newsletter from "../Common/Newsletter";
-import { medusaConfig } from "@/lib/medusa/config";
 
 type QuoteForm = {
     firstName: string;
@@ -55,21 +54,11 @@ export default function RequestAQuote({
         };
         
         try {
-            // Call backend API
-            const backendUrl = medusaConfig.backendUrl;
-            const publishableKey = medusaConfig.publishableKey;
-            
-            if (!publishableKey) {
-                setIsSubmitting(false);
-                toast.error("API configuration error. Please refresh the page and try again.");
-                return;
-            }
-            
-            const response = await fetch(`${backendUrl}/store/quote-request`, {
+            // Call Contact Form 7 API via Next.js API route
+            const response = await fetch("/api/quote-request", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-publishable-api-key": publishableKey,
                 },
                 body: JSON.stringify(submitData),
             });
@@ -84,12 +73,18 @@ export default function RequestAQuote({
                 return;
             }
 
-            if (response.ok) {
+            if (response.ok && result.status === "success") {
+                // Success - form submitted to Contact Form 7 and saved in Flamingo
+                console.log("✅ Quote request submitted successfully");
+                toast.success(result.message || "Quote request submitted successfully!");
                 // Redirect to thank you page after successful submission
                 router.push("/mail-success");
             } else {
                 setIsSubmitting(false);
-                toast.error(result.message || "Failed to submit quote request. Please try again.");
+                // Show error message from Contact Form 7
+                const errorMessage = result.message || "Failed to submit quote request. Please try again.";
+                toast.error(errorMessage);
+                console.error("Quote request error response:", result);
             }
         } catch (error: any) {
             setIsSubmitting(false);

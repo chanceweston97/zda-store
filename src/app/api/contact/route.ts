@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Quote Request API Route
+ * Contact Form API Route
  * Integrates with Contact Form 7 REST API (WordPress headless)
  * 
  * Endpoint: POST /wp-json/contact-form-7/v1/contact-forms/{FORM_ID}/feedback
@@ -14,21 +14,21 @@ export const dynamic = 'force-dynamic';
 
 // Get CMS URL and Form ID from environment variables
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
-const CONTACT_FORM_7_QUOTE_ID = process.env.CONTACT_FORM_7_QUOTE_ID || "";
+const CONTACT_FORM_7_CONTACT_ID = process.env.CONTACT_FORM_7_CONTACT_ID || "";
 
 export async function POST(req: NextRequest) {
   try {
     // Log request details for debugging
     const contentType = req.headers.get("content-type");
-    console.log("📥 Quote Request API Request:", {
+    console.log("📥 Contact Form API Request:", {
       method: req.method,
       contentType: contentType,
       url: req.url,
     });
 
     // Validate environment configuration
-    if (!CONTACT_FORM_7_QUOTE_ID) {
-      console.error("❌ CONTACT_FORM_7_QUOTE_ID environment variable is not set");
+    if (!CONTACT_FORM_7_CONTACT_ID) {
+      console.error("❌ CONTACT_FORM_7_CONTACT_ID environment variable is not set");
       return NextResponse.json(
         { 
           message: "Server configuration error. Please contact support.",
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, phone, productOrService, company, message } = body;
+    const { firstName, lastName, email, phone, company, message } = body;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !phone || !company) {
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Contact Form 7 REST API endpoint
-    const cf7Endpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_QUOTE_ID}/feedback`;
+    const cf7Endpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_CONTACT_ID}/feedback`;
 
     // Prepare FormData for Contact Form 7
     // Contact Form 7 REST API expects multipart/form-data format
@@ -100,9 +100,6 @@ export async function POST(req: NextRequest) {
     formData.append("your-email", email.trim());
     formData.append("your-phone", phone.trim());
     formData.append("your-company", company.trim());
-    if (productOrService) {
-      formData.append("your-product-service", productOrService.trim());
-    }
     if (message) {
       formData.append("your-message", message.trim());
     }
@@ -111,13 +108,12 @@ export async function POST(req: NextRequest) {
 
     console.log("📤 Sending to Contact Form 7:", {
       endpoint: cf7Endpoint,
-      formId: CONTACT_FORM_7_QUOTE_ID,
+      formId: CONTACT_FORM_7_CONTACT_ID,
       fields: {
         name: `${firstName} ${lastName}`,
         email: email.trim(),
         phone: phone.trim(),
         company: company.trim(),
-        productOrService: productOrService || "",
       },
     });
 
@@ -160,17 +156,17 @@ export async function POST(req: NextRequest) {
     // Contact Form 7 returns status in the response
     if (response.ok && data.status === "mail_sent") {
       // Success - email sent and saved in Flamingo
-      console.log("✅ Quote request submission successful!");
+      console.log("✅ Contact form submission successful!");
       return NextResponse.json(
         { 
-          message: data.message || "Quote request submitted successfully!",
+          message: data.message || "Contact form submitted successfully!",
           status: "success"
         },
         { status: 200 }
       );
     } else {
       // Handle Contact Form 7 validation errors or mail errors
-      const errorMessage = data.message || "Failed to submit quote request. Please try again.";
+      const errorMessage = data.message || "Failed to submit contact form. Please try again.";
       console.error("❌ Contact Form 7 error:", {
         httpStatus: response.status,
         cf7Status: data.status,
@@ -200,7 +196,7 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error: any) {
-    console.error("❌ Quote request submission error:", error);
+    console.error("❌ Contact form submission error:", error);
     return NextResponse.json(
       { 
         message: error.message || "An unexpected error occurred. Please try again later.",
@@ -211,13 +207,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
-  return NextResponse.json(
-    { 
-      quoteRequests: [],
-      count: 0,
-      message: "Quote requests are managed in WordPress Admin (Flamingo plugin). Use POST to submit a quote request."
-    },
-    { status: 200 }
-  );
-}

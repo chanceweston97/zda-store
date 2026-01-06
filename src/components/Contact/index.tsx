@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { medusaConfig } from "@/lib/medusa/config";
 
 type ContactForm = {
   firstName: string;
@@ -28,21 +27,11 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      // Call backend API
-      const backendUrl = medusaConfig.backendUrl;
-      const publishableKey = medusaConfig.publishableKey;
-      
-      if (!publishableKey) {
-        setIsSubmitting(false);
-        toast.error("API configuration error. Please refresh the page and try again.");
-        return;
-      }
-      
-      const response = await fetch(`${backendUrl}/store/contact`, {
+      // Call Contact Form 7 API via Next.js API route
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-publishable-api-key": publishableKey,
         },
         body: JSON.stringify(data),
       });
@@ -59,35 +48,16 @@ export default function Contact() {
         return;
       }
 
-      if (response.ok) {
-        // Check if email was sent successfully
-        if (result.emailStatus) {
-          if (result.emailStatus.sent) {
-            console.log("✅ Email sent successfully");
-          } else {
-            console.warn("⚠️ Form submitted but email failed:", result.emailStatus.error);
-            // Still redirect but log the error
-            if (result.emailStatus.error) {
-              console.error("Email error details:", result.emailStatus);
-            }
-          }
-        }
+      if (response.ok && result.status === "success") {
+        // Success - form submitted to Contact Form 7 and saved in Flamingo
+        console.log("✅ Contact form submitted successfully");
+        toast.success(result.message || "Contact form submitted successfully!");
         // Redirect to thank you page after successful submission
         router.push("/mail-success");
       } else {
         setIsSubmitting(false);
-        // Show more detailed error message if available
-        let errorMessage = result.message || "Failed to submit your message. Please try again.";
-        
-        if (result.emailStatus?.error) {
-          errorMessage = `${errorMessage}\n\nError: ${result.emailStatus.error}`;
-          console.error("Contact form error details:", {
-            message: result.message,
-            emailStatus: result.emailStatus,
-            fullResponse: result
-          });
-        }
-        
+        // Show error message from Contact Form 7
+        const errorMessage = result.message || "Failed to submit your message. Please try again.";
         toast.error(errorMessage);
         console.error("Contact form error response:", result);
       }
