@@ -10,12 +10,15 @@ const MEDUSA_BACKEND_URL =
   process.env.MEDUSA_BACKEND_URL ||
   (process.env.NODE_ENV === 'production' 
     ? (() => {
-        // In production, throw error if not set (don't fallback to localhost)
-        console.error(`[MedusaConfig] ❌ CRITICAL ERROR: NEXT_PUBLIC_MEDUSA_BACKEND_URL is not set in production!`);
-        console.error(`[MedusaConfig] Set NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://18.224.229.214:9000 in your .env.local file`);
-        console.error(`[MedusaConfig] Then rebuild: yarn build`);
-        // Still return localhost as fallback, but log the error
-        return "http://localhost:9000";
+        // In production, log warning but don't throw error (allows build to continue)
+        // Medusa is optional if using WooCommerce instead
+        if (typeof window === 'undefined') {
+          console.warn(`[MedusaConfig] ⚠️ WARNING: NEXT_PUBLIC_MEDUSA_BACKEND_URL is not set in production!`);
+          console.warn(`[MedusaConfig] If using Medusa, set NEXT_PUBLIC_MEDUSA_BACKEND_URL in your .env.production file`);
+          console.warn(`[MedusaConfig] If using WooCommerce only, you can ignore this warning`);
+        }
+        // Return empty string instead of localhost to prevent accidental connections
+        return "";
       })()
     : "http://localhost:9000"); // Only use localhost in development
 

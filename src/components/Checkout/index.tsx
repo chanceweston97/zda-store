@@ -13,12 +13,11 @@ import CheckoutAreaWithoutStripe from "./CheckoutAreaWithoutStripe";
 import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { convertCartPriceToDollars } from "@/utils/price";
 
-if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
-  throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
-}
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
+// Make Stripe optional - only load if key is provided
+// If using WooCommerce checkout, Stripe may not be needed
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 export default function CheckoutMain() {
   const session = useSession();
@@ -159,7 +158,25 @@ export default function CheckoutMain() {
     );
   }
 
-  return amount > 0 ? (
+  // If Stripe is not configured, use WooCommerce checkout instead
+  if (!stripePromise && amount > 0) {
+    return (
+      <CheckoutFormProvider
+        value={{
+          register,
+          watch,
+          control,
+          setValue,
+          errors: formState.errors,
+          handleSubmit,
+        }}
+      >
+        <CheckoutAreaWithoutStripe amount={amount} />
+      </CheckoutFormProvider>
+    );
+  }
+
+  return amount > 0 && stripePromise ? (
     <Elements
       stripe={stripePromise}
       options={{
