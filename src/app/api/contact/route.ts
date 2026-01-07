@@ -13,6 +13,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Get CMS URL and Form ID from environment variables
+// NOTE: Form ID changed after migration - update CONTACT_FORM_7_CONTACT_ID with correct ID
+// Based on schema, this form should be form ID 3445 (same as quote-request)
 const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
 const CONTACT_FORM_7_CONTACT_ID = process.env.CONTACT_FORM_7_CONTACT_ID || "";
 
@@ -89,40 +91,52 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Contact Form 7 REST API endpoint
-    const cf7Endpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_CONTACT_ID}/feedback`;
+    // Contact Form 7 REST API endpoint for feedback
+    // Note: We don't check form existence first because the feedback endpoint will validate it
+    const feedbackEndpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_CONTACT_ID}/feedback`;
 
     // Prepare FormData for Contact Form 7
     // Contact Form 7 REST API expects multipart/form-data format
     // Field names must match your Contact Form 7 form fields
+    // Based on CF7 schema: your-name, your-email, your-tel, your-subject, your-message
     const formData = new FormData();
-    // Contact form uses separate "first-name" and "last-name" fields
-    formData.append("first-name", firstName.trim());
-    formData.append("last-name", lastName.trim());
+    
+    // CF7 REQUIRES _wpcf7_unit_tag for spam protection and session tracking
+    // Format: wpcf7-f{FORM_ID}-p{timestamp}-o1
+    const unitTag = `wpcf7-f${CONTACT_FORM_7_CONTACT_ID}-p${Date.now()}-o1`;
+    formData.append("_wpcf7_unit_tag", unitTag);
+    
+    // Combine firstName and lastName into your-name (CF7 expects single name field)
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    formData.append("your-name", fullName);
+    
     formData.append("your-email", email.trim());
-    // Contact form uses "your-tel" for phone number
     formData.append("your-tel", phone.trim());
-    // Contact form uses "your-subject" for company name
+    
+    // Company name maps to your-subject (required field)
     formData.append("your-subject", company.trim());
+    
     if (message) {
       formData.append("your-message", message.trim());
     }
 
     console.log("📤 Sending to Contact Form 7:", {
-      endpoint: cf7Endpoint,
+      endpoint: feedbackEndpoint,
       formId: CONTACT_FORM_7_CONTACT_ID,
       fields: {
-        name: `${firstName} ${lastName}`,
-        email: email.trim(),
-        phone: phone.trim(),
-        company: company.trim(),
+        "_wpcf7_unit_tag": unitTag,
+        "your-name": fullName,
+        "your-email": email.trim(),
+        "your-tel": phone.trim(),
+        "your-subject": company.trim(),
+        "your-message": message || "(empty)",
       },
     });
 
     // POST to Contact Form 7 REST API
     // Contact Form 7 requires multipart/form-data
     // DO NOT set Content-Type header - FormData will set multipart/form-data with boundary automatically
-    const response = await fetch(cf7Endpoint, {
+    const response = await fetch(feedbackEndpoint, {
       method: "POST",
       body: formData,
     });
