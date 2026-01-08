@@ -13,7 +13,7 @@ export default function AboutUs() {
         <div className="max-w-2xl shrink-0">
           {/* Heading */}
           <h2 className="text-[#2958A4] text-[60px] font-medium leading-[76px] tracking-[-2.4px]">
-            Enabling Wireless Networks Since 20084
+            Enabling Wireless Networks Since 2008
           </h2>
 
           {/* Paragraph */}

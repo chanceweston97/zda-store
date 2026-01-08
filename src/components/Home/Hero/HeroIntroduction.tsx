@@ -84,7 +84,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
 
   return (
     <section 
-      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 py-8 sm:py-12 lg:py-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 rounded-[10px] my-8 sm:my-12 lg:my-16"
+      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 lg:py-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 rounded-[10px] my-8 sm:my-12 lg:my-16"
       style={{
         background: 'radial-gradient(145.54% 145.5% at 49.33% -2.63%, #FDFDFD 30.35%, rgba(223, 235, 255, 0.75) 100%)'
       }}
@@ -120,7 +120,13 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
             alt={title}
             width={647}
             height={178}
-            className="w-full max-w-[500px] sm:max-w-[600px] lg:max-w-[647px] h-auto object-contain"
+            className="object-contain"
+            style={{
+              width: '647px',
+              maxWidth: '100%',
+              height: '178px',
+              aspectRatio: '647/178'
+            }}
           />
         </div>
 
