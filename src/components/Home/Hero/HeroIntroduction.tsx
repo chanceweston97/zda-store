@@ -104,7 +104,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
 
       {/* Content Row: Image and Text/Buttons */}
       <div 
-        className="flex flex-col lg:flex-row items-center lg:items-start gap-6 sm:gap-8 lg:gap-12 w-full px-4 sm:px-6 lg:px-12 xl:px-16"
+        className="flex flex-col lg:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 w-full px-4 sm:px-6 lg:px-12 xl:px-16"
       >
         {/* LEFT IMAGE - Centered */}
         <div 
