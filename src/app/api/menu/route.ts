@@ -63,27 +63,21 @@ export async function GET() {
       },
       {
         id: 2,
-        title: "Cable Customizer",
+        title: "Custom Cables",
         newTab: false,
         path: "/cable-customizer",
       },
       {
         id: 3,
-        title: "Request a Quote",
+        title: "Catalog",
         newTab: false,
-        path: "/request-a-quote",
+        path: "/catalog",
       },
       {
         id: 4,
-        title: "Our Story",
+        title: "Company",
         newTab: false,
         path: "/our-story",
-      },
-      {
-        id: 5,
-        title: "Contact Us",
-        newTab: false,
-        path: "/contact",
       },
     ];
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 const CheckoutBtn = () => {
   const router = useRouter();
@@ -12,9 +13,11 @@ const CheckoutBtn = () => {
   return (
     <button
       onClick={(e) => handleCheckoutClick(e)}
-      className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+      className="group inline-flex items-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+      style={{ fontFamily: 'Satoshi, sans-serif' }}
     >
-      Checkout
+      <ButtonArrow />
+      <span>Checkout</span>
     </button>
   );
 };

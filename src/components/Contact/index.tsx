@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 type ContactForm = {
   firstName: string;
@@ -196,12 +197,14 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`inline-flex items-center justify-center rounded-full bg-[#2958A4] px-10 py-3 text-[16px] font-medium text-white shadow-sm transition-colors ${
+                  className={`group inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#2958A4] px-10 py-3 text-[16px] font-medium text-white shadow-sm transition-all duration-300 ease-in-out ${
                     isSubmitting 
                       ? "opacity-70 cursor-not-allowed" 
-                      : "hover:bg-[#1F4480]"
+                      : "hover:bg-[#214683]"
                   }`}
+                  style={{ fontFamily: 'Satoshi, sans-serif' }}
                 >
+                  <ButtonArrow />
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <svg
@@ -227,7 +230,7 @@ export default function Contact() {
                       <span>Submitting...</span>
                     </div>
                   ) : (
-                    "Submit Now"
+                    <span>Submit Now</span>
                   )}
                 </button>
               </div>

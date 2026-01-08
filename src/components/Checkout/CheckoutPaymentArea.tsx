@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useShoppingCart } from "use-shopping-cart";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
   const { handleSubmit, watch } = useCheckoutForm();
@@ -452,9 +453,11 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white mt-7.5"
+                  className="group w-full inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] mt-7.5"
+                  style={{ fontFamily: 'Satoshi, sans-serif' }}
                 >
-                  {!loading ? `Pay $${amount.toFixed(2)}` : "Processing..."}
+                  <ButtonArrow />
+                  <span>{!loading ? `Pay $${amount.toFixed(2)}` : "Processing..."}</span>
                 </button>
             {errorMessage && (
               <p className="mt-2 text-center text-red">{errorMessage}</p>

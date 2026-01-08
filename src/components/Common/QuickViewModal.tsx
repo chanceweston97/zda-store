@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -287,14 +288,17 @@ const QuickViewModal = () => {
                     <button
                       disabled={quantity < 1}
                       onClick={() => handleAddToCart()}
-                      className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white"
+                      className="group inline-flex items-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4]"
+                      style={{ fontFamily: 'Satoshi, sans-serif' }}
                     >
-                      Add to Cart
+                      <ButtonArrow />
+                      <span>Add to Cart</span>
                     </button>
 
                     <button
                       onClick={() => handleAddToWishlist()}
-                      className="inline-flex items-center gap-2 rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+                      className="inline-flex items-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                      style={{ fontFamily: 'Satoshi, sans-serif' }}
                     >
                       <HeartIcon className="w-5 h-5" />
                       Add to Wishlist

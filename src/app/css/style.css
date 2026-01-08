@@ -2,6 +2,23 @@
 
 @import "tailwindcss";
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Ensure sticky positioning works with Lenis */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Fix for Lenis + sticky elements */
+  body > * {
+    position: relative;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

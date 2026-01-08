@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { imageBuilder } from "@/lib/data/shop-utils";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 interface HeroBannerData {
   _id?: string;
@@ -80,11 +81,20 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
       {/* LEFT TEXT + BUTTONS */}
       <div className="absolute left-6 sm:left-8 lg:left-10 z-10 max-w-[1136px]">
         <h1 
-          className={`text-white text-[36px] xl:text-[72px] lg:text-[60px] font-medium md:leading-24 md:tracking-[-2.88px] mt-[50px] md:text-[50px] transition-all duration-1000 ease-out ${
+          className={`transition-all duration-1000 ease-out mt-[50px] ${
             isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
+          style={{
+            color: '#FFF',
+            fontFamily: 'Satoshi, sans-serif',
+            fontSize: '50px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '96px',
+            letterSpacing: '-2px'
+          }}
         >
           {renderTitle()}
         </h1>
@@ -100,9 +110,26 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
             <Link
               key={index}
               href={button.link}
-              className="inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] w-[186px]"
+              className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-sm font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
+              style={{ 
+                fontFamily: 'Satoshi, sans-serif',
+                display: 'flex',
+                width: '195px',
+                padding: '10px 20px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '10px',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.paddingRight = '20px';
+              }}
             >
-              {button.text}
+              <ButtonArrowHomepage />
+              <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{button.text}</p>
             </Link>
           ))}
         </div>
@@ -140,7 +167,7 @@ function CardAnimation({ card }: { card?: { image?: any; title?: string; descrip
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const cardImage = card?.image
     ? imageBuilder(card.image).url()
-    : "/images/products/antenna.png";
+    : "/images/hero/hero-antenna.webp";
   const cardTitle = card?.title || "Precision & Performance";
   const cardDescription = card?.description || "Empowering connectivity with engineered reliability and real world results";
 
@@ -159,7 +186,7 @@ function CardAnimation({ card }: { card?: { image?: any; title?: string; descrip
             src={cardImage}
             alt={cardTitle}
             fill
-            className="object-contain"
+            className="rounded-lg object-cover"
           />
         </div>
 

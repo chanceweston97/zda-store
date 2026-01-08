@@ -13,7 +13,7 @@ const accountLinks = [
   },
   {
     id: 3,
-    label: 'Cable Customizer',
+    label: 'Custom Cable',
     href: '/cable-customizer',
   },
   {
@@ -30,8 +30,18 @@ const accountLinks = [
 export default function ProductsLinks() {
   return (
     <div className="w-full sm:w-auto">
-      <h2 className="mb-7.5 text-custom-1 font-medium text-white">
-        Products
+      <h2 
+        className="mb-7.5"
+        style={{
+          color: '#70C8FF',
+          fontFamily: 'Satoshi, sans-serif',
+          fontSize: '20px',
+          fontStyle: 'normal',
+          fontWeight: 500,
+          lineHeight: '30px'
+        }}
+      >
+        PRODUCTS
       </h2>
 
       <ul className="flex flex-col gap-3.5">
@@ -39,7 +49,7 @@ export default function ProductsLinks() {
           accountLinks.map((link) => (
             <li key={link.id}>
               <Link
-                className="ease-out duration-200 hover:text-white"
+                className="text-white ease-out duration-200 hover:text-[#70C8FF]"
                 href={link.href}
               >
                 {link.label}

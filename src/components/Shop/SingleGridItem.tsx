@@ -20,6 +20,7 @@ import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
 import CheckoutBtn from "./CheckoutBtn";
 import ReviewStar from "./ReviewStar";
 import { useEffect, useState } from "react";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 const SingleGridItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -123,9 +124,11 @@ const SingleGridItem = ({ item }: { item: Product }) => {
           ) : (
             <button
               onClick={() => handleAddToCart()}
-              className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+              className="group inline-flex items-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+              style={{ fontFamily: 'Satoshi, sans-serif' }}
             >
-              Add to cart
+              <ButtonArrow />
+              <span>Add to cart</span>
             </button>
           )}
 

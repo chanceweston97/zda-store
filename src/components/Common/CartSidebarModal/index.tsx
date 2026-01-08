@@ -7,6 +7,7 @@ import { useShoppingCart } from "use-shopping-cart";
 import EmptyCart from "./EmptyCart";
 import SingleItem from "./SingleItem";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 const CartSidebarModal = () => {
   const router = useRouter();
@@ -109,16 +110,20 @@ const CartSidebarModal = () => {
             <Link
               onClick={() => handleCartClick()}
               href="/cart"
-              className="w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+              className="group w-full inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+              style={{ fontFamily: 'Satoshi, sans-serif' }}
             >
-              View Cart
+              <ButtonArrow />
+              <span>View Cart</span>
             </Link>
 
             <button
               onClick={(e) => handleCheckoutClick(e)}
-              className="w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+              className="group w-full inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+              style={{ fontFamily: 'Satoshi, sans-serif' }}
             >
-              Checkout
+              <ButtonArrow />
+              <span>Checkout</span>
             </button>
           </div>
         </div>

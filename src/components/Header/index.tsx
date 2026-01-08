@@ -111,7 +111,7 @@ const Header = () => {
                         <li key={i} className="group relative">
                           <Link
                             href={menuItem.path!}
-                            className="relative inline-flex hover:text-[#2958A4] text-[#2958A4] px-7 font-satoshi text-[18px] font-medium leading-7 tracking-[-0.36px] xl:py-3 before:absolute before:left-7 before:bottom-2 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-[calc(100%-3.5rem)]"
+                            className="relative inline-flex hover:text-[#2958A4] text-[#2958A4] px-7 font-satoshi text-[18px] font-medium leading-7 tracking-[-0.36px] xl:py-3 before:absolute before:bottom-2 before:h-[1px] before:w-0 before:bg-[#2958A4] before:transition-[width,left,right] before:duration-300 before:ease-in-out before:right-7 before:left-auto hover:before:left-7 hover:before:right-auto hover:before:w-[calc(100%-3.5rem)]"
                           >
                             {menuItem.title}
                           </Link>

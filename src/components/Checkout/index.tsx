@@ -8,16 +8,18 @@ import { useShoppingCart } from "use-shopping-cart";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { EmptyCartIcon } from "@/assets/icons";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 import CheckoutPaymentArea from "./CheckoutPaymentArea";
 import CheckoutAreaWithoutStripe from "./CheckoutAreaWithoutStripe";
 import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { convertCartPriceToDollars } from "@/utils/price";
 
-// Make Stripe optional - only load if key is provided
-// If using WooCommerce checkout, Stripe may not be needed
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-  : null;
+if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
+  throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
+}
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+);
 
 export default function CheckoutMain() {
   const session = useSession();
@@ -126,9 +128,11 @@ export default function CheckoutMain() {
         <div className="flex justify-center">
           <Link
             href="/shop"
-            className="inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+            className="group inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+            style={{ fontFamily: 'Satoshi, sans-serif' }}
           >
-            Continue Shopping
+            <ButtonArrow />
+            <span>Continue Shopping</span>
           </Link>
         </div>
       </div>
@@ -150,7 +154,8 @@ export default function CheckoutMain() {
         </p>
         <Link
           href="/shop"
-          className="w-96 mx-auto inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+          className="w-96 mx-auto inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
+          style={{ fontFamily: 'Satoshi, sans-serif' }}
         >
           Continue Shopping
         </Link>
@@ -158,25 +163,7 @@ export default function CheckoutMain() {
     );
   }
 
-  // If Stripe is not configured, use WooCommerce checkout instead
-  if (!stripePromise && amount > 0) {
-    return (
-      <CheckoutFormProvider
-        value={{
-          register,
-          watch,
-          control,
-          setValue,
-          errors: formState.errors,
-          handleSubmit,
-        }}
-      >
-        <CheckoutAreaWithoutStripe amount={amount} />
-      </CheckoutFormProvider>
-    );
-  }
-
-  return amount > 0 && stripePromise ? (
+  return amount > 0 ? (
     <Elements
       stripe={stripePromise}
       options={{

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FaqSection from "../Home/Faq";
 import Newsletter from "../Common/Newsletter";
+import { ButtonArrow } from "@/components/Common/ButtonArrow";
 
 type QuoteForm = {
     firstName: string;
@@ -248,7 +249,8 @@ export default function RequestAQuote({
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className={`inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-10 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white`}
+                                    className={`inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-10 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4]`}
+                                    style={{ fontFamily: 'Satoshi, sans-serif' }}
                                 >
                                     {isSubmitting ? (
                                         <div className="flex items-center gap-2">
@@ -439,7 +441,8 @@ export default function RequestAQuote({
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className={`inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-10 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white`}
+                                    className={`inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-10 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4]`}
+                                    style={{ fontFamily: 'Satoshi, sans-serif' }}
                                 >
                                     {isSubmitting ? (
                                         <div className="flex items-center gap-2">

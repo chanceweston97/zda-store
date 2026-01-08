@@ -40,7 +40,7 @@ export default function Hero({ slider }: HeroProps) {
       {/* ✅ Content left */}
       <div className="absolute z-10 left-6 sm:left-10 lg:left-16 top-1/2 -translate-y-1/2 max-w-[760px]">
 
-        <h1 className="text-white font-semibold leading-tight text-[28px] sm:text-[40px] lg:text-[52px] tracking-tight">
+        <h1 className="text-white font-semibold leading-tight text-[28px] sm:text-[40px] lg:text-[50px] tracking-tight">
           {slider?.headline ??
             "Field-tested antennas and cabling built to improve signal where it counts."}
         </h1>

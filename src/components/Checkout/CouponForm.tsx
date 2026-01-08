@@ -43,7 +43,8 @@ export default function CouponForm() {
       <button
         type="button"
         onClick={applyCoupon}
-        className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white disabled:pointer-events-none"
+        className="inline-flex items-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] disabled:pointer-events-none"
+        style={{ fontFamily: 'Satoshi, sans-serif' }}
         disabled={alreadyApplied || loading}
       >
         {alreadyApplied ? "Applied" : loading ? "Applying..." : "Apply"}

@@ -51,27 +51,21 @@ export const menuData: Menu[] = [
   },
   {
     id: 2,
-    title: "Cable Customizer",
+    title: "Custom Cables",
     newTab: false,
     path: "/cable-customizer",
   },
   {
     id: 3,
-    title: "Request a Quote",
+    title: "Catalog",
     newTab: false,
-    path: "/request-a-quote",
+    path: "/catalog",
   },
   {
-    id: 3,
-    title: "Our Story",
+    id: 4,
+    title: "Company",
     newTab: false,
     path: "/our-story",
-  },
-  {
-    id: 3,
-    title: "Contact Us",
-    newTab: false,
-    path: "/contact",
   },
  
 ];

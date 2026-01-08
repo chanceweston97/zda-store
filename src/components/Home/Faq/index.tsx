@@ -104,7 +104,8 @@ export default function FaqSection({ faqData }: FaqSectionProps) {
 
           <Link
             href={contactButton.link}
-            className="inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] px-6 py-3 text-sm font-medium text-white transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+            className="inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] px-6 py-3 text-[16px] font-medium text-white transition-all duration-300 ease-in-out hover:bg-[#214683]"
+            style={{ fontFamily: 'Satoshi, sans-serif' }}
           >
             {contactButton.text}
           </Link>

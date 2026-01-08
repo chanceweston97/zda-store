@@ -3,6 +3,7 @@
 import PreLoader from "@/components/Common/PreLoader";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import CacheRefreshButton from "@/components/Common/CacheRefreshButton";
+import SmoothScroll from "@/components/Common/SmoothScroll";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
@@ -20,8 +21,8 @@ export default function RootLayout({
   const isAdminRoute = pathname?.startsWith("/admin");
 
   return (
-    <html lang="en" className="font-inter" suppressHydrationWarning>
-      <body>
+    <html lang="en" className="font-inter scroll-smooth" suppressHydrationWarning>
+      <body id="lenis-root">
         {!isAdminRoute && <PreLoader />}
 
         <Providers>
@@ -43,6 +44,7 @@ export default function RootLayout({
 
         {!isAdminRoute && (
           <>
+            <SmoothScroll />
             <ScrollToTop />
             <CacheRefreshButton />
             <Footer />

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import FooterBottom from "./FooterBottom";
 import QuickLinks from "./QuickLinks";
@@ -5,11 +7,60 @@ import Image from "next/image";
 import ProductsLinks from "./ProductsLinks";
 import Legal from "./Legal";
 import Info from "./Info";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate email before submitting
+    if (!email || !email.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Successfully subscribed to newsletter!");
+        setEmail("");
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        toast.error(data.message || "Failed to subscribe. Please try again.");
+      }
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error("Subscription error:", error);
+      toast.error(error.message || "An unexpected error occurred. Please check your connection and try again.");
+    }
+  };
+
   return (
-    <footer className="overflow-hidden">
-      <div className="w-full mx-auto bg-[#2958A4] text-white/60 max-w-[1340px] sm:px-6 xl:px-0 shrink-0 self-stretch">
+    <footer className="overflow-hidden w-full">
+      <div 
+        className="mx-auto bg-[#2958A4] shrink-0 self-stretch"
+        style={{
+          width: '1440px',
+          maxWidth: '100%',
+          color: '#fff'
+        }}
+      >
         {/* <!-- footer menu start --> */}
         <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-[50px] xl:pb-15 px-[50px]">
           <div className="max-w-[330px] w-full mt-5 lg:mt-0">
@@ -24,44 +75,44 @@ const Footer = () => {
               </Link>
             </div>
 
-           <p className="text-white/60 font-satoshi text-lg font-medium leading-[26px] mb-2">Field-tested antennas and cabling built to improve signal where it counts.</p>
-
-            {/* <!-- Social Links start --> */}
-            {/* <div className="flex items-center gap-4 mt-7.5">
-              <Link
-                href="#"
-                className="flex duration-200 ease-out hover:text-white"
-              >
-                <span className="sr-only">Facebook link</span>
-                <FacebookIcon />
-              </Link>
-
-              <Link
-                href="#"
-                className="flex duration-200 ease-out hover:text-white"
-              >
-                <span className="sr-only">Twitter link</span>
-                <TwitterIcon />
-              </Link>
-
-              <Link
-                href="#"
-                className="flex duration-200 ease-out hover:text-white"
-              >
-                <span className="sr-only">Instagram link</span>
-                <InstagramIcon />
-              </Link>
-
-              <Link
-                href="#"
-                aria-label="Linkedin Social Link"
-                className="flex duration-200 ease-out hover:text-white"
-              >
-                <span className="sr-only">LinkedIn link</span>
-                <LinkedInIcon />
-              </Link>
-            </div> */}
-            {/* <!-- Social Links end --> */}
+            {/* Newsletter Signup Form */}
+            <div className="mb-4">
+              <p className="text-white text-[16px] font-medium mb-3">Sign up for our latest newsletters</p>
+              <form onSubmit={handleSubmit} className="relative" style={{ width: '400px', height: '50px' }}>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-full text-white placeholder-white/60 outline-none focus:border-white/50 pr-[85px]"
+                  style={{ 
+                    fontFamily: 'Satoshi, sans-serif',
+                    borderRadius: '10px',
+                    border: '0.5px solid #FFF',
+                    background: 'rgba(41, 88, 164, 0.30)',
+                    paddingLeft: '16px',
+                    paddingRight: '85px'
+                  }}
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  type="submit"
+                  className="absolute right-[5px] top-1/2 -translate-y-1/2 text-[14px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    fontFamily: 'Satoshi, sans-serif',
+                    width: '75px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: '#70C8FF',
+                    color: '#000'
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "..." : "Submit"}
+                </button>
+              </form>
+            </div>
           </div>
 
           <ProductsLinks />
@@ -69,8 +120,6 @@ const Footer = () => {
           <QuickLinks />
           <Legal />
           <Info />
-
-          
         </div>
         {/* <!-- footer menu end --> */}
       </div>

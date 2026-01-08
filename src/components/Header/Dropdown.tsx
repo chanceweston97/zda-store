@@ -27,7 +27,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
           ${isActiveParent && "text-[#2958A4]!"}
         `}
       >
-        <span className={`relative inline-block before:absolute before:left-0 before:bottom-0 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-full ${isActiveParent ? "before:w-full" : ""}`}>
+        <span className={`relative inline-block before:absolute before:bottom-0 before:h-[1px] before:w-0 before:bg-[#2958A4] before:transition-[width,left,right] before:duration-300 before:ease-in-out before:right-0 before:left-auto hover:before:left-0 hover:before:right-auto hover:before:w-full ${isActiveParent ? "before:w-full before:left-0 before:right-auto" : ""}`}>
           {menuItem.title}
         </span>
 
@@ -86,7 +86,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
                   ${isActiveChild && "bg-gray-100 text-[#2958A4]"}
                 `}
               >
-                <span className={`relative inline-block before:absolute before:left-0 before:bottom-0 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-full ${isActiveChild ? "before:w-full" : ""} group-hover/submenu:before:w-full`}>
+                <span className={`relative inline-block before:absolute before:bottom-0 before:h-[1px] before:w-0 before:bg-[#2958A4] before:transition-[width,left,right] before:duration-300 before:ease-in-out before:right-0 before:left-auto hover:before:left-0 hover:before:right-auto hover:before:w-full ${isActiveChild ? "before:w-full before:left-0 before:right-auto" : ""}`}>
                   {item.title}
                 </span>
                 {hasSubmenu && (
@@ -137,7 +137,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
                             ${isActiveSubChild && "bg-gray-100 text-[#2958A4]"}
                           `}
                         >
-                          <span className={`relative inline-block before:absolute before:left-0 before:bottom-0 before:h-[2px] before:w-0 before:bg-[#2958A4] before:transition-all before:duration-300 before:ease-out hover:before:w-full ${isActiveSubChild ? "before:w-full" : ""}`}>
+                          <span className={`relative inline-block before:absolute before:bottom-0 before:h-[1px] before:w-0 before:bg-[#2958A4] before:transition-[width,left,right] before:duration-300 before:ease-in-out before:right-0 before:left-auto hover:before:left-0 hover:before:right-auto hover:before:w-full ${isActiveSubChild ? "before:w-full before:left-0 before:right-auto" : ""}`}>
                             {subItem.title}
                           </span>
                         </Link>

@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { getCableSeries, getCableTypes, getConnectors, imageBuilder } from "@/lib/data/shop-utils";
 
 export const metadata: Metadata = {
-  title: "Cable Customizer | ZDAComm | Store",
+  title: "Cable Customizer | ZDA Communication",
   description: "Build your perfect custom cable. Select connectors, length, and specifications.",
 };
 

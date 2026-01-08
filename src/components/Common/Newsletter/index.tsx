@@ -1,119 +1,87 @@
 "use client";
 
-import { useState } from "react";
-import toast from "react-hot-toast";
+import Link from "next/link";
+import Image from "next/image";
 
 const Newsletter = () => {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate email before submitting
-    if (!email || !email.trim()) {
-      toast.error("Please enter an email address");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Show success notification only, no redirect
-        toast.success(data.message || "Successfully subscribed to newsletter!");
-        setEmail(""); // Clear the email field
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-        toast.error(data.message || "Failed to subscribe. Please try again.");
-      }
-    } catch (error: any) {
-      setIsLoading(false);
-      console.error("Subscription error:", error);
-      toast.error(error.message || "An unexpected error occurred. Please check your connection and try again.");
-    }
-  };
-
   return (
-    <section className="w-full flex justify-center pt-10">
-      <div className="w-full max-w-[1340px] 
-    bg-linear-to-b from-[rgba(49,106,197,0)] to-[#2958A4]
-    flex items-center px-[50px] py-[71px]">
+    <section 
+      className="flex justify-center items-center relative overflow-hidden mx-auto"
+      style={{
+        width: '1440px',
+        maxWidth: '100%',
+        height: '400px',
+        flexShrink: 0,
+        background: 'radial-gradient(99.5% 99.03% at 50% 35.5%, #2958A4 21.63%, #1870D5 55.29%, #70C8FF 97.6%)'
+      }}
+    >
+      {/* Dot Background SVG */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <Image
+          src="/images/dot-bg-global.svg"
+          alt=""
+          fill
+          className="object-cover"
+          style={{ mixBlendMode: 'overlay' }}
+        />
+      </div>
 
-        <div className="w-full max-w-[680px] text-center">
+      <div className="relative z-10 w-full max-w-[1340px] mx-auto px-4 sm:px-6 xl:px-0 flex flex-col items-center justify-center text-center">
+        <h2 
+          className="mb-4"
+          style={{
+            color: '#FFF',
+            textAlign: 'center',
+            fontFamily: 'Satoshi, sans-serif',
+            fontSize: '70px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '66px',
+            letterSpacing: '-2.8px'
+          }}
+        >
+          Getting connected starts <span style={{ color: '#70C8FF' }}>here</span>
+        </h2>
+        
+        <p 
+          className="mb-8"
+          style={{
+            color: '#FFF',
+            textAlign: 'center',
+            fontFamily: 'Satoshi, sans-serif',
+            fontSize: '18px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '28px',
+            letterSpacing: '-0.36px'
+          }}
+        >
+          Support at every stage of your project
+        </p>
 
-          <h2 className="text-[#2958A4] text-center text-5xl lg:text-[60px] font-medium leading-[66px] tracking-[-2.4px]">
-            Subscribe For <br /> Latest News Now!
-          </h2>
-
-          <p className="mt-[22px] text-[#383838] text-[18px] font-medium leading-7 max-w-[572px] mx-auto">
-            &quot;Stay updated with the latest club news, events, and exclusive offers—
-            straight to your inbox.&quot;
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-10 flex lg:flex-row flex-col items-center justify-center gap-4 max-w-[680px]">
-            <input
-              type="email"
-              placeholder="Enter email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full max-w-[505px] rounded-[40px] bg-white/80 text-[#383838] px-6 py-2.5
-          placeholder-[#383838] outline-none"
-              required
-              disabled={isLoading}
-            />
-
-            <button
-              type="submit"
-              className="inline-flex items-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Subscribing...
-                </>
-              ) : (
-                "Subscribe Now"
-              )}
-            </button>
-          </form>
-
-        </div>
-
+        <Link
+          href="/contact"
+          className="inline-flex items-center justify-center rounded-[10px] border border-transparent transition-all duration-300 ease-in-out hover:opacity-90"
+          style={{ 
+            display: 'flex',
+            padding: '10px 30px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '10px',
+            fontFamily: 'Satoshi, sans-serif',
+            backgroundColor: '#70C8FF',
+            color: '#002D78',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '26px',
+            letterSpacing: '-0.32px'
+          }}
+        >
+          Inquire Today
+        </Link>
       </div>
     </section>
-
   );
 };
 
