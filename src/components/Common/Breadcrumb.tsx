@@ -1,7 +1,9 @@
 import Link from "next/link";
 import React from "react";
 
-const Breadcrumb = ({ title, pages }: { title: string; pages: string[] }) => {
+const Breadcrumb = ({ title, pages }: { title: string; pages?: string[] }) => {
+  const pagesArray = pages || [];
+  
   return (
     <div className="overflow-hidden shadow-breadcrumb pt-[209px] sm:pt-[155px] lg:pt-[95px] xl:pt-[100px]">
       <div>
@@ -16,8 +18,8 @@ const Breadcrumb = ({ title, pages }: { title: string; pages: string[] }) => {
                 <Link href="/">Home /</Link>
               </li>
 
-              {pages.length > 0 &&
-                pages.map((page, key) => (
+              {pagesArray.length > 0 &&
+                pagesArray.map((page, key) => (
                   <li
                     className="capitalize text-custom-sm last:text-[#2958A4]"
                     key={key}

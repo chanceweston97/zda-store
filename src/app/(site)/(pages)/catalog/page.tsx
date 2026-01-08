@@ -1,20 +1,96 @@
 import { Metadata } from "next";
-import Breadcrumb from "@/components/Common/Breadcrumb";
+import Link from "next/link";
+import CatalogButton from "./CatalogButton";
 
 export const metadata: Metadata = {
   title: "Catalog | ZDA Communications",
-  description: "ZDA Communications Catalog",
+  description: "ZDA Communications Catalog - Coming Soon",
 };
 
 const CatalogPage = () => {
   return (
     <>
-      <Breadcrumb title="Catalog" />
-      <div className="py-20">
+      <div className="py-20 min-h-[70vh] flex items-center justify-center pt-[100px]">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl font-medium mb-4">Catalog</h1>
-            <p className="text-gray-600">This page is under construction.</p>
+          <div className="text-center max-w-3xl mx-auto">
+            {/* Coming Soon Badge */}
+            <div className="mb-8">
+              <span 
+                className="inline-block px-6 py-2 rounded-full"
+                style={{
+                  backgroundColor: 'rgba(41, 88, 164, 0.1)',
+                  color: '#2958A4',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  letterSpacing: '-0.28px'
+                }}
+              >
+                COMING SOON
+              </span>
+            </div>
+
+            {/* Main Heading */}
+            <h1 
+              className="mb-6"
+              style={{
+                color: '#000',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '60px',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '72px',
+                letterSpacing: '-2.4px'
+              }}
+            >
+              Product Catalog
+            </h1>
+
+            {/* Description */}
+            <p 
+              className="mb-12"
+              style={{
+                color: '#383838',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '28px',
+                letterSpacing: '-0.36px'
+              }}
+            >
+              Our comprehensive product catalog is currently being prepared. 
+              We're working hard to bring you detailed information about all our antennas, 
+              cables, connectors, and RF accessories.
+            </p>
+
+            {/* CTA Button */}
+            <div className="mb-8">
+              <CatalogButton />
+            </div>
+
+            {/* Additional Info */}
+            <p 
+              style={{
+                color: '#6B7280',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '22px',
+                letterSpacing: '-0.28px'
+              }}
+            >
+              In the meantime, browse our{" "}
+              <Link 
+                href="/shop" 
+                className="underline hover:no-underline transition-all"
+                style={{ color: '#2958A4' }}
+              >
+                online shop
+              </Link>{" "}
+              to view our available products.
+            </p>
           </div>
         </div>
       </div>
