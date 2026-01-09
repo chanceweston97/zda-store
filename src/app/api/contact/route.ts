@@ -66,13 +66,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, phone, company, message } = body;
+    const { firstName, lastName, email, phone, company, message, productOrService } = body;
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !phone || !company) {
+    // Validate required fields (phone and company are now optional)
+    if (!firstName || !lastName || !email) {
       return NextResponse.json(
         { 
-          message: "All required fields must be provided.",
+          message: "First name, last name, and email are required.",
           status: "error"
         },
         { status: 400 }
@@ -111,10 +111,11 @@ export async function POST(req: NextRequest) {
     formData.append("your-name", fullName);
     
     formData.append("your-email", email.trim());
-    formData.append("your-tel", phone.trim());
+    formData.append("your-tel", phone?.trim() || "");
     
-    // Company name maps to your-subject (required field)
-    formData.append("your-subject", company.trim());
+    // Company name maps to your-subject (optional field, use productOrService if company not provided)
+    const subject = company?.trim() || productOrService?.trim() || "Contact Form Submission";
+    formData.append("your-subject", subject);
     
     if (message) {
       formData.append("your-message", message.trim());

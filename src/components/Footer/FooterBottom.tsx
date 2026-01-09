@@ -46,7 +46,7 @@ export default function FooterBottom() {
         }}
       >
         <div className="flex flex-wrap items-center justify-between gap-5 px-[50px]">
-          <p className="font-medium text-white text-[16px]">
+          <p className="text-white text-[16px]">
             &copy; {year} Copyright -{" "}
             <a
               className="text-white"
