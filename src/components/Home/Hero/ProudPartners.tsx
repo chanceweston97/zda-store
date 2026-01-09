@@ -54,7 +54,7 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
         {/* Heading */}
         <h2 
           ref={titleRef.ref}
-          className={`text-[#2958A4] font-satoshi text-[40px] lg:text-[56px] font-medium leading-[76px] tracking-[-2.24px] text-center transition-all duration-1000 ease-out ${
+          className={`text-[#000] font-satoshi text-[40px] lg:text-[56px] font-normal leading-[76px] tracking-[-2.24px] text-center transition-all duration-1000 ease-out ${
             titleRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'

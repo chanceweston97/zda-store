@@ -168,18 +168,25 @@ export default function WhatWeOffer({ whatWeOfferData }: WhatWeOfferProps) {
 
                                             <Link
                                                 href={item.button.link}
-                                                className="btn filled group relative self-start inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
+                                                className="btn filled group relative self-start inline-flex items-center justify-center rounded-[10px] border text-[16px] font-medium transition-all duration-300 ease-in-out"
                                                 style={{ 
                                                   fontFamily: 'Satoshi, sans-serif',
                                                   padding: '10px 30px',
                                                   paddingRight: '30px',
-                                                  minWidth: 'fit-content'
+                                                  minWidth: 'fit-content',
+                                                  borderColor: '#2958A4',
+                                                  backgroundColor: 'transparent',
+                                                  color: '#2958A4'
                                                 }}
                                                 onMouseEnter={(e) => {
-                                                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                                                  e.currentTarget.style.paddingRight = 'calc(30px + 11px)';
+                                                  e.currentTarget.style.backgroundColor = '#2958A4';
+                                                  e.currentTarget.style.color = '#FFFFFF';
                                                 }}
                                                 onMouseLeave={(e) => {
                                                   e.currentTarget.style.paddingRight = '30px';
+                                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                                  e.currentTarget.style.color = '#2958A4';
                                                 }}
                                             >
                                                 <ButtonArrowHomepage />

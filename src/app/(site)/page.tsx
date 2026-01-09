@@ -4,6 +4,7 @@ import Categories from "@/components/Home/Categories";
 import CountDown from "@/components/Home/Countdown";
 import FaqSection from "@/components/Home/Faq";
 import Hero from "@/components/Home/Hero";
+import WorkWithUs from "@/components/Home/Hero/WorkWithUs";
 import NewArrival from "@/components/Home/NewArrivals";
 import PromoBanner from "@/components/Home/PromoBanner";
 import Testimonials from "@/components/Home/Testimonials";
@@ -22,6 +23,7 @@ export default async function HomePage() {
   return (
     <main>
       <Hero />
+      <WorkWithUs />
       <FaqSection faqData={faqData} />
       {/* <Categories />
       <NewArrival />

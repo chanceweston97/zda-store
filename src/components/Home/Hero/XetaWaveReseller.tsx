@@ -18,12 +18,9 @@ export default function XetaWaveReseller() {
     >
       <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
         <div 
-          className="bg-[#2958A4] rounded-[20px] overflow-hidden relative"
+          className="rounded-[20px] overflow-hidden relative min-h-[400px] md:min-h-[500px] lg:min-h-[600px] p-5 sm:p-8 md:p-10 lg:p-[50px]"
           style={{
-            width: '1340px',
-            height: '600px',
-            maxWidth: '100%',
-            padding: '50px'
+            background: 'radial-gradient(89.11% 88.6% at 39.25% 24.11%, #2958A4 42.79%, #1870D5 74.04%, #70C8FF 100%)'
           }}
         >
           {/* Dot Background SVG */}
@@ -38,54 +35,54 @@ export default function XetaWaveReseller() {
           </div>
 
           {/* Content */}
-          <div className="relative z-10 h-full flex flex-col">
-            {/* Top Row: Heading and Description */}
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-8 flex-1">
-              {/* Left Side: Title Section */}
-              <div className="flex flex-col">
+          <div className="relative z-10 h-full flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10">
+            {/* Left Column: Title Section */}
+            <div className="flex flex-col w-full md:w-1/2">
                 <h2 
-                  className="text-white mb-2"
                   style={{
+                  color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '50px',
+                  fontSize: 'clamp(32px, 5vw, 50px)',
                     fontStyle: 'normal',
-                    fontWeight: 500,
-                    lineHeight: '50px',
-                    letterSpacing: '-2px'
+                  fontWeight: 400,
+                  lineHeight: 'clamp(32px, 5vw, 50px)',
+                  letterSpacing: '-2px',
+                  marginBottom: '8px'
                   }}
                 >
                   We build the whole link
                 </h2>
                 <h3 
-                  className="mb-3"
                   style={{
                     color: '#70C8FF',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '50px',
+                  fontSize: 'clamp(32px, 5vw, 50px)',
                     fontStyle: 'normal',
-                    fontWeight: 500,
-                    lineHeight: '50px',
-                    letterSpacing: '-2px'
+                  fontWeight: 400,
+                  lineHeight: 'clamp(32px, 5vw, 50px)',
+                  letterSpacing: '-2px',
+                  marginBottom: '12px'
                   }}
                 >
                   end-to-end
                 </h3>
                 <div className="w-1 h-8 bg-white"></div>
-              </div>
-              
-              {/* Right Side: Description Text */}
-              <div className="w-full lg:max-w-[600px] xl:max-w-[700px]">
+            </div>
+
+            {/* Right Column: Description Text */}
+            <div className="w-full md:w-1/2 flex items-start">
                 <p 
-                  className="text-white"
                   style={{
+                  color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '18px',
+                  fontSize: 'clamp(16px, 1.5vw, 18px)',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
                     lineHeight: '28px'
                   }}
                 >
                   As an authorized Xetawave reseller, we deliver end-to-end wireless link solutions integrating radios, antennas, cabling, and RF accessories for secure, reliable operation.
                 </p>
-              </div>
             </div>
           </div>
         </div>

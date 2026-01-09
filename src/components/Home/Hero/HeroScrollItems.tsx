@@ -3,297 +3,477 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface ScrollItem {
-  id: number;
-  number: string;
-  title: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-}
+gsap.registerPlugin(ScrollTrigger);
 
-const items: ScrollItem[] = [
-  {
-    id: 1,
-    number: '01/04',
-    title: 'Antennas',
-    description: 'Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.',
-    buttonText: 'Explore Antennas',
-    buttonLink: '/shop?category=antennas'
-  },
-  {
-    id: 2,
-    number: '02/04',
-    title: 'Cables',
-    description: 'Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.',
-    buttonText: 'Explore Cables',
-    buttonLink: '/shop?category=cables'
-  },
-  {
-    id: 3,
-    number: '03/04',
-    title: 'Connectors & Accessories',
-    description: 'Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.',
-    buttonText: 'Explore Connectors',
-    buttonLink: '/shop?category=connectors'
-  },
-  {
-    id: 4,
-    number: '04/04',
-    title: 'Manufacturing',
-    description: 'Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.',
-    buttonText: 'Explore Manufacturing',
-    buttonLink: '/manufacturing'
-  }
-];
+const HEADER_OFFSET = 100;
+const NUMBER_HEIGHT = 20; // Approximate height of number section (14px font + line height)
+const NUMBER_MARGIN = 50; // Margin below number
+const CARD_HEIGHT = 450;
+const GAP = 50;
 
 export default function HeroScrollItems() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
+  const card3Ref = useRef<HTMLDivElement>(null);
+  const card4Ref = useRef<HTMLDivElement>(null);
+  const dotsRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
+    ScrollTrigger.getAll().forEach(t => t.kill());
 
-      const headerHeight = 100;
-      
-      // Get scroll position - Lenis uses window.scrollY internally
-      // But we need to get the actual scroll position
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Calculate which item should be active based on scroll position
-      // Each item section is viewport height
-      const itemHeight = window.innerHeight - headerHeight;
-      const containerTop = containerRef.current.offsetTop;
-      const scrollProgress = Math.max(0, scrollY - (containerTop - headerHeight));
-      const newActiveIndex = Math.floor(scrollProgress / itemHeight);
-      
-      setActiveIndex(Math.min(Math.max(0, newActiveIndex), items.length - 1));
-    };
+    if (!containerRef.current || !card1Ref.current || !card2Ref.current || !card3Ref.current || !card4Ref.current) return;
 
-    // Listen to both Lenis scroll events and window scroll
-    const lenis = (window as any).lenisInstance;
-    
-    // Always use window scroll event as Lenis still triggers it
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial call
-    
-    // Also listen to Lenis scroll if available for more accurate updates
-    if (lenis) {
-      const lenisScrollHandler = () => {
-        // Small delay to ensure scroll position is updated
-        requestAnimationFrame(handleScroll);
-      };
-      lenis.on('scroll', lenisScrollHandler);
-      
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        lenis.off('scroll', lenisScrollHandler);
-      };
-    }
-    
+    // Calculate pin positions: each card pins just below previous number with 10px margin
+    const card1PinTop = HEADER_OFFSET;
+    const card2PinTop = HEADER_OFFSET + NUMBER_HEIGHT + NUMBER_MARGIN;
+    const card3PinTop = HEADER_OFFSET + 2 * (NUMBER_HEIGHT + NUMBER_MARGIN);
+    const card4PinTop = HEADER_OFFSET + 3 * (NUMBER_HEIGHT + NUMBER_MARGIN);
+
+    // Pin dots with first card
+    ScrollTrigger.create({
+      trigger: card1Ref.current,
+      start: `top ${card1PinTop}px`,
+      endTrigger: card4Ref.current,
+      end: `top ${card4PinTop}px`,
+      pin: dotsRef.current,
+      pinSpacing: false,
+    });
+
+    // Card 1: pins at header, unpins when card 4 reaches
+    // Lower z-index so it gets covered by newer cards
+    gsap.set(card1Ref.current, { zIndex: 1 });
+    ScrollTrigger.create({
+      trigger: card1Ref.current,
+      start: `top ${card1PinTop}px`,
+      endTrigger: card4Ref.current,
+      end: `top ${card4PinTop}px`,
+      pin: true,
+      pinSpacing: false,
+      anticipatePin: 1,
+      onEnter: () => {
+        setActiveIndex(0);
+        if (card1Ref.current) {
+          card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onEnterBack: () => {
+        setActiveIndex(0);
+        if (card1Ref.current) {
+          card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onLeave: () => {
+        if (card1Ref.current) {
+          card1Ref.current.style.boxShadow = "none";
+        }
+      },
+      onLeaveBack: () => {
+        if (card1Ref.current) {
+          card1Ref.current.style.boxShadow = "none";
+        }
+      },
+    });
+
+    // Card 2: pins under card 1's number (with 10px margin), unpins when card 4 reaches
+    // Higher z-index so it covers card 1
+    gsap.set(card2Ref.current, { zIndex: 2 });
+    ScrollTrigger.create({
+      trigger: card2Ref.current,
+      start: `top ${card2PinTop}px`,
+      endTrigger: card4Ref.current,
+      end: `top ${card4PinTop}px`,
+      pin: true,
+      pinSpacing: false,
+      anticipatePin: 1,
+      onEnter: () => {
+        setActiveIndex(1);
+        if (card2Ref.current) {
+          card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onEnterBack: () => {
+        setActiveIndex(1);
+        if (card2Ref.current) {
+          card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onLeave: () => {
+        if (card2Ref.current) {
+          card2Ref.current.style.boxShadow = "none";
+        }
+      },
+      onLeaveBack: () => {
+        if (card2Ref.current) {
+          card2Ref.current.style.boxShadow = "none";
+        }
+      },
+    });
+
+    // Card 3: pins under card 2's number (with 10px margin), unpins when card 4 reaches
+    // Highest z-index so it covers card 1 and 2
+    gsap.set(card3Ref.current, { zIndex: 3 });
+    ScrollTrigger.create({
+      trigger: card3Ref.current,
+      start: `top ${card3PinTop}px`,
+      endTrigger: card4Ref.current,
+      end: `top ${card4PinTop}px`,
+      pin: true,
+      pinSpacing: false,
+      anticipatePin: 1,
+      onEnter: () => {
+        setActiveIndex(2);
+        if (card3Ref.current) {
+          card3Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onEnterBack: () => {
+        setActiveIndex(2);
+        if (card3Ref.current) {
+          card3Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+        }
+      },
+      onLeave: () => {
+        if (card3Ref.current) {
+          card3Ref.current.style.boxShadow = "none";
+        }
+      },
+      onLeaveBack: () => {
+        if (card3Ref.current) {
+          card3Ref.current.style.boxShadow = "none";
+        }
+      },
+    });
+
+    // Card 4: NOT sticky, just tracks active index when it reaches
+    ScrollTrigger.create({
+      trigger: card4Ref.current,
+      start: `top ${card4PinTop}px`,
+      onEnter: () => setActiveIndex(3),
+      onEnterBack: () => setActiveIndex(3),
+    });
+
+    ScrollTrigger.refresh();
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
-  const scrollToItem = (index: number) => {
-    if (!containerRef.current) return;
-
-    const headerHeight = 100;
-    const itemHeight = window.innerHeight - headerHeight;
-    const containerOffsetTop = containerRef.current.offsetTop;
-    const targetScroll = containerOffsetTop - headerHeight + (index * itemHeight);
-    
-    // Use Lenis scrollTo if available, otherwise use window.scrollTo
-    const lenis = (window as any).lenisInstance;
-    
-    if (lenis) {
-      lenis.scrollTo(targetScroll, {
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      });
-    } else {
-      window.scrollTo({
-        top: targetScroll,
-        behavior: 'smooth'
-      });
-    }
-
-    setActiveIndex(index);
-  };
-
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: '100%',
-        marginTop: '50px',
-        marginBottom: '50px',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '50px',
-        alignItems: 'flex-start',
-        // Ensure no transforms that break sticky
-        transform: 'none',
-        willChange: 'auto'
-      }}
-    >
-      {/* Pagination Dots - Sticky at Header Bottom */}
+    <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0">
       <div
-        style={{
-          position: 'sticky',
-          top: '100px',
-          alignSelf: 'flex-start',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          paddingLeft: '50px',
-          height: 'fit-content',
-          zIndex: 10000,
-          pointerEvents: 'auto',
-          marginTop: '125px'
-        }}
+        className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] my-12 sm:my-16 md:my-20 items-start"
       >
-        {items.map((item, index) => (
-          <button
-            key={item.id}
-            onClick={() => scrollToItem(index)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.3s ease',
-              width: '8px'
-            }}
-            aria-label={`Go to ${item.title}`}
-          >
-            <div
-              style={{
-                width: '8px',
-                height: activeIndex === index ? '40px' : '8px',
-                backgroundColor: activeIndex === index ? '#2958A4' : '#CBD5E1',
-                borderRadius: '4px',
-                transition: 'all 0.3s ease'
-              }}
-            />
-          </button>
-        ))}
-      </div>
-      
-      {/* Cards Container */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-          paddingRight: '50px'
-        }}
-      >
-        {items.map((item, index) => (
+        {/* Dots - Hidden on mobile */}
+        <div
+          ref={dotsRef}
+          className="hidden md:flex"
+          style={{
+            flexDirection: "column",
+            gap: 12,
+            alignSelf: "flex-start",
+            marginTop: `${CARD_HEIGHT * 2 / 3}px`, // Position at 1/3 of first item height
+          }}
+        >
           <div
-            key={item.id}
-            className="pin-spacer"
             style={{
-              position: 'relative',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              marginTop: index > 0 ? '20px' : '0' // Add gap between items
+              width: 8,
+              height: activeIndex === 0 ? 40 : 8,
+              borderRadius: 4,
+              background: activeIndex === 0 ? "#2958A4" : "#CBD5E1",
+              transition: "0.3s",
+            }}
+          />
+          <div
+            style={{
+              width: 8,
+              height: activeIndex === 1 ? 40 : 8,
+              borderRadius: 4,
+              background: activeIndex === 1 ? "#2958A4" : "#CBD5E1",
+              transition: "0.3s",
+            }}
+          />
+          <div
+            style={{
+              width: 8,
+              height: activeIndex === 2 ? 40 : 8,
+              borderRadius: 4,
+              background: activeIndex === 2 ? "#2958A4" : "#CBD5E1",
+              transition: "0.3s",
+            }}
+          />
+          <div
+            style={{
+              width: 8,
+              height: activeIndex === 3 ? 40 : 8,
+              borderRadius: 4,
+              background: activeIndex === 3 ? "#2958A4" : "#CBD5E1",
+              transition: "0.3s",
+            }}
+          />
+        </div>
+
+        {/* Cards */}
+        <div ref={containerRef} className="w-full md:flex-1">
+          {/* Card 1 */}
+          <div
+            ref={card1Ref}
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            style={{
+              minHeight: CARD_HEIGHT,
+              height: 'auto',
+              background: "#F1F6FF",
+              borderRadius: 10,
+              transition: "box-shadow 0.3s",
+              overflow: "hidden",
+              position: "relative",
+              marginBottom: GAP,
             }}
           >
-            <div
-              className="card featured-item"
-              style={{
-                position: 'sticky',
-                top: '100px', // Stick at header bottom
-                zIndex: items.length - index, // Higher index = higher z-index (appears on top)
-                width: '1340px',
-                maxWidth: '100%',
-                transition: 'opacity 0.3s ease',
-                opacity: 1
-              }}
-            >
-              <div
+            {/* Left Content Section */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 14, color: "#6B7280" }}>01/04</div>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Antennas</h3>
+              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+                Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.
+              </p>
+              <Link
+                href="/shop?category=antennas"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
                 style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  padding: '10px 20px',
+                  paddingRight: '20px',
+                  cursor: 'pointer',
+                  maxWidth: '600px',
+                  borderColor: '#2958A4',
+                  borderWidth: '1px',
+                  backgroundColor: 'transparent',
+                  color: '#2958A4',
+                  textDecoration: 'none',
                   display: 'flex',
-                  width: '100%',
-                  height: '450px',
-                  padding: '30px 50px',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  backgroundColor: '#F8F9FC',
-                  borderRadius: '10px'
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
+                  e.currentTarget.style.backgroundColor = '#2958A4';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.paddingRight = '20px';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#2958A4';
                 }}
               >
-                {/* Number Indicator */}
-                <div style={{ color: '#6B7280', fontSize: '14px', fontFamily: 'Satoshi, sans-serif', fontWeight: 400 }}>
-                  {item.number}
-                </div>
-
-                {/* Title */}
-                <h3 style={{
-                  color: '#000',
-                  fontFamily: 'Satoshi, sans-serif',
-                  fontSize: '48px',
-                  fontWeight: 400,
-                  lineHeight: '1.2',
-                  margin: 0
-                }}>
-                  {item.title}
-                </h3>
-
-                {/* Description */}
-                <p style={{
-                  color: '#383838',
-                  fontFamily: 'Satoshi, sans-serif',
-                  fontSize: '18px',
-                  fontWeight: 400,
-                  lineHeight: '28px',
-                  margin: 0,
-                  maxWidth: '600px'
-                }}>
-                  {item.description}
-                </p>
-
-                {/* Button */}
-                <Link
-                  href={item.buttonLink}
-                  className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[16px] font-medium transition-all duration-300 ease-in-out hover:active"
-                  style={{ 
-                    fontFamily: 'Satoshi, sans-serif',
-                    padding: '10px 30px',
-                    paddingRight: '30px',
-                    cursor: 'pointer',
-                    width: '600px',
-                    backgroundColor: '#F8F9FC',
-                    borderColor: '#2958A4',
-                    borderWidth: '1px',
-                    color: '#2958A4'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.paddingRight = '30px';
-                  }}
-                >
-                  <ButtonArrowHomepage />
-                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{item.buttonText}</p>
-                </Link>
+                <ButtonArrowHomepage />
+                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Antennas</span>
+              </Link>
+            </div>
+            {/* Right Image Section */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
+                <span>Antenna Image</span>
               </div>
             </div>
           </div>
-        ))}
+
+          {/* Card 2 */}
+          <div
+            ref={card2Ref}
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            style={{
+              minHeight: CARD_HEIGHT,
+              height: 'auto',
+              background: "#F1F6FF",
+              borderRadius: 10,
+              transition: "box-shadow 0.3s",
+              overflow: "hidden",
+              position: "relative",
+              marginBottom: GAP,
+            }}
+          >
+            {/* Left Content Section */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 14, color: "#6B7280" }}>02/04</div>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Cables</h3>
+              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+                Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.
+              </p>
+              <Link
+                href="/shop?category=cables"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  padding: '10px 20px',
+                  paddingRight: '20px',
+                  cursor: 'pointer',
+                  maxWidth: '600px',
+                  borderColor: '#2958A4',
+                  borderWidth: '1px',
+                  backgroundColor: 'transparent',
+                  color: '#2958A4',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
+                  e.currentTarget.style.backgroundColor = '#2958A4';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.paddingRight = '20px';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#2958A4';
+                }}
+              >
+                <ButtonArrowHomepage />
+                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Cables</span>
+              </Link>
+            </div>
+            {/* Right Image Section */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
+                <span>Cable Image</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div
+            ref={card3Ref}
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            style={{
+              minHeight: CARD_HEIGHT,
+              height: 'auto',
+              background: "#F1F6FF",
+              borderRadius: 10,
+              transition: "box-shadow 0.3s",
+              overflow: "hidden",
+              position: "relative",
+              marginBottom: GAP,
+            }}
+          >
+            {/* Left Content Section */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 14, color: "#6B7280" }}>03/04</div>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Connectors & Accessories</h3>
+              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
+              </p>
+              <Link
+                href="/shop?category=connectors"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  padding: '10px 20px',
+                  paddingRight: '20px',
+                  cursor: 'pointer',
+                  maxWidth: '600px',
+                  borderColor: '#2958A4',
+                  borderWidth: '1px',
+                  backgroundColor: 'transparent',
+                  color: '#2958A4',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
+                  e.currentTarget.style.backgroundColor = '#2958A4';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.paddingRight = '20px';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#2958A4';
+                }}
+              >
+                <ButtonArrowHomepage />
+                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Connectors</span>
+              </Link>
+            </div>
+            {/* Right Image Section */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
+                <span>Connector Image</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4 - NOT sticky */}
+          <div
+            ref={card4Ref}
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            style={{
+              minHeight: CARD_HEIGHT,
+              height: 'auto',
+              background: "#F1F6FF",
+              borderRadius: 10,
+              position: "relative",
+              zIndex: 4, // Highest z-index so it's always visible
+            }}
+          >
+            {/* Left Content Section */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 14, color: "#6B7280" }}>04/04</div>
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Manufacturing</h3>
+              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
+              </p>
+              <Link
+                href="/manufacturing"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  padding: '10px 20px',
+                  paddingRight: '20px',
+                  cursor: 'pointer',
+                  maxWidth: '600px',
+                  borderColor: '#2958A4',
+                  borderWidth: '1px',
+                  backgroundColor: 'transparent',
+                  color: '#2958A4',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
+                  e.currentTarget.style.backgroundColor = '#2958A4';
+                  e.currentTarget.style.color = '#FFFFFF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.paddingRight = '20px';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#2958A4';
+                }}
+              >
+                <ButtonArrowHomepage />
+                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Manufacturing</span>
+              </Link>
+            </div>
+            {/* Right Image Section */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
+                <span>Manufacturing Image</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

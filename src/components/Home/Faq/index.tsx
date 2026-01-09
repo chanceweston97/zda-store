@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 type FaqItem = {
   question: string;
@@ -98,16 +99,29 @@ export default function FaqSection({ faqData }: FaqSectionProps) {
       <div className="mx-auto max-w-[1340px] px-6 sm:px-0">
         {/* Header */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-[#2958A4] text-[40px] lg:text-[56px] font-medium leading-[76px] tracking-[-2.24px]">
+          <h2 className="text-[#000] text-[40px] lg:text-[56px] font-normal leading-[76px] tracking-[-2.24px]">
             {title}
           </h2>
 
           <Link
             href={contactButton.link}
-            className="inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] px-6 py-3 text-[16px] font-medium text-white transition-all duration-300 ease-in-out hover:bg-[#214683]"
-            style={{ fontFamily: 'Satoshi, sans-serif' }}
+            className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
+            style={{ 
+              fontFamily: 'Satoshi, sans-serif',
+              padding: '10px 30px',
+              paddingRight: '30px',
+              cursor: 'pointer',
+              minWidth: 'fit-content'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.paddingRight = '30px';
+            }}
           >
-            {contactButton.text}
+            <ButtonArrowHomepage />
+            <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{contactButton.text}</p>
           </Link>
         </div>
 
@@ -161,10 +175,21 @@ function FaqRow({
       <div className={`flex flex-col rounded-2xl ${isOpen ? "bg-[#f7f7f7]" : "bg-white"} px-5 py-4 shadow-sm transition hover:bg-[#f7f7f7]`}>
         {/* Question */}
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[#2958A4] font-satoshi text-[20px] font-medium leading-[30px] tracking-[-0.2px]"
+          <p 
+            style={{
+              color: '#2958A4',
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '20px',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              lineHeight: '30px',
+              letterSpacing: '-0.2px',
+              leadingTrim: 'both',
+              textEdge: 'cap'
+            }}
           >
             {`Q${item.id}: `}
-            <span className="font-normal">{item.question}</span>
+            <span style={{ fontWeight: 400 }}>{item.question}</span>
           </p>
 
           <span
@@ -179,12 +204,25 @@ function FaqRow({
 
         {/* Answer with delayed animation */}
         <div
-          className={`mt-2 overflow-hidden text-[14px] leading-6 text-[#383838] transition-all duration-500 ${isOpen
+          className={`mt-2 overflow-hidden transition-all duration-500 ${isOpen
               ? "max-h-40 opacity-100 delay-75"
               : "max-h-0 opacity-0 delay-0"
             }`}
         >
-          <p className="text-[#383838] font-satoshi text-[18px] font-normal leading-7">{item.answer}</p>
+          <p 
+            style={{
+              color: '#383838',
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '18px',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              lineHeight: '28px',
+              leadingTrim: 'both',
+              textEdge: 'cap'
+            }}
+          >
+            {item.answer}
+          </p>
         </div>
       </div>
     </button>

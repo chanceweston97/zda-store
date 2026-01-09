@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 const Newsletter = () => {
   return (
@@ -41,8 +42,8 @@ const Newsletter = () => {
           }}
         >
           Getting connected starts <span style={{ color: '#70C8FF' }}>here</span>
-        </h2>
-        
+          </h2>
+
         <p 
           className="mb-8"
           style={{
@@ -61,24 +62,25 @@ const Newsletter = () => {
 
         <Link
           href="/contact"
-          className="inline-flex items-center justify-center rounded-[10px] border border-transparent transition-all duration-300 ease-in-out hover:opacity-90"
+          className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90"
           style={{ 
-            display: 'flex',
-            padding: '10px 30px',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '10px',
             fontFamily: 'Satoshi, sans-serif',
             backgroundColor: '#70C8FF',
             color: '#002D78',
-            fontSize: '16px',
-            fontStyle: 'normal',
-            fontWeight: 500,
-            lineHeight: '26px',
-            letterSpacing: '-0.32px'
+            padding: '10px 30px',
+            paddingRight: '30px',
+            cursor: 'pointer',
+            minWidth: 'fit-content'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.paddingRight = '30px';
           }}
         >
-          Inquire Today
+          <ButtonArrowHomepage />
+          <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Inquire Today</p>
         </Link>
       </div>
     </section>

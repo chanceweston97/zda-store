@@ -77,7 +77,7 @@ const Footer = () => {
 
             {/* Newsletter Signup Form */}
             <div className="mb-4">
-              <p className="text-white text-[16px] font-medium mb-3">Sign up for our latest newsletters</p>
+              <p className="text-white text-[16px] mb-3">Sign up for our latest newsletters</p>
               <form onSubmit={handleSubmit} className="relative" style={{ width: '400px', height: '50px' }}>
                 <input
                   type="email"
