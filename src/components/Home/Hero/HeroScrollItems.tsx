@@ -236,10 +236,23 @@ export default function HeroScrollItems() {
             }}
           >
             {/* Left Content Section */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 14, color: "#6B7280" }}>01/04</div>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Antennas</h3>
-              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+            <div style={{ flex: 1 }}>
+              <div>
+                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>01/04</div>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Antennas</h3>
+              </div>
+              <p style={{ 
+                maxWidth: '100%', 
+                width: '100%',
+                color: '#000',
+                fontFamily: 'Satoshi',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '28px',
+                margin: 0,
+                marginTop: '100px'
+              }}>
                 Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.
               </p>
               <Link
@@ -259,7 +272,8 @@ export default function HeroScrollItems() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '10px',
+                  marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
@@ -301,9 +315,22 @@ export default function HeroScrollItems() {
           >
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 14, color: "#6B7280" }}>02/04</div>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Cables</h3>
-              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>02/04</div>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Cables</h3>
+              </div>
+              <p style={{ 
+                maxWidth: '100%', 
+                width: '100%',
+                color: '#000',
+                fontFamily: 'Satoshi',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '28px',
+                margin: 0,
+                marginTop: '100px'
+              }}>
                 Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.
               </p>
               <Link
@@ -323,7 +350,8 @@ export default function HeroScrollItems() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '10px',
+                  marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
@@ -365,9 +393,22 @@ export default function HeroScrollItems() {
           >
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 14, color: "#6B7280" }}>03/04</div>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Connectors & Accessories</h3>
-              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>03/04</div>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Connectors & Accessories</h3>
+              </div>
+              <p style={{ 
+                maxWidth: '100%', 
+                width: '100%',
+                color: '#000',
+                fontFamily: 'Satoshi',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '28px',
+                margin: 0,
+                marginTop: '100px'
+              }}>
                 Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
@@ -387,7 +428,8 @@ export default function HeroScrollItems() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '10px',
+                  marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
@@ -427,9 +469,22 @@ export default function HeroScrollItems() {
           >
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 14, color: "#6B7280" }}>04/04</div>
-              <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)' }}>Manufacturing</h3>
-              <p className="text-sm sm:text-base" style={{ maxWidth: '100%', width: '100%' }}>
+              <div>
+                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>04/04</div>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Manufacturing</h3>
+              </div>
+              <p style={{ 
+                maxWidth: '100%', 
+                width: '100%',
+                color: '#000',
+                fontFamily: 'Satoshi',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '28px',
+                margin: 0,
+                marginTop: '100px'
+              }}>
                 Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
@@ -449,7 +504,8 @@ export default function HeroScrollItems() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '10px',
+                  marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(20px + 11px)';

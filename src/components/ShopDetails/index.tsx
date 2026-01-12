@@ -1348,7 +1348,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 fontSize: '16px',
                                 fontWeight: 400,
                                 color: '#000',
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16'%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 7 3-3 3 3'/%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 9 3 3 3-3'/%3E%3C/svg%3E")`,
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
                                 backgroundRepeat: 'no-repeat',
                                 backgroundPosition: 'right 16px center',
                                 paddingRight: '2.5rem'
@@ -1406,7 +1406,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 fontSize: '16px',
                                 fontWeight: 400,
                                 color: '#000',
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16'%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 7 3-3 3 3'/%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 9 3 3 3-3'/%3E%3C/svg%3E")`,
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
                                 backgroundRepeat: 'no-repeat',
                                 backgroundPosition: 'right 16px center',
                                 paddingRight: '2.5rem'

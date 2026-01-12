@@ -9,6 +9,7 @@ export default function XetaWaveReseller() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const titleRef = useScrollAnimation({ threshold: 0.2 });
   const descriptionRef = useScrollAnimation({ threshold: 0.2 });
+  const ctaRef = useScrollAnimation({ threshold: 0.2 });
   const featuresRef = useScrollAnimation({ threshold: 0.2 });
 
   return (
@@ -42,17 +43,17 @@ export default function XetaWaveReseller() {
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col gap-8 md:gap-10 lg:gap-12">
-            {/* Top Section: Heading + Description */}
-            <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10">
+            {/* First Section: Title + Description */}
+            <div 
+              ref={titleRef.ref}
+              className={`flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 transition-all duration-1000 ease-out ${
+                titleRef.isVisible 
+                  ? 'opacity-100 translate-y-0' 
+                  : 'opacity-0 translate-y-8'
+              }`}
+            >
               {/* Left Column: Title Section */}
-              <div 
-                ref={titleRef.ref}
-                className={`flex flex-col w-full md:w-1/2 transition-all duration-1000 ease-out ${
-                  titleRef.isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
-                }`}
-              >
+              <div className="flex flex-col w-full md:w-1/2">
                 <h2 
                   style={{
                     color: '#FFF',
@@ -83,45 +84,12 @@ export default function XetaWaveReseller() {
                 >
                   end-to-end
                 </h3>
-                <p 
-                  style={{
-                    color: '#FFF',
-                    fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '18px',
-                    fontStyle: 'normal',
-                    fontWeight: 400,
-                    lineHeight: '26px',
-                    marginBottom: '20px',
-                    marginTop: '20px'
-                  }}
-                >
-                  For complete system solutions, reach out to a product expert.
-                </p>
-                <Link
-                  href="/request-a-quote"
-                  className="group inline-flex items-center gap-2 rounded-lg px-6 py-3 transition-all duration-300 ease-in-out hover:opacity-90"
-                  style={{
-                    backgroundColor: '#70C8FF',
-                    color: '#002D78',
-                    fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    width: 'fit-content'
-                  }}
-                >
-                  <ButtonArrowHomepage />
-                  <span>Inquire Today</span>
-                </Link>
               </div>
 
               {/* Right Column: Description Text */}
               <div 
                 ref={descriptionRef.ref}
-                className={`w-full md:w-1/2 flex items-start transition-all duration-1000 ease-out delay-300 ${
-                  descriptionRef.isVisible 
-                    ? 'opacity-100 translate-x-0' 
-                    : 'opacity-0 translate-x-8'
-                }`}
+                className="w-full md:w-1/2 flex items-start md:items-end justify-end transition-all duration-1000 ease-out delay-300"
               >
                 <p 
                   style={{
@@ -137,6 +105,45 @@ export default function XetaWaveReseller() {
                   As an authorized Xetawave and Surecall reseller, we deliver end-to-end wireless link solutions integrating radios, antennas, cabling, and RF accessories for secure, reliable operation.
                 </p>
               </div>
+            </div>
+
+            {/* Second Section: CTA Text + Button */}
+            <div 
+              ref={ctaRef.ref}
+              className={`flex flex-col gap-6 transition-all duration-1000 ease-out delay-300 ${
+                ctaRef.isVisible 
+                  ? 'opacity-100 translate-x-0' 
+                  : 'opacity-0 translate-x-8'
+              }`}
+            >
+              <p 
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '26px',
+                  margin: 0
+                }}
+              >
+                For complete system solutions, reach out to a product expert.
+              </p>
+              <Link
+                href="/request-a-quote"
+                className="group inline-flex items-center gap-2 rounded-lg px-6 py-3 transition-all duration-300 ease-in-out hover:opacity-90"
+                style={{
+                  backgroundColor: '#70C8FF',
+                  color: '#002D78',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  width: 'fit-content'
+                }}
+              >
+                <ButtonArrowHomepage />
+                <span>Inquire Today</span>
+              </Link>
             </div>
 
             {/* Bottom Section: Four Feature Columns */}

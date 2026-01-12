@@ -99,11 +99,11 @@ const SingleListItem = ({ item }: { item: Product }) => {
   const hasImage = !!(item?.previewImages?.[0]?.image || item?.thumbnails?.[0]?.image || item?.connector?.image);
   
   const productImageUrl = item?.previewImages?.[0]?.image
-    ? imageBuilder(item.previewImages[0].image).url()!
-    : item?.thumbnails?.[0]?.image
-    ? imageBuilder(item.thumbnails[0].image).url()!
-    : item?.connector?.image
-    ? imageBuilder(item.connector.image).url()!
+                  ? imageBuilder(item.previewImages[0].image).url()!
+                  : item?.thumbnails?.[0]?.image
+                  ? imageBuilder(item.thumbnails[0].image).url()!
+                  : item?.connector?.image
+                  ? imageBuilder(item.connector.image).url()!
     : null;
 
   // Get SKU - Priority: First variation SKU → Parent SKU → empty
@@ -190,12 +190,12 @@ const SingleListItem = ({ item }: { item: Product }) => {
               <Link href={`/products/${item?.slug?.current}`}>
                 <Image
                   src={productImageUrl}
-                  alt={item.name}
+              alt={item.name}
                   fill
                   className="object-contain"
                   sizes="300px"
-                />
-              </Link>
+            />
+          </Link>
             ) : (
               <div className="flex items-center justify-center w-full h-full p-4">
                 <p 
@@ -262,7 +262,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
                 }}
                 className="hover:text-[#2958A4] transition-colors"
               >
-                {item.name}
+              {item.name}
               </h2>
             </Link>
 

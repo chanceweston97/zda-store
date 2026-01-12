@@ -67,7 +67,7 @@ export default function WorkWithUsSection() {
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-white text-[18px] font-medium leading-[26px]">
+                            <h3 className="text-white text-[18px] font-normal leading-[26px]">
                                 {item.title}
                             </h3>
 

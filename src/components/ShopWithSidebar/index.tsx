@@ -365,36 +365,36 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
           <div className="flex gap-7.5">
             {/* Sidebar Start - Hide completely on category/subcategory pages */}
             {!currentCategory && (
-              <div
-                className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static xl:w-1/4 w-full ease-out duration-200 ${
-                  productSidebar ? "translate-x-0 bg-white" : "-translate-x-full"
+            <div
+              className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static xl:w-1/4 w-full ease-out duration-200 ${
+                productSidebar ? "translate-x-0 bg-white" : "-translate-x-full"
+              }`}
+            >
+              <button
+                onClick={() => setProductSidebar(!productSidebar)}
+                aria-label="button for product sidebar toggle"
+                className={`xl:hidden absolute -right-12.5 sm:-right-8 flex items-center justify-center w-8 h-8 rounded-md bg-white shadow-1 ${
+                  stickyMenu
+                    ? "lg:top-20 sm:top-34.5 top-35"
+                    : "lg:top-24 sm:top-39 top-37"
                 }`}
               >
-                <button
-                  onClick={() => setProductSidebar(!productSidebar)}
-                  aria-label="button for product sidebar toggle"
-                  className={`xl:hidden absolute -right-12.5 sm:-right-8 flex items-center justify-center w-8 h-8 rounded-md bg-white shadow-1 ${
-                    stickyMenu
-                      ? "lg:top-20 sm:top-34.5 top-35"
-                      : "lg:top-24 sm:top-39 top-37"
-                  }`}
-                >
-                  <SidebarToggleIcon />
-                </button>
+                <SidebarToggleIcon />
+              </button>
 
-                <div className="flex flex-col gap-6 overflow-y-auto max-xl:h-screen max-xl:p-5">
-                  {/* filter box */}
-                  <ClearFilters />
+              <div className="flex flex-col gap-6 overflow-y-auto max-xl:h-screen max-xl:p-5">
+                {/* filter box */}
+                <ClearFilters />
 
                   {/* Category filter - Only show on shop page */}
-                  <CategoryDropdown categories={categories} allProducts={allProducts} />
+                <CategoryDropdown categories={categories} allProducts={allProducts} />
 
-                  {/* gender box */}
-                  {/* <GenderDropdown genders={genders} /> */}
+                {/* gender box */}
+                {/* <GenderDropdown genders={genders} /> */}
 
-                  <SizeDropdown availableSizes={availableSizes} />
-                </div>
+                <SizeDropdown availableSizes={availableSizes} />
               </div>
+            </div>
             )}
             {/* Sidebar End */}
 
@@ -416,7 +416,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
               {paginatedProducts.length ? (
                 <div className="flex flex-col gap-7.5">
                   {paginatedProducts.map((product) => (
-                    <SingleListItem key={product._id} item={product} />
+                      <SingleListItem key={product._id} item={product} />
                   ))}
                 </div>
               ) : (

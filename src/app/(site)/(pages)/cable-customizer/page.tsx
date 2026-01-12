@@ -44,7 +44,7 @@ const CableCustomizerPage = async () => {
 
 
   return (
-    <main>
+    <main style={{ backgroundColor: '#ffffff' }}>
       <CableCustomizerClient data={transformedData} />
     </main>
   );

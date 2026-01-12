@@ -91,9 +91,9 @@ const Header = () => {
                   <Image
                     src="/images/logo/logo.png"
                     alt="Logo"
-                    width={147}
-                    height={61}
-                    className="h-auto w-auto max-w-[120px] sm:max-w-[147px]"
+                    width={111}
+                    height={46}
+                    className="h-auto w-auto"
                   />
                 </Link>
               </div>
@@ -138,7 +138,8 @@ const Header = () => {
                     paddingRight: '30px',
                     cursor: 'pointer',
                     width: '140px',
-                    minWidth: '140px'
+                    minWidth: '140px',
+                    height: '46px'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
@@ -164,7 +165,7 @@ const Header = () => {
                     height={24}
                     className="w-6 h-6"
                   />
-                  {isMounted && cartCount > 0 && (
+                  {isMounted && cartCount && cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[#2958A4] text-white text-xs font-medium rounded-full">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
@@ -223,8 +224,8 @@ const Header = () => {
                 <Image
                   src="/images/logo/logo.png"
                   alt="Logo"
-                  width={130}
-                  height={28}
+                  width={111}
+                  height={46}
                 />
               </Link>
               <button

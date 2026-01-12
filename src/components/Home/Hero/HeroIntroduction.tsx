@@ -31,7 +31,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
   const imageRef = useScrollAnimation({ threshold: 0.2 });
 
   // Fallback values if no data from Sanity
-  const title = introductionData?.title || "Enabling Wireless Networks Since 2008";
+  const title = introductionData?.title || "Enabling wireless networks since 2008";
   const description = introductionData?.description || "At ZDA Communications, we care about one thing above all: reliable wireless performance. We design and supply industrial-grade antennas, cabling, and RF accessories that help homes, enterprises, and field teams achieve clear, consistent connectivity. ";
   const buttons = (introductionData?.buttons || [
     { text: "More About Us", link: "/about" },
@@ -84,97 +84,132 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
 
   return (
     <section 
-      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pb-8 sm:pb-12 lg:pb-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 rounded-[10px] mb-8 sm:mb-12 lg:mb-16"
+      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pb-8 sm:pb-12 lg:pb-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 mb-8 sm:mb-12 lg:mb-16"
       style={{
-        background: 'radial-gradient(145.54% 145.5% at 49.33% -2.63%, #FDFDFD 30.35%, rgba(223, 235, 255, 0.75) 100%)',
+        borderRadius: '10px',
+        background: 'radial-gradient(145.54% 145.5% at 49.33% -2.63%, #FDFDFD 30.35%, #F1F6FF 100%)',
         paddingTop: '22px'
       }}
     >
-      {/* Heading */}
-      <h2 
-        ref={titleRef.ref}
-        className={`text-[32px] sm:text-[40px] lg:text-[50px] font-thin leading-[1.2] sm:leading-[1.3] lg:leading-[76px] tracking-[-1px] sm:tracking-[-1.5px] lg:tracking-[-2.4px] transition-all duration-1000 ease-out px-4 sm:px-6 lg:px-0 ${
-          titleRef.isVisible 
-            ? 'opacity-100 translate-y-0' 
-            : 'opacity-0 translate-y-8'
-        }`}
-      >
-        <span className="text-black">{mainTitle}</span>
-        {yearPart && <span className="text-[#2958A4]"> {yearPart}</span>}
-      </h2>
-
       {/* Content Row: Image and Text/Buttons */}
-      <div 
-        className="flex flex-col lg:flex-row justify-center items-center gap-6 sm:gap-8 lg:gap-12 w-full px-4 sm:px-6 lg:px-12 xl:px-16"
-      >
-        {/* LEFT IMAGE - Centered */}
-        <div 
-          ref={imageRef.ref}
-          className={`w-full lg:w-auto shrink-0 flex items-center justify-center transition-all duration-1000 ease-out delay-300 ${
-            imageRef.isVisible 
-              ? 'opacity-100 translate-x-0 scale-100' 
-              : 'opacity-0 translate-x-8 scale-95'
+        {/* Heading - Top Left */}
+        <h2 
+          ref={titleRef.ref}
+          className={`transition-all duration-1000 ease-out mb-5 md:mb-[30px] ${
+            titleRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
           }`}
         >
-          <Image
-            src={imageUrl}
-            alt={title}
-            width={647}
-            height={178}
-            className="object-contain"
+          <span style={{
+            color: '#000',
+            fontFamily: 'Satoshi',
+            fontSize: '50px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '50px',
+            letterSpacing: '-2px'
+          }}>{mainTitle}</span>
+          {yearPart && <span style={{
+            color: '#2958A4',
+            fontFamily: 'Satoshi',
+            fontSize: '50px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '50px',
+            letterSpacing: '-2px'
+          }}> {yearPart}</span>}
+        </h2>
+
+        {/* Bottom Row: Image on Left, Text/Button on Right */}
+        <div className="flex flex-col md:flex-row items-center md:items-center" style={{ flex: 1, gap: '20px' }}>
+          {/* LEFT IMAGE */}
+          <div 
+            ref={imageRef.ref}
+            className={`w-full lg:w-auto shrink-0 flex items-center justify-center transition-all duration-1000 ease-out delay-300 ${
+              imageRef.isVisible 
+                ? 'opacity-100 translate-x-0 scale-100' 
+                : 'opacity-0 translate-x-8 scale-95'
+            }`}
+          >
+            <Image
+              src={imageUrl}
+              alt={title}
+              width={647}
+              height={178}
+              className="object-contain w-full md:w-auto"
             style={{
-              width: '647px',
-              maxWidth: '100%',
-              height: '178px',
+              width: '100%',
+              maxWidth: '647px',
+              height: 'auto',
               aspectRatio: '647/178'
             }}
-          />
-        </div>
+            />
+          </div>
 
-        {/* RIGHT CONTENT */}
-        <div className="flex flex-col justify-center flex-1 w-full">
+          {/* RIGHT CONTENT */}
+          <div className="w-full md:w-auto" style={{ display: 'flex', flexDirection: 'column', gap: '25px', marginLeft: 'auto', width: '482px', maxWidth: '100%' }}>
           {/* Paragraphs */}
           <div 
             ref={textRef.ref}
-            className={`flex flex-col gap-4 transition-all duration-1000 ease-out delay-200 ${
+            className={`transition-all duration-1000 ease-out delay-200 ${
               textRef.isVisible 
                 ? 'opacity-100 translate-y-0' 
                 : 'opacity-0 translate-y-8'
             }`}
             style={{
-              color: '#383838',
-              fontFamily: 'Satoshi, sans-serif',
-              fontSize: '16px',
-              fontStyle: 'normal',
-              fontWeight: 500,
-              lineHeight: '26px',
-              letterSpacing: '-0.32px'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              height: 'auto',
+              minHeight: '168px'
             }}
           >
-            <p className="text-[16px] sm:text-[18px] leading-[24px] sm:leading-[28px]">{firstParagraph}</p>
-            {secondParagraph && <p className="text-[16px] sm:text-[18px] leading-[24px] sm:leading-[28px]">{secondParagraph}</p>}
+            <p className="text-[16px] md:text-[18px]" style={{
+              color: '#383838',
+              fontFamily: 'Satoshi',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              lineHeight: '28px',
+              letterSpacing: '-0.36px',
+              margin: 0
+            }}>{firstParagraph}</p>
+            {secondParagraph && <p className="text-[16px] md:text-[18px]" style={{
+              color: '#383838',
+              fontFamily: 'Satoshi',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              lineHeight: '28px',
+              letterSpacing: '-0.36px',
+              margin: 0
+            }}>{secondParagraph}</p>}
           </div>
 
           {/* Buttons */}
           <div 
             ref={buttonsRef.ref}
-            className={`mt-6 sm:mt-8 flex flex-wrap gap-4 transition-all duration-1000 ease-out delay-400 ${
+            className={`transition-all duration-1000 ease-out delay-400 ${
               buttonsRef.isVisible 
                 ? 'opacity-100 translate-y-0' 
                 : 'opacity-0 translate-y-8'
             }`}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}
           >
             {buttons.map((button, index) => (
               <Link
                 key={index}
                 href={button.link}
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
+                className="group"
                 style={{ 
-                  fontFamily: 'Satoshi, sans-serif',
+                  display: 'flex',
                   padding: '10px 30px',
-                  paddingRight: '30px',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '10px',
+                  borderRadius: '10px',
+                  background: '#2958A4',
                   cursor: 'pointer',
-                  minWidth: 'fit-content'
+                  textDecoration: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
@@ -183,13 +218,15 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
                   e.currentTarget.style.paddingRight = '30px';
                 }}
               >
-                <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{button.text}</p>
+                <div style={{ color: '#FFFFFF' }}>
+                  <ButtonArrowHomepage />
+                </div>
+                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]" style={{ color: '#FFFFFF' }}>{button.text}</span>
               </Link>
             ))}
           </div>
+          </div>
         </div>
-      </div>
     </section>
   );
 }

@@ -375,8 +375,9 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     <>      
       {/* Hero Section */}
       <section 
-        className="relative py-12 lg:py-12 mt-[80px] overflow-hidden"
+        className="relative mt-[80px] overflow-hidden flex items-center"
         style={{
+          height: '350px',
           background: 'radial-gradient(143.61% 142.34% at 55.45% -16%, #2958A4 34.13%, #1870D5 74.53%, #70C8FF 100%)'
         }}
       >
@@ -401,7 +402,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   fontFamily: 'Satoshi, sans-serif',
                   fontSize: '60px',
                   fontStyle: 'normal',
-                  fontWeight: 500,
+                  fontWeight: 400,
                   lineHeight: '50px',
                   letterSpacing: '-2.4px',
                   marginBottom: '50px'
@@ -455,16 +456,26 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         </div>
       </section>
 
-      <section className="relative py-10 lg:py-20 bg-gray-2 mb-[50px]">
+      <section className="relative py-10 mb-[50px]">
         <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Left: Configuration Panel */}
             <div className="space-y-6">
               {/* Order Summary Card */}
-              <div className="bg-white rounded-lg shadow-1 p-6">
-                <h3 className="text-[#2958A4] text-[24px] font-medium mb-6">
-                  Order Summary
-                </h3>
+              <div className="bg-white rounded-lg border border-gray-3 p-6">
+                <h3 
+                  style={{
+                    color: '#2958A4',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '24px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    letterSpacing: '-0.48px',
+                    marginBottom: '24px'
+                  }}
+                >
+                    Order Summary
+                  </h3>
 
                 {/* Cable Series */}
                 <div className="mb-4">
@@ -486,15 +497,34 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       }
                     }}
                     onBlur={() => setTouched((prev) => ({ ...prev, cableSeries: true }))}
-                    className={`w-full py-3 px-4 border bg-white text-[#383838] focus:outline-none appearance-none ${
+                    className={`w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4] ${
                       touched.cableSeries && errors.cableSeries
                         ? "border-red-500 focus:border-red-500"
-                        : "border-[#2958A4] focus:border-[#2958A4]"
+                        : ""
                     }`}
+                    style={{
+                      display: 'flex',
+                      height: '50px',
+                      padding: '0 16px',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      borderRadius: '10px',
+                      background: '#F6F7F7',
+                      border: 'none',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 400,
+                      color: '#383838',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '2.5rem'
+                    }}
                   >
-                    <option value="">Select Cable Series</option>
+                    <option value="" style={{ color: '#383838' }}>Select Cable Series</option>
                     {data.cableSeries.map((series) => (
-                      <option key={series.id} value={series.slug}>
+                      <option key={series.id} value={series.slug} style={{ color: '#383838' }}>
                         {series.name}
                       </option>
                     ))}
@@ -567,17 +597,36 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                     }}
                     onBlur={() => setTouched((prev) => ({ ...prev, cableType: true }))}
                     disabled={!config.cableSeries}
-                    className={`w-full py-3 px-4 border bg-white text-[#383838] focus:outline-none appearance-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400 ${
+                    className={`w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4] disabled:cursor-not-allowed disabled:opacity-50 ${
                       touched.cableType && errors.cableType
                         ? "border-red-500 focus:border-red-500"
-                        : "border-[#2958A4] focus:border-[#2958A4]"
+                        : ""
                     }`}
+                    style={{
+                      display: 'flex',
+                      height: '50px',
+                      padding: '0 16px',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      borderRadius: '10px',
+                      background: '#F6F7F7',
+                      border: 'none',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 400,
+                      color: '#383838',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '2.5rem'
+                    }}
                   >
-                    <option value="">
+                    <option value="" style={{ color: '#383838' }}>
                       {config.cableSeries ? "Select Cable Type" : "Select Cable Series first"}
                     </option>
                     {availableCableTypes.map((type) => (
-                      <option key={type.id} value={type.slug}>
+                      <option key={type.id} value={type.slug} style={{ color: '#383838' }}>
                         {type.name}
                       </option>
                     ))}
@@ -602,15 +651,34 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       }
                     }}
                     onBlur={() => setTouched((prev) => ({ ...prev, connector1: true }))}
-                    className={`w-full py-3 px-4 border bg-white text-[#383838] focus:outline-none appearance-none ${
+                    className={`w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4] ${
                       touched.connector1 && errors.connector1
                         ? "border-red-500 focus:border-red-500"
-                        : "border-[#2958A4] focus:border-[#2958A4]"
+                        : ""
                     }`}
+                    style={{
+                      display: 'flex',
+                      height: '50px',
+                      padding: '0 16px',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      borderRadius: '10px',
+                      background: '#F6F7F7',
+                      border: 'none',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 400,
+                      color: '#383838',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '2.5rem'
+                    }}
                   >
-                    <option value="">Select Connector A</option>
+                    <option value="" style={{ color: '#383838' }}>Select Connector A</option>
                     {availableConnectors.map((connector) => (
-                      <option key={connector.id} value={connector.slug}>
+                      <option key={connector.id} value={connector.slug} style={{ color: '#383838' }}>
                         {connector.name}
                       </option>
                     ))}
@@ -635,15 +703,34 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       }
                     }}
                     onBlur={() => setTouched((prev) => ({ ...prev, connector2: true }))}
-                    className={`w-full py-3 px-4 border bg-white text-[#383838] focus:outline-none appearance-none ${
+                    className={`w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4] ${
                       touched.connector2 && errors.connector2
                         ? "border-red-500 focus:border-red-500"
-                        : "border-[#2958A4] focus:border-[#2958A4]"
+                        : ""
                     }`}
+                    style={{
+                      display: 'flex',
+                      height: '50px',
+                      padding: '0 16px',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      borderRadius: '10px',
+                      background: '#F6F7F7',
+                      border: 'none',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 400,
+                      color: '#383838',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 16px center',
+                      paddingRight: '2.5rem'
+                    }}
                   >
-                    <option value="">Select Connector B</option>
+                    <option value="" style={{ color: '#383838' }}>Select Connector B</option>
                     {availableConnectors.map((connector) => (
-                      <option key={connector.id} value={connector.slug}>
+                      <option key={connector.id} value={connector.slug} style={{ color: '#383838' }}>
                         {connector.name}
                       </option>
                     ))}
@@ -690,11 +777,22 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                         }
                       }}
                       placeholder="Enter length in feet"
-                      className={`w-full py-3 px-4 border bg-white text-[#383838] focus:outline-none ${
+                      className={`w-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4] ${
                         touched.length && errors.length
                           ? "border-red-500 focus:border-red-500"
-                          : "border-[#2958A4] focus:border-[#2958A4]"
+                          : ""
                       }`}
+                      style={{
+                        height: '50px',
+                        padding: '0 16px',
+                        borderRadius: '10px',
+                        background: '#F6F7F7',
+                        border: 'none',
+                        fontFamily: 'Satoshi, sans-serif',
+                        fontSize: '16px',
+                        fontWeight: 400,
+                        color: '#383838'
+                      }}
                       onInvalid={(e) => {
                         e.preventDefault();
                       }}
@@ -776,10 +874,21 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
             </div>
 
             {/* Right: Visual Preview */}
-            <div className="bg-white rounded-lg shadow-1 p-6 lg:p-8">
-              <h3 className="text-[#2958A4] text-[24px] font-medium mb-6 text-center">
-                Preview
-              </h3>
+            <div className="bg-white rounded-lg border border-gray-3 p-6 lg:p-8">
+                <h3 
+                  style={{
+                    color: '#2958A4',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '24px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    letterSpacing: '-0.48px',
+                    marginBottom: '24px',
+                    textAlign: 'center'
+                  }}
+                >
+                  Preview
+                </h3>
               
               <div className="flex items-center justify-center gap-4 lg:gap-8 mb-8">
                 {/* Connector 1 */}

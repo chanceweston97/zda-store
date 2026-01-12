@@ -172,12 +172,21 @@ function FaqRow({
       aria-expanded={isOpen}
       className="w-full text-left"
     >
-      <div className={`flex flex-col rounded-2xl ${isOpen ? "bg-[#f7f7f7]" : "bg-white"} px-5 py-4 shadow-sm transition hover:bg-[#f7f7f7]`}>
+      <div 
+        className="flex flex-col transition"
+        style={{
+          padding: '32px',
+          alignSelf: 'stretch',
+          borderRadius: '10px',
+          border: '1px solid #F2F2F2',
+          background: '#FFF'
+        }}
+      >
         {/* Question */}
         <div className="flex items-center justify-between gap-2">
           <p 
             style={{
-              color: '#2958A4',
+              color: '#000',
               fontFamily: 'Satoshi, sans-serif',
               fontSize: '20px',
               fontStyle: 'normal',

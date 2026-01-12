@@ -68,8 +68,9 @@ export default function WorkWithUs() {
               fontFamily: 'Satoshi, sans-serif',
               fontSize: 'clamp(16px, 1.5vw, 18px)',
               fontStyle: 'normal',
-              fontWeight: 500,
-              lineHeight: '26px'
+              fontWeight: 400,
+              lineHeight: '26px',
+              marginTop: '10px'
             }}
           >
             From government fleets to amateur radio enthusiasts, we're your partner for antennas, cables, connectors, and more.
@@ -172,7 +173,7 @@ export default function WorkWithUs() {
                       fontFamily: 'Satoshi, sans-serif',
                       fontSize: '24px',
                       fontStyle: 'normal',
-                      fontWeight: 500,
+                      fontWeight: 400,
                       lineHeight: '34px',
                       letterSpacing: '-0.96px',
                       margin: 0,
@@ -193,6 +194,7 @@ export default function WorkWithUs() {
                       color: '#000',
                       fontFamily: 'Satoshi, sans-serif',
                       fontSize: '16px',
+                      marginTop:'10px',
                       fontStyle: 'normal',
                       fontWeight: 400,
                       lineHeight: '26px',
