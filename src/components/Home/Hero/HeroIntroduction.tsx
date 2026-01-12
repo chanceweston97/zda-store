@@ -137,13 +137,13 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
               alt={title}
               width={647}
               height={178}
-              className="object-contain w-full md:w-auto"
-            style={{
-              width: '100%',
-              maxWidth: '647px',
-              height: 'auto',
-              aspectRatio: '647/178'
-            }}
+              className="object-contain"
+              style={{
+                width: '647px',
+                height: '178px',
+                maxWidth: '100%',
+                aspectRatio: '647/178'
+              }}
             />
           </div>
 
