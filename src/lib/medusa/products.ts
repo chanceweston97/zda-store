@@ -321,6 +321,8 @@ export function convertMedusaToSanityProduct(medusaProduct: MedusaProduct): any 
     categories: allCategories,
     // Handle field for URL routing (Medusa uses handle, not slug)
     handle: medusaProduct.handle,
+    // SKU - get from first variant or product metadata
+    sku: medusaProduct.variants?.[0]?.sku || (medusaProduct.metadata as any)?.sku || null,
     // Preserve full metadata object (includes all custom fields from admin panel)
     // This is already set above, so we don't need to duplicate it
   };

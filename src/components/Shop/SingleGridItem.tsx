@@ -148,15 +148,85 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <Link href={`/products/${item?.slug?.current}`}>
-        <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5 line-clamp-1">
-          {item.name}
-        </h3>
+      <div>
+        {/* Product Title */}
+        <Link href={`/products/${item?.slug?.current}`}>
+          <h3 
+            className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 line-clamp-2"
+            style={{
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '18px',
+              fontWeight: 500,
+              lineHeight: '26px'
+            }}
+          >
+            {item.name}
+          </h3>
+        </Link>
 
-        <span className="flex items-center gap-2 text-lg font-medium">
-          <span className="text-dark">${formatPrice(productPrice)}</span>
-        </span>
-      </Link>
+        {/* Price in Rectangle */}
+        <div 
+          className="inline-block mb-2 px-3 py-1.5"
+          style={{
+            background: '#F1F6FF',
+            borderRadius: '4px'
+          }}
+        >
+          <span 
+            className="text-dark font-medium"
+            style={{
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '18px',
+              fontWeight: 500
+            }}
+          >
+            ${formatPrice(productPrice)}
+          </span>
+        </div>
+
+        {/* Tagline/Short Description */}
+        {item.shortDescription && (
+          <p 
+            className="mb-2 text-gray-600"
+            style={{
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '14px',
+              fontWeight: 400,
+              lineHeight: '20px'
+            }}
+          >
+            {item.shortDescription}
+          </p>
+        )}
+
+        {/* Features */}
+        {(item as any).features && (() => {
+          const features = (item as any).features;
+          if (Array.isArray(features) && features.length > 0) {
+            return (
+              <ul className="space-y-1">
+                {features.slice(0, 3).map((feature: string, index: number) => (
+                  <li key={index} className="flex items-start gap-1.5">
+                    <span className="text-gray-600" style={{ fontSize: '12px' }}>•</span>
+                    <span
+                      className="text-gray-600"
+                      style={{
+                        fontFamily: 'Satoshi, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 400,
+                        lineHeight: '18px'
+                      }}
+                    >
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            );
+          }
+          return null;
+        })()}
+      </div>
     </div>
   );
 };

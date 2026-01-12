@@ -1,13 +1,17 @@
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
-import FaqSection from "@/components/Home/Faq";
+import ShopWithSidebar from "@/components/ShopWithSidebar";
 import Newsletter from "@/components/Common/Newsletter";
 import {
   getCategories,
   getCategoryBySlug,
   getCategoriesWithSubcategories,
+  getAllProducts,
 } from "@/lib/data/unified-data";
 import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
+import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
+import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
+import { medusaClient } from "@/lib/medusa/client";
+import { convertMedusaToSanityCategory } from "@/lib/medusa/categories";
 
 // Force dynamic rendering to prevent static generation in production
 export const dynamic = "force-dynamic";
@@ -268,20 +272,43 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     });
   }
 
-  // Clean slug by removing hyphens and symbol characters
-  const cleanSlug = slug
-    ? slug
-        .replace(/[^a-zA-Z0-9\s]/g, "  ")
-        .replace(/\s+/g, " ")
-        .trim()
-    : "Category Page";
+  // Fetch all categories for the sidebar
+  let categories: any[] = [];
+  try {
+    const useWooCommerce = isWooCommerceEnabled();
+    
+    if (useWooCommerce) {
+      categories = await getWooCommerceCategories();
+    } else {
+      const categoriesResponse = await medusaClient.getCategories();
+      const product_categories = categoriesResponse?.product_categories || (categoriesResponse as any)?.categories || [];
+      if (product_categories.length > 0) {
+        const converted = product_categories.map((cat: any) =>
+          convertMedusaToSanityCategory(cat, product_categories)
+        );
+        categories = converted.filter((cat: any) => !cat.parent);
+      }
+    }
+  } catch (error) {
+    console.error("[CategoryPage] Error fetching categories:", error);
+    categories = [];
+  }
 
-  const faqData = await getFaq();
+  // Get category name for hero section
+  const categoryName = categoryData?.title || categoryData?.name || slug;
 
   return (
     <main>
-      <ShopWithoutSidebar shopData={filteredProducts} />
-      <FaqSection faqData={faqData} />
+      <ShopWithSidebar
+        data={{
+          allProducts,
+          products: filteredProducts,
+          categories,
+          allProductsCount: allProducts.length,
+          currentCategory: categoryData, // Pass current category for subcategories display
+        }}
+        categoryName={categoryName}
+      />
       <Newsletter />
     </main>
   );

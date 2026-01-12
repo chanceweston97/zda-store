@@ -77,10 +77,13 @@ const SingleListItem = ({ item }: { item: Product }) => {
       dispatch(removeItemFromWishlist(item._id));
       toast.success("Product removed from wishlist!");
     } else {
+      const wishlistPrice = productPrice || item.price || 0;
       dispatch(
         addItemToWishlist({
           ...item,
           quantity: 1,
+          price: wishlistPrice,
+          discountedPrice: item.discountedPrice || wishlistPrice,
         })
       );
       toast.success("Product added to wishlist!");
@@ -92,83 +95,334 @@ const SingleListItem = ({ item }: { item: Product }) => {
     setMounted(true);
   }, []);
 
+  // Check if product has a valid image
+  const hasImage = !!(item?.previewImages?.[0]?.image || item?.thumbnails?.[0]?.image || item?.connector?.image);
+  
+  const productImageUrl = item?.previewImages?.[0]?.image
+    ? imageBuilder(item.previewImages[0].image).url()!
+    : item?.thumbnails?.[0]?.image
+    ? imageBuilder(item.thumbnails[0].image).url()!
+    : item?.connector?.image
+    ? imageBuilder(item.connector.image).url()!
+    : null;
+
+  // Get SKU - Priority: First variation SKU → Parent SKU → empty
+  // When variations exist, show first variation's SKU (first ID's SKU)
+  const sku = (() => {
+    // Debug logging to verify data availability
+    console.log("PRODUCT DEBUG", {
+      id: item._id,
+      name: item.name,
+      sku: (item as any).sku,
+      variants: (item as any).variants,
+      variations: (item as any).variations,
+      variantsCount: (item as any).variants?.length || 0,
+      firstVariantSku: (item as any).variants?.[0]?.sku,
+    });
+
+    // 1️⃣ First variation SKU (if variations exist, prioritize first variation's SKU)
+    // Variations are sorted by ID in convertWCToSanityProduct, so [0] is the first (lowest ID)
+    if ((item as any).variants && (item as any).variants.length > 0) {
+      // Get first variation's SKU (first ID's SKU - variations are sorted by ID ascending)
+      const firstVariant = (item as any).variants[0];
+      const firstVariantSku = firstVariant?.sku;
+      
+      if (firstVariantSku && firstVariantSku.trim() !== "") {
+        console.log(`[SingleListItem] Using first variant SKU: ${firstVariantSku} (variant ID: ${firstVariant?.id})`);
+        return firstVariantSku.trim();
+      } else {
+        console.log(`[SingleListItem] First variant has no SKU (variant ID: ${firstVariant?.id}), checking other variants...`);
+        // If first variant has no SKU, find first variant with SKU
+        const firstWithSku = (item as any).variants.find((v: any) => v.sku && v.sku.trim() !== "");
+        if (firstWithSku) {
+          console.log(`[SingleListItem] Using first variant with SKU: ${firstWithSku.sku} (variant ID: ${firstWithSku.id})`);
+          return firstWithSku.sku.trim();
+        }
+      }
+    }
+
+    // 2️⃣ Parent SKU (fallback if no variations or first variation has no SKU)
+    const parentSku = (item as any).sku;
+    if (parentSku && parentSku.trim() !== "") {
+      return parentSku.trim();
+    }
+
+    // 3️⃣ GainOptions SKU (for antenna products)
+    if (item.productType === "antenna" && item.gainOptions && item.gainOptions.length > 0) {
+      const firstGainOptionWithSku = item.gainOptions.find(
+        (g: any) => {
+          const gainOption = g as any;
+          return gainOption?.sku && typeof gainOption.sku === 'string' && gainOption.sku.trim() !== "";
+        }
+      );
+      if (firstGainOptionWithSku) {
+        const sku = (firstGainOptionWithSku as any).sku;
+        if (typeof sku === 'string') {
+          return sku.trim();
+        }
+      }
+    }
+
+    // 4️⃣ Metadata SKU (last resort)
+    const metadataSku = (item as any).metadata?.sku;
+    if (metadataSku && metadataSku.trim() !== "") {
+      return metadataSku.trim();
+    }
+
+    // 5️⃣ Nothing
+    return null;
+  })();
+
   return (
-    <div className="bg-white rounded-lg group shadow-1">
-      <div className="flex">
-        <div className="shadow-list relative overflow-hidden flex items-center justify-center max-w-[270px] w-full sm:min-h-[270px] p-4">
-          <Link href={`/products/${item?.slug?.current}`}>
-            <Image
-              src={
-                item?.previewImages?.[0]?.image
-                  ? imageBuilder(item.previewImages[0].image).url()!
-                  : item?.thumbnails?.[0]?.image
-                  ? imageBuilder(item.thumbnails[0].image).url()!
-                  : item?.connector?.image
-                  ? imageBuilder(item.connector.image).url()!
-                  : "/images/placeholder.png"
-              }
-              alt={item.name}
-              className="object-cover"
-              width={270}
-              height={270}
-            />
-          </Link>
-
-          <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
-            <button
-              onClick={() => {
-                openModal();
-                handleQuickViewUpdate();
-              }}
-              aria-label="button for quick view"
-              className="flex items-center justify-center border border-gray-2 w-9 h-9 rounded-full shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
-            >
-              <EyeIcon className="w-5 h-5" />
-            </button>
-
-            {isItemInCart ? (
-              <CheckoutBtn />
+    <div className="bg-white rounded-lg shadow-1 overflow-hidden mb-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* LEFT: Product Image - Fixed 300x300px */}
+        <div className="flex-shrink-0 relative mx-auto lg:mx-0">
+          <div 
+            className="relative rounded-lg border border-gray-3 flex items-center justify-center bg-gray-1 overflow-hidden"
+            style={{
+              width: '300px',
+              height: '300px',
+              aspectRatio: '1/1'
+            }}
+          >
+            {hasImage && productImageUrl ? (
+              <Link href={`/products/${item?.slug?.current}`}>
+                <Image
+                  src={productImageUrl}
+                  alt={item.name}
+                  fill
+                  className="object-contain"
+                  sizes="300px"
+                />
+              </Link>
             ) : (
-              <button
-                onClick={() => handleAddToCart()}
-                className="group inline-flex items-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
-                style={{ fontFamily: 'Satoshi, sans-serif' }}
-              >
-                <ButtonArrow />
-                <span>Add to cart</span>
-              </button>
+              <div className="flex items-center justify-center w-full h-full p-4">
+                <p 
+                  className="text-center text-gray-500 text-sm"
+                  style={{
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    color: '#6B7280'
+                  }}
+                >
+                  No Product Image Available
+                </p>
+              </div>
             )}
-
-            <button
-              onClick={handleToggleWishList}
-              aria-label="button for favorite select"
-              className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-2 shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
-            >
-              {mounted ? (
-                isItemInWishlist ? (
-                  <HeartSolid className="w-5 h-5" />
-                ) : (
-                  <HeartIcon className="w-5 h-5" />
-                )
-              ) : null}
-            </button>
           </div>
         </div>
 
-        <Link
-          href={`/products/${item?.slug?.current}`}
-          className="w-full flex flex-col gap-5 sm:flex-row sm:items-center justify-center sm:justify-between py-5 px-4 sm:px-7.5 lg:pl-11 lg:pr-12"
-        >
-          <div>
-            <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
-              {item.name}
-            </h3>
+        {/* RIGHT: Product Info - Takes remaining space */}
+        <div className="flex-1 flex flex-col justify-start px-4 lg:px-0">
+          {/* SKU, Title, Price in Rectangle - On Top */}
+          <div
+            style={{
+              display: 'flex',
+              padding: '15px',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: '5px',
+              alignSelf: 'stretch',
+              borderRadius: '10px',
+              background: '#F1F6FF',
+              marginBottom: '16px'
+            }}
+          >
+            {/* SKU - Like PDP - Always show if available */}
+            {sku ? (
+              <span
+                style={{
+                  color: '#457B9D',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  lineHeight: '26px',
+                  letterSpacing: '-0.32px'
+                }}
+              >
+                {sku}
+              </span>
+            ) : null}
 
-            <span className="flex items-center gap-2 text-lg font-medium">
-              <span className="text-dark">${formatPrice(productPrice)}</span>
-            </span>
+            {/* Product Title */}
+            <Link href={`/products/${item?.slug?.current}`}>
+              <h2
+                style={{
+                  color: '#000',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '24px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px',
+                  letterSpacing: '-0.48px',
+                  margin: 0
+                }}
+                className="hover:text-[#2958A4] transition-colors"
+              >
+                {item.name}
+              </h2>
+            </Link>
+
+            {/* Price */}
+            <h3
+              style={{
+                color: '#000',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '18px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '36px',
+                letterSpacing: '-0.54px',
+                textTransform: 'uppercase',
+                margin: 0
+              }}
+            >
+              {formatPrice(productPrice)}
+            </h3>
           </div>
-        </Link>
+
+          {/* Subtitle/Short Description - Outside rectangle */}
+          {item.shortDescription && (
+            <p
+              style={{
+                color: '#000',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '16px',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '26px',
+                marginBottom: '16px',
+                marginTop: 0
+              }}
+            >
+              {item.shortDescription}
+            </p>
+          )}
+
+          {/* Features - Outside rectangle */}
+          {(item as any).features && (() => {
+            const features = (item as any).features;
+            if (Array.isArray(features) && features.length > 0) {
+              return (
+                <div className="mb-4">
+                  <ul className="space-y-1">
+                    {features.map((feature: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span
+                          style={{
+                            color: '#000',
+                            fontFamily: 'Satoshi, sans-serif',
+                            fontSize: '12px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '26px'
+                          }}
+                        >
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            // Handle string format - could be HTML or newline-separated
+            if (typeof features === 'string' && features.trim()) {
+              if (typeof window !== 'undefined') {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(features, 'text/html');
+                const listItems = doc.querySelectorAll('li');
+
+                if (listItems.length > 0) {
+                  // HTML list format
+                  return (
+                    <div className="mb-4">
+                      <ul className="space-y-1">
+                        {Array.from(listItems).map((li, index) => {
+                          const text = li.textContent || li.innerText || '';
+                          return (
+                            <li key={index} className="flex items-start gap-2">
+                              <span
+                                style={{
+                                  color: '#000',
+                                  fontFamily: 'Satoshi, sans-serif',
+                                  fontSize: '12px',
+                                  fontStyle: 'normal',
+                                  fontWeight: 400,
+                                  lineHeight: '26px'
+                                }}
+                              >
+                                {text.trim()}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                } else {
+                  // Newline-separated string format
+                  const featureLines = features.split('\n').filter(line => line.trim());
+                  if (featureLines.length > 0) {
+                    return (
+                      <div className="mb-4">
+                        <ul className="space-y-1">
+                          {featureLines.map((feature: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span
+                                style={{
+                                  color: '#000',
+                                  fontFamily: 'Satoshi, sans-serif',
+                                  fontSize: '12px',
+                                  fontStyle: 'normal',
+                                  fontWeight: 400,
+                                  lineHeight: '26px'
+                                }}
+                              >
+                                {feature.trim()}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  }
+                }
+              } else {
+                // Server-side: handle newline-separated string
+                const featureLines = features.split('\n').filter(line => line.trim());
+                if (featureLines.length > 0) {
+                  return (
+                    <div className="mb-4">
+                      <ul className="space-y-1">
+                        {featureLines.map((feature: string, index: number) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span
+                              style={{
+                                color: '#000',
+                                fontFamily: 'Satoshi, sans-serif',
+                                fontSize: '12px',
+                                fontStyle: 'normal',
+                                fontWeight: 400,
+                                lineHeight: '26px'
+                              }}
+                            >
+                              {feature.trim()}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                }
+              }
+            }
+            return null;
+          })()}
+        </div>
       </div>
     </div>
   );
