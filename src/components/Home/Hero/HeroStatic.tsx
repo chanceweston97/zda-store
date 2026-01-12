@@ -81,7 +81,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
       {/* LEFT TEXT + BUTTONS */}
       <div className="absolute left-6 sm:left-8 lg:left-10 z-10 max-w-[1136px]">
         <h1 
-          className={`transition-all duration-1000 ease-out mt-[30px] sm:mt-[40px] md:mt-[50px] ${
+          className={`transition-all duration-1000 ease-out mt-[30px] sm:mt-[40px] md:mt-[50px] text-[40px] sm:text-[50px] ${
             isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -89,7 +89,6 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
           style={{
             color: '#FFF',
             fontFamily: 'Satoshi, sans-serif',
-            fontSize: '50px',
             fontStyle: 'normal',
             fontWeight: 400,
             lineHeight: '60px',
@@ -156,7 +155,7 @@ function BrandNameAnimation({ brandName }: { brandName: string }) {
           : 'opacity-0 -translate-x-8'
       }`}
     >
-      <p className="text-white text-[32px] sm:text-[40px] md:text-[50px] lg:text-[60px] xl:text-[70px] 2xl:text-[100px] font-light tracking-tight">
+      <p className="text-white text-[48px] sm:text-[40px] md:text-[50px] lg:text-[60px] xl:text-[70px] 2xl:text-[100px] font-light tracking-tight">
         {brandName}
       </p>
     </div>

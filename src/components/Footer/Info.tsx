@@ -75,7 +75,7 @@ export default function Info() {
             sales@zdacomm.com
           </Link>
         </li>
-        <li>
+        <li className="mb-5 sm:mb-0">
           <Link
             className="ease-out duration-200 hover:text-[#70C8FF]"
             href="tel:18034194702"

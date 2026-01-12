@@ -54,7 +54,7 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
         {/* Heading */}
         <h2 
           ref={titleRef.ref}
-          className={`text-center transition-all duration-1000 ease-out ${
+          className={`text-center transition-all duration-1000 ease-out text-[40px] sm:text-[50px] ${
             titleRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -63,7 +63,6 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
             color: '#000',
             fontFeatureSettings: "'liga' off, 'clig' off",
             fontFamily: 'Satoshi, sans-serif',
-            fontSize: '50px',
             fontStyle: 'normal',
             fontWeight: 400,
             lineHeight: '76px',

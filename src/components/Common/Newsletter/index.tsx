@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 const Newsletter = () => {
+  const headingRef = useScrollAnimation({ threshold: 0.2 });
+  const paragraphRef = useScrollAnimation({ threshold: 0.2 });
+  const buttonRef = useScrollAnimation({ threshold: 0.2 });
+
   return (
     <section 
       className="flex justify-center items-center relative overflow-hidden mx-auto"
@@ -29,12 +34,16 @@ const Newsletter = () => {
 
       <div className="relative z-10 w-full max-w-[1340px] mx-auto px-4 sm:px-6 xl:px-0 flex flex-col items-center justify-center text-center">
         <h2 
-          className="mb-4"
+          ref={headingRef.ref}
+          className={`mb-4 text-[45px] sm:text-[70px] transition-all duration-1000 ease-out ${
+            headingRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
           style={{
             color: '#FFF',
             textAlign: 'center',
             fontFamily: 'Satoshi, sans-serif',
-            fontSize: '70px',
             fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '66px',
@@ -45,7 +54,12 @@ const Newsletter = () => {
           </h2>
 
         <p 
-          className="mb-8"
+          ref={paragraphRef.ref}
+          className={`mb-8 transition-all duration-1000 ease-out delay-200 ${
+            paragraphRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
           style={{
             color: '#FFF',
             textAlign: 'center',
@@ -61,8 +75,13 @@ const Newsletter = () => {
         </p>
 
         <Link
+          ref={buttonRef.ref}
           href="/contact"
-          className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90"
+          className={`btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 ${
+            buttonRef.isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-8'
+          }`}
           style={{ 
             fontFamily: 'Satoshi, sans-serif',
             backgroundColor: '#70C8FF',
@@ -70,7 +89,9 @@ const Newsletter = () => {
             padding: '10px 30px',
             paddingRight: '30px',
             cursor: 'pointer',
-            minWidth: 'fit-content'
+            minWidth: 'fit-content',
+            transitionDuration: '1000ms',
+            transitionDelay: '400ms'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.paddingRight = 'calc(30px + 17px)';

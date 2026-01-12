@@ -34,23 +34,13 @@ export default function WorkWithUs() {
   return (
     <section 
       ref={ref}
-      className={`transition-all duration-1000 ease-out ${
+      className={`transition-all duration-1000 ease-out flex w-full max-w-[1440px] min-h-[600px] h-auto justify-center items-center mx-auto mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
       }`}
       style={{ 
-        background: '#F1F6FF',
-        display: 'flex',
-        width: '100%',
-        maxWidth: '1440px',
-        minHeight: '600px',
-        height: 'auto',
-        padding: '0 100px',
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: '0 auto',
-        marginTop: '50px'
+        background: '#F1F6FF'
       }}
     >
       <div className="w-full max-w-[1440px] mx-auto">
@@ -108,89 +98,114 @@ export default function WorkWithUs() {
 
         {/* Service Cards */}
         <div className="flex flex-col sm:flex-row justify-between items-center">
-          {services.map((service, index) => (
-            <div key={service.title} className="contents">
-              {/* Horizontal Separator (Mobile) */}
-              {index > 0 && (
-                <div 
-                  className="block sm:hidden w-full"
-                  style={{
-                    height: '1px',
-                    backgroundColor: '#D1D5DB'
-                  }}
-                />
-              )}
-              {/* Vertical Separator (Desktop) - centered between items */}
-              {index > 0 && (
-                <div 
-                  className="hidden sm:block"
-                  style={{
-                    width: '1px',
-                    height: '225px',
-                    backgroundColor: '#D1D5DB',
-                    flexShrink: 0,
-                    alignSelf: 'center'
-                  }}
-                />
-              )}
-              <div 
-                className="w-full sm:w-[250px]"
-                style={{
-                  display: 'flex',
-                  height: '250px',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  flexShrink: 0
-                }}
-              >
-                {/* Icon */}
-                <div style={{ marginBottom: '50px' }}>
-                  <Image
-                    src={service.icon}
-                    alt={service.title}
-                    width={50}
-                    height={50}
+          {services.map((service, index) => {
+            const iconRef = useScrollAnimation({ threshold: 0.2 });
+            const titleRef = useScrollAnimation({ threshold: 0.2 });
+            const descriptionRef = useScrollAnimation({ threshold: 0.2 });
+            
+            return (
+              <div key={service.title} className="contents">
+                {/* Horizontal Separator (Mobile) */}
+                {index > 0 && (
+                  <div 
+                    className="block sm:hidden w-full"
                     style={{
-                      width: '50px',
-                      height: '50px',
-                      flexShrink: 0,
-                      aspectRatio: '1/1'
+                      height: '1px',
+                      backgroundColor: '#D1D5DB'
                     }}
                   />
+                )}
+                {/* Vertical Separator (Desktop) - centered between items */}
+                {index > 0 && (
+                  <div 
+                    className="hidden sm:block"
+                    style={{
+                      width: '1px',
+                      height: '225px',
+                      backgroundColor: '#D1D5DB',
+                      flexShrink: 0,
+                      alignSelf: 'center'
+                    }}
+                  />
+                )}
+                <div 
+                  className="w-full sm:w-[250px] flex flex-col items-center text-center sm:items-start sm:text-left flex-shrink-0"
+                  style={{
+                    height: '250px'
+                  }}
+                >
+                  {/* Icon */}
+                  <div 
+                    ref={iconRef.ref}
+                    className={`mb-5 sm:mb-[50px] transition-all duration-1000 ease-out ${
+                      iconRef.isVisible 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    style={{
+                      transitionDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <Image
+                      src={service.icon}
+                      alt={service.title}
+                      width={50}
+                      height={50}
+                      style={{
+                        width: '50px',
+                        height: '50px',
+                        flexShrink: 0,
+                        aspectRatio: '1/1'
+                      }}
+                    />
+                  </div>
+                  {/* Title */}
+                  <h3 
+                    ref={titleRef.ref}
+                    className={`mb-[10px] transition-all duration-1000 ease-out ${
+                      titleRef.isVisible 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    style={{
+                      color: '#000',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '24px',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      lineHeight: '34px',
+                      letterSpacing: '-0.96px',
+                      margin: 0,
+                      transitionDelay: `${index * 100 + 100}ms`
+                    }}
+                  >
+                    {service.title}
+                  </h3>
+                  {/* Description */}
+                  <p 
+                    ref={descriptionRef.ref}
+                    className={`transition-all duration-1000 ease-out ${
+                      descriptionRef.isVisible 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-8'
+                    }`}
+                    style={{
+                      color: '#000',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontStyle: 'normal',
+                      fontWeight: 400,
+                      lineHeight: '26px',
+                      margin: 0,
+                      transitionDelay: `${index * 100 + 200}ms`
+                    }}
+                  >
+                    {service.description}
+                  </p>
                 </div>
-                {/* Title */}
-                <h3 
-                  style={{
-                    color: '#000',
-                    fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '24px',
-                    fontStyle: 'normal',
-                    fontWeight: 500,
-                    lineHeight: '34px',
-                    letterSpacing: '-0.96px',
-                    margin: 0,
-                    marginBottom: '10px'
-                  }}
-                >
-                  {service.title}
-                </h3>
-                {/* Description */}
-                <p 
-                  style={{
-                    color: '#000',
-                    fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '16px',
-                    fontStyle: 'normal',
-                    fontWeight: 400,
-                    lineHeight: '26px',
-                    margin: 0
-                  }}
-                >
-                  {service.description}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

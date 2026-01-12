@@ -99,7 +99,7 @@ export default function FaqSection({ faqData }: FaqSectionProps) {
       <div className="mx-auto max-w-[1340px] px-6 sm:px-0">
         {/* Header */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-[#000] text-[40px] lg:text-[56px] font-normal leading-[76px] tracking-[-2.24px]">
+          <h2 className="text-[#000] text-[40px] lg:text-[56px] font-normal leading-[45px] sm:leading-[76px] tracking-[-2.24px]">
             {title}
           </h2>
 
