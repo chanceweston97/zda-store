@@ -7,7 +7,7 @@ export default function HeroBackbone() {
 
   return (
     <section 
-      className="w-full my-8 sm:my-12 md:my-16"
+      className="w-full"
     >
       <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
       {/* Heading */}

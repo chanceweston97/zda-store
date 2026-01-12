@@ -49,7 +49,8 @@ export default function WorkWithUs() {
         padding: '0 100px',
         justifyContent: 'center',
         alignItems: 'center',
-        margin: '0 auto'
+        margin: '0 auto',
+        marginTop: '50px'
       }}
     >
       <div className="w-full max-w-[1440px] mx-auto">

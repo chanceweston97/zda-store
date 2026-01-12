@@ -24,28 +24,15 @@ import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
 import Breadcrumb from "../Common/Breadcrumb";
 import Newsletter from "../Common/Newsletter";
 import Description from "./Description";
-import RequestAQuote from "../RequestAQuote";
+import WorkWithUs from "../Home/Hero/WorkWithUs";
 import FaqSection from "../Home/Faq";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/utils/price";
+import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
 
 type SelectedAttributesType = {
   [key: number]: string | undefined;
 };
-const productDetailsHeroData = [
-  {
-    img: "/images/icons/shield-check.svg",
-    title: "1 Year Warranty",
-  },
-  {
-    img: "/images/icons/truck.svg",
-    title: "Orders Shipped Within 24 Business Hours"
-  },
-  {
-    img: "/images/icons/vectorr.svg",
-    title: "Complete Technical Support",
-  },
-];
 type ShopDetailsProps = {
   product: Product;
   cableSeries?: any[] | null;
@@ -906,88 +893,185 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
             {/* RIGHT: PRODUCT CONTENT */}
             <div className="w-full lg:w-1/2">
-              {/* SKU Display - Use SKU from selected variant or product */}
-              {(() => {
-                // For connector products with cableSeries and cableType (isConnectorProduct)
-                if (isConnectorProduct && (product as any).variants && (product as any).variants.length > 0) {
-                  // Use selected variant if available, otherwise use first variant
-                  const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
-                  const selectedVariant = (product as any).variants[variantIndex];
-                  const displaySku = selectedVariant?.sku || (product as any).sku;
-                  return displaySku ? (
-                    <div className="mb-3">
-                      <span className="text-[#383838] text-[16px] font-medium">
-                        <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+              {/* Section for SKU, Title, Price with background */}
+              <div
+                style={{
+                  display: 'flex',
+                  padding: '15px',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: '15px',
+                  alignSelf: 'stretch',
+                  borderRadius: '10px',
+                  backgroundColor: '#F1F6FF'
+                }}
+                className="mb-4"
+              >
+                {/* SKU Display - Use SKU from selected variant or product */}
+                {(() => {
+                  // For connector products with cableSeries and cableType (isConnectorProduct)
+                  if (isConnectorProduct && (product as any).variants && (product as any).variants.length > 0) {
+                    // Use selected variant if available, otherwise use first variant
+                    const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
+                    const selectedVariant = (product as any).variants[variantIndex];
+                    const displaySku = selectedVariant?.sku || (product as any).sku;
+                    return displaySku ? (
+                      <span
+                        style={{
+                          color: '#457B9D',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          lineHeight: '26px',
+                          letterSpacing: '-0.32px'
+                        }}
+                      >
+                        {displaySku}
                       </span>
-                    </div>
-                  ) : null;
-                }
-                // For standalone connectors
-                if (isStandaloneConnector) {
-                  // Show product SKU or first variant SKU if available
-                  const displaySku = (product as any).sku || 
-                                    ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
-                  return displaySku ? (
-                    <div className="mb-3">
-                      <span className="text-[#383838] text-[16px] font-medium">
-                        <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+                    ) : null;
+                  }
+                  // For standalone connectors
+                  if (isStandaloneConnector) {
+                    // Show product SKU or first variant SKU if available
+                    const displaySku = (product as any).sku || 
+                                      ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
+                    return displaySku ? (
+                      <span
+                        style={{
+                          color: '#457B9D',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          lineHeight: '26px',
+                          letterSpacing: '-0.32px'
+                        }}
+                      >
+                        {displaySku}
                       </span>
-                    </div>
-                  ) : null;
-                }
-                // For simple connectors and other connectors with variants, use SKU from selected variant (cable type)
-                if (product.productType === "connector" && (product as any).variants && (product as any).variants.length > 0) {
-                  // Use selected variant if available, otherwise use first variant
-                  const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
-                  const selectedVariant = (product as any).variants[variantIndex];
-                  const displaySku = selectedVariant?.sku || (product as any).sku;
-                  return displaySku ? (
-                    <div className="mb-3">
-                      <span className="text-[#383838] text-[16px] font-medium">
-                        <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+                    ) : null;
+                  }
+                  // For simple connectors and other connectors with variants, use SKU from selected variant (cable type)
+                  if (product.productType === "connector" && (product as any).variants && (product as any).variants.length > 0) {
+                    // Use selected variant if available, otherwise use first variant
+                    const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
+                    const selectedVariant = (product as any).variants[variantIndex];
+                    const displaySku = selectedVariant?.sku || (product as any).sku;
+                    return displaySku ? (
+                      <span
+                        style={{
+                          color: '#457B9D',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          lineHeight: '26px',
+                          letterSpacing: '-0.32px'
+                        }}
+                      >
+                        {displaySku}
                       </span>
-                    </div>
-                  ) : null;
-                }
-                // For cable products, use SKU from selected length option
-                if (isCableProduct && lengthOptions.length > 0) {
-                  const selectedLengthOption = selectedLengthIndex >= 0 ? lengthOptions[selectedLengthIndex] : lengthOptions[0];
-                  const displaySku = (selectedLengthOption as any)?.sku || 
-                                    (product as any).sku || 
-                                    ((product as any).variants && (product as any).variants.length > 0 && 
-                                     ((product as any).variants[selectedLengthIndex >= 0 ? selectedLengthIndex : 0]?.sku));
-                  return displaySku ? (
-                    <div className="mb-3">
-                      <span className="text-[#383838] text-[16px] font-medium">
-                        <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+                    ) : null;
+                  }
+                  // For cable products, use SKU from selected length option
+                  if (isCableProduct && lengthOptions.length > 0) {
+                    const selectedLengthOption = selectedLengthIndex >= 0 ? lengthOptions[selectedLengthIndex] : lengthOptions[0];
+                    const displaySku = (selectedLengthOption as any)?.sku || 
+                                      (product as any).sku || 
+                                      ((product as any).variants && (product as any).variants.length > 0 && 
+                                       ((product as any).variants[selectedLengthIndex >= 0 ? selectedLengthIndex : 0]?.sku));
+                    return displaySku ? (
+                      <span
+                        style={{
+                          color: '#457B9D',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          lineHeight: '26px',
+                          letterSpacing: '-0.32px'
+                        }}
+                      >
+                        {displaySku}
                       </span>
-                    </div>
-                  ) : null;
-                }
-                // For antenna products, use SKU from selected gain option
-                if (product.productType === "antenna" && currentGainOption) {
-                  const displaySku = (currentGainOption as any)?.sku || 
-                                    (product as any).sku || 
-                                    ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku) ||
-                                    (product.gainOptions && product.gainOptions.length > 0 && (product.gainOptions[0] as any)?.sku);
-                  return displaySku ? (
-                    <div className="mb-3">
-                      <span className="text-[#383838] text-[16px] font-medium">
-                        <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+                    ) : null;
+                  }
+                  // For antenna products, use SKU from selected gain option
+                  if (product.productType === "antenna" && currentGainOption) {
+                    const displaySku = (currentGainOption as any)?.sku || 
+                                      (product as any).sku || 
+                                      ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku) ||
+                                      (product.gainOptions && product.gainOptions.length > 0 && (product.gainOptions[0] as any)?.sku);
+                    return displaySku ? (
+                      <span
+                        style={{
+                          color: '#457B9D',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 500,
+                          lineHeight: '26px',
+                          letterSpacing: '-0.32px'
+                        }}
+                      >
+                        {displaySku}
                       </span>
-                    </div>
-                  ) : null;
-                }
-                // For other products, show SKU if available
-                const displaySku = (product as any).sku || ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
-                return displaySku ? (
-                  <div className="mb-3">
-                    <span className="text-[#383838] text-[16px] font-medium">
-                      <span className="bg-[#2958A4] text-white px-[30px] py-[10px] rounded-full font-normal">{displaySku}</span>
+                    ) : null;
+                  }
+                  // For other products, show SKU if available
+                  const displaySku = (product as any).sku || ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
+                  return displaySku ? (
+                    <span
+                      style={{
+                        color: '#457B9D',
+                        fontFamily: 'Satoshi, sans-serif',
+                        fontSize: '16px',
+                        fontStyle: 'normal',
+                        fontWeight: 500,
+                        lineHeight: '26px',
+                        letterSpacing: '-0.32px'
+                      }}
+                    >
+                      {displaySku}
                     </span>
-                  </div>
-                ) : null;
-              })()}
+                  ) : null;
+                })()}
+
+                {/* Product Title */}
+                <h2
+                  style={{
+                    color: '#000',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '48px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '58px',
+                    letterSpacing: '-1.92px',
+                    margin: 0
+                  }}
+                >
+                  {product.name}
+                </h2>
+
+                {/* Price */}
+                <h3
+                  style={{
+                    color: '#000',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '36px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '36px',
+                    letterSpacing: '-1.08px',
+                    textTransform: 'uppercase',
+                    margin: 0
+                  }}
+                >
+                  ${formatPrice(totalPrice)}
+                </h3>
+              </div>
+
               {/* Tags/Categories - Show for all products (remove duplicates) */}
               {/* For cable products, only show actual tags (not category names) */}
               {product.tags && Array.isArray(product.tags) && product.tags.length > 0 && (() => {
@@ -1028,23 +1112,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                 ) : null;
               })()}
 
-              {/* Product Title */}
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[#2958A4] text-[48px] font-medium leading-[58px] tracking-[-1.92px]">
-                  {product.name}
-                </h2>
-              </div>
-
-              {/* Price */}
-              <h3 className="font-medium text-custom-1 mb-4">
-                <span className="text-black text-[36px] font-medium leading-9 tracking-[-1.08px] uppercase">
-                  ${formatPrice(totalPrice)}
-                </span>
-              </h3>
-
               {/* Short Description - Under price (from WordPress admin) */}
               {product.shortDescription && (
-                <p className="text-black text-[24px] font-medium leading-[26px] mb-4">
+                <p
+                  style={{
+                    color: '#000',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '24px',
+                    fontStyle: 'normal',
+                    fontWeight: 500,
+                    lineHeight: '26px',
+                    margin: 0,
+                    marginBottom: '16px'
+                  }}
+                >
                   {product.shortDescription}
                 </p>
               )}
@@ -1061,7 +1142,16 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                         {features.map((feature: string, index: number) => (
                           <li key={index} className="flex items-start gap-2">
                             <span className="text-black text-[16px] leading-[24px]">•</span>
-                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                            <span
+                              style={{
+                                color: '#000',
+                                fontFamily: 'Satoshi, sans-serif',
+                                fontSize: '16px',
+                                fontStyle: 'normal',
+                                fontWeight: 400,
+                                lineHeight: '26px'
+                              }}
+                            >
                               {feature}
                             </span>
                           </li>
@@ -1090,7 +1180,16 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 return (
                                   <li key={index} className="flex items-start gap-2">
                                     <span className="text-black text-[16px] leading-[24px]">•</span>
-                                    <span className="text-black text-[16px] font-medium leading-[26px]">
+                                    <span
+                                      style={{
+                                        color: '#000',
+                                        fontFamily: 'Satoshi, sans-serif',
+                                        fontSize: '16px',
+                                        fontStyle: 'normal',
+                                        fontWeight: 400,
+                                        lineHeight: '26px'
+                                      }}
+                                    >
                                       {text.trim()}
                                     </span>
                                   </li>
@@ -1105,7 +1204,17 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                   // Plain text - render as is
                   return (
                     <div className="mb-4">
-                      <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                      <p
+                        style={{
+                          color: '#000',
+                          fontFamily: 'Satoshi, sans-serif',
+                          fontSize: '16px',
+                          fontStyle: 'normal',
+                          fontWeight: 400,
+                          lineHeight: '26px'
+                        }}
+                        className="whitespace-pre-line"
+                      >
                         {features}
                       </p>
                     </div>
@@ -1201,7 +1310,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                         </div>
                       )}
 
-                      {/* Gain/Variants - Full Width Row (Antenna products only) */}
+                      {/* Gain/Variants - Dropdown (Antenna products only) */}
                       {/* For WooCommerce products with variations, show variants instead of gainOptions */}
                       {/* Only show Gain if NOT a cable product and variants don't contain "Length:" */}
                       {!isConnectorProduct && 
@@ -1211,67 +1320,110 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                        (product as any).variants.length > 0 &&
                        !(product as any).variants.some((v: any) => v.title && /Length:/i.test(v.title)) && (
                         <div className="space-y-2">
-                          <label className="text-black text-[20px] leading-[30px]">
+                          <label className="text-black text-[20px] leading-[30px] font-medium">
                             Gain
                           </label>
 
-                          <div className="flex flex-wrap gap-2">
-                            {(product as any).variants.map((variant: any, index: number) => {
-                              if (!variant) return null;
-                              // Extract gain value from variant title (e.g., "Gain: 8dBi" -> "8dBi")
-                              const variantTitle = variant.title || "";
-                              const gainMatch = variantTitle.match(/(\d+(?:\.\d+)?)\s*dBi/i);
-                              const gainValue = gainMatch ? gainMatch[1] : variantTitle.replace("Gain: ", "");
-                              const isSelected = selectedLengthIndex === index;
-                              
-                              return (
-                                <button
-                                  key={variant.id || index}
-                                  type="button"
-                                  onClick={() => setSelectedLengthIndex(index)}
-                                  className={`rounded-lg border flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
-                                    isSelected
-                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
-                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
-                                  }`}
-                                >
-                                  {gainValue} dBi
-                                </button>
-                              );
-                            })}
+                          <div className="relative w-full">
+                            <select
+                              value={selectedLengthIndex >= 0 ? (product as any).variants[selectedLengthIndex]?.id || "" : ""}
+                              onChange={(e) => {
+                                const variantIndex = (product as any).variants.findIndex((v: any) => v.id === e.target.value);
+                                if (variantIndex >= 0) {
+                                  setSelectedLengthIndex(variantIndex);
+                                }
+                              }}
+                              className="w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4]"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none',
+                                fontFamily: 'Satoshi, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: 400,
+                                color: '#000',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16'%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 7 3-3 3 3'/%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 9 3 3 3-3'/%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 16px center',
+                                paddingRight: '2.5rem'
+                              }}
+                            >
+                              <option value="">Select Gain</option>
+                              {(product as any).variants.map((variant: any, index: number) => {
+                                if (!variant) return null;
+                                const variantTitle = variant.title || "";
+                                const gainMatch = variantTitle.match(/(\d+(?:\.\d+)?)\s*dBi/i);
+                                const gainValue = gainMatch ? gainMatch[1] : variantTitle.replace("Gain: ", "");
+                                return (
+                                  <option key={variant.id || index} value={variant.id || index}>
+                                    {gainValue} dBi
+                                  </option>
+                                );
+                              })}
+                            </select>
                           </div>
                         </div>
                       )}
-                      {/* Legacy gainOptions display (for Medusa products) */}
+                      {/* Legacy gainOptions display (for Medusa products) - Convert to dropdown */}
                       {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] leading-[30px]">
                             Gain
                           </label>
 
-                          <div className="flex flex-wrap gap-2">
-                            {product.gainOptions?.map((gainOption: any, index: number) => {
-                              if (gainOption === null || gainOption === undefined) return null;
-                              // Use variant.title directly (like front project)
-                              const gainTitle = gainOption.title || gainOption.value || "";
-                              if (!gainTitle) return null;
-                              const isSelected = gainIndex === index;
-                              
-                              return (
-                                <button
-                                  key={gainOption.id || index}
-                                  type="button"
-                                  onClick={() => setGainIndex(index)}
-                                  className={`rounded-lg border-2 flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
-                                    isSelected
-                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
-                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
-                                  }`}
-                                >
-                                  {gainTitle} dBi
-                                </button>
-                              );
-                            })}
+                          <div className="relative w-full">
+                            <select
+                              value={gainIndex >= 0 ? (product.gainOptions[gainIndex] as any)?.id || gainIndex : ""}
+                              onChange={(e) => {
+                                const selectedIndex = product.gainOptions.findIndex((opt: any) => 
+                                  (opt?.id && opt.id === e.target.value) || 
+                                  opt === product.gainOptions[parseInt(e.target.value)]
+                                );
+                                if (selectedIndex >= 0) {
+                                  setGainIndex(selectedIndex);
+                                } else {
+                                  setGainIndex(parseInt(e.target.value));
+                                }
+                              }}
+                              className="w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4]"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none',
+                                fontFamily: 'Satoshi, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: 400,
+                                color: '#000',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16'%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 7 3-3 3 3'/%3E%3Cpath fill='none' stroke='%23383838' stroke-width='1' stroke-linecap='round' stroke-linejoin='round' d='m3 9 3 3 3-3'/%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 16px center',
+                                paddingRight: '2.5rem'
+                              }}
+                            >
+                              <option value="">Select Gain</option>
+                              {product.gainOptions.map((gainOption: any, index: number) => {
+                                if (gainOption === null || gainOption === undefined) return null;
+                                const gainTitle = gainOption.title || gainOption.value || "";
+                                if (!gainTitle) return null;
+                                return (
+                                  <option key={gainOption.id || index} value={gainOption.id || index}>
+                                    {gainTitle} dBi
+                                  </option>
+                                );
+                              })}
+                            </select>
                           </div>
                         </div>
                       )}
@@ -1360,7 +1512,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               Quantity
                             </label>
 
-                            <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                            <div 
+                              className="quantity-controls w-full"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none'
+                              }}
+                            >
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1368,24 +1533,30 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                     setQuantity((prev) => prev - 1);
                                   }
                                 }}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <MinusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m15 18-6-6 6-6"/>
+                                </svg>
                               </button>
 
-                              <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
 
                               <button
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <PlusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m9 18 6-6-6-6"/>
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -1432,7 +1603,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                             <label className="text-black text-[20px] font-medium leading-[30px]">
                               Quantity
                             </label>
-                            <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                            <div 
+                              className="quantity-controls w-full"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none'
+                              }}
+                            >
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1440,22 +1624,30 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                     setQuantity((prev) => prev - 1);
                                   }
                                 }}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <MinusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m15 18-6-6 6-6"/>
+                                </svg>
                               </button>
-                              <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+
+                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
+
                               <button
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <PlusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m9 18 6-6-6-6"/>
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -1530,7 +1722,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                             <label className="text-black text-[20px] font-medium leading-[30px]">
                               Quantity
                             </label>
-                            <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                            <div 
+                              className="quantity-controls w-full"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none'
+                              }}
+                            >
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1538,22 +1743,30 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                     setQuantity((prev) => prev - 1);
                                   }
                                 }}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <MinusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m15 18-6-6 6-6"/>
+                                </svg>
                               </button>
-                              <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+
+                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
+
                               <button
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
-                                className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                                className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <PlusIcon className="w-4 h-4" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="m9 18 6-6-6-6"/>
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -1627,7 +1840,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                           <label className="text-black text-[20px] font-medium leading-[30px]">
                             Quantity
                           </label>
-                          <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                          <div 
+                            className="quantity-controls w-full"
+                            style={{
+                              display: 'flex',
+                              height: '50px',
+                              padding: '0 16px',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              alignSelf: 'stretch',
+                              borderRadius: '10px',
+                              background: '#F6F7F7',
+                              border: 'none'
+                            }}
+                          >
                             <button
                               type="button"
                               onClick={() => {
@@ -1635,24 +1861,30 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   setQuantity((prev) => prev - 1);
                                 }
                               }}
-                              className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={quantity <= 1}
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                             >
                               <span className="sr-only">Decrease quantity</span>
-                              <MinusIcon className="w-4 h-4" />
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m15 18-6-6 6-6"/>
+                              </svg>
                             </button>
 
-                            <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+                            <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                               {quantity}
                             </span>
 
                             <button
                               type="button"
                               onClick={() => setQuantity((prev) => prev + 1)}
-                              className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                              className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                             >
                               <span className="sr-only">Increase quantity</span>
-                              <PlusIcon className="w-4 h-4" />
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m9 18 6-6-6-6"/>
+                              </svg>
                             </button>
                           </div>
                         </div>
@@ -1664,7 +1896,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                           <label className="text-black text-[20px] font-medium leading-[30px]">
                             Quantity
                           </label>
-                          <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                          <div 
+                            className="quantity-controls w-full"
+                            style={{
+                              display: 'flex',
+                              height: '50px',
+                              padding: '0 16px',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              alignSelf: 'stretch',
+                              borderRadius: '10px',
+                              background: '#F6F7F7',
+                              border: '1px solid #2958A4'
+                            }}
+                          >
                             <button
                               type="button"
                               onClick={() => {
@@ -1672,22 +1917,28 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                   setQuantity((prev) => prev - 1);
                                 }
                               }}
-                              className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex items-center justify-center text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={quantity <= 1}
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                             >
                               <span className="sr-only">Decrease quantity</span>
-                              <MinusIcon className="w-4 h-4" />
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m15 18-6-6 6-6"/>
+                              </svg>
                             </button>
-                            <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+                            <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                               {quantity}
                             </span>
                             <button
                               type="button"
                               onClick={() => setQuantity((prev) => prev + 1)}
-                              className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                              className="flex items-center justify-center text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                             >
                               <span className="sr-only">Increase quantity</span>
-                              <PlusIcon className="w-4 h-4" />
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m9 18 6-6-6-6"/>
+                              </svg>
                             </button>
                           </div>
                         </div>
@@ -1701,21 +1952,55 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                         type="button"
                         onClick={handleAddToCart}
                         disabled={isProductInCart}
-                        className={`w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4] ${
+                        className={`btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full ${
                           isProductInCart
-                            ? "opacity-70 cursor-not-allowed disabled:hover:border-transparent disabled:hover:bg-[#2958A4] disabled:hover:text-white"
+                            ? "opacity-70 cursor-not-allowed"
                             : ""
                         }`}
+                        style={{ 
+                          fontFamily: 'Satoshi, sans-serif',
+                          padding: '10px 30px',
+                          paddingRight: '30px',
+                          cursor: isProductInCart ? 'not-allowed' : 'pointer',
+                          minWidth: 'fit-content'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isProductInCart) {
+                            e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isProductInCart) {
+                            e.currentTarget.style.paddingRight = '30px';
+                          }
+                        }}
                       >
-                        {isProductInCart ? "Added to Cart" : "Add to Cart"}
+                        <ButtonArrowHomepage />
+                        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">
+                          {isProductInCart ? "Added to Cart" : "Add to Cart"}
+                        </p>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => router.push("/request-a-quote")}
-                        className="w-full inline-flex items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
+                        className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
+                        style={{ 
+                          fontFamily: 'Satoshi, sans-serif',
+                          padding: '10px 30px',
+                          paddingRight: '30px',
+                          cursor: 'pointer',
+                          minWidth: 'fit-content'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.paddingRight = '30px';
+                        }}
                       >
-                        Request a Quote
+                        <ButtonArrowHomepage />
+                        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request a Quote</p>
                       </button>
                     </div>
                 </div>
@@ -1725,34 +2010,6 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           </div>
         </div>
       </section>
-      <div className="w-full">
-        <div className="w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px mt-5">
-            {productDetailsHeroData.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className="flex flex-col items-center justify-center gap-4 bg-[#F6F7F7] py-6 px-4 sm:px-6 w-full text-center"
-                >
-                  <div className="flex items-center justify-center flex-shrink-0">
-                    <Image
-                      src={item.img}
-                      alt="icon"
-                      width={60}
-                      height={60}
-                      className=""
-                    />
-                  </div>
-
-                  <h3 className="text-[#2958A4] text-[20px] font-medium leading-[30px]">
-                    {item.title}
-                  </h3>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
       {/* Description Section - Hide for cable products */}
       {!isCableProduct && (
         <Description 
@@ -1767,7 +2024,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           }}
         />
       )}
-      <RequestAQuote variant="two-column" showProductOrService={false} />
+      <WorkWithUs />
       <FaqSection />
       <Newsletter />
     </>

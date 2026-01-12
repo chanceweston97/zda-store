@@ -12,18 +12,28 @@ const Hero = async () => {
   const partnersData = await getProudPartners();
 
   return (
-    <section className="overflow-hidden pt-20 sm:pt-25 lg:pt-30 xl:pt-21.5">
+    <section className="overflow-hidden pt-[56px]">
       <div className="max-w-[1340px] w-full mx-auto px-4 sm:px-6 xl:px-0 pt-6">
         <div className="flex flex-col xl:flex-row gap-5">
           <div className="w-full">
             <div className="relative z-1 rounded-[10px]">
               <HeroStatic bannerData={bannerData} />
               {/* <HeroFeature /> */}
-              <HeroIntroduction introductionData={introductionData} />
-              <HeroBackbone />
-              <HeroScrollItems />
-              <ProudPartners partnersData={partnersData} />
-              <XetaWaveReseller />
+              <div style={{ marginTop: '50px' }}>
+                <HeroIntroduction introductionData={introductionData} />
+              </div>
+              <div style={{ marginTop: '50px' }}>
+                <HeroBackbone />
+              </div>
+              <div style={{ marginTop: '50px' }}>
+                <HeroScrollItems />
+              </div>
+              <div style={{ marginTop: '50px' }}>
+                <ProudPartners partnersData={partnersData} />
+              </div>
+              <div style={{ marginTop: '50px' }}>
+                <XetaWaveReseller />
+              </div>
             </div>
           </div>
         </div>

@@ -91,7 +91,7 @@ const ShopWithSidebar = ({ data }: PropsType) => {
 
   return (
     <>
-       <section className="relative pt-5 pb-10 overflow-hidden lg:pt-10 xl:pt-12 bg-gray-2 mt-[108px]">
+       <section className="relative pt-5 pb-10 overflow-hidden lg:pt-10 xl:pt-12 bg-gray-2 mt-[80px]">
         <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="flex gap-7.5">
             {/* Sidebar Start */}

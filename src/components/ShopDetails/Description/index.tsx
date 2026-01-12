@@ -5,6 +5,7 @@ import { useState } from "react";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
 import { CircleCheckIcon } from "@/assets/icons";
+import { ButtonArrowHomepage } from "../../Common/ButtonArrowHomepage";
 
 // Helper function to render description/specifications (replaces PortableText)
 const renderContent = (content: any): React.ReactNode => {
@@ -194,7 +195,7 @@ export default function Description({ product, metadata }: Props) {
                 <div className="flex w-full flex-col gap-4 lg:w-[35%]">
                     {/* Datasheet preview + button */}
                     {datasheetImageUrl && !imageError ? (
-                        <div className="relative overflow-hidden rounded-[20px] bg-gray-100 h-full flex flex-col">
+                        <div className="relative overflow-hidden bg-gray-100 h-full flex flex-col">
                             <div className="flex-1 relative">
                                 <Image
                                     src={datasheetImageUrl}
@@ -226,13 +227,32 @@ export default function Description({ product, metadata }: Props) {
                                     document.body.removeChild(link);
                                 }}
                                 disabled={!datasheetPdfUrl}
-                                className={`flex w-full items-center justify-center rounded-full border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-8 py-3 transition-colors mt-4 ${
-                                    datasheetPdfUrl 
-                                        ? "hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]" 
-                                        : "cursor-not-allowed bg-[#A1A9C3] opacity-70"
+                                className={`btn filled group inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] mt-4 ${
+                                    !datasheetPdfUrl
+                                        ? "opacity-70 cursor-not-allowed"
+                                        : ""
                                 }`}
+                                style={{ 
+                                    fontFamily: 'Satoshi, sans-serif',
+                                    padding: '10px 30px',
+                                    paddingRight: '30px',
+                                    cursor: datasheetPdfUrl ? 'pointer' : 'not-allowed',
+                                    minWidth: 'fit-content',
+                                    height: '40px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (datasheetPdfUrl) {
+                                        e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (datasheetPdfUrl) {
+                                        e.currentTarget.style.paddingRight = '30px';
+                                    }
+                                }}
                             >
-                                Download Data Sheet
+                                <ButtonArrowHomepage />
+                                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Download Data Sheet</p>
                             </button>
                         </div>
                     ) : (
@@ -248,14 +268,15 @@ export default function Description({ product, metadata }: Props) {
                 <div className="w-full rounded-[20px] bg-[#F6F7F7] px-6 py-8 lg:w-[65%] lg:px-10 lg:py-10 h-full flex flex-col">
                     {/* Tabs */}
                     <div className="mb-6 flex w-full justify-center">
-                        <div className="w-full justify-center inline-flex rounded-full bg-[#E9ECF3] p-1">
+                        <div className="w-full justify-center inline-flex rounded-[10px] bg-[#E9ECF3]">
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("description")}
-                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] ${activeTab === "description"
-                                    ? "rounded-full bg-[#2958A4] text-white shadow-sm"
+                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] rounded-[10px] ${activeTab === "description"
+                                    ? "bg-[#2958A4] text-white shadow-sm"
                                     : "text-[#2958A4]"
                                     }`}
+                                style={activeTab !== "description" ? { backgroundColor: '#DFEBFF' } : {}}
                             >
                                 Description
                             </button>
@@ -263,10 +284,11 @@ export default function Description({ product, metadata }: Props) {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("specifications")}
-                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] ${activeTab === "specifications"
-                                    ? "rounded-full bg-[#2958A4] text-white shadow-sm"
+                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] rounded-[10px] ${activeTab === "specifications"
+                                    ? "bg-[#2958A4] text-white shadow-sm"
                                     : "text-[#2958A4]"
                                     }`}
+                                style={activeTab !== "specifications" ? { backgroundColor: '#DFEBFF' } : {}}
                             >
                                 Specifications
                             </button>
@@ -296,7 +318,16 @@ export default function Description({ product, metadata }: Props) {
                                                                 {features.map((feature: string, index: number) => (
                                                                     <li key={index} className="flex items-start gap-2">
                                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                        <span
+                                                                            style={{
+                                                                                color: '#000',
+                                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                                fontSize: '16px',
+                                                                                fontStyle: 'normal',
+                                                                                fontWeight: 400,
+                                                                                lineHeight: '26px'
+                                                                            }}
+                                                                        >
                                                                             {feature}
                                                                         </span>
                                                                     </li>
@@ -320,7 +351,16 @@ export default function Description({ product, metadata }: Props) {
                                                                                     return (
                                                                                         <li key={index} className="flex items-start gap-2">
                                                                                             <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    color: '#000',
+                                                                                                    fontFamily: 'Satoshi, sans-serif',
+                                                                                                    fontSize: '16px',
+                                                                                                    fontStyle: 'normal',
+                                                                                                    fontWeight: 400,
+                                                                                                    lineHeight: '26px'
+                                                                                                }}
+                                                                                            >
                                                                                                 {text.trim()}
                                                                                             </span>
                                                                                         </li>
@@ -332,7 +372,17 @@ export default function Description({ product, metadata }: Props) {
                                                                 }
                                                                 // Plain text - render as is
                                                                 return (
-                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                            <p
+                                                                style={{
+                                                                    color: '#000',
+                                                                    fontFamily: 'Satoshi, sans-serif',
+                                                                    fontSize: '16px',
+                                                                    fontStyle: 'normal',
+                                                                    fontWeight: 400,
+                                                                    lineHeight: '26px'
+                                                                }}
+                                                                className="whitespace-pre-line"
+                                                            >
                                                                 {features}
                                                             </p>
                                                                 );
@@ -354,7 +404,16 @@ export default function Description({ product, metadata }: Props) {
                                                                 {applications.map((application: string, index: number) => (
                                                                     <li key={index} className="flex items-start gap-2">
                                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                        <span
+                                                                            style={{
+                                                                                color: '#000',
+                                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                                fontSize: '16px',
+                                                                                fontStyle: 'normal',
+                                                                                fontWeight: 400,
+                                                                                lineHeight: '26px'
+                                                                            }}
+                                                                        >
                                                                             {application}
                                                                         </span>
                                                                     </li>
@@ -378,7 +437,16 @@ export default function Description({ product, metadata }: Props) {
                                                                                     return (
                                                                                         <li key={index} className="flex items-start gap-2">
                                                                                             <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                                            <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    color: '#000',
+                                                                                                    fontFamily: 'Satoshi, sans-serif',
+                                                                                                    fontSize: '16px',
+                                                                                                    fontStyle: 'normal',
+                                                                                                    fontWeight: 400,
+                                                                                                    lineHeight: '26px'
+                                                                                                }}
+                                                                                            >
                                                                                                 {text.trim()}
                                                                                             </span>
                                                                                         </li>
@@ -390,7 +458,17 @@ export default function Description({ product, metadata }: Props) {
                                                                 }
                                                                 // Plain text - render as is
                                                                 return (
-                                                            <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                            <p
+                                                                style={{
+                                                                    color: '#000',
+                                                                    fontFamily: 'Satoshi, sans-serif',
+                                                                    fontSize: '16px',
+                                                                    fontStyle: 'normal',
+                                                                    fontWeight: 400,
+                                                                    lineHeight: '26px'
+                                                                }}
+                                                                className="whitespace-pre-line"
+                                                            >
                                                                 {applications}
                                                             </p>
                                                                 );
@@ -433,7 +511,16 @@ export default function Description({ product, metadata }: Props) {
                                                                 return (
                                                                     <li key={index} className="flex items-start gap-2">
                                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                                        <span
+                                                                            style={{
+                                                                                color: '#000',
+                                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                                fontSize: '16px',
+                                                                                fontStyle: 'normal',
+                                                                                fontWeight: 400,
+                                                                                lineHeight: '26px'
+                                                                            }}
+                                                                        >
                                                                             {text.trim()}
                                                                         </span>
                                                                     </li>
@@ -534,7 +621,17 @@ export default function Description({ product, metadata }: Props) {
                                         // Plain text
                                         return (
                                             <div className="font-medium">
-                                                <p className="text-black text-[16px] font-medium leading-[26px] whitespace-pre-line">
+                                                <p
+                                                    style={{
+                                                        color: '#000',
+                                                        fontFamily: 'Satoshi, sans-serif',
+                                                        fontSize: '16px',
+                                                        fontStyle: 'normal',
+                                                        fontWeight: 400,
+                                                        lineHeight: '26px'
+                                                    }}
+                                                    className="whitespace-pre-line"
+                                                >
                                                     {specifications}
                                                 </p>
                                             </div>
@@ -548,7 +645,16 @@ export default function Description({ product, metadata }: Props) {
                                                 {specifications.map((spec: string, index: number) => (
                                                     <li key={index} className="flex items-start gap-2">
                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                        <span className="text-black text-[16px] font-medium leading-[26px]">
+                                                        <span
+                                                            style={{
+                                                                color: '#000',
+                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                fontSize: '16px',
+                                                                fontStyle: 'normal',
+                                                                fontWeight: 400,
+                                                                lineHeight: '26px'
+                                                            }}
+                                                        >
                                                             {spec}
                                                         </span>
                                                     </li>

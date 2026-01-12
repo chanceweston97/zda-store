@@ -27,7 +27,7 @@ const workItems = [
 
 export default function WorkWithUsSection() {
     return (
-        <section className=" ">
+        <section className=" " style={{ marginTop: '50px' }}>
             <div className="mx-auto w-full max-w-[1340px] bg-[#2958A4] rounded-[20px] px-4 py-10 sm:px-8 sm:py-12 lg:px-12 lg:py-16">
                 {/* Top row: title + tagline + button */}
                 <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">

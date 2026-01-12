@@ -65,7 +65,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
   };
 
   return (
-    <section className="relative w-full h-[640px] md:h-[800px] rounded-2xl overflow-hidden">
+    <section className="relative w-full h-[600px] rounded-2xl overflow-hidden">
       {/* Background */}
       <Image
         src={backgroundImage}
@@ -81,7 +81,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
       {/* LEFT TEXT + BUTTONS */}
       <div className="absolute left-6 sm:left-8 lg:left-10 z-10 max-w-[1136px]">
         <h1 
-          className={`transition-all duration-1000 ease-out mt-[30px] sm:mt-[40px] md:mt-[50px] text-[28px] sm:text-[36px] md:text-[42px] lg:text-[50px] leading-[1.2] sm:leading-[1.3] md:leading-[1.5] lg:leading-[96px] tracking-[-1px] sm:tracking-[-1.5px] md:tracking-[-2px] ${
+          className={`transition-all duration-1000 ease-out mt-[30px] sm:mt-[40px] md:mt-[50px] ${
             isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -89,8 +89,11 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
           style={{
             color: '#FFF',
             fontFamily: 'Satoshi, sans-serif',
+            fontSize: '50px',
             fontStyle: 'normal',
-            fontWeight: 500,
+            fontWeight: 400,
+            lineHeight: '60px',
+            letterSpacing: '-2px',
           }}
         >
           {renderTitle()}

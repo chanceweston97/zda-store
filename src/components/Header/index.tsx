@@ -1,5 +1,6 @@
 "use client";
 import { CartIcon, HeartIcon, SearchIcon } from "@/assets/icons";
+import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -74,11 +75,13 @@ const Header = () => {
     <>
       <header
         className={`fixed left-0 top-0 w-full z-999 bg-white transition-shadow ease-in-out duration-300 ${stickyMenu ? "shadow-sm" : ""}`}
+        style={{ height: '80px', display: 'flex', alignItems: 'center' }}
       >
-        <div className="w-full px-4 mx-auto max-w-[1340px] sm:px-6 xl:px-0">
+        <div className="w-full px-4 mx-auto max-w-[1340px] sm:px-6 xl:px-0 h-full flex items-center">
           {/* <!-- header top start --> */}
           <div
-            className="flex flex-col lg:flex-row gap-5 items-end lg:items-center xl:justify-between ease-out duration-200 py-6"
+            className="flex flex-col lg:flex-row gap-5 items-center xl:justify-between ease-out duration-200 w-full"
+            style={{ paddingTop: '0', paddingBottom: '0' }}
           >
             {/* <!-- header top left --> */}
             <div className="flex w-full items-center justify-between gap-4 lg:relative">
@@ -123,15 +126,44 @@ const Header = () => {
                 {/* //   <!-- Main Nav End --> */}
               </div>
 
-              {/* Right side buttons - Cart + Mobile Hamburger */}
+              {/* Right side buttons - Contact + Cart + Mobile Hamburger */}
               <div className="flex items-center gap-2 sm:gap-3">
+                {/* Contact Button - Hidden on mobile/tablet, visible on xl+ */}
+                <Link
+                  href="/contact"
+                  className="hidden xl:inline-flex btn filled group relative items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                  style={{ 
+                    fontFamily: 'Satoshi, sans-serif',
+                    padding: '10px 30px',
+                    paddingRight: '30px',
+                    cursor: 'pointer',
+                    width: '140px',
+                    minWidth: '140px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.paddingRight = '30px';
+                  }}
+                >
+                  <ButtonArrowHomepage />
+                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Contact</p>
+                </Link>
+
                 {/* Cart Icon Button - Visible on all screens */}
                 <button
                   onClick={handleOpenCartModal}
                   aria-label="Open cart"
                   className="relative w-10 h-10 flex items-center justify-center text-[#2958A4] hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <CartIcon className="w-6 h-6" />
+                  <Image
+                    src="/images/icons/cart.svg"
+                    alt="Cart"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6"
+                  />
                   {isMounted && cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[#2958A4] text-white text-xs font-medium rounded-full">
                       {cartCount > 99 ? "99+" : cartCount}
@@ -245,6 +277,39 @@ const Header = () => {
                     </li>
                   )
                 )}
+                {/* Contact Button in Mobile Menu */}
+                <li
+                  className={`transform transition-all duration-300 ease-out ${navigationOpen
+                    ? "translate-x-0 opacity-100"
+                    : "translate-x-4 opacity-0"
+                    }`}
+                  style={{
+                    transitionDelay: navigationOpen ? `${menuData.length * 50}ms` : "0ms",
+                  }}
+                >
+                  <Link
+                    href="/contact"
+                    className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] mt-2"
+                    style={{ 
+                      fontFamily: 'Satoshi, sans-serif',
+                      padding: '10px 30px',
+                      paddingRight: '30px',
+                      cursor: 'pointer',
+                      width: '140px',
+                      minWidth: '140px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.paddingRight = '30px';
+                    }}
+                    onClick={() => setNavigationOpen(false)}
+                  >
+                    <ButtonArrowHomepage />
+                    <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Contact</p>
+                  </Link>
+                </li>
               </ul>
             </nav>{" "}
 

@@ -12,11 +12,11 @@ type Brand = { name: string; logo: string };
 
 const defaultBrands: Brand[] = [
   { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
+  { name: "ABC", logo: "/images/hero/partners/ABC.png" },
   { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
   { name: "APS", logo: "/images/hero/partners/aps.svg" },
   { name: "Motus", logo: "/images/hero/partners/motus.png" },
-  { name: "abc", logo: "/images/hero/partners/abc.png" },
-  { name: "rancho", logo: "/images/hero/partners/rancho.webp" },
+  { name: "surecall", logo: "/images/hero/partners/surecall.png" },
 ];
 
 interface ProudPartnersData {
@@ -39,7 +39,7 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
   const carouselRef = useScrollAnimation({ threshold: 0.2 });
 
   // Fallback values if no data from CMS
-  const title = partnersData?.title || "Proud Suppliers Of";
+  const title = partnersData?.title || "proud partners of";
   const partners = partnersData?.partners?.map((partner) => ({
     name: partner.name,
     // If logo is already a string URL, use it directly; otherwise use imageBuilder
@@ -49,16 +49,26 @@ export default function ProudPartners({ partnersData }: ProudPartnersProps) {
   })) || defaultBrands;
 
   return (
-    <section className="w-full py-12 sm:pt-0">
+    <section className="w-full">
       <div className="mx-auto max-w-[1340px]">
         {/* Heading */}
         <h2 
           ref={titleRef.ref}
-          className={`text-[#000] font-satoshi text-[40px] lg:text-[56px] font-normal leading-[76px] tracking-[-2.24px] text-center transition-all duration-1000 ease-out ${
+          className={`text-center transition-all duration-1000 ease-out ${
             titleRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
           }`}
+          style={{
+            color: '#000',
+            fontFeatureSettings: "'liga' off, 'clig' off",
+            fontFamily: 'Satoshi, sans-serif',
+            fontSize: '50px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '76px',
+            letterSpacing: '-2px'
+          }}
         >
           {title}
         </h2>

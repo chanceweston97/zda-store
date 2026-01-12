@@ -10,7 +10,7 @@ export default function XetaWaveReseller() {
   return (
     <section 
       ref={ref}
-      className={`py-10 sm:py-12 lg:py-16 transition-all duration-1000 ease-out ${
+      className={`transition-all duration-1000 ease-out ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'

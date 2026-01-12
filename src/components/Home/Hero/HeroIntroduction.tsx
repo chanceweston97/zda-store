@@ -84,9 +84,10 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
 
   return (
     <section 
-      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 lg:py-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 rounded-[10px] my-8 sm:my-12 lg:my-16"
+      className="w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 pb-8 sm:pb-12 lg:pb-16 flex flex-col gap-6 sm:gap-8 lg:gap-10 rounded-[10px] mb-8 sm:mb-12 lg:mb-16"
       style={{
-        background: 'radial-gradient(145.54% 145.5% at 49.33% -2.63%, #FDFDFD 30.35%, rgba(223, 235, 255, 0.75) 100%)'
+        background: 'radial-gradient(145.54% 145.5% at 49.33% -2.63%, #FDFDFD 30.35%, rgba(223, 235, 255, 0.75) 100%)',
+        paddingTop: '22px'
       }}
     >
       {/* Heading */}

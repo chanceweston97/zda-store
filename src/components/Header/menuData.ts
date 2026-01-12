@@ -65,7 +65,7 @@ export const menuData: Menu[] = [
     id: 4,
     title: "Company",
     newTab: false,
-    path: "/our-story",
+    path: "/company",
   },
  
 ];

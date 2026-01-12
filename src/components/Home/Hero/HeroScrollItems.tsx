@@ -8,7 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const HEADER_OFFSET = 100;
+const HEADER_OFFSET = 80;
 const NUMBER_HEIGHT = 20; // Approximate height of number section (14px font + line height)
 const NUMBER_MARGIN = 50; // Margin below number
 const CARD_HEIGHT = 450;
@@ -167,7 +167,7 @@ export default function HeroScrollItems() {
   return (
     <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0">
       <div
-        className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] my-12 sm:my-16 md:my-20 items-start"
+        className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start"
       >
         {/* Dots - Hidden on mobile */}
         <div
@@ -232,7 +232,7 @@ export default function HeroScrollItems() {
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: GAP,
+              marginBottom: '400px',
             }}
           >
             {/* Left Content Section */}
@@ -296,7 +296,7 @@ export default function HeroScrollItems() {
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: GAP,
+              marginBottom: '400px',
             }}
           >
             {/* Left Content Section */}
@@ -360,7 +360,7 @@ export default function HeroScrollItems() {
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: GAP,
+              marginBottom: '400px',
             }}
           >
             {/* Left Content Section */}

@@ -18,10 +18,8 @@ const productServiceOptions = [
   "Select one",
   "Antennas",
   "Cables",
-  "RF Accessories",
+  "XetaWave Radios",
   "Manufacturing",
-  "Custom Solutions",
-  "Technical Support",
   "Other"
 ];
 
@@ -83,12 +81,32 @@ export default function Contact() {
   };
 
   return (
-    <section className="py-20 mt-7">
-      <div className="mx-auto w-full max-w-[1340px] px-[50px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-
+    <section
+      className="mx-auto"
+      style={{
+        background: 'conic-gradient(from -74deg at 74.37% 54.74%, #FFF 131.53754711151123deg, #70C8FF 162.69198417663574deg, #1870D5 197.30801582336426deg, #70C8FF 295.9637188911438deg, #FFF 330.5797505378723deg)',
+        marginTop: '100px',
+        width: '1440px',
+        padding: '50px',
+        maxWidth: '100%',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div
+        className="flex flex-col md:flex-row h-full"
+        style={{
+          display: 'flex',
+          padding: 0,
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          alignSelf: 'stretch',
+          height: '100%',
+          gap: 0
+        }}
+      >
           {/* LEFT COLUMN — WHITE BACKGROUND */}
-          <div className="flex flex-col bg-white px-[50px] py-[50px]">
+        <div className="flex flex-col bg-white w-full md:w-[523px]" style={{ flex: '0 0 auto', padding: 0 }}>
+          <div style={{ padding: 0 }}>
             <h1 
               className="text-black text-[66px] font-medium leading-[66px] tracking-[-2.64px]"
               style={{ fontFamily: 'Satoshi, sans-serif' }}
@@ -154,16 +172,19 @@ export default function Contact() {
               </div>
             </div>
           </div>
+        </div>
 
           {/* RIGHT COLUMN */}
-          <div className="flex items-center justify-center bg-white px-[50px] py-[50px]">
+        <div className="flex items-center justify-center w-full md:w-auto" style={{ flex: '0 0 auto', padding: 0 }}>
             {/* Form */}
             <form
+              className="relative z-10"
               onSubmit={handleSubmit(onSubmit)}
               noValidate
               style={{
                 display: 'flex',
                 width: '750px',
+                maxWidth: '100%',
                 padding: '20px',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -178,15 +199,22 @@ export default function Contact() {
               <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
                 <div style={{ flex: 1 }}>
                   <label 
-                    className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                    style={{ fontFamily: 'Satoshi, sans-serif' }}
+                    className="block mb-2"
+                    style={{ 
+                      color: '#FFF',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '20px',
+                      fontStyle: 'normal',
+                      fontWeight: 400,
+                      lineHeight: '30px'
+                    }}
                   >
                     First name <span className="text-red-400">*</span>
                   </label>
                   <input
                     {...register("firstName", { required: "First name is required" })}
-                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
-                    style={{ fontFamily: 'Satoshi, sans-serif' }}
+                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
+                    style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                   />
                   {errors.firstName && (
                     <p className="mt-1 text-xs text-red-300">{errors.firstName.message}</p>
@@ -195,15 +223,22 @@ export default function Contact() {
 
                 <div style={{ flex: 1 }}>
                   <label 
-                    className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                    style={{ fontFamily: 'Satoshi, sans-serif' }}
+                    className="block mb-2"
+                    style={{ 
+                      color: '#FFF',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '20px',
+                      fontStyle: 'normal',
+                      fontWeight: 400,
+                      lineHeight: '30px'
+                    }}
                   >
                     Last name <span className="text-red-400">*</span>
                   </label>
                   <input
                     {...register("lastName", { required: "Last name is required" })}
-                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
-                    style={{ fontFamily: 'Satoshi, sans-serif' }}
+                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
+                    style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                   />
                   {errors.lastName && (
                     <p className="mt-1 text-xs text-red-300">{errors.lastName.message}</p>
@@ -214,8 +249,15 @@ export default function Contact() {
               {/* Email address */}
               <div style={{ width: '100%' }}>
                 <label 
-                  className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="block mb-2"
+                  style={{ 
+                    color: '#FFF',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '20px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '30px'
+                  }}
                 >
                   Email address <span className="text-red-400">*</span>
                 </label>
@@ -228,8 +270,8 @@ export default function Contact() {
                     },
                   })}
                   type="email"
-                  className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="w-full rounded-[10px] border border-white/30 bg-white px-4 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
+                  style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-300">{errors.email.message}</p>
@@ -239,31 +281,45 @@ export default function Contact() {
               {/* Company name */}
               <div style={{ width: '100%' }}>
                 <label 
-                  className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="block mb-2"
+                  style={{ 
+                    color: '#FFF',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '20px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '30px'
+                  }}
                 >
                   Company name
                 </label>
                 <input
                   {...register("company")}
-                  className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="w-full rounded-[10px] border border-white/30 bg-white px-4 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20"
+                  style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                 />
               </div>
 
               {/* Product or service of interest */}
               <div style={{ width: '100%', position: 'relative' }}>
                 <label 
-                  className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="block mb-2"
+                  style={{ 
+                    color: '#FFF',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '20px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '30px'
+                  }}
                 >
                   Product or service of interest <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <select
                     {...register("productOrService", { required: "Please select a product or service" })}
-                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 pr-10 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20 appearance-none"
-                    style={{ fontFamily: 'Satoshi, sans-serif' }}
+                    className="w-full rounded-[10px] border border-white/30 bg-white px-4 pr-10 text-[16px] outline-none focus:border-white focus:ring-2 focus:ring-white/20 appearance-none"
+                    style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                   >
                     {productServiceOptions.map((option) => (
                       <option key={option} value={option === "Select one" ? "" : option}>
@@ -271,11 +327,6 @@ export default function Contact() {
                       </option>
                     ))}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7 8L6.61939 7.62393L0 0.786325L0.761229 0L7 6.44444L13.2388 0L14 0.786325L7.38061 7.62393L7 8Z" fill="#2958A4" />
-                    </svg>
-                  </div>
                 </div>
                 {errors.productOrService && (
                   <p className="mt-1 text-xs text-red-300">{errors.productOrService.message}</p>
@@ -285,21 +336,30 @@ export default function Contact() {
               {/* Message */}
               <div style={{ width: '100%' }}>
                 <label 
-                  className="text-white text-[16px] font-medium leading-[24px] block mb-2"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="block mb-2"
+                  style={{ 
+                    color: '#FFF',
+                    fontFamily: 'Satoshi, sans-serif',
+                    fontSize: '20px',
+                    fontStyle: 'normal',
+                    fontWeight: 400,
+                    lineHeight: '30px'
+                  }}
                 >
                   Message
                 </label>
                 <textarea
                   {...register("message")}
-                  rows={6}
                   className="w-full rounded-[10px] border border-white/30 bg-white px-4 py-3 text-[16px] resize-none outline-none focus:border-white focus:ring-2 focus:ring-white/20"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  height: '150px'
+                }}
                 />
               </div>
 
               {/* Recaptcha placeholder */}
-              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
                 <div 
                   className="bg-gray-300 text-gray-600 px-6 py-3 rounded-[10px] text-[14px] cursor-pointer"
                   style={{ fontFamily: 'Satoshi, sans-serif' }}
@@ -309,12 +369,11 @@ export default function Contact() {
               </div>
 
               {/* Submit button */}
-              <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`rounded-[10px] px-10 py-3 text-[16px] font-medium transition-all duration-300 ease-in-out ${
-                    isSubmitting 
+                className={`rounded-[10px] px-10 py-3 text-[16px] font-medium transition-all duration-300 ease-in-out ${isSubmitting
                       ? "opacity-70 cursor-not-allowed" 
                       : "hover:opacity-90"
                   }`}
@@ -354,8 +413,6 @@ export default function Contact() {
                 </button>
               </div>
             </form>
-          </div>
-
         </div>
       </div>
     </section>

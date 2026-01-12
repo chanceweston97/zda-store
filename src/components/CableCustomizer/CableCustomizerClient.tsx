@@ -6,11 +6,12 @@ import Link from "next/link";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
 import toast from "react-hot-toast";
-import RequestAQuote from "../RequestAQuote";
 import { MinusIcon, PlusIcon } from "@/assets/icons";
+import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
 import FaqSection from "../Home/Faq";
 import Newsletter from "../Common/Newsletter";
 import { formatPrice } from "@/utils/price";
+import WorkWithUs from "../Home/Hero/WorkWithUs";
 
 // Types for Sanity data
 interface CableCustomizerData {
@@ -373,14 +374,52 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
   return (
     <>      
       {/* Hero Section */}
-      <section className="relative bg-[#2958A4] py-12 lg:py-12 mt-[108px]">
-        <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
+      <section 
+        className="relative py-12 lg:py-12 mt-[80px] overflow-hidden"
+        style={{
+          background: 'radial-gradient(143.61% 142.34% at 55.45% -16%, #2958A4 34.13%, #1870D5 74.53%, #70C8FF 100%)'
+        }}
+      >
+        {/* Dot Background SVG */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <Image
+            src="/images/dot-bg-global.svg"
+            alt=""
+            fill
+            className="object-cover"
+            style={{ mixBlendMode: 'overlay' }}
+            sizes="100vw"
+          />
+        </div>
+        <div className="relative z-10 w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <h1 className="text-white text-[48px] lg:text-[72px] font-medium leading-[58px] lg:leading-[76px] tracking-[-1.92px] lg:tracking-[-2.88px] mb-4">
-                CUSTOM CABLE BUILDER
+              <h1 
+                className="text-white"
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '60px',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  lineHeight: '50px',
+                  letterSpacing: '-2.4px',
+                  marginBottom: '50px'
+                }}
+              >
+                Custom Cable Builder
               </h1>
-              <p className="text-white text-[18px] lg:text-[24px] font-medium leading-7 lg:leading-[30px]">
+              <p 
+                className="text-white"
+                style={{
+                  color: '#FFF',
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '24px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px'
+                }}
+              >
                 Engineered to carry what matters, built to length for the links you rely on.
               </p>
             </div>
@@ -416,7 +455,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         </div>
       </section>
 
-      <section className="relative py-10 lg:py-20 bg-gray-2">
+      <section className="relative py-10 lg:py-20 bg-gray-2 mb-[50px]">
         <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Left: Configuration Panel */}
@@ -713,10 +752,25 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="w-full inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 w-full"
+                  style={{ 
+                    fontFamily: 'Satoshi, sans-serif',
+                    backgroundColor: '#2958A4',
+                    color: '#FFF',
+                    padding: '10px 30px',
+                    paddingRight: '30px',
+                    cursor: 'pointer',
+                    minWidth: 'fit-content'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.paddingRight = '30px';
+                  }}
                 >
-                  Add to Cart
+                  <ButtonArrowHomepage />
+                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Add to Cart</p>
                 </button>
               </div>
             </div>
@@ -835,50 +889,10 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         </div>
       </section>
 
-      {/* Guarantees Section */}
-      <div className="w-full">
-        <div className="w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px mt-10">
-            {[
-              {
-                img: "/images/icons/shield-check.svg",
-                title: "1 Year Warranty",
-              },
-              {
-                img: "/images/icons/truck.svg",
-                title: "Orders Shipped Within 24 Business Hours",
-              },
-              {
-                img: "/images/icons/vectorr.svg",
-                title: "Complete Technical Support",
-              },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center justify-center gap-4 bg-[#F6F7F7] py-6 px-4 sm:px-6 w-full text-center"
-              >
-                <div className="flex items-center justify-center flex-shrink-0">
-                  <Image
-                    src={item.img}
-                    alt="icon"
-                    width={60}
-                    height={60}
-                    className=""
-                  />
-                </div>
-
-                <h3 className="text-[#2958A4] text-[20px] font-medium leading-[30px]">
-                  {item.title}
-                </h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+     
 
       {/* Request a Quote Section */}
-      <RequestAQuote variant="two-column" showProductOrService={false} />
-      
+      <WorkWithUs />
       {/* FAQ Section */}
       <FaqSection />
       
