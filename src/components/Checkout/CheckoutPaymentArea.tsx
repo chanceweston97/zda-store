@@ -1,6 +1,5 @@
 "use client";
 import { useSession } from "next-auth/react";
-import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
 import Coupon from "./Coupon";
 import Login from "./Login";
@@ -17,7 +16,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useShoppingCart } from "use-shopping-cart";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
-import { ButtonArrow } from "@/components/Common/ButtonArrow";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
   const { handleSubmit, watch } = useCheckoutForm();
@@ -430,7 +429,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
 
   return (
     <>
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2" style={{ marginTop: '80px' }}>
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-8 xl:px-0 lg:columns-2 gap-7.5 xl:gap-8">
           {!Boolean(session?.user) && (
             <div className="mb-6">
@@ -453,11 +452,26 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="group w-full inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] mt-7.5"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
+                  className="btn filled group relative w-full inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] mt-7.5"
+                  style={{ 
+                    fontFamily: 'Satoshi, sans-serif',
+                    padding: '10px 30px',
+                    paddingRight: '30px',
+                    cursor: loading ? 'not-allowed' : 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) {
+                      e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) {
+                      e.currentTarget.style.paddingRight = '30px';
+                    }
+                  }}
                 >
-                  <ButtonArrow />
-                  <span>{!loading ? `Pay $${amount.toFixed(2)}` : "Processing..."}</span>
+                  <ButtonArrowHomepage />
+                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{!loading ? `Pay $${amount.toFixed(2)}` : "Processing..."}</p>
                 </button>
             {errorMessage && (
               <p className="mt-2 text-center text-red">{errorMessage}</p>

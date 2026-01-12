@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useCheckoutForm } from "./form";
 import toast from "react-hot-toast";
 import { validateCoupon } from "@/app/actions";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 export default function CouponForm() {
   const { setValue, watch } = useCheckoutForm();
@@ -38,16 +39,40 @@ export default function CouponForm() {
         disabled={alreadyApplied}
         value={coupon}
         onChange={(e) => setCoupon(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            applyCoupon();
+          }
+        }}
       />
 
       <button
         type="button"
         onClick={applyCoupon}
-        className="inline-flex items-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] disabled:pointer-events-none"
-        style={{ fontFamily: 'Satoshi, sans-serif' }}
+        className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2958A4] disabled:pointer-events-none"
+        style={{ 
+          fontFamily: 'Satoshi, sans-serif',
+          padding: '10px 30px',
+          paddingRight: '30px',
+          cursor: (alreadyApplied || loading) ? 'not-allowed' : 'pointer'
+        }}
         disabled={alreadyApplied || loading}
+        onMouseEnter={(e) => {
+          if (!alreadyApplied && !loading) {
+            e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!alreadyApplied && !loading) {
+            e.currentTarget.style.paddingRight = '30px';
+          }
+        }}
       >
-        {alreadyApplied ? "Applied" : loading ? "Applying..." : "Apply"}
+        <ButtonArrowHomepage />
+        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">
+          {alreadyApplied ? "Applied" : loading ? "Applying..." : "Apply"}
+        </p>
       </button>
     </>
   );

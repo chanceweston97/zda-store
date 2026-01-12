@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useShoppingCart } from "use-shopping-cart";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
-import { ButtonArrow } from "@/components/Common/ButtonArrow";
+import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 const OrderSummary = () => {
   const {
@@ -65,11 +65,22 @@ const OrderSummary = () => {
           {/* <!-- checkout button --> */}
           <Link
             href="/checkout"
-            className="group w-full inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683] mt-7.5"
-            style={{ fontFamily: 'Satoshi, sans-serif' }}
+            className="btn filled group relative w-full inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] mt-7.5"
+            style={{ 
+              fontFamily: 'Satoshi, sans-serif',
+              padding: '10px 30px',
+              paddingRight: '30px',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.paddingRight = '30px';
+            }}
           >
-            <ButtonArrow />
-            <span>Process to Checkout</span>
+            <ButtonArrowHomepage />
+            <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Process to Checkout</p>
           </Link>
         </div>
       </div>
