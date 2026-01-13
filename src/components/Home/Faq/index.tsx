@@ -190,7 +190,6 @@ function FaqRow({
               fontFamily: 'Satoshi, sans-serif',
               fontSize: '20px',
               fontStyle: 'normal',
-              fontWeight: 500,
               lineHeight: '30px',
               letterSpacing: '-0.2px',
               leadingTrim: 'both',
