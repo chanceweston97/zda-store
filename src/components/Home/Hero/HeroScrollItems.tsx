@@ -238,7 +238,7 @@ export default function HeroScrollItems() {
             {/* Left Content Section */}
             <div style={{ flex: 1 }}>
               <div>
-                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>01/04</div>
+                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>01/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Antennas</h3>
               </div>
               <p style={{ 
@@ -316,7 +316,7 @@ export default function HeroScrollItems() {
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>02/04</div>
+                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>02/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Cables</h3>
               </div>
               <p style={{ 
@@ -394,7 +394,7 @@ export default function HeroScrollItems() {
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>03/04</div>
+                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>03/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Connectors & Accessories</h3>
               </div>
               <p style={{ 
@@ -409,7 +409,7 @@ export default function HeroScrollItems() {
                 margin: 0,
                 marginTop: '100px'
               }}>
-                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
+                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.<br></br><br></br> For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
                 href="/shop?category=connectors"
@@ -470,7 +470,7 @@ export default function HeroScrollItems() {
             {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>04/04</div>
+                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>04/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Manufacturing</h3>
               </div>
               <p style={{ 

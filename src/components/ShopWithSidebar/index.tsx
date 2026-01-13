@@ -352,12 +352,12 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
 
   return (
     <>
-      {/* Products Hero Section (like Company page) - Show when not on a specific category page */}
+      {/* Products Hero Section (like Company page) - Show on base shop page */}
       {!categoryNameProp && <ProductsHeroSection />}
 
-      {/* Category Hero Section (like Company page) - Show when category selected */}
-      {categoryName && (
-        <CategoryHeroSection categoryName={categoryName} />
+      {/* Category Hero Section (like Company page) - Show when category page visited via menu */}
+      {categoryNameProp && (
+        <CategoryHeroSection categoryName={categoryNameProp} />
       )}
 
        <section className="relative pt-5 pb-10 overflow-hidden lg:pt-10 xl:pt-12 bg-white">
