@@ -34,16 +34,22 @@ export default function WorkWithUs() {
   return (
     <section 
       ref={ref}
-      className={`transition-all duration-1000 ease-out flex w-full min-h-[600px] h-auto justify-center items-center mx-auto pt-5 md:pt-0 mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
+      className={`transition-all duration-1000 ease-out flex w-full min-h-[600px] h-auto justify-center items-center pt-5 md:pt-0 mt-[50px] ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
       }`}
       style={{ 
-        background: '#F1F6FF'
+        background: '#F1F6FF',
+        width: '100vw',
+        position: 'relative',
+        left: '50%',
+        right: '50%',
+        marginLeft: '-50vw',
+        marginRight: '-50vw'
       }}
     >
-      <div className="w-full mx-auto">
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-[100px]">
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-8 sm:mb-10 lg:mb-12">
           <h2 

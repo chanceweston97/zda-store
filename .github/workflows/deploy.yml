@@ -5,33 +5,13 @@ on:
     branches: ["main"]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: yarn
-
-      # 3️⃣ Install dependencies (cached)
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      # 4️⃣ Build Next.js
-      - name: Build application
-        run: yarn build
-        env:
-          NODE_ENV: production
-          NEXT_PUBLIC_MEDUSA_BACKEND_URL: https://admin.zdacomm.com
-
-      # 5️⃣ Setup SSH
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -39,29 +19,134 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # 6️⃣ Rsync ONLY required build files
-      - name: Deploy build to EC2
+      - name: Rsync source to EC2 (excludes large dirs)
         run: |
           rsync -az --delete \
-            .next \
-            public \
-            package.json \
-            yarn.lock \
-            ecosystem.config.js \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}
+            --exclude node_modules \
+            --exclude .next \
+            --exclude .git \
+            --exclude .github \
+            --exclude coverage \
+            --exclude build \
+            --exclude out \
+            --exclude logs \
+            --exclude .vercel \
+            --exclude .yarn \
+            --exclude "*.log" \
+            --exclude "*.tar.gz" \
+            --exclude ".env*.local" \
+            --exclude ".env" \
+            ./ \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}/
 
-      # 7️⃣ Restart app (NO build on EC2)
-      - name: Restart app with PM2
+      - name: Build & restart frontend on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            set -e
+
             cd ${{ secrets.APP_PATH }}
 
+            # Load shell environment (for yarn/node paths)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc" || true
+            [ -s "$HOME/.profile" ] && . "$HOME/.profile" || true
+
+            # Ensure Node.js is available
+            if ! command -v node &> /dev/null; then
+              echo "❌ Error: Node.js not found. Please install Node.js first."
+              exit 1
+            fi
+
+            # Try to enable corepack (comes with Node.js 16.10+)
+            if command -v corepack &> /dev/null; then
+              echo "Enabling corepack..."
+              corepack enable || true
+              corepack prepare yarn@stable --activate || true
+            fi
+
+            # Ensure yarn is in PATH
+            if ! command -v yarn &> /dev/null; then
+              # Try common yarn locations
+              if [ -f "$HOME/.yarn/bin/yarn" ]; then
+                export PATH="$HOME/.yarn/bin:$PATH"
+              elif [ -f "/usr/local/bin/yarn" ]; then
+                export PATH="/usr/local/bin:$PATH"
+              elif command -v npm &> /dev/null; then
+                # Install yarn via npm as fallback
+                echo "Installing yarn via npm..."
+                npm install -g yarn || true
+              fi
+            fi
+
+            # Determine package manager (yarn or npm)
+            if command -v yarn &> /dev/null; then
+              PACKAGE_MANAGER="yarn"
+              INSTALL_CMD="yarn install --immutable"
+              BUILD_CMD="yarn build"
+            elif command -v npm &> /dev/null; then
+              PACKAGE_MANAGER="npm"
+              INSTALL_CMD="npm ci"
+              BUILD_CMD="npm run build"
+              echo "⚠️  Warning: Using npm instead of yarn"
+            else
+              echo "❌ Error: Neither yarn nor npm found. Please install Node.js."
+              exit 1
+            fi
+
+            echo "Installing dependencies with $PACKAGE_MANAGER..."
+            echo "Package manager path: $(which $PACKAGE_MANAGER || echo 'not found')"
+            $INSTALL_CMD
+
+            # Clean old build
+            rm -rf .next
+
+            # Load environment variables from .env.production if it exists
+            # This is required for Next.js build (e.g., STRIPE_SECRET_KEY)
+            if [ -f ".env.production" ]; then
+              echo "Loading environment variables from .env.production..."
+              set -a
+              source .env.production
+              set +a
+            else
+              echo "⚠️  Warning: .env.production not found. Build may fail if required env vars are missing."
+            fi
+
+            # Set environment variables before build (Next.js reads these during build)
             export NODE_ENV=production
 
+            # Build application
+            echo "Building application..."
+            $BUILD_CMD
+
+            # Create PM2 ecosystem config file
+            APP_PATH="${{ secrets.APP_PATH }}"
+            
+            # Determine start command based on available package manager
+            if [ "$PACKAGE_MANAGER" = "yarn" ]; then
+              # Find yarn path (prefer corepack, fallback to yarn in PATH)
+              if [ -f "$HOME/.corepack/v1/yarn/4.6.0/yarn.js" ]; then
+                START_SCRIPT="node"
+                START_ARGS="$HOME/.corepack/v1/yarn/4.6.0/yarn.js start"
+              else
+                START_SCRIPT="yarn"
+                START_ARGS="start"
+              fi
+            else
+              # Use npm
+              START_SCRIPT="npm"
+              START_ARGS="run start"
+            fi
+            
+            echo "Creating PM2 ecosystem.config.js (script: $START_SCRIPT, args: $START_ARGS)"
+            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "%s",\n      args: "%s",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$START_SCRIPT" "$START_ARGS" "$APP_PATH" > ecosystem.config.js
+
+            # Restart store via PM2 using ecosystem config
+            echo "Starting store with PM2..."
             pm2 delete store || true
             pm2 start ecosystem.config.js
             pm2 save

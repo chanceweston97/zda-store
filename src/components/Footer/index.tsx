@@ -54,15 +54,20 @@ const Footer = () => {
   return (
     <footer className="overflow-hidden w-full">
       <div 
-        className="mx-auto bg-[#2958A4] shrink-0 self-stretch"
+        className="bg-[#2958A4] shrink-0 self-stretch"
         style={{
-          width: '1440px',
-          maxWidth: '100%',
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
           color: '#fff'
         }}
       >
         {/* <!-- footer menu start --> */}
-        <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-[50px] xl:pb-15 px-[50px]">
+        <div className="max-w-[1440px] mx-auto">
+          <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-[50px] xl:pb-15 px-[50px]">
           <div className="max-w-[330px] w-full mt-5 lg:mt-0">
             <div className="mb-7.5 text-custom-1 font-medium text-dark">
               <Link className="shrink-0" href="/">
@@ -120,6 +125,7 @@ const Footer = () => {
           <QuickLinks />
           <Legal />
           <Info />
+          </div>
         </div>
         {/* <!-- footer menu end --> */}
       </div>

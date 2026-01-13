@@ -12,10 +12,14 @@ const Newsletter = () => {
 
   return (
     <section 
-      className="flex justify-center items-center relative overflow-hidden mx-auto"
+      className="flex justify-center items-center relative overflow-hidden"
       style={{
-        width: '1440px',
-        maxWidth: '100%',
+        width: '100vw',
+        position: 'relative',
+        left: '50%',
+        right: '50%',
+        marginLeft: '-50vw',
+        marginRight: '-50vw',
         height: '400px',
         flexShrink: 0,
         background: 'radial-gradient(99.5% 99.03% at 50% 35.5%, #2958A4 21.63%, #1870D5 55.29%, #70C8FF 97.6%)'

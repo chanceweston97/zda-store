@@ -39,13 +39,18 @@ export default function FooterBottom() {
   return (
     <div className="w-full">
       <div 
-        className="bg-[#2958A4] py-5 border-t border-white/30 mx-auto"
+        className="bg-[#2958A4] py-5 border-t border-white/30"
         style={{
-          width: '1440px',
-          maxWidth: '100%'
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw'
         }}
       >
-        <div className="flex flex-wrap items-center justify-between gap-5 px-[50px]">
+        <div className="max-w-[1440px] mx-auto">
+          <div className="flex flex-wrap items-center justify-between gap-5 px-[50px]">
           <p className="text-white text-[16px]">
             &copy; {year} Copyright -{" "}
             <a
@@ -112,6 +117,7 @@ export default function FooterBottom() {
               </a>
             </div>
 
+          </div>
           </div>
         </div>
       </div>
