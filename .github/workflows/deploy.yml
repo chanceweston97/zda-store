@@ -56,6 +56,19 @@ jobs:
             [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc" || true
             [ -s "$HOME/.profile" ] && . "$HOME/.profile" || true
 
+            # Ensure Node.js is available
+            if ! command -v node &> /dev/null; then
+              echo "❌ Error: Node.js not found. Please install Node.js first."
+              exit 1
+            fi
+
+            # Try to enable corepack (comes with Node.js 16.10+)
+            if command -v corepack &> /dev/null; then
+              echo "Enabling corepack..."
+              corepack enable || true
+              corepack prepare yarn@stable --activate || true
+            fi
+
             # Ensure yarn is in PATH
             if ! command -v yarn &> /dev/null; then
               # Try common yarn locations
@@ -63,12 +76,31 @@ jobs:
                 export PATH="$HOME/.yarn/bin:$PATH"
               elif [ -f "/usr/local/bin/yarn" ]; then
                 export PATH="/usr/local/bin:$PATH"
+              elif command -v npm &> /dev/null; then
+                # Install yarn via npm as fallback
+                echo "Installing yarn via npm..."
+                npm install -g yarn || true
               fi
             fi
 
-            echo "Installing dependencies..."
-            echo "Yarn path: $(which yarn || echo 'not found')"
-            yarn install --immutable
+            # Determine package manager (yarn or npm)
+            if command -v yarn &> /dev/null; then
+              PACKAGE_MANAGER="yarn"
+              INSTALL_CMD="yarn install --immutable"
+              BUILD_CMD="yarn build"
+            elif command -v npm &> /dev/null; then
+              PACKAGE_MANAGER="npm"
+              INSTALL_CMD="npm ci"
+              BUILD_CMD="npm run build"
+              echo "⚠️  Warning: Using npm instead of yarn"
+            else
+              echo "❌ Error: Neither yarn nor npm found. Please install Node.js."
+              exit 1
+            fi
+
+            echo "Installing dependencies with $PACKAGE_MANAGER..."
+            echo "Package manager path: $(which $PACKAGE_MANAGER || echo 'not found')"
+            $INSTALL_CMD
 
             # Clean old build
             rm -rf .next
@@ -89,22 +121,29 @@ jobs:
 
             # Build application
             echo "Building application..."
-            yarn build
+            $BUILD_CMD
 
             # Create PM2 ecosystem config file
             APP_PATH="${{ secrets.APP_PATH }}"
             
-            # Find yarn path (prefer corepack, fallback to yarn in PATH)
-            if [ -f "$HOME/.corepack/v1/yarn/4.6.0/yarn.js" ]; then
-              YARN_SCRIPT="node"
-              YARN_ARGS="$HOME/.corepack/v1/yarn/4.6.0/yarn.js start"
+            # Determine start command based on available package manager
+            if [ "$PACKAGE_MANAGER" = "yarn" ]; then
+              # Find yarn path (prefer corepack, fallback to yarn in PATH)
+              if [ -f "$HOME/.corepack/v1/yarn/4.6.0/yarn.js" ]; then
+                START_SCRIPT="node"
+                START_ARGS="$HOME/.corepack/v1/yarn/4.6.0/yarn.js start"
+              else
+                START_SCRIPT="yarn"
+                START_ARGS="start"
+              fi
             else
-              YARN_SCRIPT="yarn"
-              YARN_ARGS="start"
+              # Use npm
+              START_SCRIPT="npm"
+              START_ARGS="run start"
             fi
             
-            echo "Creating PM2 ecosystem.config.js (script: $YARN_SCRIPT, args: $YARN_ARGS)"
-            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "%s",\n      args: "%s",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$YARN_SCRIPT" "$YARN_ARGS" "$APP_PATH" > ecosystem.config.js
+            echo "Creating PM2 ecosystem.config.js (script: $START_SCRIPT, args: $START_ARGS)"
+            printf 'module.exports = {\n  apps: [\n    {\n      name: "store",\n      script: "%s",\n      args: "%s",\n      cwd: "%s",\n      env: {\n        NODE_ENV: "production",\n        NEXT_PUBLIC_MEDUSA_BACKEND_URL: "https://admin.zdacomm.com"\n      }\n    }\n  ]\n}\n' "$START_SCRIPT" "$START_ARGS" "$APP_PATH" > ecosystem.config.js
 
             # Restart store via PM2 using ecosystem config
             echo "Starting store with PM2..."
