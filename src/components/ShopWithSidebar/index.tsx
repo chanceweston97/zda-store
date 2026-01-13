@@ -279,7 +279,7 @@ type PropsType = {
 const PRODUCTS_PER_PAGE = 9;
 
 const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) => {
-  const { allProducts, products, categories, allProductsCount, currentCategory } = data;
+  const { allProducts, categories, allProductsCount, currentCategory } = data;
   const searchParams = useSearchParams();
 
   // Always use list view - grid view removed
@@ -288,23 +288,114 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   const [stickyMenu, setStickyMenu] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // SERVER-SIDE FILTERING: Products are already filtered on the server (page.tsx)
-  // All filtering (category, size, price, sort) is done on the server for optimal performance
-
-  // ✅ OPTIMIZED: Only reset pagination when category changes, not on every searchParams change
-  // This prevents unnecessary re-renders when only page number or sort changes
+  // ✅ CLIENT-SIDE FILTERING: Filter products on the client for instant updates
+  // This avoids server round-trips and makes filtering instant
   const categoryParam = searchParams?.get("category") || null;
+  const sizesParam = searchParams?.get("sizes") || null;
+  const minPriceParam = searchParams?.get("minPrice") || null;
+  const maxPriceParam = searchParams?.get("maxPrice") || null;
+  const sortParam = searchParams?.get("sort") || null;
+
+  // Reset pagination when filters change
   useEffect(() => {
-    // Only reset if category actually changed (not on page/sort changes)
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [categoryParam]); // Only depend on category, not all searchParams
+  }, [categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam]);
 
   const availableSizes = useMemo(() => {
     const sizes = allProducts.flatMap((product) => product.sizes || []);
     return [...new Set(sizes)];
   }, [allProducts]);
+
+  // Build category map for O(1) lookup
+  const categoryMap = useMemo(() => {
+    const map = new Map<string, any>();
+    const buildMap = (cats: any[]) => {
+      cats.forEach((cat) => {
+        const catHandle = (cat as any).handle || cat.slug?.current || cat.slug;
+        if (catHandle) {
+          map.set(catHandle, cat);
+        }
+        const subcats = cat.subcategories || cat.category_children || [];
+        if (subcats.length > 0) {
+          buildMap(subcats);
+        }
+      });
+    };
+    buildMap(categories);
+    return map;
+  }, [categories]);
+
+  // ✅ CLIENT-SIDE FILTERING: Filter products based on URL params
+  const filteredProducts = useMemo(() => {
+    let result = [...allProducts];
+
+    // Category filter
+    if (categoryParam) {
+      const categoryHandles = categoryParam.split(",").filter(Boolean);
+      const categoryIdSet = new Set<string>();
+      
+      categoryHandles.forEach((handle) => {
+        const foundCategory = categoryMap.get(handle);
+        if (foundCategory) {
+          const categoryId = foundCategory.id || foundCategory._id;
+          if (categoryId) {
+            categoryIdSet.add(categoryId);
+            const subcats = foundCategory.subcategories || foundCategory.category_children || [];
+            subcats.forEach((sub: any) => {
+              const subId = sub.id || sub._id;
+              if (subId) categoryIdSet.add(subId);
+            });
+          }
+        }
+      });
+
+      if (categoryIdSet.size > 0) {
+        result = result.filter((product: any) => {
+          const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
+          return productCategoryIds.some((id: string) => categoryIdSet.has(id));
+        });
+      }
+    }
+
+    // Size filter
+    if (sizesParam) {
+      const selectedSizesSet = new Set(sizesParam.split(",").filter(Boolean));
+      if (selectedSizesSet.size > 0) {
+        result = result.filter((product: any) => {
+          const productSizes = product.sizes || [];
+          return Array.from(selectedSizesSet).some(size => productSizes.includes(size));
+        });
+      }
+    }
+
+    // Price filter
+    const minPriceNum = minPriceParam ? parseFloat(minPriceParam) : null;
+    const maxPriceNum = maxPriceParam ? parseFloat(maxPriceParam) : null;
+    if (minPriceNum !== null || maxPriceNum !== null) {
+      result = result.filter((product: any) => {
+        const productPrice = product.price || 0;
+        if (minPriceNum !== null && productPrice < minPriceNum) return false;
+        if (maxPriceNum !== null && productPrice > maxPriceNum) return false;
+        return true;
+      });
+    }
+
+    // Sort
+    if (sortParam === 'popular') {
+      result = [...result].sort((a, b) => {
+        const aReviews = a.reviews?.length || 0;
+        const bReviews = b.reviews?.length || 0;
+        return bReviews - aReviews;
+      });
+    }
+
+    return result;
+  }, [allProducts, categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam, categoryMap]);
+
+  // Use filtered products instead of server-filtered products
+  const products = filteredProducts;
 
   const handleStickyMenu = () => {
     if (window.scrollY >= 80) {

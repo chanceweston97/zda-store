@@ -109,17 +109,6 @@ const SingleListItem = ({ item }: { item: Product }) => {
   // Get SKU - Priority: First variation SKU → Parent SKU → empty
   // When variations exist, show first variation's SKU (first ID's SKU)
   const sku = (() => {
-    // Debug logging to verify data availability
-    console.log("PRODUCT DEBUG", {
-      id: item._id,
-      name: item.name,
-      sku: (item as any).sku,
-      variants: (item as any).variants,
-      variations: (item as any).variations,
-      variantsCount: (item as any).variants?.length || 0,
-      firstVariantSku: (item as any).variants?.[0]?.sku,
-    });
-
     // 1️⃣ First variation SKU (if variations exist, prioritize first variation's SKU)
     // Variations are sorted by ID in convertWCToSanityProduct, so [0] is the first (lowest ID)
     if ((item as any).variants && (item as any).variants.length > 0) {
@@ -128,14 +117,11 @@ const SingleListItem = ({ item }: { item: Product }) => {
       const firstVariantSku = firstVariant?.sku;
       
       if (firstVariantSku && firstVariantSku.trim() !== "") {
-        console.log(`[SingleListItem] Using first variant SKU: ${firstVariantSku} (variant ID: ${firstVariant?.id})`);
         return firstVariantSku.trim();
       } else {
-        console.log(`[SingleListItem] First variant has no SKU (variant ID: ${firstVariant?.id}), checking other variants...`);
         // If first variant has no SKU, find first variant with SKU
         const firstWithSku = (item as any).variants.find((v: any) => v.sku && v.sku.trim() !== "");
         if (firstWithSku) {
-          console.log(`[SingleListItem] Using first variant with SKU: ${firstWithSku.sku} (variant ID: ${firstWithSku.id})`);
           return firstWithSku.sku.trim();
         }
       }

@@ -183,10 +183,6 @@ export default function Description({ product, metadata }: Props) {
     const features = metadata?.features || product.features;
     const applications = metadata?.applications || product.applications;
     const specifications = metadata?.specifications || product.specifications;
-    console.log("PRODUCTS", product);
-    console.log("SPECIFICATIONS:", specifications);
-    console.log("SPECIFICATIONS TYPE:", typeof specifications);
-    console.log("SPECIFICATIONS IS ARRAY:", Array.isArray(specifications));
     const [imageError, setImageError] = useState(false);
 
     return (
@@ -621,8 +617,6 @@ export default function Description({ product, metadata }: Props) {
                         ) : activeTab === "specifications" ? (
                             specifications ? (
                                 (() => {
-                                    console.log("[Specifications Tab] Rendering specifications:", specifications);
-                                    
                                     // Handle specifications - can be string, array, or HTML
                                     if (typeof specifications === 'string' && specifications.trim()) {
                                         // Check if string contains HTML (table, list, or other HTML)
@@ -680,7 +674,6 @@ export default function Description({ product, metadata }: Props) {
                                                     if (activeTab) {
                                                         // Get the inner HTML of the active tab (the table)
                                                         cleanedSpecs = activeTab.innerHTML;
-                                                        console.log("[Specifications] Extracted active tab content:", cleanedSpecs);
                                                     }
                                                 } catch (e) {
                                                     console.warn("[Specifications] Error parsing HTML, using original:", e);

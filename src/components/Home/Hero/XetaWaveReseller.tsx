@@ -34,7 +34,7 @@ export default function XetaWaveReseller() {
           {/* Dot Background SVG */}
           <div className="absolute inset-0 opacity-20 pointer-events-none">
             <Image
-              src="/images/dot-bg-global.svg"
+              src="/image/xetawave-dot.svg"
               alt=""
               fill
               className="object-cover"

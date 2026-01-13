@@ -41,9 +41,6 @@ export async function wcFetch<T>(
   };
 
   try {
-    console.log(`[WooCommerce] Making request to: ${url}`);
-    console.log(`[WooCommerce] Method: ${options.method || 'GET'}`);
-    
     // Create abort controller for timeout (more compatible)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout

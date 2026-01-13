@@ -199,13 +199,6 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   const categoryId = categoryData?.id?.toString() || categoryData?._id?.toString();
   const categoryHandle = (categoryData as any)?.handle || categoryData?.slug?.current || categoryData?.slug || slug;
   
-  console.log(`[CategoryPage] Filtering products for category:`, {
-    slug,
-    categoryId,
-    categoryHandle,
-    categoryTitle: categoryData?.title || categoryData?.name,
-  });
-  
   // Filter products by category ID (WooCommerce and Medusa use category IDs for filtering)
   let filteredProducts = allProducts;
   
@@ -221,8 +214,6 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       });
     }
     
-    console.log(`[CategoryPage] Filtering by category IDs:`, allCategoryIds);
-    
     // Filter products by category IDs (exactly like shop page)
     // WooCommerce products have category IDs as strings, so we compare as strings
     filteredProducts = allProducts.filter((product: any) => {
@@ -235,11 +226,8 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       const matches = productCategoryIds.some((id: string) => allCategoryIds.includes(id));
       return matches;
     });
-    
-    console.log(`[CategoryPage] Found ${filteredProducts.length} products matching category IDs`);
   } else if (categoryHandle) {
     // Fallback: filter by handle/slug if ID not available
-    console.log(`[CategoryPage] Filtering by category handle: ${categoryHandle}`);
     filteredProducts = allProducts.filter((product: any) => {
       const productCategoryHandles = product.categories?.map((cat: any) => 
         (cat as any).handle || cat.slug?.current || cat.slug
@@ -247,8 +235,6 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       const matches = productCategoryHandles.includes(categoryHandle);
       return matches;
     });
-    
-    console.log(`[CategoryPage] Found ${filteredProducts.length} products matching category handle`);
   } else {
     // No category found, show empty
     console.warn(`[CategoryPage] No category ID or handle found for slug: ${slug}`);

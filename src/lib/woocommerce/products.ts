@@ -123,18 +123,13 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
  * This is used for PDP where we need complete variant information
  */
 export async function convertWCToSanityProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
-  console.log(`[convertWCToSanityProductWithVariations] Starting conversion for product ${wcProduct.id}`);
-  console.log(`[convertWCToSanityProductWithVariations] Product has ${wcProduct.variations?.length || 0} variations`);
-  
   // First do the basic conversion
   const baseProduct = await convertWCToSanityProduct(wcProduct);
   
   // If product has variations, fetch full variation details
   if (wcProduct.variations && wcProduct.variations.length > 0) {
     try {
-      console.log(`[convertWCToSanityProductWithVariations] Fetching variations for product ${wcProduct.id}...`);
       const variations = await getProductVariations(wcProduct.id);
-      console.log(`[convertWCToSanityProductWithVariations] Fetched ${variations.length} variations:`, JSON.stringify(variations, null, 2));
       
       // Update variants with full variation data
       const fullVariants = variations.map((variation: any) => {
@@ -188,14 +183,6 @@ export async function convertWCToSanityProductWithVariations(wcProduct: WooComme
             variation_attributes: variation.attributes,
           },
         };
-        console.log(`[convertWCToSanityProductWithVariations] Variant ${variant.id}:`, {
-          title: variant.title,
-          price: variant.price,
-          calculated_amount: variant.calculated_price.calculated_amount,
-          gainValue: gainValue,
-          menu_order: variation.menu_order,
-          attributes: variation.attributes,
-        });
         return variant;
       });
       
@@ -212,27 +199,13 @@ export async function convertWCToSanityProductWithVariations(wcProduct: WooComme
         return (a.menu_order || 0) - (b.menu_order || 0);
       });
       
-      console.log(`[convertWCToSanityProductWithVariations] Sorted variants by gain value:`, 
-        fullVariants.map((v: any) => ({ id: v.id, title: v.title, gainValue: v.gainValue }))
-      );
-      
       // Replace placeholder variants with full variant data
       baseProduct.variants = fullVariants;
-      
-      console.log(`[convertWCToSanityProductWithVariations] Successfully converted ${fullVariants.length} variations for product ${wcProduct.id}`);
-      console.log(`[convertWCToSanityProductWithVariations] Final product variants:`, JSON.stringify(fullVariants, null, 2));
     } catch (error) {
       console.error(`[convertWCToSanityProductWithVariations] Error fetching variations:`, error);
       // Keep the placeholder variants if fetch fails
     }
   }
-  
-  console.log(`[convertWCToSanityProductWithVariations] Final product:`, {
-    id: baseProduct._id,
-    name: baseProduct.name,
-    shortDescription: baseProduct.shortDescription,
-    variantsCount: baseProduct.variants?.length || 0,
-  });
   
   return baseProduct;
 }
@@ -276,7 +249,7 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
     const url = mediaData.source_url || mediaData.guid?.rendered || null;
     
     if (url) {
-      console.log(`[resolveMediaId] Resolved media ID ${id} to URL: ${url}`);
+      // Media ID resolved successfully
     } else {
       console.warn(`[resolveMediaId] Media ${id} has no source_url or guid`);
     }
@@ -327,8 +300,9 @@ export async function getCategories(): Promise<Array<{
 /**
  * Convert WooCommerce product to Sanity/Medusa format for compatibility
  * This matches the format expected by the shop page components
+ * @param skipVariations - If true, skip fetching variations (faster for listing pages)
  */
-export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): Promise<any> {
+export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
@@ -436,9 +410,10 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
     return typeof value === 'string' && value.startsWith('field_');
   };
   
+  // ✅ OPTIMIZATION: Skip media ID resolution for listing pages (only needed on PDP)
   // Resolve datasheet image
   let datasheetImage: string | null = null;
-  if (datasheetImageRaw) {
+  if (datasheetImageRaw && !skipVariations) {
     // Skip ACF field keys - they need to be resolved differently
     if (isACFFieldKey(datasheetImageRaw)) {
       console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetImage is an ACF field key (${datasheetImageRaw}), not a media ID. This needs to be resolved from ACF field data.`);
@@ -452,11 +427,14 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
       console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetImage format:`, datasheetImageRaw);
       datasheetImage = null;
     }
+  } else if (datasheetImageRaw && typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
+    // For listing pages, only use direct URLs (skip media ID resolution)
+    datasheetImage = datasheetImageRaw;
   }
   
   // Resolve datasheet PDF
   let datasheetPdf: string | null = null;
-  if (datasheetPdfRaw) {
+  if (datasheetPdfRaw && !skipVariations) {
     // Skip ACF field keys - they need to be resolved differently
     if (isACFFieldKey(datasheetPdfRaw)) {
       console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetPdf is an ACF field key (${datasheetPdfRaw}), not a media ID. This needs to be resolved from ACF field data.`);
@@ -470,14 +448,10 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
       console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetPdf format:`, datasheetPdfRaw);
       datasheetPdf = null;
     }
+  } else if (datasheetPdfRaw && typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
+    // For listing pages, only use direct URLs (skip media ID resolution)
+    datasheetPdf = datasheetPdfRaw;
   }
-  
-  console.log(`[convertWCToSanityProduct] Datasheet fields for product ${wcProduct.id}:`, {
-    imageRaw: datasheetImageRaw,
-    imageResolved: datasheetImage,
-    pdfRaw: datasheetPdfRaw,
-    pdfResolved: datasheetPdf,
-  });
 
   // Handle variants - WooCommerce uses variations
   // Fetch variations to get actual SKUs (required for listing pages to show SKU)
@@ -485,10 +459,34 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
   
   // Check if product has variations
   if (wcProduct.variations && wcProduct.variations.length > 0) {
-    try {
-      // Fetch actual variations to get their SKUs
-      // This is required because WooCommerce doesn't include variation data in product listings
-      const variations = await getProductVariations(wcProduct.id);
+    // ✅ OPTIMIZATION: Skip variation fetching for listing pages (much faster)
+    if (skipVariations) {
+      // Create placeholder variants without fetching (for listing pages)
+      wcProduct.variations.forEach((variationId: number) => {
+        variants.push({
+          id: variationId.toString(),
+          title: wcProduct.name,
+          sku: wcProduct.sku || "",
+          price: price,
+          calculated_price: {
+            calculated_amount: price * 100,
+            currency_code: "USD",
+          },
+          inventory_quantity: 0,
+          options: [],
+          metadata: {
+            ...metadataObj,
+            variation_id: variationId,
+            _needsVariationFetch: true,
+          },
+        });
+      });
+    } else {
+      // Fetch full variation details (for product detail pages)
+      try {
+        // Fetch actual variations to get their SKUs
+        // This is required because WooCommerce doesn't include variation data in product listings
+        const variations = await getProductVariations(wcProduct.id);
       
       // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
       const sortedVariations = [...variations].sort((a: any, b: any) => {
@@ -517,28 +515,29 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct): P
           },
         });
       });
-    } catch (error) {
-      console.error(`[convertWCToSanityProduct] Error fetching variations for product ${wcProduct.id}:`, error);
-      // Fallback: create placeholder variants if fetch fails
-      wcProduct.variations.forEach((variationId: number) => {
-        variants.push({
-          id: variationId.toString(),
-          title: wcProduct.name,
-          sku: wcProduct.sku || "",
-          price: price,
-          calculated_price: {
-            calculated_amount: price * 100,
-            currency_code: "USD",
-          },
-          inventory_quantity: 0,
-          options: [],
-          metadata: {
-            ...metadataObj,
-            variation_id: variationId,
-            _needsVariationFetch: true,
-          },
+      } catch (error) {
+        console.error(`[convertWCToSanityProduct] Error fetching variations for product ${wcProduct.id}:`, error);
+        // Fallback: create placeholder variants if fetch fails
+        wcProduct.variations.forEach((variationId: number) => {
+          variants.push({
+            id: variationId.toString(),
+            title: wcProduct.name,
+            sku: wcProduct.sku || "",
+            price: price,
+            calculated_price: {
+              calculated_amount: price * 100,
+              currency_code: "USD",
+            },
+            inventory_quantity: 0,
+            options: [],
+            metadata: {
+              ...metadataObj,
+              variation_id: variationId,
+              _needsVariationFetch: true,
+            },
+          });
         });
-      });
+      }
     }
   } else {
     // For simple products without variations, create a single variant

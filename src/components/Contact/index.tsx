@@ -62,7 +62,6 @@ export default function Contact() {
 
       if (response.ok && result.status === "success") {
         // Success - form submitted to Contact Form 7 and saved in Flamingo
-        console.log("✅ Contact form submitted successfully");
         toast.success(result.message || "Contact form submitted successfully!");
         // Redirect to thank you page after successful submission
         router.push("/mail-success");
