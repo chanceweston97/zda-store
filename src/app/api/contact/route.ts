@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     const { firstName, lastName, email, phone, company, message, productOrService } = body;
 
-    // Validate required fields (phone and company are now optional)
+    // Validate required fields (phone and company are now optional, but productOrService is required)
     if (!firstName || !lastName || !email) {
       return NextResponse.json(
         { 
@@ -91,14 +91,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate productOrService is required and not "Select one"
+    if (!productOrService || productOrService.trim() === "" || productOrService.trim() === "Select one") {
+      return NextResponse.json(
+        { 
+          message: "Please select a product or service.",
+          status: "error"
+        },
+        { status: 400 }
+      );
+    }
+
     // Contact Form 7 REST API endpoint for feedback
     // Note: We don't check form existence first because the feedback endpoint will validate it
     const feedbackEndpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_CONTACT_ID}/feedback`;
 
     // Prepare FormData for Contact Form 7
     // Contact Form 7 REST API expects multipart/form-data format
-    // Field names must match your Contact Form 7 form fields
-    // Based on CF7 schema: your-name, your-email, your-tel, your-subject, your-message
+    // Field names must match your Contact Form 7 form fields EXACTLY
+    // CF7 form fields: first-name, last-name, your-email, your-subject, your-product, your-message
     const formData = new FormData();
     
     // CF7 REQUIRES _wpcf7_unit_tag for spam protection and session tracking
@@ -106,31 +117,37 @@ export async function POST(req: NextRequest) {
     const unitTag = `wpcf7-f${CONTACT_FORM_7_CONTACT_ID}-p${Date.now()}-o1`;
     formData.append("_wpcf7_unit_tag", unitTag);
     
-    // Combine firstName and lastName into your-name (CF7 expects single name field)
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    formData.append("your-name", fullName);
+    // First name - separate field (not combined)
+    formData.append("first-name", firstName.trim());
     
+    // Last name - separate field (not combined)
+    formData.append("last-name", lastName.trim());
+    
+    // Email address
     formData.append("your-email", email.trim());
-    formData.append("your-tel", phone?.trim() || "");
     
-    // Company name maps to your-subject (optional field, use productOrService if company not provided)
-    const subject = company?.trim() || productOrService?.trim() || "Contact Form Submission";
-    formData.append("your-subject", subject);
+    // Company name (optional)
+    formData.append("your-subject", company?.trim() || "");
     
-    if (message) {
-      formData.append("your-message", message.trim());
-    }
-
+    // Product/Service of Interest - REQUIRED field (dropdown)
+    // CF7 expects the exact value from the dropdown options
+    const productServiceValue = productOrService.trim();
+    formData.append("your-product", productServiceValue);
+    
+    // Message (optional)
+    formData.append("your-message", message?.trim() || "");
+    
     console.log("📤 Sending to Contact Form 7:", {
       endpoint: feedbackEndpoint,
       formId: CONTACT_FORM_7_CONTACT_ID,
       fields: {
         "_wpcf7_unit_tag": unitTag,
-        "your-name": fullName,
+        "first-name": firstName.trim(),
+        "last-name": lastName.trim(),
         "your-email": email.trim(),
-        "your-tel": phone.trim(),
-        "your-subject": company.trim(),
-        "your-message": message || "(empty)",
+        "your-subject": company?.trim() || "",
+        "your-product": productServiceValue,
+        "your-message": message?.trim() || "",
       },
     });
 
@@ -196,10 +213,27 @@ export async function POST(req: NextRequest) {
       // Provide more helpful error message
       let userMessage = errorMessage;
       if (data.invalid_fields && Object.keys(data.invalid_fields).length > 0) {
+        // Handle both string keys and numeric keys (CF7 sometimes returns numeric indices)
         const fieldErrors = Object.entries(data.invalid_fields)
-          .map(([field, error]: [string, any]) => `${field}: ${error.message || error}`)
+          .map(([field, error]: [string, any]) => {
+            // If error is an object with message property, use it
+            if (error && typeof error === 'object' && error.message) {
+              return error.message;
+            }
+            // If error is a string, use it directly
+            if (typeof error === 'string') {
+              return error;
+            }
+            // Otherwise, format as field: error
+            return `${field}: ${error}`;
+          })
+          .filter(Boolean) // Remove empty strings
           .join(", ");
-        userMessage = `Validation error: ${fieldErrors}`;
+        
+        // Only prepend "Validation error: " if we have field-specific errors
+        if (fieldErrors) {
+          userMessage = `Validation error: ${fieldErrors}`;
+        }
       }
 
       return NextResponse.json(
