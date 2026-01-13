@@ -191,7 +191,7 @@ export default function Description({ product, metadata }: Props) {
 
     return (
         <section className="pb-5 pt-10">
-            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 xl:px-0">
+            <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
                 {/* Technical Specifications Section */}
                 <div style={{ marginBottom: '40px' }}>
                     <h2
@@ -224,12 +224,12 @@ export default function Description({ product, metadata }: Props) {
                     </p>
                 </div>
             </div>
-            <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-stretch xl:px-0">
+            <div className="mx-auto flex w-full max-w-[1340px] flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-stretch xl:px-0">
                 {/* LEFT COLUMN – DATASHEET */}
-                <div className="flex w-full flex-col gap-4 lg:w-[35%]">
+                <div className="flex w-full flex-col gap-4 lg:w-[38%]">
                     {/* Datasheet preview + button */}
                     {datasheetImageUrl && !imageError ? (
-                        <div className="relative overflow-hidden bg-gray-100 h-full flex flex-col">
+                        <div className="relative overflow-hidden flex flex-col">
                             <div className="flex-1 relative">
                                 <Image
                                     src={datasheetImageUrl}
@@ -299,7 +299,7 @@ export default function Description({ product, metadata }: Props) {
                 </div>
 
                 {/* RIGHT COLUMN – TABS + CONTENT */}
-                <div className="w-full rounded-[20px] bg-[#F6F7F7] px-6 py-8 lg:w-[65%] lg:px-10 lg:py-10 h-full flex flex-col">
+                <div className="w-full lg:w-[62%] h-full flex flex-col">
                     {/* Tabs */}
                     <div className="mb-6 flex w-full justify-center">
                         <div className="w-full justify-center inline-flex rounded-[10px] bg-[#E9ECF3]">
@@ -410,6 +410,37 @@ export default function Description({ product, metadata }: Props) {
                                                                         );
                                                                     }
                                                                 }
+                                                                
+                                                                // Check if plain text has bullet points
+                                                                const hasBullets = features.includes('•');
+                                                                if (hasBullets) {
+                                                                    // Only split by bullet points (•), not by newlines to preserve sentence structure
+                                                                    const items = features.split(/[•]/).filter(item => item.trim());
+                                                                    if (items.length > 0) {
+                                                                        return (
+                                                                            <ul className="space-y-2">
+                                                                                {items.map((item, index) => (
+                                                                                    <li key={index} className="flex items-start gap-2">
+                                                                                        <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                                        <span
+                                                                                            style={{
+                                                                                                color: '#000',
+                                                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                                                fontSize: '16px',
+                                                                                                fontStyle: 'normal',
+                                                                                                fontWeight: 400,
+                                                                                                lineHeight: '26px'
+                                                                                            }}
+                                                                                        >
+                                                                                            {item.trim()}
+                                                                                        </span>
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        );
+                                                                    }
+                                                                }
+                                                                
                                                                 // Plain text - render as is
                                                                 return (
                                                             <p
@@ -501,8 +532,8 @@ export default function Description({ product, metadata }: Props) {
                                                                     // If it has <p> tags, extract text and split by bullet points
                                                                     if (paragraphs.length > 0) {
                                                                         const pText = paragraphs[0].textContent || paragraphs[0].innerText || '';
-                                                                        // Split by bullet points (•) or newlines
-                                                                        const items = pText.split(/[•\n]/).filter(item => item.trim());
+                                                                        // Only split by bullet points (•), not by newlines to preserve sentence structure
+                                                                        const items = pText.split(/[•]/).filter(item => item.trim());
                                                                         
                                                                         if (items.length > 0) {
                                                                             return (
@@ -531,9 +562,10 @@ export default function Description({ product, metadata }: Props) {
                                                                 }
                                                                 
                                                                 // Check if plain text has bullet points
-                                                                const hasBullets = applications.includes('•') || applications.includes('\n');
+                                                                const hasBullets = applications.includes('•');
                                                                 if (hasBullets) {
-                                                                    const items = applications.split(/[•\n]/).filter(item => item.trim());
+                                                                    // Only split by bullet points (•), not by newlines to preserve sentence structure
+                                                                    const items = applications.split(/[•]/).filter(item => item.trim());
                                                                     if (items.length > 0) {
                                                                         return (
                                                                             <ul className="space-y-2">
