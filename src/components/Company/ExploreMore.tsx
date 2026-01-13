@@ -34,7 +34,7 @@ export default function ExploreMore() {
       }}
     >
       <div
-        className="flex flex-col md:flex-row pt-[30px] px-[30px] pb-0 md:pt-[50px] md:px-[100px] md:pb-0"
+        className="flex flex-col md:flex-row pt-[30px] px-[30px] pb-0 md:pt-[50px] md:px-[50px] md:pb-0"
         style={{
           display: 'flex',
           width: '100%',

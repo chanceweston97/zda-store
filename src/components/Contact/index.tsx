@@ -147,7 +147,7 @@ export default function Contact() {
                   </p>
                   <a 
                     href="mailto:sales@zdacomm.com"
-                    className="text-[#2958A4] text-[18px] underline"
+                    className="text-[18px] underline"
                     style={{ fontFamily: 'Satoshi, sans-serif' }}
                   >
                     sales@zdacomm.com
@@ -163,7 +163,7 @@ export default function Contact() {
                   </p>
                   <a 
                     href="mailto:leekennedy@zdacomm.com"
-                    className="text-[#2958A4] text-[18px] underline"
+                    className="text-[18px] underline"
                     style={{ fontFamily: 'Satoshi, sans-serif' }}
                   >
                     leekennedy@zdacomm.com
@@ -209,7 +209,7 @@ export default function Contact() {
                       lineHeight: '30px'
                     }}
                   >
-                    First name <span className="text-red-400">*</span>
+                    First name <span className="text-white">*</span>
                   </label>
                   <input
                     {...register("firstName", { required: "First name is required" })}
@@ -217,7 +217,7 @@ export default function Contact() {
                     style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                   />
                   {errors.firstName && (
-                    <p className="mt-1 text-xs text-red-300">{errors.firstName.message}</p>
+                    <p className="mt-1 text-sm text-red">{errors.firstName.message}</p>
                   )}
                 </div>
 
@@ -233,7 +233,7 @@ export default function Contact() {
                       lineHeight: '30px'
                     }}
                   >
-                    Last name <span className="text-red-400">*</span>
+                    Last name <span className="text-white">*</span>
                   </label>
                   <input
                     {...register("lastName", { required: "Last name is required" })}
@@ -241,7 +241,7 @@ export default function Contact() {
                     style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                   />
                   {errors.lastName && (
-                    <p className="mt-1 text-xs text-red-300">{errors.lastName.message}</p>
+                    <p className="mt-1 text-sm text-red">{errors.lastName.message}</p>
                   )}
                 </div>
               </div>
@@ -259,7 +259,7 @@ export default function Contact() {
                     lineHeight: '30px'
                   }}
                 >
-                  Email address <span className="text-red-400">*</span>
+                  Email address <span className="text-white">*</span>
                 </label>
                 <input
                   {...register("email", {
@@ -274,7 +274,7 @@ export default function Contact() {
                   style={{ fontFamily: 'Satoshi, sans-serif', height: '40px' }}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-xs text-red-300">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red">{errors.email.message}</p>
                 )}
               </div>
 
@@ -313,7 +313,7 @@ export default function Contact() {
                     lineHeight: '30px'
                   }}
                 >
-                  Product or service of interest <span className="text-red-400">*</span>
+                  Product or service of interest <span className="text-white">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -329,7 +329,7 @@ export default function Contact() {
                   </select>
                 </div>
                 {errors.productOrService && (
-                  <p className="mt-1 text-xs text-red-300">{errors.productOrService.message}</p>
+                  <p className="mt-1 text-sm text-red">{errors.productOrService.message}</p>
                 )}
               </div>
 
