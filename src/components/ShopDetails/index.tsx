@@ -1120,7 +1120,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                     fontFamily: 'Satoshi, sans-serif',
                     fontSize: '24px',
                     fontStyle: 'normal',
-                    fontWeight: 500,
+                    fontWeight: 400,
                     lineHeight: '26px',
                     margin: 0,
                     marginBottom: '16px'
@@ -1538,8 +1538,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m15 18-6-6 6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
@@ -1554,8 +1554,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m9 18 6-6-6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
                             </div>
@@ -1629,8 +1629,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m15 18-6-6 6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
@@ -1645,8 +1645,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m9 18 6-6-6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
                             </div>
@@ -1748,8 +1748,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m15 18-6-6 6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
@@ -1764,8 +1764,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m9 18 6-6-6-6"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                  <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
                             </div>
@@ -1866,8 +1866,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                             >
                               <span className="sr-only">Decrease quantity</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m15 18-6-6 6-6"/>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>
 
@@ -1882,8 +1882,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                             >
                               <span className="sr-only">Increase quantity</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m9 18 6-6-6-6"/>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>
                           </div>
@@ -1922,8 +1922,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
                             >
                               <span className="sr-only">Decrease quantity</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m15 18-6-6 6-6"/>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>
                             <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
@@ -1936,8 +1936,8 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                             >
                               <span className="sr-only">Increase quantity</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m9 18 6-6-6-6"/>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>
                           </div>

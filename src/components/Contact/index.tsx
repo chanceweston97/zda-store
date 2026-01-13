@@ -108,7 +108,7 @@ export default function Contact() {
         <div className="flex flex-col bg-white w-full md:w-[523px]" style={{ flex: '0 0 auto', padding: 0 }}>
           <div style={{ padding: 0 }}>
             <h1 
-              className="text-black text-[66px] font-medium leading-[66px] tracking-[-2.64px]"
+              className="text-black text-[66px] leading-[66px] tracking-[-2.64px]"
               style={{ fontFamily: 'Satoshi, sans-serif' }}
             >
               Contact an <span className="text-[#2958A4]">expert</span>
@@ -131,7 +131,7 @@ export default function Contact() {
             {/* Email our team section */}
             <div className="mt-[50px]">
               <h3 
-                className="text-[#000] text-[20px] font-medium leading-[30px] mb-4"
+                className="text-[#000] text-[20px] leading-[30px] mb-4"
                 style={{ fontFamily: 'Satoshi, sans-serif' }}
               >
                 Email our team

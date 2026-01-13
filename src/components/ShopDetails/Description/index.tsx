@@ -44,6 +44,7 @@ const renderContent = (content: any): React.ReactNode => {
           className="prose max-w-none" 
           style={{ 
             lineHeight: '1.6',
+            fontWeight: 400
           }}
           dangerouslySetInnerHTML={{ __html: processedContent }} 
         />
@@ -190,6 +191,39 @@ export default function Description({ product, metadata }: Props) {
 
     return (
         <section className="pb-5 pt-10">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 xl:px-0">
+                {/* Technical Specifications Section */}
+                <div style={{ marginBottom: '40px' }}>
+                    <h2
+                        style={{
+                            color: '#000',
+                            fontFamily: 'Satoshi, sans-serif',
+                            fontSize: '50px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '50px',
+                            letterSpacing: '-1px',
+                            margin: 0,
+                            marginBottom: '16px'
+                        }}
+                    >
+                        Technical Specifications
+                    </h2>
+                    <p
+                        style={{
+                            color: '#000',
+                            fontFamily: 'Satoshi, sans-serif',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '30px',
+                            margin: 0
+                        }}
+                    >
+                        For full product specifications, download the attached data sheet.
+                    </p>
+                </div>
+            </div>
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-stretch xl:px-0">
                 {/* LEFT COLUMN – DATASHEET */}
                 <div className="flex w-full flex-col gap-4 lg:w-[35%]">
@@ -300,7 +334,13 @@ export default function Description({ product, metadata }: Props) {
                         {activeTab === "description" ? (
                             (metadata?.description || product.description) ? (
                                 <div>
-                                    <div className="font-medium">
+                                    <style>{`
+                                        .description-content strong,
+                                        .description-content b {
+                                            font-weight: 400 !important;
+                                        }
+                                    `}</style>
+                                    <div className="description-content">
                                         {renderContent(metadata?.description || product.description)}
                                     </div>
                                     {/* Features and Applications from admin panel (metadata) */}
@@ -421,14 +461,16 @@ export default function Description({ product, metadata }: Props) {
                                                             </ul>
                                                         ) : typeof applications === 'string' && applications.trim() ? (
                                                             (() => {
-                                                                // Check if string contains HTML list
-                                                                const hasHTMLList = /<ul|<li/i.test(applications);
-                                                                if (hasHTMLList) {
-                                                                    // Parse HTML and extract list items
+                                                                // Check if string contains HTML
+                                                                const hasHTML = /<[a-z][\s\S]*>/i.test(applications);
+                                                                if (hasHTML) {
+                                                                    // Parse HTML and extract content
                                                                     const parser = new DOMParser();
                                                                     const doc = parser.parseFromString(applications, 'text/html');
                                                                     const listItems = doc.querySelectorAll('li');
+                                                                    const paragraphs = doc.querySelectorAll('p');
                                                                     
+                                                                    // If it has <li> tags, use those
                                                                     if (listItems.length > 0) {
                                                                         return (
                                                                             <ul className="space-y-2">
@@ -455,7 +497,68 @@ export default function Description({ product, metadata }: Props) {
                                                                             </ul>
                                                                         );
                                                                     }
+                                                                    
+                                                                    // If it has <p> tags, extract text and split by bullet points
+                                                                    if (paragraphs.length > 0) {
+                                                                        const pText = paragraphs[0].textContent || paragraphs[0].innerText || '';
+                                                                        // Split by bullet points (•) or newlines
+                                                                        const items = pText.split(/[•\n]/).filter(item => item.trim());
+                                                                        
+                                                                        if (items.length > 0) {
+                                                                            return (
+                                                                                <ul className="space-y-2">
+                                                                                    {items.map((item, index) => (
+                                                                                        <li key={index} className="flex items-start gap-2">
+                                                                                            <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    color: '#000',
+                                                                                                    fontFamily: 'Satoshi, sans-serif',
+                                                                                                    fontSize: '16px',
+                                                                                                    fontStyle: 'normal',
+                                                                                                    fontWeight: 400,
+                                                                                                    lineHeight: '26px'
+                                                                                                }}
+                                                                                            >
+                                                                                                {item.trim()}
+                                                                                            </span>
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            );
+                                                                        }
+                                                                    }
                                                                 }
+                                                                
+                                                                // Check if plain text has bullet points
+                                                                const hasBullets = applications.includes('•') || applications.includes('\n');
+                                                                if (hasBullets) {
+                                                                    const items = applications.split(/[•\n]/).filter(item => item.trim());
+                                                                    if (items.length > 0) {
+                                                                        return (
+                                                                            <ul className="space-y-2">
+                                                                                {items.map((item, index) => (
+                                                                                    <li key={index} className="flex items-start gap-2">
+                                                                                        <span className="text-black text-[16px] leading-[24px]">•</span>
+                                                                                        <span
+                                                                                            style={{
+                                                                                                color: '#000',
+                                                                                                fontFamily: 'Satoshi, sans-serif',
+                                                                                                fontSize: '16px',
+                                                                                                fontStyle: 'normal',
+                                                                                                fontWeight: 400,
+                                                                                                lineHeight: '26px'
+                                                                                            }}
+                                                                                        >
+                                                                                            {item.trim()}
+                                                                                        </span>
+                                                                                    </li>
+                                                                                ))}
+                                                                            </ul>
+                                                                        );
+                                                                    }
+                                                                }
+                                                                
                                                                 // Plain text - render as is
                                                                 return (
                                                             <p

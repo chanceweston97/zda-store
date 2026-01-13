@@ -239,7 +239,7 @@ export default function HeroScrollItems() {
             <div style={{ flex: 1 }}>
               <div>
                 <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>01/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Antennas</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Antennas</h3>
               </div>
               <p style={{ 
                 maxWidth: '100%', 
@@ -317,7 +317,7 @@ export default function HeroScrollItems() {
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>02/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Cables</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Cables</h3>
               </div>
               <p style={{ 
                 maxWidth: '100%', 
@@ -395,7 +395,7 @@ export default function HeroScrollItems() {
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>03/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Connectors & Accessories</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Connectors & Accessories</h3>
               </div>
               <p style={{ 
                 maxWidth: '100%', 
@@ -471,7 +471,7 @@ export default function HeroScrollItems() {
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#6B7280", marginBottom: 0 }}>04/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: 0, marginBottom: 0 }}>Manufacturing</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Manufacturing</h3>
               </div>
               <p style={{ 
                 maxWidth: '100%', 
