@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 type ContactForm = {
   firstName: string;
@@ -26,6 +27,7 @@ const productServiceOptions = [
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const {
     register,
     handleSubmit,
@@ -36,6 +38,34 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
+      // Generate reCAPTCHA token (only if available)
+      let recaptchaToken = "";
+      if (executeRecaptcha) {
+        try {
+          recaptchaToken = await executeRecaptcha("contact_form");
+          if (!recaptchaToken) {
+            console.warn("reCAPTCHA token is empty");
+          }
+        } catch (recaptchaError: any) {
+          console.error("reCAPTCHA execution error:", recaptchaError);
+          // Continue without token if reCAPTCHA fails (for development)
+          // In production, you might want to block submission
+          if (process.env.NODE_ENV === "production") {
+            setIsSubmitting(false);
+            toast.error("reCAPTCHA verification failed. Please refresh the page and try again.");
+            return;
+          }
+        }
+      } else {
+        console.warn("reCAPTCHA not initialized - check NEXT_PUBLIC_RECAPTCHA_SITE_KEY environment variable");
+        // In production, block submission without reCAPTCHA
+        if (process.env.NODE_ENV === "production") {
+          setIsSubmitting(false);
+          toast.error("reCAPTCHA not available. Please refresh the page.");
+          return;
+        }
+      }
+      
       // Call Contact Form 7 API via Next.js API route
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -45,6 +75,7 @@ export default function Contact() {
         body: JSON.stringify({
           ...data,
           phone: "", // Phone not required in new design, send empty string
+          recaptchaToken,
         }),
       });
 
@@ -355,16 +386,6 @@ export default function Contact() {
                   height: '150px'
                 }}
                 />
-              </div>
-
-              {/* Recaptcha placeholder */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
-                <div 
-                  className="bg-gray-300 text-gray-600 px-6 py-3 rounded-[10px] text-[14px] cursor-pointer"
-                  style={{ fontFamily: 'Satoshi, sans-serif' }}
-                >
-                  Recaptcha
-                </div>
               </div>
 
               {/* Submit button */}

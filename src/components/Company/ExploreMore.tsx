@@ -38,7 +38,6 @@ export default function ExploreMore() {
         style={{
           display: 'flex',
           width: '100%',
-          maxWidth: '1440px',
           justifyContent: 'space-between',
           alignItems: 'flex-start'
         }}

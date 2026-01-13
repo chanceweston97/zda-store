@@ -6002,6 +6002,7 @@ __metadata:
     postcss: "npm:^8.4.31"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
+    react-google-recaptcha-v3: "npm:^1.11.0"
     react-hook-form: "npm:^7.54.2"
     react-hot-toast: "npm:^2.4.1"
     react-instantsearch: "npm:^7.7.1"
@@ -6651,6 +6652,18 @@ __metadata:
   peerDependencies:
     react: 17.0.2
   checksum: 10c0/51abbcb72450fe527ebf978c3bc989ba266630faaa53f47a2fae5392369729e8de62b2e4683598cbe651ea7873cd34ec7d5127e2f50bf4bfe6bd0c3ad9bddcb0
+  languageName: node
+  linkType: hard
+
+"react-google-recaptcha-v3@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "react-google-recaptcha-v3@npm:1.11.0"
+  dependencies:
+    hoist-non-react-statics: "npm:^3.3.2"
+  peerDependencies:
+    react: ^16.3 || ^17.0 || ^18.0 || ^19.0
+    react-dom: ^17.0 || ^18.0 || ^19.0
+  checksum: 10c0/8c14d4aae702cb4be150ec15794842947473c1fd8d9c65545fb17566beb6033982f418a4a2dea0b4e5b73c28cb3a7312f5ab2c32e45c6a4d4e115b2a6193a86b
   languageName: node
   linkType: hard
 

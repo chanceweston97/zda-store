@@ -102,6 +102,88 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ✅ Verify reCAPTCHA token (CRITICAL - must be done before sending to CF7)
+    const { recaptchaToken } = body;
+    const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+
+    // Only verify reCAPTCHA if secret key is configured
+    if (RECAPTCHA_SECRET_KEY) {
+      if (!recaptchaToken) {
+        console.warn("⚠️ reCAPTCHA token missing but secret key is configured");
+        return NextResponse.json(
+          { 
+            message: "reCAPTCHA verification is required.",
+            status: "error"
+          },
+          { status: 400 }
+        );
+      }
+
+      // Verify reCAPTCHA token with Google
+      try {
+        const verifyRes = await fetch(
+          "https://www.google.com/recaptcha/api/siteverify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              secret: RECAPTCHA_SECRET_KEY,
+              response: recaptchaToken,
+            }),
+          }
+        );
+
+        const verifyData = await verifyRes.json();
+
+        // Handle browser-error specifically (usually means domain not registered or site key issue)
+        if (verifyData["error-codes"] && verifyData["error-codes"].includes("browser-error")) {
+          console.error("❌ reCAPTCHA browser-error - Check:", {
+            issue: "Domain may not be registered in Google reCAPTCHA console",
+            domain: "Make sure 'localhost' is added to allowed domains",
+            siteKey: "Verify NEXT_PUBLIC_RECAPTCHA_SITE_KEY matches Google Console",
+            errorCodes: verifyData["error-codes"],
+          });
+          return NextResponse.json(
+            { 
+              message: "reCAPTCHA configuration error. Please check domain settings.",
+              status: "error"
+            },
+            { status: 403 }
+          );
+        }
+
+        if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+          console.error("❌ reCAPTCHA verification failed:", verifyData);
+          return NextResponse.json(
+            { 
+              message: "reCAPTCHA verification failed. Please try again.",
+              status: "error"
+            },
+            { status: 403 }
+          );
+        }
+
+        console.log("✅ reCAPTCHA verification successful:", {
+          success: verifyData.success,
+          score: verifyData.score,
+          action: verifyData.action,
+        });
+      } catch (recaptchaError: any) {
+        console.error("❌ reCAPTCHA verification error:", recaptchaError);
+        return NextResponse.json(
+          { 
+            message: "reCAPTCHA verification error. Please try again.",
+            status: "error"
+          },
+          { status: 500 }
+        );
+      }
+    } else {
+      console.warn("⚠️ RECAPTCHA_SECRET_KEY not set - skipping reCAPTCHA verification (development mode)");
+    }
+
     // Contact Form 7 REST API endpoint for feedback
     // Note: We don't check form existence first because the feedback endpoint will validate it
     const feedbackEndpoint = `${CMS_URL}/wp-json/contact-form-7/v1/contact-forms/${CONTACT_FORM_7_CONTACT_ID}/feedback`;

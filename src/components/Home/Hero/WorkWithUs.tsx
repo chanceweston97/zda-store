@@ -34,7 +34,7 @@ export default function WorkWithUs() {
   return (
     <section 
       ref={ref}
-      className={`transition-all duration-1000 ease-out flex w-full max-w-[1440px] min-h-[600px] h-auto justify-center items-center mx-auto pt-5 md:pt-0 mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
+      className={`transition-all duration-1000 ease-out flex w-full min-h-[600px] h-auto justify-center items-center mx-auto pt-5 md:pt-0 mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
@@ -43,7 +43,7 @@ export default function WorkWithUs() {
         background: '#F1F6FF'
       }}
     >
-      <div className="w-full max-w-[1440px] mx-auto">
+      <div className="w-full mx-auto">
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-8 sm:mb-10 lg:mb-12">
           <h2 

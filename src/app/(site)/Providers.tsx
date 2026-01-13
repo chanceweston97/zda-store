@@ -8,24 +8,46 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import CartProvider from "@/components/Providers/CartProvider";
 import { AutoOpenCartProvider } from "@/components/Providers/AutoOpenCartProvider";
 import { SessionProvider } from "next-auth/react";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+  
+  // Only wrap with reCAPTCHA provider if site key is available
+  const content = (
+    <CartProvider>
+      <AutoOpenCartProvider>
+        <ModalProvider>
+          <PreviewSliderProvider>
+            {children}
+            <QuickViewModal />
+            <CartSidebarModal />
+            <PreviewSliderModal />
+          </PreviewSliderProvider>
+        </ModalProvider>
+      </AutoOpenCartProvider>
+    </CartProvider>
+  );
+
   return (
     <ReduxProvider>
       <SessionProvider>
-        <CartProvider>
-          <AutoOpenCartProvider>
-            <ModalProvider>
-              <PreviewSliderProvider>
-                {children}
-                <QuickViewModal />
-                <CartSidebarModal />
-                <PreviewSliderModal />
-              </PreviewSliderProvider>
-            </ModalProvider>
-          </AutoOpenCartProvider>
-        </CartProvider>
+        {recaptchaSiteKey ? (
+          <GoogleReCaptchaProvider
+            reCaptchaKey={recaptchaSiteKey}
+            scriptProps={{
+              async: false,
+              defer: false,
+              appendTo: "head",
+              nonce: undefined,
+            }}
+          >
+            {content}
+          </GoogleReCaptchaProvider>
+        ) : (
+          content
+        )}
       </SessionProvider>
     </ReduxProvider>
   );
