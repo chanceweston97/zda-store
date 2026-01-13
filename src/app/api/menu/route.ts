@@ -65,7 +65,7 @@ export async function GET() {
         id: 2,
         title: "Cable Builder",
         newTab: false,
-        path: "/cable-customizer",
+        path: "/cable-builder",
       },
       {
         id: 3,

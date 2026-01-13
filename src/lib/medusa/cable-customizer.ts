@@ -1,5 +1,5 @@
 /**
- * Medusa Cable Customizer Integration
+ * Medusa Cable Builder Integration
  * Functions to fetch cable series, cable types, and connectors from Medusa backend
  */
 

@@ -1,5 +1,5 @@
 /**
- * Script to clean up/delete cable customizer data from Sanity
+ * Script to clean up/delete Cable Builder data from Sanity
  * 
  * Usage:
  * npm run cleanup:cable-data
@@ -100,7 +100,7 @@ async function deleteAllCableSeries() {
 }
 
 async function listAllCableData() {
-  console.log('\n📋 Current Cable Customizer Data in Sanity:\n');
+  console.log('\n📋 Current Cable Builder Data in Sanity:\n');
   
   const series = await client.fetch(`*[_type == "cableSeries"] | order(name asc)`);
   const cableTypes = await client.fetch(`*[_type == "cableType"] | order(name asc)`);
@@ -126,7 +126,7 @@ async function listAllCableData() {
 }
 
 async function main() {
-  console.log('🧹 Cable Customizer Data Cleanup Tool\n');
+  console.log('🧹 Cable Builder Data Cleanup Tool\n');
 
   if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
     console.error('❌ NEXT_PUBLIC_SANITY_PROJECT_ID is not set in .env file');

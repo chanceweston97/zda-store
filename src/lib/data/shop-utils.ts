@@ -205,8 +205,8 @@ export async function getCoupons() {
   return [];
 }
 
-// Cable Customizer Functions
-// Import local cable customizer data
+// Cable Builder Functions
+// Import local Cable Builder data
 import cableCustomizerData from "./cable-customizer-data";
 
 export async function getCableSeries() {

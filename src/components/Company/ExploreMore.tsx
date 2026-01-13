@@ -17,7 +17,7 @@ const exploreItems = [
   {
     title: "Cable Builder",
     description: "Build-to-spec coaxial cable assemblies for RF systems.",
-    link: "/cable-customizer"
+    link: "/cable-builder"
   }
 ];
 

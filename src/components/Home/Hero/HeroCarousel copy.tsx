@@ -57,7 +57,7 @@ export default function Hero({ slider }: HeroProps) {
             href="/custom-cable"
             className="inline-flex items-center rounded-full bg-white/20 hover:bg-white/30 text-white text-sm font-medium px-6 py-2.5 backdrop-blur"
           >
-            Cable Customizer
+            Cable Builder
           </Link>
         </div>
 

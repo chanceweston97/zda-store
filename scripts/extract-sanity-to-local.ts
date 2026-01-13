@@ -259,7 +259,7 @@ export default content;
 }
 
 async function extractCableCustomizer() {
-  console.log("Extracting cable customizer data...");
+  console.log("Extracting Cable Builder data...");
   
   // Cable Series
   const cableSeries = await client.fetch(`
@@ -335,7 +335,7 @@ export default cableCustomizerData;
     tsContent
   );
 
-  console.log(`✓ Extracted cable customizer data`);
+  console.log(`✓ Extracted Cable Builder data`);
 }
 
 async function main() {

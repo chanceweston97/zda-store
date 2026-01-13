@@ -46,7 +46,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
   const brandName = bannerData?.brandName || "ZDA Communications";
   const buttons = bannerData?.buttons || [
     { text: "All Products", link: "/shop" },
-    { text: "Cable Customizer", link: "/cable-customizer" },
+    { text: "Cable Builder", link: "/cable-builder" },
   ];
   const card = bannerData?.card;
 

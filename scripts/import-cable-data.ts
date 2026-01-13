@@ -1,5 +1,5 @@
 /**
- * Script to import cable customizer data into Sanity
+ * Script to import Cable Builder data into Sanity
  * 
  * Usage:
  * 1. Make sure you have SANITY_PROJECT_API_TOKEN in your .env file
@@ -247,7 +247,7 @@ async function importConnectors(cableTypeMap: Map<string, string>) {
 }
 
 async function main() {
-  console.log('🚀 Starting cable customizer data import...\n');
+  console.log('🚀 Starting Cable Builder data import...\n');
 
   // Check environment variables
   const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;

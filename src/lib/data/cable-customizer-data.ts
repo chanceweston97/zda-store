@@ -1,7 +1,7 @@
 /**
- * Cable Customizer Local Data
+ * Cable Builder Local Data
  * 
- * This file contains the cable customizer data (cable series, cable types, connectors).
+ * This file contains the Cable Builder data (cable series, cable types, connectors).
  * 
  * TO UPDATE THIS DATA:
  * 1. Export the data from your Medusa backend or provide it manually

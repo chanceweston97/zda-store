@@ -3,12 +3,12 @@ import { Metadata } from "next";
 import { getCableSeries, getCableTypes, getConnectors, imageBuilder } from "@/lib/data/shop-utils";
 
 export const metadata: Metadata = {
-  title: "Cable Customizer | ZDA Communication",
+  title: "Cable Builder | ZDA Communication",
   description: "Build your perfect custom cable. Select connectors, length, and specifications.",
 };
 
 const CableCustomizerPage = async () => {
-  // Cable customizer uses LOCAL DATA ONLY (not from WooCommerce or Medusa)
+  // Cable Builder uses LOCAL DATA ONLY (not from WooCommerce or Medusa)
   // Data is stored in frontend/src/lib/data/cable-customizer-data.ts
   const [cableSeries, cableTypes, connectors] = await Promise.all([
     getCableSeries(),
@@ -51,4 +51,3 @@ const CableCustomizerPage = async () => {
 };
 
 export default CableCustomizerPage;
-
