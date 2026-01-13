@@ -5,7 +5,7 @@ import Link from "next/link";
 const workItems = [
     {
         icon: "/images/icons/cable-reel.svg",
-        title: "Custom Cables",
+        title: "Cable Builder",
         text: "Directional and omni RF antennas for reliable, real-world coverage.",
     },
     {

@@ -23,10 +23,11 @@ export default function XetaWaveReseller() {
     >
       <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
         <div 
-          className="rounded-[20px] overflow-hidden relative"
+          className="overflow-hidden relative"
           style={{
             height: '593px',
             padding: '50px',
+            borderRadius: '10px',
             background: 'radial-gradient(89.11% 88.6% at 39.25% 24.11%, #2958A4 42.79%, #1870D5 74.04%, #70C8FF 100%)'
           }}
         >

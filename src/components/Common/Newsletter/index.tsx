@@ -45,7 +45,7 @@ const Newsletter = () => {
             textAlign: 'center',
             fontFamily: 'Satoshi, sans-serif',
             fontStyle: 'normal',
-            fontWeight: 500,
+            fontWeight: 400,
             lineHeight: '66px',
             letterSpacing: '-2.8px'
           }}

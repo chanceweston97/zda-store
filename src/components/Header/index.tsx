@@ -165,7 +165,7 @@ const Header = () => {
                     height={24}
                     className="w-6 h-6"
                   />
-                  {isMounted && cartCount && cartCount > 0 && (
+                  {isMounted && typeof cartCount === 'number' && cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[#2958A4] text-white text-xs font-medium rounded-full">
                       {cartCount > 99 ? "99+" : cartCount}
                     </span>
