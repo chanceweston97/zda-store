@@ -13,16 +13,15 @@ export default function XetaWaveReseller() {
   const featuresRef = useScrollAnimation({ threshold: 0.2 });
 
   return (
-    <section 
+    <section
       ref={ref}
-      className={`transition-all duration-1000 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
+      className={`transition-all duration-1000 ease-out ${isVisible
+          ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-8'
-      }`}
+        }`}
     >
       <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
-        <div 
+        <div
           className="overflow-hidden relative"
           style={{
             height: '593px',
@@ -32,30 +31,29 @@ export default function XetaWaveReseller() {
           }}
         >
           {/* Dot Background SVG */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none">
             <Image
-              src="/image/xetawave-dot.svg"
+              src="/images/xetawave-dot.svg"
               alt=""
               fill
               className="object-cover"
-              style={{ mixBlendMode: 'overlay' }}
             />
           </div>
+
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col gap-8 md:gap-10 lg:gap-12">
             {/* First Section: Title + Description */}
-            <div 
+            <div
               ref={titleRef.ref}
-              className={`flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 transition-all duration-1000 ease-out ${
-                titleRef.isVisible 
-                  ? 'opacity-100 translate-y-0' 
+              className={`flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 transition-all duration-1000 ease-out ${titleRef.isVisible
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-8'
-              }`}
+                }`}
             >
               {/* Left Column: Title Section */}
               <div className="flex flex-col w-full md:w-1/2">
-                <h2 
+                <h2
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -70,7 +68,7 @@ export default function XetaWaveReseller() {
                 >
                   We build the whole link
                 </h2>
-                <h3 
+                <h3
                   style={{
                     color: '#70C8FF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -88,11 +86,11 @@ export default function XetaWaveReseller() {
               </div>
 
               {/* Right Column: Description Text */}
-              <div 
+              <div
                 ref={descriptionRef.ref}
                 className="w-full md:w-1/2 flex items-start md:items-end justify-end transition-all duration-1000 ease-out delay-300"
               >
-                <p 
+                <p
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -109,15 +107,14 @@ export default function XetaWaveReseller() {
             </div>
 
             {/* Second Section: CTA Text + Button */}
-            <div 
+            <div
               ref={ctaRef.ref}
-              className={`flex flex-col gap-6 transition-all duration-1000 ease-out delay-300 ${
-                ctaRef.isVisible 
-                  ? 'opacity-100 translate-x-0' 
+              className={`flex flex-col gap-6 transition-all duration-1000 ease-out delay-300 ${ctaRef.isVisible
+                  ? 'opacity-100 translate-x-0'
                   : 'opacity-0 translate-x-8'
-              }`}
+                }`}
             >
-              <p 
+              <p
                 style={{
                   color: '#FFF',
                   fontFamily: 'Satoshi, sans-serif',
@@ -148,17 +145,16 @@ export default function XetaWaveReseller() {
             </div>
 
             {/* Bottom Section: Four Feature Columns */}
-            <div 
+            <div
               ref={featuresRef.ref}
-              className={`flex flex-col md:flex-row gap-0 transition-all duration-1000 ease-out delay-500 ${
-                featuresRef.isVisible 
-                  ? 'opacity-100 translate-y-0' 
+              className={`flex flex-col md:flex-row gap-0 transition-all duration-1000 ease-out delay-500 ${featuresRef.isVisible
+                  ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-8'
-              }`}
+                }`}
             >
               {/* Feature 1: ≤1.5 VSWR */}
               <div className="flex-1 flex flex-col gap-3 p-4 md:p-6 border-r border-white/30 last:border-r-0">
-                <h4 
+                <h4
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -173,7 +169,7 @@ export default function XetaWaveReseller() {
                 >
                   ≤1.5 VSWR
                 </h4>
-                <p 
+                <p
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -190,7 +186,7 @@ export default function XetaWaveReseller() {
 
               {/* Feature 2: 0-6 GHz */}
               <div className="flex-1 flex flex-col gap-3 p-4 md:p-6 border-r border-white/30 last:border-r-0">
-                <h4 
+                <h4
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -205,7 +201,7 @@ export default function XetaWaveReseller() {
                 >
                   0-6 GHz
                 </h4>
-                <p 
+                <p
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -222,7 +218,7 @@ export default function XetaWaveReseller() {
 
               {/* Feature 3: Industrial Radio */}
               <div className="flex-1 flex flex-col gap-3 p-4 md:p-6 border-r border-white/30 last:border-r-0">
-                <h4 
+                <h4
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -237,7 +233,7 @@ export default function XetaWaveReseller() {
                 >
                   Industrial Radio
                 </h4>
-                <p 
+                <p
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -254,7 +250,7 @@ export default function XetaWaveReseller() {
 
               {/* Feature 4: Cellular Signal */}
               <div className="flex-1 flex flex-col gap-3 p-4 md:p-6 border-r border-white/30 last:border-r-0">
-                <h4 
+                <h4
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
@@ -269,7 +265,7 @@ export default function XetaWaveReseller() {
                 >
                   Cellular Signal
                 </h4>
-                <p 
+                <p
                   style={{
                     color: '#FFF',
                     fontFamily: 'Satoshi, sans-serif',
