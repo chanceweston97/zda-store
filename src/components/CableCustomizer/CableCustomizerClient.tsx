@@ -375,9 +375,10 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     <>      
       {/* Hero Section */}
       <section 
-        className="relative mt-[80px] overflow-hidden flex items-center"
+        className="relative mt-[80px] overflow-hidden flex items-center p-5 md:p-0"
         style={{
-          height: '350px',
+          height: 'auto',
+          minHeight: '350px',
           background: 'radial-gradient(143.61% 142.34% at 55.45% -16%, #2958A4 34.13%, #1870D5 74.53%, #70C8FF 100%)'
         }}
       >
@@ -394,18 +395,18 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         </div>
         <div className="relative z-10 w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
+            <div className="text-center md:text-left">
               <h1 
                 className="text-white"
                 style={{
                   color: '#FFF',
                   fontFamily: 'Satoshi, sans-serif',
-                  fontSize: '60px',
+                  fontSize: 'clamp(32px, 8vw, 60px)',
                   fontStyle: 'normal',
                   fontWeight: 400,
-                  lineHeight: '50px',
+                  lineHeight: 'clamp(40px, 8vw, 50px)',
                   letterSpacing: '-2.4px',
-                  marginBottom: '50px'
+                  marginBottom: 'clamp(20px, 5vw, 50px)'
                 }}
               >
                 Custom Cable Builder
@@ -415,10 +416,10 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                 style={{
                   color: '#FFF',
                   fontFamily: 'Satoshi, sans-serif',
-                  fontSize: '24px',
+                  fontSize: 'clamp(16px, 4vw, 24px)',
                   fontStyle: 'normal',
                   fontWeight: 400,
-                  lineHeight: '28px'
+                  lineHeight: 'clamp(24px, 4vw, 28px)'
                 }}
               >
                 Engineered to carry what matters, built to length for the links you rely on.
@@ -814,24 +815,47 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   <label className="block text-[#383838] text-[16px] font-medium mb-2">
                     Quantity
                   </label>
-                  <div className="flex items-center divide-x divide-[#2958A4] border border-[#2958A4] rounded-full quantity-controls w-fit">
+                  <div 
+                    className="quantity-controls w-full"
+                    style={{
+                      display: 'flex',
+                      height: '50px',
+                      padding: '0 16px',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      alignSelf: 'stretch',
+                      borderRadius: '10px',
+                      background: '#F6F7F7',
+                      border: 'none'
+                    }}
+                  >
                     <button
+                      type="button"
                       onClick={() => setConfig((prev) => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}
-                      className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={config.quantity <= 1}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: config.quantity <= 1 ? 'not-allowed' : 'pointer' }}
                     >
                       <span className="sr-only">Decrease quantity</span>
-                      <MinusIcon className="w-4 h-4" />
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                      </svg>
                     </button>
-                    <span className="flex items-center justify-center w-16 h-10 font-medium text-[#2958A4]">
+
+                    <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                       {config.quantity}
                     </span>
+
                     <button
+                      type="button"
                       onClick={() => setConfig((prev) => ({ ...prev, quantity: prev.quantity + 1 }))}
-                      className="flex items-center justify-center w-10 h-10 text-[#2958A4] ease-out duration-200 hover:text-[#1F4480]"
+                      className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       <span className="sr-only">Increase quantity</span>
-                      <PlusIcon className="w-4 h-4" />
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#383838" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                      </svg>
                     </button>
                   </div>
                 </div>

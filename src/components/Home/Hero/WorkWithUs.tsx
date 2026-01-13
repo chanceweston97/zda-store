@@ -34,7 +34,7 @@ export default function WorkWithUs() {
   return (
     <section 
       ref={ref}
-      className={`transition-all duration-1000 ease-out flex w-full max-w-[1440px] min-h-[600px] h-auto justify-center items-center mx-auto mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
+      className={`transition-all duration-1000 ease-out flex w-full max-w-[1440px] min-h-[600px] h-auto justify-center items-center mx-auto pt-5 md:pt-0 mt-[50px] px-4 sm:px-8 lg:px-[100px] ${
         isVisible 
           ? 'opacity-100 translate-y-0' 
           : 'opacity-0 translate-y-8'
@@ -106,16 +106,6 @@ export default function WorkWithUs() {
             
             return (
               <div key={service.title} className="contents">
-                {/* Horizontal Separator (Mobile) */}
-                {index > 0 && (
-                  <div 
-                    className="block sm:hidden w-full"
-                    style={{
-                      height: '1px',
-                      backgroundColor: '#D1D5DB'
-                    }}
-                  />
-                )}
                 {/* Vertical Separator (Desktop) - centered between items */}
                 {index > 0 && (
                   <div 

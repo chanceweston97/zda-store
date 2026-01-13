@@ -10,15 +10,15 @@ export default function CompanyHero() {
 
   return (
     <section 
-      className="w-full flex flex-col md:flex-row justify-center items-center relative overflow-hidden"
+      className="w-full flex flex-col md:flex-row justify-center items-center relative overflow-hidden p-5 md:p-[50px]"
       style={{
         display: 'flex',
         width: '100%',
         margin: '0 auto',
         marginTop: '80px',
-        padding: '50px',
         alignItems: 'center',
-        height: '350px',
+        height: 'auto',
+        minHeight: '350px',
         background: 'radial-gradient(143.61% 142.34% at 55.45% -16%, #2958A4 34.13%, #1870D5 74.53%, #70C8FF 100%)'
       }}
     >
@@ -34,19 +34,19 @@ export default function CompanyHero() {
       </div>
 
       <div
-        className="relative z-10 flex flex-col md:flex-row items-center"
+        className="relative z-10 flex flex-col md:flex-row items-center w-full"
         style={{
           display: 'flex',
           width: '1440px',
           maxWidth: '100%',
-          padding: '50px',
+          padding: '0',
           alignItems: 'center'
         }}
       >
       {/* Left: "Built to connect" */}
       <div 
         ref={titleRef.ref}
-        className={`transition-all ease-out flex items-center md:mr-[250px] ${
+        className={`transition-all ease-out flex items-center justify-center md:justify-start md:mr-[250px] md:mb-0 mb-5 ${
           titleRef.isVisible 
             ? 'opacity-100 translate-y-0' 
             : 'opacity-0 translate-y-8'
@@ -57,14 +57,14 @@ export default function CompanyHero() {
         }}
       >
         <h1 
-          className="md:whitespace-nowrap"
+          className="md:whitespace-nowrap text-center md:text-left"
           style={{
             color: '#FFF',
             fontFamily: 'Satoshi, sans-serif',
-            fontSize: '60px',
+            fontSize: 'clamp(32px, 8vw, 60px)',
             fontStyle: 'normal',
             fontWeight: 400,
-            lineHeight: '50px',
+            lineHeight: 'clamp(32px, 8vw, 50px)',
             letterSpacing: '-2.4px',
             margin: 0
           }}
@@ -75,7 +75,7 @@ export default function CompanyHero() {
 
       {/* Divider */}
       <div 
-        className="flex items-center"
+        className="hidden md:flex items-center"
         style={{ height: '100%' }}
       >
         <div 
@@ -98,27 +98,28 @@ export default function CompanyHero() {
       {/* Right: Description */}
       <div 
         ref={descriptionRef.ref}
-        className={`transition-all duration-1000 ease-out delay-500 flex items-center md:ml-[80px] ${
+        className={`transition-all duration-1000 ease-out delay-500 flex items-center justify-center md:justify-start md:ml-[80px] ${
           descriptionRef.isVisible 
             ? 'opacity-100 translate-x-0' 
             : 'opacity-0 -translate-x-8'
         }`}
         style={{
-          width: '477px',
+          width: '100%',
+          maxWidth: '477px',
           flexShrink: 0,
           height: '100%'
         }}
       >
         <p 
+          className="text-center md:text-left"
           style={{
             color: '#FFF',
             fontFamily: 'Satoshi, sans-serif',
-            fontSize: '20px',
+            fontSize: 'clamp(16px, 4vw, 20px)',
             fontStyle: 'normal',
             fontWeight: 400,
-            lineHeight: '26px',
-            margin: 0,
-            textAlign: 'left'
+            lineHeight: 'clamp(22px, 5vw, 26px)',
+            margin: 0
           }}
         >
           Delivering engineered wireless connectivity solutions that provide consistent performance, reliability, and efficiency for critical communications networks.

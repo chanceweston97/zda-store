@@ -34,12 +34,11 @@ export default function ExploreMore() {
       }}
     >
       <div
-        className="flex flex-col md:flex-row"
+        className="flex flex-col md:flex-row pt-[30px] px-[30px] pb-0 md:pt-[50px] md:px-[100px] md:pb-0"
         style={{
           display: 'flex',
           width: '100%',
           maxWidth: '1440px',
-          padding: '50px 100px 0 100px',
           justifyContent: 'space-between',
           alignItems: 'flex-start'
         }}

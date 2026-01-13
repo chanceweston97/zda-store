@@ -838,7 +838,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
   return (
     <>
-      <section className="relative pt-10 pb-10 overflow-hidden lg:pt-[159px] xl:pt-[159px]">
+      <section className="relative pt-[100px] pb-10 overflow-hidden lg:pt-[120px] xl:pt-[120px]">
         <div className="w-full px-4 mx-auto max-w-[1340px] sm:px-6 xl:px-0 ">
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
             {/* LEFT: GALLERY */}
@@ -853,7 +853,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                 </button>
 
                 {mainImageUrl && (
-                  <div className="relative w-full lg:h-[512px] rounded-lg overflow-hidden">
+                  <div className="relative w-full h-[400px] lg:h-[512px] rounded-lg overflow-hidden">
                     <Image
                       src={mainImageUrl}
                       alt={product.name}
