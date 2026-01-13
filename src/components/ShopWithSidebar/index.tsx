@@ -277,7 +277,7 @@ type PropsType = {
 const PRODUCTS_PER_PAGE = 9;
 
 const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) => {
-  const { allProducts, categories, allProductsCount, currentCategory } = data;
+  const { allProducts, products: initialProducts, categories, allProductsCount, currentCategory } = data;
   const searchParams = useSearchParams();
 
   // Always use list view - grid view removed
@@ -326,11 +326,15 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   }, [categories]);
 
   // ✅ CLIENT-SIDE FILTERING: Filter products based on URL params
+  // When on a category page (currentCategory exists), start with the pre-filtered products
+  // When on shop page, start with allProducts
   const filteredProducts = useMemo(() => {
-    let result = [...allProducts];
+    // Start with pre-filtered products if on category page, otherwise use allProducts
+    const baseProducts = currentCategory ? initialProducts : allProducts;
+    let result = [...baseProducts];
 
-    // Category filter
-    if (categoryParam) {
+    // Category filter (only apply if not on a category page, or if additional categories are selected)
+    if (categoryParam && !currentCategory) {
       const categoryHandles = categoryParam.split(",").filter(Boolean);
       const categoryIdSet = new Set<string>();
       
@@ -390,9 +394,9 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     }
 
     return result;
-  }, [allProducts, categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam, categoryMap]);
+  }, [allProducts, initialProducts, currentCategory, categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam, categoryMap]);
 
-  // Use filtered products instead of server-filtered products
+  // Use filtered products
   const products = filteredProducts;
 
   const handleStickyMenu = () => {
