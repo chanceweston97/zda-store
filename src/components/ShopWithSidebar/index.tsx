@@ -30,13 +30,12 @@ function ProductsHeroSection() {
       }}
     >
       {/* Dot Background SVG */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         <Image
-          src="/images/dot-bg-global.svg"
+          src="/images/xetawave-dot.svg"
           alt=""
           fill
           className="object-cover"
-          style={{ mixBlendMode: 'overlay' }}
         />
       </div>
 
@@ -154,13 +153,12 @@ function CategoryHeroSection({ categoryName }: { categoryName: string }) {
       }}
     >
       {/* Dot Background SVG */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         <Image
-          src="/images/dot-bg-global.svg"
+          src="/images/xetawave-dot.svg"
           alt=""
           fill
           className="object-cover"
-          style={{ mixBlendMode: 'overlay' }}
         />
       </div>
 
