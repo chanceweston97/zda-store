@@ -24,7 +24,7 @@ export async function GET() {
     }
     
     // Build Products submenu from categories
-    // Use handle if available (for Medusa), otherwise use slug.current
+    // Use handle if available, otherwise use slug.current
     const productsSubmenu: Menu[] = (categories || []).map((category, index) => {
       const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
       const categoryMenu: Menu = {

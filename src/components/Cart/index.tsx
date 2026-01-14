@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useShoppingCart } from "use-shopping-cart";
 import { CheckoutFormProvider, CheckoutInput } from "../Checkout/form";
-import Breadcrumb from "../Common/Breadcrumb";
 import Discount from "./Discount";
 import OrderSummary from "./OrderSummary";
 import SingleItem from "./SingleItem";
@@ -31,14 +30,8 @@ const Cart = () => {
 
   return (
     <>
-      {/* <!-- ===== Breadcrumb Section Start ===== --> */}
-      <section>
-        <Breadcrumb title={"Cart"} pages={["Cart"]} />
-      </section>
-
-      {/* <!-- ===== Breadcrumb Section End ===== --> */}
       {cartCount ? (
-        <section className="overflow-hidden py-20 bg-gray-2">
+        <section className="overflow-hidden py-36 bg-gray-2">
           <div className="max-w-7xl  w-full mx-auto px-4 sm:px-8 xl:px-0">
             <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
               <h2 className="font-medium text-dark text-2xl">Your Cart</h2>

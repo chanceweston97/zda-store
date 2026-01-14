@@ -2,7 +2,7 @@ import { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 // NOTE: Prisma has been removed. This auth configuration will not work without a database adapter.
-// Consider using Medusa's built-in authentication instead.
+// Consider using WordPress/WooCommerce authentication or a separate auth service.
 
 declare module "next-auth" {
   interface Session {
@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
 
       async authorize(credentials) {
         // NOTE: Database functionality removed. This will always fail.
-        // Migrate to Medusa auth or implement your own user management.
+        // Implement WordPress/WooCommerce auth or your own user management.
         // Return null instead of throwing to prevent 500 errors
         return null;
       },

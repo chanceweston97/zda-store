@@ -298,7 +298,7 @@ export async function getCategories(): Promise<Array<{
 }
 
 /**
- * Convert WooCommerce product to Sanity/Medusa format for compatibility
+ * Convert WooCommerce product to frontend product format for compatibility
  * This matches the format expected by the shop page components
  * @param skipVariations - If true, skip fetching variations (faster for listing pages)
  */
@@ -313,7 +313,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
   // Parse price - WooCommerce prices are strings in the store currency (dollars)
   // The price field should be in dollars (components multiply by 100 for display)
   const priceStr = wcProduct.sale_price || wcProduct.price || wcProduct.regular_price || "0";
-  const price = parseFloat(priceStr); // Keep in dollars (matching Medusa format where price is in dollars)
+  const price = parseFloat(priceStr); // Keep in dollars
 
   // Convert images to expected format
   const thumbnails = (wcProduct.images && wcProduct.images.length > 0)

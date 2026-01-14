@@ -12,7 +12,7 @@ import { notFound } from "next/navigation";
 export async function generateStaticParams() {
   const products = await getAllProducts();
   return products.map((product) => {
-    // Use handle for Medusa products, slug.current for local products
+    // Use handle when available, otherwise slug.current
     const slug = (product as any)?.handle || product?.slug?.current;
     return slug ? { slug } : null;
   }).filter(Boolean) as { slug: string }[];

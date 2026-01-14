@@ -1,8 +1,5 @@
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import Newsletter from "@/components/Common/Newsletter";
-import { medusaClient } from "@/lib/medusa/client";
-import { convertMedusaToSanityProduct } from "@/lib/medusa/products";
-import { convertMedusaToSanityCategory } from "@/lib/medusa/categories";
 import { getProducts, convertWCToSanityProduct } from "@/lib/woocommerce/products";
 import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
@@ -30,7 +27,7 @@ type PageProps = {
 const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
   const { category, sizes, minPrice, maxPrice, sort } = await searchParams;
 
-  // Fetch products and categories from WooCommerce or Medusa
+  // Fetch products and categories from WooCommerce
   let allProducts: any[] = [];
   let categories: any[] = [];
   let allProductsCount = 0;
@@ -71,55 +68,6 @@ const ShopWithSidebarPage = async ({ searchParams }: PageProps) => {
       } else {
         console.error("[ShopPage] Error fetching categories from WooCommerce:", categoriesResponse.reason);
         categories = [];
-      }
-    } else {
-      // Fetch from Medusa (original code)
-      const [productsResponse, categoriesResponse, countResponse] = await Promise.allSettled([
-        medusaClient.getProducts({
-          limit: 100,
-          fields: "*variants.calculated_price,*variants.sku,*categories",
-        }),
-        medusaClient.getCategories(),
-        medusaClient.getProducts({ limit: 1 }),
-      ]);
-
-      // Handle products
-      if (productsResponse.status === 'fulfilled') {
-        const productsData = productsResponse.value;
-        if (productsData?.products && productsData.products.length > 0) {
-          allProducts = productsData.products.map(convertMedusaToSanityProduct);
-        } else {
-          console.warn("[ShopPage] No products in Medusa response");
-          allProducts = [];
-        }
-      } else {
-        console.error("[ShopPage] Error fetching products from Medusa:", productsResponse.reason);
-        allProducts = [];
-      }
-
-      // Handle categories
-      if (categoriesResponse.status === 'fulfilled') {
-        const categoriesData = categoriesResponse.value;
-        const product_categories = categoriesData?.product_categories || (categoriesData as any)?.categories || [];
-        
-        if (product_categories.length > 0) {
-          const converted = product_categories.map((cat: any) =>
-            convertMedusaToSanityCategory(cat, product_categories)
-          );
-          categories = converted.filter((cat: any) => !cat.parent);
-        } else {
-          categories = [];
-        }
-      } else {
-        console.error("[ShopPage] Error fetching categories from Medusa:", categoriesResponse.reason);
-        categories = [];
-      }
-
-      // Handle product count
-      if (countResponse.status === 'fulfilled') {
-        allProductsCount = countResponse.value?.count || allProducts.length;
-      } else {
-        allProductsCount = allProducts.length;
       }
     }
   } catch (error: any) {

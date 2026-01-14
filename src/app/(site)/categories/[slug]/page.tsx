@@ -8,10 +8,6 @@ import {
   getAllProducts,
 } from "@/lib/data/unified-data";
 import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
-import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
-import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
-import { medusaClient } from "@/lib/medusa/client";
-import { convertMedusaToSanityCategory } from "@/lib/medusa/categories";
 
 // Force dynamic rendering to prevent static generation in production
 export const dynamic = "force-dynamic";
@@ -166,13 +162,6 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       stack: process.env.NODE_ENV !== 'production' ? error?.stack : undefined,
     });
     
-    // If it's a connection error, log additional diagnostic info
-    if (error?.connectionError || error?.timeoutError) {
-      const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 'not set';
-      console.error(`[CategoryPage] Medusa connection issue detected. Backend URL: ${backendUrl}`);
-      console.error(`[CategoryPage] If this is production, ensure NEXT_PUBLIC_MEDUSA_BACKEND_URL is set correctly and rebuild.`);
-    }
-    
     // Return not found if category fetch fails (prevents 500 error)
     const { notFound } = await import("next/navigation");
     notFound();
@@ -199,7 +188,7 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   const categoryId = categoryData?.id?.toString() || categoryData?._id?.toString();
   const categoryHandle = (categoryData as any)?.handle || categoryData?.slug?.current || categoryData?.slug || slug;
   
-  // Filter products by category ID (WooCommerce and Medusa use category IDs for filtering)
+  // Filter products by category ID (WooCommerce uses category IDs for filtering)
   let filteredProducts = allProducts;
   
   if (categoryData && categoryId) {
@@ -261,20 +250,7 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   // Fetch all categories for the sidebar
   let categories: any[] = [];
   try {
-    const useWooCommerce = isWooCommerceEnabled();
-    
-    if (useWooCommerce) {
-      categories = await getWooCommerceCategories();
-    } else {
-      const categoriesResponse = await medusaClient.getCategories();
-      const product_categories = categoriesResponse?.product_categories || (categoriesResponse as any)?.categories || [];
-      if (product_categories.length > 0) {
-        const converted = product_categories.map((cat: any) =>
-          convertMedusaToSanityCategory(cat, product_categories)
-        );
-        categories = converted.filter((cat: any) => !cat.parent);
-      }
-    }
+    categories = await getCategoriesWithSubcategories();
   } catch (error) {
     console.error("[CategoryPage] Error fetching categories:", error);
     categories = [];

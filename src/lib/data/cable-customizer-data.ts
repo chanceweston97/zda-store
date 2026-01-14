@@ -4,7 +4,7 @@
  * This file contains the Cable Builder data (cable series, cable types, connectors).
  * 
  * TO UPDATE THIS DATA:
- * 1. Export the data from your Medusa backend or provide it manually
+ * 1. Provide the data manually or from your CMS export
  * 2. Update the arrays below with your actual data
  * 3. Ensure all prices are in DOLLARS (not cents)
  * 

@@ -15,7 +15,6 @@ import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useShoppingCart } from "use-shopping-cart";
-import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 
 const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
@@ -190,7 +189,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
       }
     }
 
-    // Helper function to create order via WooCommerce or Medusa
+    // Helper function to create order via WooCommerce
     const createOrder = async (paymentStatus: "pending" | "paid", paymentIntentId?: string) => {
       try {
         // Convert cart items to format expected by checkout
@@ -205,10 +204,8 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
           metadata: item.metadata,
         }));
 
-        // Use WooCommerce endpoint if enabled, otherwise use Medusa
-        const checkoutEndpoint = isWooCommerceEnabled() 
-          ? "/api/woocommerce/checkout/complete"
-          : "/api/checkout/complete";
+        // Use WooCommerce endpoint
+        const checkoutEndpoint = "/api/woocommerce/checkout/complete";
 
         const response = await fetch(checkoutEndpoint, {
           method: "POST",
@@ -269,7 +266,6 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
           // Clear use-shopping-cart localStorage
           try {
             localStorage.removeItem('use-shopping-cart');
-            localStorage.removeItem('_medusa_cart_id');
             console.log('[Checkout] Cleared cart from localStorage after successful order');
           } catch (e) {
             console.warn('[Checkout] Could not clear localStorage:', e);

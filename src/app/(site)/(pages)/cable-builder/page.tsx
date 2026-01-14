@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const CableCustomizerPage = async () => {
-  // Cable Builder uses LOCAL DATA ONLY (not from WooCommerce or Medusa)
+  // Cable Builder uses LOCAL DATA ONLY
   // Data is stored in frontend/src/lib/data/cable-customizer-data.ts
   const [cableSeries, cableTypes, connectors] = await Promise.all([
     getCableSeries(),

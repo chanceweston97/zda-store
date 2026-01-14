@@ -140,38 +140,30 @@ export default function Description({ product, metadata }: Props) {
         "description"
     );
 
-    // Helper function to fix old IP addresses in URLs
+    // Helper function to fix old CMS hostnames in URLs
     const fixImageUrl = (url: string | null | undefined): string | null => {
       if (!url || typeof url !== 'string') return url || null;
-      
-      // Get current backend URL from environment
-      const currentBackendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
-                               process.env.MEDUSA_BACKEND_URL || 
-                               'http://18.224.229.214:9000';
-      
-      // Extract the base URL (protocol + hostname + port)
+
+      const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL;
+      if (!cmsUrl) return url;
+
       let currentUrl: URL;
       try {
-        currentUrl = new URL(currentBackendUrl);
+        currentUrl = new URL(cmsUrl);
       } catch (e) {
         return url;
       }
-      
-      const currentHost = currentUrl.host; // includes port if present
-      
-      // List of old IPs to replace
-      const oldIPs = [
+
+      const currentHost = currentUrl.host;
+      const oldHosts = [
         '18.191.243.236:9000',
         '18.191.243.236',
       ];
-      
+
       let fixedUrl = url;
-      
-      // Replace old IPs with current backend URL
-      for (const oldIP of oldIPs) {
-        if (fixedUrl.includes(oldIP)) {
-          fixedUrl = fixedUrl.replace(oldIP, currentHost);
-          // Also replace http/https if needed to match current protocol
+      for (const oldHost of oldHosts) {
+        if (fixedUrl.includes(oldHost)) {
+          fixedUrl = fixedUrl.replace(oldHost, currentHost);
           if (currentUrl.protocol === 'https:' && fixedUrl.startsWith('http://')) {
             fixedUrl = fixedUrl.replace('http://', 'https://');
           } else if (currentUrl.protocol === 'http:' && fixedUrl.startsWith('https://')) {
@@ -180,7 +172,7 @@ export default function Description({ product, metadata }: Props) {
           break;
         }
       }
-      
+
       return fixedUrl;
     };
 

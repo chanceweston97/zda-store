@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAllProducts, getAllProductsCount, getCategoriesWithSubcategories } from "@/lib/data/unified-data";
-import { isMedusaEnabled } from "@/lib/medusa/config";
 
 export async function GET() {
   const results: any = {
     timestamp: new Date().toISOString(),
-    medusaEnabled: isMedusaEnabled(),
-    backendUrl: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "not set",
     tests: {},
   };
 
@@ -83,20 +80,8 @@ export async function GET() {
 
   // Recommendations
   results.recommendations = [];
-  if (!results.medusaEnabled) {
-    results.recommendations.push("Medusa is not enabled. Set NEXT_PUBLIC_USE_MEDUSA=true in .env");
-  }
-  if (results.backendUrl === "not set" || results.backendUrl.includes('localhost')) {
-    results.recommendations.push("NEXT_PUBLIC_MEDUSA_BACKEND_URL is not set or using localhost. Set it to your server IP and rebuild.");
-  }
   if (results.tests.getAllProducts?.success && results.tests.getAllProducts.productCount === 0) {
-    results.recommendations.push("Products fetch succeeded but returned 0 products. Check if Medusa has products.");
-  }
-  if (results.tests.getAllProducts?.connectionError) {
-    results.recommendations.push("Connection error: Check if Medusa backend is running and accessible.");
-  }
-  if (results.tests.getAllProducts?.timeoutError) {
-    results.recommendations.push("Timeout error: Medusa backend is not responding. Check server resources.");
+    results.recommendations.push("Products fetch succeeded but returned 0 products. Check if WooCommerce has products.");
   }
 
   return NextResponse.json(results, {

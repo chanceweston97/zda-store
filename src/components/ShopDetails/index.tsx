@@ -87,7 +87,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     try {
       let url: string | null = null;
       
-      // If img is already a string URL (from Medusa/WordPress), validate it
+      // If img is already a string URL (from WordPress), validate it
       if (typeof img === 'string') {
         if (img.startsWith('http://') || img.startsWith('https://')) {
           // Validate it's a proper URL before returning
@@ -177,15 +177,15 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   const cableType = product.cableType || (product as any).cableType?.cableType || null;
   const cableTypeName = cableType?.name || "";
   const cableTypePricePerFoot = cableType?.pricePerFoot ?? 0;
-  // For cable products, lengthOptions come from Medusa variants
-  // Medusa lengthOptions have structure: { value, price, sku, variantId }
+  // For cable products, lengthOptions come from variant data
+  // Length options have structure: { value, price, sku, variantId }
   const rawLengthOptions = product.lengthOptions;
   const lengthOptions = Array.isArray(rawLengthOptions) && rawLengthOptions.length > 0
     ? rawLengthOptions.filter((opt: any) => {
         if (!opt) return false;
-        // For Medusa cable products, check for 'value' field (e.g., "10", "25", "50")
+        // For cable products, check for 'value' field (e.g., "10", "25", "50")
         if (typeof opt === 'object' && opt !== null) {
-          // Check if it has a value field (Medusa structure) - this is the key field
+          // Check if it has a value field (structure) - this is the key field
           const hasValue = opt.value !== undefined && opt.value !== null && String(opt.value).trim() !== '';
           const hasTitle = opt.title !== undefined && opt.title !== null && String(opt.title).trim() !== '';
           // Also support legacy format with 'length' property
@@ -271,14 +271,14 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   }, [isConnectorProduct, product.connector?.pricing, cableType?._id]);
 
   // Helper functions for lengthOptions (similar to gainOptions)
-  // For Medusa cable products, lengthOptions have: { value, price, sku, variantId }
+  // For cable products, lengthOptions have: { value, price, sku, variantId }
   const getLengthValue = (option: any): string => {
     if (!option) return "";
     if (typeof option === 'string') {
       return option;
     }
     if (typeof option === 'object' && option !== null) {
-      // For Medusa cable products, use 'value' field (e.g., "10", "25", "50")
+      // For cable products, use 'value' field (e.g., "10", "25", "50")
       // Also check 'title' for compatibility with other formats
       return option.value || option.title || option.length || "";
     }
@@ -288,7 +288,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   const getLengthPrice = (option: any): number => {
     if (!option) return 0;
     
-    // For Medusa cable products, get price from the variant's calculated_price
+    // For cable products, get price from the variant's calculated_price
     // First try to get price from the variant using variantId
     if (typeof option === 'object' && option !== null && option.variantId) {
       const variant = (product as any).variants?.find((v: any) => v.id === option.variantId);
@@ -392,7 +392,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
         }
       }
     } else if (isCableProduct && lengthOptions.length > 0 && selectedLengthIndex < 0) {
-      // For cable products with lengthOptions (Medusa) - sort and select smallest
+      // For cable products with lengthOptions - sort and select smallest
       const sortedLengthOptions = [...lengthOptions].sort((a: any, b: any) => {
         const getLengthNumber = (option: any): number => {
           const value = getLengthValue(option);
@@ -448,11 +448,11 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
   const getGainPrice = (option: any, index: number): number => {
     // New format: object with price
-    // For Medusa: price is in cents, convert to dollars
+    // If price is in cents, convert to dollars
     // For WooCommerce: price might be in dollars already (check if > 1000, assume cents if so)
     if (option && typeof option === 'object' && option !== null && 'price' in option && typeof option.price === 'number') {
       const optionPrice = option.price;
-      // If price is >= 1000, assume it's in cents (Medusa format)
+      // If price is >= 1000, assume it's in cents format
       // If price is < 1000, assume it's already in dollars (WooCommerce format)
       return optionPrice >= 1000 ? optionPrice / 100 : optionPrice;
     }
@@ -507,7 +507,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     if (isSimpleConnector) {
       if (selectedLengthIndex >= 0 && (product as any).variants && (product as any).variants[selectedLengthIndex]) {
         const selectedVariant = (product as any).variants[selectedLengthIndex];
-        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
+        // Try calculated_price first, then price field (WooCommerce format)
         if (selectedVariant?.calculated_price?.calculated_amount) {
           return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
         }
@@ -543,7 +543,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     if (isCableProduct && (product as any).variants && (product as any).variants.length > 0) {
       if (selectedLengthIndex >= 0 && (product as any).variants[selectedLengthIndex]) {
         const selectedVariant = (product as any).variants[selectedLengthIndex];
-        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
+        // Try calculated_price first, then price field (WooCommerce format)
         if (selectedVariant?.calculated_price?.calculated_amount) {
           return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
         }
@@ -595,7 +595,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       // Use selectedLengthIndex to track selected variant (for antenna products, this represents the selected gain/variant)
       if (selectedLengthIndex >= 0 && (product as any).variants[selectedLengthIndex]) {
         const selectedVariant = (product as any).variants[selectedLengthIndex];
-        // Try calculated_price first (for Medusa format), then price field (for WooCommerce format)
+        // Try calculated_price first, then price field (WooCommerce format)
         if (selectedVariant?.calculated_price?.calculated_amount) {
           return selectedVariant.calculated_price.calculated_amount / 100; // Convert cents to dollars
         }
@@ -614,7 +614,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       }
     }
     
-    // For antenna products, use gain options (legacy/Medusa format)
+    // For antenna products, use gain options (legacy format)
     if (gainIndex < 0 || !currentGainOption) {
       // Fallback to first gain option's price, or product price if no gain options
       const firstGain = product.gainOptions?.[0];
@@ -1384,7 +1384,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                           </div>
                         </div>
                       )}
-                      {/* Legacy gainOptions display (for Medusa products) - Convert to dropdown */}
+                      {/* Legacy gainOptions display - Convert to dropdown */}
                       {!isConnectorProduct && !isCableProduct && product.gainOptions && product.gainOptions.length > 0 && !((product as any).variants && (product as any).variants.length > 0) && (
                         <div className="space-y-2">
                           <label className="text-black text-[20px] leading-[30px]">

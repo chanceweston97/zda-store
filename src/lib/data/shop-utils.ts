@@ -165,13 +165,6 @@ export async function getOrderById(orderId: string) {
   return null;
 }
 
-// Get backend URL for CMS API
-const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || 
-         process.env.MEDUSA_BACKEND_URL || 
-         "http://localhost:9000";
-};
-
 export const getHeroBanners = async () => {
   // Return local hero banners data only (no backend fetch)
   return heroBanners;

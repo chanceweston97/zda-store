@@ -5,7 +5,6 @@ import { convertCartItemToWC } from "@/lib/woocommerce/utils";
 
 /**
  * Complete checkout by creating order in WooCommerce
- * This replaces the Medusa checkout flow
  */
 export async function POST(req: NextRequest) {
   try {

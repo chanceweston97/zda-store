@@ -76,10 +76,10 @@ const CheckoutAreaWithoutStripe = ({ amount }: { amount: number }) => {
       }
     }
 
-    // Create order via Medusa
+    // Create order via WooCommerce
     const createOrder = async (paymentStatus: "pending" | "paid") => {
       try {
-        // Convert cart items to format expected by Medusa checkout
+        // Convert cart items to format expected by WooCommerce checkout
         const cartItems = Object.values(cartDetails ?? {}).map((item) => ({
           id: item.id,
           name: item.name,
@@ -91,10 +91,7 @@ const CheckoutAreaWithoutStripe = ({ amount }: { amount: number }) => {
           metadata: item.metadata,
         }));
 
-        // NOTE: Custom checkout (Option 3) disabled due to API key authentication issues
-        // Using regular checkout flow which stores metadata correctly
-        // Custom cable details will be in line item metadata for admin viewing
-        const checkoutEndpoint = "/api/checkout/complete";
+        const checkoutEndpoint = "/api/woocommerce/checkout/complete";
 
         const response = await fetch(checkoutEndpoint, {
           method: "POST",
@@ -154,7 +151,6 @@ const CheckoutAreaWithoutStripe = ({ amount }: { amount: number }) => {
           // Clear use-shopping-cart localStorage
           try {
             localStorage.removeItem('use-shopping-cart');
-            localStorage.removeItem('_medusa_cart_id');
             console.log('[Checkout] Cleared cart from localStorage after successful order');
           } catch (e) {
             console.warn('[Checkout] Could not clear localStorage:', e);
