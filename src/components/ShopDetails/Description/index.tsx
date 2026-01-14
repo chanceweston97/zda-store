@@ -7,6 +7,30 @@ import { Product } from "@/types/product";
 import { CircleCheckIcon } from "@/assets/icons";
 import { ButtonArrowHomepage } from "../../Common/ButtonArrowHomepage";
 
+// Helper function to clean HTML strings (works for both SSR and CSR)
+function cleanHTMLString(input: string): string {
+  if (!input) return '';
+
+  // Remove all HTML tags
+  const noTags = input.replace(/<[^>]*>/g, '');
+
+  // Decode HTML entities safely
+  const txt = typeof window !== 'undefined'
+    ? (() => {
+        const el = document.createElement('textarea');
+        el.innerHTML = noTags;
+        return el.value;
+      })()
+    : noTags
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'");
+
+  return txt.trim();
+}
+
 // Helper function to render description/specifications (replaces PortableText)
 const renderContent = (content: any): React.ReactNode => {
   if (!content) return null;
@@ -364,7 +388,7 @@ export default function Description({ product, metadata }: Props) {
                                                                                 lineHeight: '26px'
                                                                             }}
                                                                         >
-                                                                            {feature}
+                                                                            {cleanHTMLString(feature)}
                                                                         </span>
                                                                     </li>
                                                                 ))}
@@ -397,7 +421,7 @@ export default function Description({ product, metadata }: Props) {
                                                                                                     lineHeight: '26px'
                                                                                                 }}
                                                                                             >
-                                                                                                {text.trim()}
+                                                                                                {cleanHTMLString(text)}
                                                                                             </span>
                                                                                         </li>
                                                                                     );
@@ -428,7 +452,7 @@ export default function Description({ product, metadata }: Props) {
                                                                                                 lineHeight: '26px'
                                                                                             }}
                                                                                         >
-                                                                                            {item.trim()}
+                                                                                            {cleanHTMLString(item)}
                                                                                         </span>
                                                                                     </li>
                                                                                 ))}
@@ -450,7 +474,7 @@ export default function Description({ product, metadata }: Props) {
                                                                 }}
                                                                 className="whitespace-pre-line"
                                                             >
-                                                                {features}
+                                                                {cleanHTMLString(features)}
                                                             </p>
                                                                 );
                                                             })()
@@ -471,33 +495,22 @@ export default function Description({ product, metadata }: Props) {
                                                                 {applications.map((application: string, index: number) => (
                                                                     <li key={index} className="flex items-start gap-2">
                                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                        <span
-                                                                            style={{
-                                                                                color: '#000',
-                                                                                fontFamily: 'Satoshi, sans-serif',
-                                                                                fontSize: '16px',
-                                                                                fontStyle: 'normal',
-                                                                                fontWeight: 400,
-                                                                                lineHeight: '26px'
-                                                                            }}
-                                                                        >
-                                                                            {application}
+                                                                        <span className="text-black text-[16px] leading-[26px] font-normal">
+                                                                            {cleanHTMLString(application)}
                                                                         </span>
                                                                     </li>
                                                                 ))}
                                                             </ul>
                                                         ) : typeof applications === 'string' && applications.trim() ? (
                                                             (() => {
-                                                                // Check if string contains HTML
-                                                                const hasHTML = /<[a-z][\s\S]*>/i.test(applications);
-                                                                if (hasHTML) {
-                                                                    // Parse HTML and extract content
+                                                                // Check if string contains HTML list
+                                                                const hasHTMLList = /<ul|<li/i.test(applications);
+                                                                if (hasHTMLList) {
+                                                                    // Parse HTML and extract list items
                                                                     const parser = new DOMParser();
                                                                     const doc = parser.parseFromString(applications, 'text/html');
                                                                     const listItems = doc.querySelectorAll('li');
-                                                                    const paragraphs = doc.querySelectorAll('p');
                                                                     
-                                                                    // If it has <li> tags, use those
                                                                     if (listItems.length > 0) {
                                                                         return (
                                                                             <ul className="space-y-2">
@@ -516,44 +529,13 @@ export default function Description({ product, metadata }: Props) {
                                                                                                     lineHeight: '26px'
                                                                                                 }}
                                                                                             >
-                                                                                                {text.trim()}
+                                                                                                {cleanHTMLString(text)}
                                                                                             </span>
                                                                                         </li>
                                                                                     );
                                                                                 })}
                                                                             </ul>
                                                                         );
-                                                                    }
-                                                                    
-                                                                    // If it has <p> tags, extract text and split by bullet points
-                                                                    if (paragraphs.length > 0) {
-                                                                        const pText = paragraphs[0].textContent || paragraphs[0].innerText || '';
-                                                                        // Only split by bullet points (•), not by newlines to preserve sentence structure
-                                                                        const items = pText.split(/[•]/).filter(item => item.trim());
-                                                                        
-                                                                        if (items.length > 0) {
-                                                                            return (
-                                                                                <ul className="space-y-2">
-                                                                                    {items.map((item, index) => (
-                                                                                        <li key={index} className="flex items-start gap-2">
-                                                                                            <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                                            <span
-                                                                                                style={{
-                                                                                                    color: '#000',
-                                                                                                    fontFamily: 'Satoshi, sans-serif',
-                                                                                                    fontSize: '16px',
-                                                                                                    fontStyle: 'normal',
-                                                                                                    fontWeight: 400,
-                                                                                                    lineHeight: '26px'
-                                                                                                }}
-                                                                                            >
-                                                                                                {item.trim()}
-                                                                                            </span>
-                                                                                        </li>
-                                                                                    ))}
-                                                                                </ul>
-                                                                            );
-                                                                        }
                                                                     }
                                                                 }
                                                                 
@@ -578,7 +560,7 @@ export default function Description({ product, metadata }: Props) {
                                                                                                 lineHeight: '26px'
                                                                                             }}
                                                                                         >
-                                                                                            {item.trim()}
+                                                                                            {cleanHTMLString(item)}
                                                                                         </span>
                                                                                     </li>
                                                                                 ))}
@@ -600,7 +582,7 @@ export default function Description({ product, metadata }: Props) {
                                                                 }}
                                                                 className="whitespace-pre-line"
                                                             >
-                                                                {applications}
+                                                                {cleanHTMLString(applications)}
                                                             </p>
                                                                 );
                                                             })()
@@ -650,7 +632,7 @@ export default function Description({ product, metadata }: Props) {
                                                                                 lineHeight: '26px'
                                                                             }}
                                                                         >
-                                                                            {text.trim()}
+                                                                            {cleanHTMLString(text)}
                                                                         </span>
                                                                     </li>
                                                                 );

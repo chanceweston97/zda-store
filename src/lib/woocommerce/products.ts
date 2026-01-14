@@ -459,14 +459,62 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
   
   // Check if product has variations
   if (wcProduct.variations && wcProduct.variations.length > 0) {
-    // ✅ OPTIMIZATION: Skip variation fetching for listing pages (much faster)
-    if (skipVariations) {
-      // Create placeholder variants without fetching (for listing pages)
+    // Always fetch variations to get actual SKU data (required for shop page)
+    // Even for listing pages, we need variation SKUs, not parent SKU
+    try {
+      // Fetch actual variations to get their SKUs
+      // This is required because WooCommerce doesn't include variation data in product listings
+      const variations = await getProductVariations(wcProduct.id);
+    
+      // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
+      const sortedVariations = [...variations].sort((a: any, b: any) => {
+        return (a.id || 0) - (b.id || 0);
+      });
+      
+      // Map variations to variants with actual variation data (not parent product data)
+      sortedVariations.forEach((variation: any) => {
+        const variationPrice = parseFloat(variation.price || variation.regular_price || variation.sale_price || priceStr || "0");
+        
+        // Build variant title from attributes if available, otherwise use variation name or parent name
+        let variantTitle = wcProduct.name;
+        if (variation.attributes && Array.isArray(variation.attributes) && variation.attributes.length > 0) {
+          const attributeStrings = variation.attributes
+            .filter((attr: any) => attr.name && attr.option)
+            .map((attr: any) => `${attr.name}: ${attr.option}`);
+          if (attributeStrings.length > 0) {
+            variantTitle = attributeStrings.join(", ");
+          }
+        } else if (variation.name && variation.name !== wcProduct.name) {
+          variantTitle = variation.name;
+        }
+        
+        variants.push({
+          id: variation.id.toString(),
+          title: variantTitle, // Use variation-specific title, not parent name
+          sku: variation.sku || "", // Use variation SKU only (don't fallback to parent SKU)
+          price: variationPrice, // Use variation price, not parent price
+          calculated_price: {
+            calculated_amount: variationPrice * 100,
+            currency_code: "USD",
+          },
+          inventory_quantity: variation.stock_quantity || 0,
+          options: variation.attributes || [],
+          metadata: {
+            ...metadataObj,
+            variation_id: variation.id,
+            variation_attributes: variation.attributes,
+          },
+        });
+      });
+    } catch (error) {
+      console.error(`[convertWCToSanityProduct] Error fetching variations for product ${wcProduct.id}:`, error);
+      // Fallback: create placeholder variants if fetch fails
+      // But mark them so we know they need to be fetched
       wcProduct.variations.forEach((variationId: number) => {
         variants.push({
           id: variationId.toString(),
           title: wcProduct.name,
-          sku: wcProduct.sku || "",
+          sku: "", // Don't use parent SKU as fallback - leave empty
           price: price,
           calculated_price: {
             calculated_amount: price * 100,
@@ -481,63 +529,6 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
           },
         });
       });
-    } else {
-      // Fetch full variation details (for product detail pages)
-      try {
-        // Fetch actual variations to get their SKUs
-        // This is required because WooCommerce doesn't include variation data in product listings
-        const variations = await getProductVariations(wcProduct.id);
-      
-      // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
-      const sortedVariations = [...variations].sort((a: any, b: any) => {
-        return (a.id || 0) - (b.id || 0);
-      });
-      
-      // Map variations to variants with actual SKU data
-      sortedVariations.forEach((variation: any) => {
-        const variationPrice = parseFloat(variation.price || variation.regular_price || variation.sale_price || priceStr || "0");
-        
-        variants.push({
-          id: variation.id.toString(),
-          title: wcProduct.name,
-          sku: variation.sku || wcProduct.sku || "", // Use variation SKU, fallback to parent SKU
-          price: variationPrice,
-          calculated_price: {
-            calculated_amount: variationPrice * 100,
-            currency_code: "USD",
-          },
-          inventory_quantity: variation.stock_quantity || 0,
-          options: variation.attributes || [],
-          metadata: {
-            ...metadataObj,
-            variation_id: variation.id,
-            variation_attributes: variation.attributes,
-          },
-        });
-      });
-      } catch (error) {
-        console.error(`[convertWCToSanityProduct] Error fetching variations for product ${wcProduct.id}:`, error);
-        // Fallback: create placeholder variants if fetch fails
-        wcProduct.variations.forEach((variationId: number) => {
-          variants.push({
-            id: variationId.toString(),
-            title: wcProduct.name,
-            sku: wcProduct.sku || "",
-            price: price,
-            calculated_price: {
-              calculated_amount: price * 100,
-              currency_code: "USD",
-            },
-            inventory_quantity: 0,
-            options: [],
-            metadata: {
-              ...metadataObj,
-              variation_id: variationId,
-              _needsVariationFetch: true,
-            },
-          });
-        });
-      }
     }
   } else {
     // For simple products without variations, create a single variant

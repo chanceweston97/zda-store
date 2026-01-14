@@ -106,6 +106,18 @@ const SingleListItem = ({ item }: { item: Product }) => {
                   ? imageBuilder(item.connector.image).url()!
     : null;
 
+  // Log product details for debugging (shop page only)
+  console.log('[Shop Page - SingleListItem] Product Details:', {
+    name: item.name,
+    id: item._id,
+    hasVariants: !!(item as any).variants,
+    variantsCount: (item as any).variants?.length || 0,
+    variants: (item as any).variants,
+    parentSku: (item as any).sku,
+    metadataSku: (item as any).metadata?.sku,
+    productType: item.productType
+  });
+  
   // Get SKU - Priority: First variation SKU → Parent SKU → empty
   // When variations exist, show first variation's SKU (first ID's SKU)
   const sku = (() => {
@@ -158,6 +170,8 @@ const SingleListItem = ({ item }: { item: Product }) => {
     // 5️⃣ Nothing
     return null;
   })();
+
+  console.log('[Shop Page - SingleListItem] Final SKU:', sku);
 
   return (
     <div className="bg-white rounded-lg shadow-1 overflow-hidden mb-6">
@@ -266,7 +280,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
                 margin: 0
               }}
             >
-              {formatPrice(productPrice)}
+              ${formatPrice(productPrice)}
             </h3>
           </div>
 

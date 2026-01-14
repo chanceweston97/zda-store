@@ -6,21 +6,6 @@ const quickLinks = [
     label: 'Contact Us',
     href: '/contact',
   },
-  {
-    id: 2,
-    label: 'Request a Quote',
-    href: 'request-a-quote',
-  },
-  {
-    id: 3,
-    label: 'Returns',
-    href: '#',
-  },
-  {
-    id: 4,
-    label: "FAQ's",
-    href: '#',
-  },
 ]
 
 export default function QuickLinks() {

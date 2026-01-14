@@ -46,6 +46,71 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     console.warn(`Product "${item.name}" has invalid price: ${productPrice}`);
   }
   
+  // Log product details for debugging (shop page only)
+  console.log('[Shop Page - SingleGridItem] Product Details:', {
+    name: item.name,
+    id: item._id,
+    hasVariants: !!(item as any).variants,
+    variantsCount: (item as any).variants?.length || 0,
+    variants: (item as any).variants,
+    parentSku: (item as any).sku,
+    metadataSku: (item as any).metadata?.sku,
+    productType: item.productType
+  });
+  
+  // Get SKU - Priority: First variation SKU → Parent SKU → empty
+  const sku = (() => {
+    // 1️⃣ First variation SKU (if variations exist, prioritize first variation's SKU)
+    if ((item as any).variants && (item as any).variants.length > 0) {
+      // Get first variation's SKU (first ID's SKU - variations are sorted by ID ascending)
+      const firstVariant = (item as any).variants[0];
+      const firstVariantSku = firstVariant?.sku;
+      
+      if (firstVariantSku && firstVariantSku.trim() !== "") {
+        return firstVariantSku.trim();
+      } else {
+        // If first variant has no SKU, find first variant with SKU
+        const firstWithSku = (item as any).variants.find((v: any) => v.sku && v.sku.trim() !== "");
+        if (firstWithSku) {
+          return firstWithSku.sku.trim();
+        }
+      }
+    }
+
+    // 2️⃣ Parent SKU (fallback if no variations or first variation has no SKU)
+    const parentSku = (item as any).sku;
+    if (parentSku && parentSku.trim() !== "") {
+      return parentSku.trim();
+    }
+
+    // 3️⃣ GainOptions SKU (for antenna products)
+    if (item.productType === "antenna" && item.gainOptions && item.gainOptions.length > 0) {
+      const firstGainOptionWithSku = item.gainOptions.find(
+        (g: any) => {
+          const gainOption = g as any;
+          return gainOption?.sku && typeof gainOption.sku === 'string' && gainOption.sku.trim() !== "";
+        }
+      );
+      if (firstGainOptionWithSku) {
+        const sku = (firstGainOptionWithSku as any).sku;
+        if (typeof sku === 'string') {
+          return sku.trim();
+        }
+      }
+    }
+
+    // 4️⃣ Metadata SKU (last resort)
+    const metadataSku = (item as any).metadata?.sku;
+    if (metadataSku && metadataSku.trim() !== "") {
+      return metadataSku.trim();
+    }
+
+    // 5️⃣ Nothing
+    return null;
+  })();
+  
+  console.log('[Shop Page - SingleGridItem] Final SKU:', sku);
+  
   const cartItem = {
     id: item._id,
     name: item.name,
@@ -163,6 +228,25 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             {item.name}
           </h3>
         </Link>
+
+        {/* SKU Display */}
+        {sku && (
+          <span
+            style={{
+              color: '#457B9D',
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '14px',
+              fontStyle: 'normal',
+              fontWeight: 500,
+              lineHeight: '20px',
+              letterSpacing: '-0.28px',
+              marginBottom: '8px',
+              display: 'block'
+            }}
+          >
+            {sku}
+          </span>
+        )}
 
         {/* Price in Rectangle */}
         <div 

@@ -17,10 +17,13 @@ type ContactForm = {
 
 const productServiceOptions = [
   "Select one",
+  "Request a Quote",
+  "SureCall Signal Boosters",
+  "XetaWave Radios",
   "Antennas",
   "Cables",
-  "XetaWave Radios",
   "Manufacturing",
+  "Returns",
   "Other"
 ];
 

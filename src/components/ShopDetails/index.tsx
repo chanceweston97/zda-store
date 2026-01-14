@@ -1241,71 +1241,85 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                             Length
                           </label>
 
-                          <div className="flex flex-wrap gap-2">
-                            {(() => {
-                              // Sort variants by length value (smallest to largest)
-                              const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
-                                const getLengthNumber = (variant: any): number => {
-                                  const title = variant.title || "";
-                                  const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-                                  const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-                                  return match ? parseFloat(match[1]) : 0;
-                                };
-                                return getLengthNumber(a) - getLengthNumber(b);
-                              });
-                              
-                              return sortedVariants.map((variant: any, sortedIndex: number) => {
-                                // Find the original index for selection tracking
-                                const originalVariantIndex = (product as any).variants.findIndex((v: any) => 
-                                  (v.id && variant.id && v.id === variant.id) || 
-                                  v === variant
-                                );
-                                if (!variant) return null;
-                                // Extract length value from variant title (e.g., "Length: 10 ft dBi" -> "10 ft")
-                                const variantTitle = variant.title || "";
-                                console.log(`[ShopDetails] Processing variant title: "${variantTitle}"`);
-                                // Remove "Length:" prefix if present (case insensitive, anywhere in string)
-                                let cleanedTitle = variantTitle.replace(/Length:\s*/gi, "").trim();
-                                // Remove "dBi" if present (case insensitive)
-                                cleanedTitle = cleanedTitle.replace(/\s*dBi/gi, "").trim();
-                                // Try to extract length (e.g., "10 ft", "25 ft", "1000 ft")
-                                const lengthMatch = cleanedTitle.match(/(\d+(?:\.\d+)?)\s*ft/i);
-                                let lengthValue;
-                                if (lengthMatch) {
-                                  // Format as "10 ft" (no dBi, no "Length:" prefix)
-                                  lengthValue = `${lengthMatch[1]} ft`;
-                                } else {
-                                  // Fallback: ensure "ft" is present, remove any remaining "Length:" or "dBi"
-                                  let fallback = cleanedTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-                                  lengthValue = fallback.includes('ft') ? fallback : `${fallback} ft`;
+                          <div className="relative w-full">
+                            <select
+                              value={selectedLengthIndex >= 0 ? (product as any).variants[selectedLengthIndex]?.id || "" : ""}
+                              onChange={(e) => {
+                                const variantIndex = (product as any).variants.findIndex((v: any) => v.id === e.target.value);
+                                if (variantIndex >= 0) {
+                                  setSelectedLengthIndex(variantIndex);
+                                  // Extract length value from variant title
+                                  const variant = (product as any).variants[variantIndex];
+                                  const variantTitle = variant?.title || "";
+                                  let cleanedTitle = variantTitle.replace(/Length:\s*/gi, "").trim();
+                                  cleanedTitle = cleanedTitle.replace(/\s*dBi/gi, "").trim();
+                                  const lengthMatch = cleanedTitle.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                  let lengthValue;
+                                  if (lengthMatch) {
+                                    lengthValue = `${lengthMatch[1]} ft`;
+                                  } else {
+                                    let fallback = cleanedTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+                                    lengthValue = fallback.includes('ft') ? fallback : `${fallback} ft`;
+                                  }
+                                  setSelectedLength(lengthValue);
                                 }
-                                console.log(`[ShopDetails] Extracted length value: "${lengthValue}" from "${variantTitle}"`);
-                                // Use original index for selection check - if nothing selected yet, select first (smallest) after sorting
-                                const isSelected = originalVariantIndex >= 0 && (
-                                  selectedLengthIndex === originalVariantIndex || 
-                                  (selectedLengthIndex < 0 && sortedIndex === 0)
-                                );
-                              
-                                return (
-                                  <button
-                                    key={variant.id || originalVariantIndex}
-                                    type="button"
-                                    onClick={() => {
-                                      // Set to original index so price calculation works correctly
-                                      setSelectedLengthIndex(originalVariantIndex >= 0 ? originalVariantIndex : sortedIndex);
-                                      setSelectedLength(lengthValue);
-                                    }}
-                                  className={`rounded-lg border flex items-center justify-center text-center text-[20px] leading-[26px] transition-all duration-200 whitespace-nowrap px-5 py-2.5 min-w-[80px] shadow-sm ${
-                                    isSelected
-                                      ? "border-[#2958A4] bg-[#2958A4] text-white shadow-md"
-                                      : "border-[#2958A4] bg-white text-[#2958A4] hover:bg-[#2958A4] hover:text-white"
-                                  }`}
-                                >
-                                    {lengthValue}
-                                  </button>
-                                );
-                              });
-                            })()}
+                              }}
+                              className="w-full appearance-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#2958A4] focus:border-[#2958A4]"
+                              style={{
+                                display: 'flex',
+                                height: '50px',
+                                padding: '0 16px',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                alignSelf: 'stretch',
+                                borderRadius: '10px',
+                                background: '#F6F7F7',
+                                border: 'none',
+                                fontFamily: 'Satoshi, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: 400,
+                                color: '#000',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20' viewBox='0 0 14 20' fill='none'%3E%3Cpath d='M7 0.88477L6.68555 1.18555L1.2168 6.6543L1.8457 7.2832L7 2.12891L12.1543 7.2832L12.7832 6.6543L7.31445 1.18555L7 0.88477Z' fill='%23383838'/%3E%3Cpath d='M7 19.1152L6.68555 18.8144L1.2168 13.3457L1.8457 12.7168L7 17.87109L12.1543 12.7168L12.7832 13.3457L7.31445 18.8144L7 19.1152Z' fill='%23383838'/%3E%3C/svg%3E")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 16px center',
+                                paddingRight: '2.5rem'
+                              }}
+                            >
+                              <option value="">Select Length</option>
+                              {(() => {
+                                // Sort variants by length value (smallest to largest)
+                                const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
+                                  const getLengthNumber = (variant: any): number => {
+                                    const title = variant.title || "";
+                                    const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+                                    const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                    return match ? parseFloat(match[1]) : 0;
+                                  };
+                                  return getLengthNumber(a) - getLengthNumber(b);
+                                });
+                                
+                                return sortedVariants.map((variant: any) => {
+                                  if (!variant) return null;
+                                  // Extract length value from variant title
+                                  const variantTitle = variant.title || "";
+                                  let cleanedTitle = variantTitle.replace(/Length:\s*/gi, "").trim();
+                                  cleanedTitle = cleanedTitle.replace(/\s*dBi/gi, "").trim();
+                                  const lengthMatch = cleanedTitle.match(/(\d+(?:\.\d+)?)\s*ft/i);
+                                  let lengthValue;
+                                  if (lengthMatch) {
+                                    lengthValue = `${lengthMatch[1]} ft`;
+                                  } else {
+                                    let fallback = cleanedTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
+                                    lengthValue = fallback.includes('ft') ? fallback : `${fallback} ft`;
+                                  }
+                                  return (
+                                    <option key={variant.id} value={variant.id}>
+                                      {lengthValue}
+                                    </option>
+                                  );
+                                });
+                              })()}
+                            </select>
                           </div>
                         </div>
                       )}
@@ -1535,15 +1549,15 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
-                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                              <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
 
@@ -1551,10 +1565,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1626,15 +1640,15 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
-                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                              <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
 
@@ -1642,10 +1656,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1745,15 +1759,15 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
 
-                              <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                              <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                                 {quantity}
                               </span>
 
@@ -1761,10 +1775,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1871,7 +1885,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               </svg>
                             </button>
 
-                            <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                            <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                               {quantity}
                             </span>
 
@@ -1926,7 +1940,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>
-                            <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                            <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                               {quantity}
                             </span>
                             <button
@@ -2010,20 +2024,18 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           </div>
         </div>
       </section>
-      {/* Description Section - Hide for cable products */}
-      {!isCableProduct && (
-        <Description 
-          product={product}
-          metadata={{
-            description: product.description,
-            specifications: (product as any).specifications,
-            datasheetImage: (product as any).datasheetImage || (product.metadata as any)?.datasheetImage,
-            datasheetPdf: (product as any).datasheetPdf || (product.metadata as any)?.datasheetPdf,
-            features: (product as any).features,
-            applications: (product as any).applications,
-          }}
-        />
-      )}
+      {/* Description Section - Show for all products including cables */}
+      <Description 
+        product={product}
+        metadata={{
+          description: product.description,
+          specifications: (product as any).specifications,
+          datasheetImage: (product as any).datasheetImage || (product.metadata as any)?.datasheetImage,
+          datasheetPdf: (product as any).datasheetPdf || (product.metadata as any)?.datasheetPdf,
+          features: (product as any).features,
+          applications: (product as any).applications,
+        }}
+      />
       <WorkWithUs />
       <FaqSection />
       <Newsletter />
