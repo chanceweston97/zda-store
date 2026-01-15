@@ -336,6 +336,32 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   const allProductsCount: number =
     initialTotalCount || productsData?.allCount || totalCount;
 
+  const categoryCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    const walk = (cats: any[]) => {
+      cats.forEach((cat) => {
+        const id = String(cat.id || cat._id || "");
+        if (id) {
+          map.set(id, Number(cat.productCount || 0));
+        }
+        if (cat.subcategories?.length) walk(cat.subcategories);
+      });
+    };
+    walk(categories || []);
+    return map;
+  }, [categories]);
+
+  const selectedCategoryCount = useMemo(() => {
+    if (!activeCategoryIds.length) return null;
+    return activeCategoryIds.reduce((sum, id) => {
+      return sum + (categoryCountMap.get(id) || 0);
+    }, 0);
+  }, [activeCategoryIds, categoryCountMap]);
+
+  const showingCount = selectedCategoryCount ?? totalCount;
+  const displayAllCount = activeCategoryIds.length ? showingCount : allProductsCount;
+  const paginationCount = activeCategoryIds.length ? showingCount : totalCount;
+
   useEffect(() => {
     const ids: string[] = [];
     const collectIds = (cats: any[]) => {
@@ -482,8 +508,8 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
                 <div className="flex items-center justify-between">
                   {/* top bar left */}
                   <TopBar
-                    allProductsCount={allProductsCount}
-                    showingProductsCount={totalCount}
+                    allProductsCount={displayAllCount}
+                    showingProductsCount={showingCount}
                   />
 
                   {/* Grid/List view toggle removed - always use list view */}
@@ -555,7 +581,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
 
               <Pagination
                 currentPage={currentPage}
-                totalCount={totalCount}
+                totalCount={paginationCount}
                 pageSize={PRODUCTS_PER_PAGE}
                 onPageChange={handlePageChange}
               />

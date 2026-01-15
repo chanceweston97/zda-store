@@ -68,9 +68,19 @@ export async function getProducts(params?: {
   
   const products = await wcFetch<WooCommerceProduct[]>(endpoint);
   
-  // Filter out products with catalog_visibility = "hidden"
+  // Filter out hidden/private/draft products and uncategorized items
   // These products should not appear in shop pages
-  return products.filter(product => product.catalog_visibility !== "hidden");
+  return products.filter((product) => {
+    const isVisible =
+      product.catalog_visibility !== "hidden" &&
+      product.catalog_visibility !== "search" &&
+      product.status !== "private" &&
+      product.status !== "draft";
+    const hasCategory =
+      (product.categories?.length || 0) > 0 &&
+      !product.categories?.some((cat) => cat.slug === "uncategorized");
+    return isVisible && hasCategory;
+  });
 }
 
 /**
@@ -95,8 +105,15 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
     const product = products.find(p => p.slug === slug);
     
     if (product) {
-      // Double-check catalog visibility (should already be filtered, but be safe)
-      if (product.catalog_visibility === "hidden") {
+      // Double-check visibility/status/category (should already be filtered, but be safe)
+      if (
+        product.catalog_visibility === "hidden" ||
+        product.catalog_visibility === "search" ||
+        product.status === "private" ||
+        product.status === "draft" ||
+        !product.categories?.length ||
+        product.categories?.some((cat) => cat.slug === "uncategorized")
+      ) {
         return null;
       }
       return product;

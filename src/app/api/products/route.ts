@@ -12,6 +12,8 @@ type WooCommerceProduct = {
   categories?: Array<{ id: number; name: string; slug: string }>;
   variations?: number[];
   meta_data?: Array<{ key: string; value: any }>;
+  status?: string;
+  catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
 };
 
 const parsePrice = (value?: string) => {
@@ -47,17 +49,75 @@ export async function GET(req: Request) {
       );
     }
 
+    const fetchCategoryIdsExcludingUncategorized = async (): Promise<string[]> => {
+      const categoryParams = new URLSearchParams({
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret,
+        per_page: "100",
+        _fields: "id,slug",
+      });
+      const categoryRes = await fetch(`${apiUrl}/products/categories?${categoryParams.toString()}`, {
+        next: { revalidate: 3600, tags: ["wc-categories"] },
+      });
+      if (!categoryRes.ok) return [];
+      const categories = (await categoryRes.json()) as Array<{ id: number; slug: string }>;
+      return categories
+        .filter((cat) => cat.slug !== "uncategorized")
+        .map((cat) => String(cat.id));
+    };
+
+    const categoryFilterIds = await fetchCategoryIdsExcludingUncategorized();
+
+    const hasCategoryFilter = Boolean(category);
+    const categoryFilterParam = hasCategoryFilter
+      ? category
+      : categoryFilterIds.length > 0
+      ? categoryFilterIds.join(",")
+      : "";
+
+    const fetchShowableCount = async (categoryParam?: string): Promise<number> => {
+      const baseParams = new URLSearchParams({
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret,
+        per_page: "1",
+        page: "1",
+        _fields: "id",
+        status: "publish",
+      });
+      if (categoryParam) {
+        baseParams.append("category", categoryParam);
+      }
+
+      const fetchCountForVisibility = async (visibility: "visible" | "catalog") => {
+        const params = new URLSearchParams(baseParams);
+        params.append("catalog_visibility", visibility);
+        const res = await fetch(`${apiUrl}/products?${params.toString()}`, {
+          next: { revalidate: 60, tags: ["wc-products"] },
+        });
+        if (!res.ok) return 0;
+        return Number(res.headers.get("X-WP-Total") || 0);
+      };
+
+      const [visibleCount, catalogCount] = await Promise.all([
+        fetchCountForVisibility("visible"),
+        fetchCountForVisibility("catalog"),
+      ]);
+
+      return visibleCount + catalogCount;
+    };
+
     const params = new URLSearchParams({
       consumer_key: consumerKey,
       consumer_secret: consumerSecret,
       per_page: perPage,
       page,
       _fields:
-        "id,name,price,regular_price,sale_price,slug,images,categories,sku,variations,meta_data",
+        "id,name,price,regular_price,sale_price,slug,images,categories,sku,variations,meta_data,status,catalog_visibility",
+      status: "publish",
     });
 
-    if (category) {
-      params.append("category", category);
+    if (categoryFilterParam) {
+      params.append("category", categoryFilterParam);
     }
 
     const res = await fetch(`${apiUrl}/products?${params.toString()}`, {
@@ -73,27 +133,21 @@ export async function GET(req: Request) {
     }
 
     const wcProducts = (await res.json()) as WooCommerceProduct[];
-    const totalCount = Number(res.headers.get("X-WP-Total") || wcProducts.length);
-
-    let allCount = totalCount;
-    if (category) {
-      const totalParams = new URLSearchParams({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        per_page: "1",
-        page: "1",
-        _fields: "id",
-      });
-      const totalRes = await fetch(`${apiUrl}/products?${totalParams.toString()}`, {
-        next: { revalidate: 60, tags: ["wc-products"] },
-      });
-      if (totalRes.ok) {
-        const totalHeader = totalRes.headers.get("X-WP-Total");
-        if (totalHeader) {
-          allCount = Number(totalHeader);
-        }
-      }
-    }
+    const visibleProducts = wcProducts.filter((product) => {
+      const isVisible =
+        product.catalog_visibility !== "hidden" &&
+        product.catalog_visibility !== "search" &&
+        product.status !== "private" &&
+        product.status !== "draft";
+      const hasCategory =
+        (product.categories?.length || 0) > 0 &&
+        !product.categories?.some((cat) => cat.slug === "uncategorized");
+      return isVisible && hasCategory;
+    });
+    const totalCount = await fetchShowableCount(categoryFilterParam || undefined);
+    const allCount = await fetchShowableCount(
+      categoryFilterIds.length > 0 ? categoryFilterIds.join(",") : undefined
+    );
 
     const fetchFirstVariationSku = async (
       productId: number
@@ -118,7 +172,7 @@ export async function GET(req: Request) {
     };
 
     const products = await Promise.all(
-      wcProducts.map(async (product) => {
+      visibleProducts.map(async (product) => {
         const image = product.images?.[0]?.src || "";
         const featuresMeta = product.meta_data?.find((item) => item.key === "features");
         const featuresValue = featuresMeta?.value ?? null;

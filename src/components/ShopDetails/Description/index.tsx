@@ -143,7 +143,7 @@ export default function Description({ product, metadata }: Props) {
     // Helper function to fix old CMS hostnames in URLs
     const fixImageUrl = (url: string | null | undefined): string | null => {
       if (!url || typeof url !== 'string') return url || null;
-
+      
       const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL;
       if (!cmsUrl) return url;
 
@@ -153,13 +153,13 @@ export default function Description({ product, metadata }: Props) {
       } catch (e) {
         return url;
       }
-
+      
       const currentHost = currentUrl.host;
       const oldHosts = [
         '18.191.243.236:9000',
         '18.191.243.236',
       ];
-
+      
       let fixedUrl = url;
       for (const oldHost of oldHosts) {
         if (fixedUrl.includes(oldHost)) {
@@ -172,7 +172,7 @@ export default function Description({ product, metadata }: Props) {
           break;
         }
       }
-
+      
       return fixedUrl;
     };
 
