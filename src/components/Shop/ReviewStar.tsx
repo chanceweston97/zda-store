@@ -13,4 +13,5 @@ const ReviewStar = ({ reviews }: { reviews: number }) => {
   );
 };
 
+
 export default ReviewStar;
