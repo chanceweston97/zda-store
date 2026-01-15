@@ -103,7 +103,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           return null;
         }
       } else {
-        // Otherwise, try to use imageBuilder for Sanity assets
+      // Otherwise, try to use imageBuilder for image objects
         const builtUrl = imageBuilder(img).url();
         if (builtUrl && typeof builtUrl === 'string' && builtUrl.length > 0) {
           // Validate the built URL

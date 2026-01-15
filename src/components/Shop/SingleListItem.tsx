@@ -122,7 +122,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
   // When variations exist, show first variation's SKU (first ID's SKU)
   const sku = (() => {
     // 1️⃣ First variation SKU (if variations exist, prioritize first variation's SKU)
-    // Variations are sorted by ID in convertWCToSanityProduct, so [0] is the first (lowest ID)
+    // Variations are sorted by ID in convertWCToProduct, so [0] is the first (lowest ID)
     if ((item as any).variants && (item as any).variants.length > 0) {
       // Get first variation's SKU (first ID's SKU - variations are sorted by ID ascending)
       const firstVariant = (item as any).variants[0];

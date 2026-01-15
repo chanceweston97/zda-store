@@ -6,7 +6,7 @@ import { imageBuilder } from "@/lib/data/shop-utils";
 
 interface HeroProps {
   slider: {
-    image?: any;                         // Sanity image object
+    image?: any;                         // CMS image object
     headline?: string;                   // large text
     subheadline?: string;                // "ZDA Communications"
     overlayImageUrl?: string;            // small image on right

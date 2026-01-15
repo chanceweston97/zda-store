@@ -1,4 +1,4 @@
-// NOTE: Sanity PortableTextBlock removed. Using generic type instead.
+// NOTE: PortableTextBlock removed. Using generic type instead.
 type PortableTextBlock = any;
 
 export type WishlistItem = {

@@ -1,14 +1,11 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import useSWR, { useSWRConfig } from "swr";
 import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import Breadcrumb from "../Common/Breadcrumb";
 import CategoryDropdown from "./CategoryDropdown";
 import ClearFilters from "./ClearFilters";
-import SizeDropdown from "./SizeDropdown";
-import SubcategoryFilter from "./SubcategoryFilter";
 
 // Products Hero Section Component (like Company page "Built to connect")
 function ProductsHeroSection() {
@@ -265,10 +262,9 @@ import Pagination from "../Common/Pagination";
 
 type PropsType = {
   data: {
-    allProducts: Product[];
     products: Product[];
     categories: Category[];
-    allProductsCount: number;
+    totalCount: number;
     currentCategory?: Category | null; // Optional: current category for subcategories display
   };
   categoryName?: string; // Optional: category name for hero section (from category page)
@@ -277,127 +273,95 @@ type PropsType = {
 const PRODUCTS_PER_PAGE = 9;
 
 const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) => {
-  const { allProducts, products: initialProducts, categories, allProductsCount, currentCategory } = data;
+  const { products: initialProducts, categories, totalCount: initialTotalCount, currentCategory } = data;
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { mutate } = useSWRConfig();
 
   // Always use list view - grid view removed
   const productStyle = "list";
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // ✅ CLIENT-SIDE FILTERING: Filter products on the client for instant updates
-  // This avoids server round-trips and makes filtering instant
   const categoryParam = searchParams?.get("category") || null;
-  const sizesParam = searchParams?.get("sizes") || null;
-  const minPriceParam = searchParams?.get("minPrice") || null;
-  const maxPriceParam = searchParams?.get("maxPrice") || null;
-  const sortParam = searchParams?.get("sort") || null;
+  const pageParam = searchParams?.get("page");
+  const parsedPage = pageParam ? parseInt(pageParam, 10) : 1;
+  const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
-  // Reset pagination when filters change
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
+  const activeCategoryIds = useMemo(() => {
+    if (categoryParam) {
+      return categoryParam.split(",").filter(Boolean);
     }
-  }, [categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam]);
+    if (currentCategory) {
+      const id = (currentCategory as any).id || currentCategory._id;
+      return id ? [String(id)] : [];
+    }
+    return [];
+  }, [categoryParam, currentCategory]);
 
-  const availableSizes = useMemo(() => {
-    const sizes = allProducts.flatMap((product) => product.sizes || []);
-    return [...new Set(sizes)];
-  }, [allProducts]);
+  const fetchProducts = async (categoryIds?: string) => {
+    const params = new URLSearchParams({
+      per_page: String(PRODUCTS_PER_PAGE),
+      page: String(currentPage),
+    });
+    if (categoryIds) {
+      params.set("category", categoryIds);
+    }
+    const response = await fetch(`/api/products?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error(`Failed to load products (${response.status})`);
+    }
+    return response.json();
+  };
 
-  // Build category map for O(1) lookup
-  const categoryMap = useMemo(() => {
-    const map = new Map<string, any>();
-    const buildMap = (cats: any[]) => {
+  const categoryKey = activeCategoryIds.join(",");
+  const swrKey = activeCategoryIds.length ? categoryKey : "all";
+  const prevCategoryKey = useRef(categoryKey);
+  const productsTopRef = useRef<HTMLDivElement | null>(null);
+  const { data: productsData, isLoading } = useSWR(
+    ["products", swrKey, currentPage],
+    () => fetchProducts(activeCategoryIds.join(",")),
+    {
+      keepPreviousData: true,
+      fallbackData: {
+        products: initialProducts || [],
+        totalCount: initialTotalCount || 0,
+        allCount: initialTotalCount || 0,
+      },
+    }
+  );
+
+  const products: Product[] = productsData?.products || [];
+  const totalCount: number = productsData?.totalCount || 0;
+  const allProductsCount: number =
+    initialTotalCount || productsData?.allCount || totalCount;
+
+  useEffect(() => {
+    const ids: string[] = [];
+    const collectIds = (cats: any[]) => {
       cats.forEach((cat) => {
-        const catHandle = (cat as any).handle || cat.slug?.current || cat.slug;
-        if (catHandle) {
-          map.set(catHandle, cat);
-        }
-        const subcats = cat.subcategories || cat.category_children || [];
-        if (subcats.length > 0) {
-          buildMap(subcats);
-        }
+        const id = cat.id || cat._id;
+        if (id) ids.push(String(id));
+        if (cat.subcategories?.length) collectIds(cat.subcategories);
       });
     };
-    buildMap(categories);
-    return map;
-  }, [categories]);
+    collectIds(categories || []);
 
-  // ✅ CLIENT-SIDE FILTERING: Filter products based on URL params
-  // When on a category page (currentCategory exists), start with the pre-filtered products
-  // When on shop page, start with allProducts
-  const filteredProducts = useMemo(() => {
-    // Start with pre-filtered products if on category page, otherwise use allProducts
-    const baseProducts = currentCategory ? initialProducts : allProducts;
-    let result = [...baseProducts];
+    ids.forEach((id) => {
+      mutate(["products", id, 1], fetchProducts(id), { revalidate: false });
+    });
+  }, [categories, mutate]);
 
-    // Category filter (only apply if not on a category page, or if additional categories are selected)
-    if (categoryParam && !currentCategory) {
-      const categoryHandles = categoryParam.split(",").filter(Boolean);
-      const categoryIdSet = new Set<string>();
-      
-      categoryHandles.forEach((handle) => {
-        const foundCategory = categoryMap.get(handle);
-        if (foundCategory) {
-          const categoryId = foundCategory.id || foundCategory._id;
-          if (categoryId) {
-            categoryIdSet.add(categoryId);
-            const subcats = foundCategory.subcategories || foundCategory.category_children || [];
-            subcats.forEach((sub: any) => {
-              const subId = sub.id || sub._id;
-              if (subId) categoryIdSet.add(subId);
-            });
-          }
-        }
-      });
-
-      if (categoryIdSet.size > 0) {
-        result = result.filter((product: any) => {
-          const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
-          return productCategoryIds.some((id: string) => categoryIdSet.has(id));
-        });
-      }
+  useEffect(() => {
+    if (prevCategoryKey.current === categoryKey) {
+      return;
     }
-
-    // Size filter
-    if (sizesParam) {
-      const selectedSizesSet = new Set(sizesParam.split(",").filter(Boolean));
-      if (selectedSizesSet.size > 0) {
-        result = result.filter((product: any) => {
-          const productSizes = product.sizes || [];
-          return Array.from(selectedSizesSet).some(size => productSizes.includes(size));
-        });
-      }
-    }
-
-    // Price filter
-    const minPriceNum = minPriceParam ? parseFloat(minPriceParam) : null;
-    const maxPriceNum = maxPriceParam ? parseFloat(maxPriceParam) : null;
-    if (minPriceNum !== null || maxPriceNum !== null) {
-      result = result.filter((product: any) => {
-        const productPrice = product.price || 0;
-        if (minPriceNum !== null && productPrice < minPriceNum) return false;
-        if (maxPriceNum !== null && productPrice > maxPriceNum) return false;
-        return true;
-      });
-    }
-
-    // Sort
-    if (sortParam === 'popular') {
-      result = [...result].sort((a, b) => {
-        const aReviews = a.reviews?.length || 0;
-        const bReviews = b.reviews?.length || 0;
-        return bReviews - aReviews;
-      });
-    }
-
-    return result;
-  }, [allProducts, initialProducts, currentCategory, categoryParam, sizesParam, minPriceParam, maxPriceParam, sortParam, categoryMap]);
-
-  // Use filtered products
-  const products = filteredProducts;
+    prevCategoryKey.current = categoryKey;
+    if (currentPage <= 1) return;
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [categoryKey, currentPage, pathname, router, searchParams]);
 
   const handleStickyMenu = () => {
     if (window.scrollY >= 80) {
@@ -426,10 +390,20 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     };
   }, [productSidebar]);
 
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    return products.slice(start, start + PRODUCTS_PER_PAGE);
-  }, [products, currentPage]);
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (page <= 1) {
+      params.delete("page");
+    } else {
+      params.set("page", String(page));
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    if (productsTopRef.current) {
+      productsTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   // Get category name from prop or URL params
   const categoryName = useMemo(() => {
@@ -437,10 +411,21 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     if (categoryNameProp) return categoryNameProp;
     // Otherwise get from URL params
     if (!categoryParam) return null;
-    const category = categories.find(
-      (cat) => ((cat as any).handle || cat.slug?.current || (cat as any).slug) === categoryParam
-    );
-    return (category as any)?.name || category?.title || categoryParam;
+    const categoryId = categoryParam?.split(",")[0];
+    if (!categoryId) return null;
+    const findCategory = (cats: any[]): any => {
+      for (const cat of cats) {
+        const id = cat.id || cat._id;
+        if (String(id) === categoryId) return cat;
+        if (cat.subcategories?.length) {
+          const found = findCategory(cat.subcategories);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const category = findCategory(categories);
+    return (category as any)?.name || category?.title || categoryId;
   }, [categoryParam, categories, categoryNameProp]);
 
   return (
@@ -480,12 +465,12 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
                 <ClearFilters />
 
                   {/* Category filter - Only show on shop page */}
-                <CategoryDropdown categories={categories} allProducts={allProducts} />
+                <CategoryDropdown categories={categories} />
 
                 {/* gender box */}
                 {/* <GenderDropdown genders={genders} /> */}
 
-                <SizeDropdown availableSizes={availableSizes} />
+                {/* Size filter removed */}
               </div>
             </div>
             )}
@@ -498,7 +483,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
                   {/* top bar left */}
                   <TopBar
                     allProductsCount={allProductsCount}
-                    showingProductsCount={products.length}
+                    showingProductsCount={totalCount}
                   />
 
                   {/* Grid/List view toggle removed - always use list view */}
@@ -506,9 +491,61 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
               </div>
 
               {/* Products List View - Always use list view */}
-              {paginatedProducts.length ? (
+              <div ref={productsTopRef} />
+              {isLoading ? (
                 <div className="flex flex-col gap-7.5">
-                  {paginatedProducts.map((product) => (
+                  {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, index) => (
+                    <div
+                      key={`product-skeleton-${index}`}
+                      className="bg-white rounded-lg shadow-1 overflow-hidden mb-6 animate-pulse"
+                    >
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Left image placeholder */}
+                        <div className="flex-shrink-0 relative mx-auto lg:mx-0">
+                          <div
+                            className="relative rounded-lg border border-gray-3 flex items-center justify-center bg-gray-1 overflow-hidden"
+                            style={{
+                              width: "300px",
+                              height: "300px",
+                              aspectRatio: "1/1",
+                            }}
+                          >
+                            <div className="w-full h-full bg-gray-2" />
+                          </div>
+                        </div>
+
+                        {/* Right content placeholder */}
+                        <div className="flex-1 flex flex-col justify-start px-4 lg:px-0 w-full">
+                          <div
+                            className="rounded-[10px] bg-[#F1F6FF] w-full mb-4"
+                            style={{
+                              display: "flex",
+                              padding: "15px",
+                              flexDirection: "column",
+                              alignItems: "flex-start",
+                              gap: "5px",
+                              alignSelf: "stretch",
+                            }}
+                          >
+                            <div className="h-5 w-40 rounded bg-gray-2" />
+                            <div className="h-7 w-3/4 rounded bg-gray-2" />
+                            <div className="h-6 w-24 rounded bg-gray-2" />
+                          </div>
+                          <div className="h-5 w-2/3 rounded bg-gray-2 mb-4" />
+                          <div className="space-y-2">
+                            <div className="h-4 w-1/2 rounded bg-gray-2" />
+                            <div className="h-4 w-2/3 rounded bg-gray-2" />
+                            <div className="h-4 w-3/4 rounded bg-gray-2" />
+                            <div className="h-4 w-5/6 rounded bg-gray-2" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : products.length ? (
+                <div className="flex flex-col gap-7.5">
+                  {products.map((product) => (
                       <SingleListItem key={product._id} item={product} />
                   ))}
                 </div>
@@ -518,9 +555,9 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
 
               <Pagination
                 currentPage={currentPage}
-                totalCount={products.length}
+                totalCount={totalCount}
                 pageSize={PRODUCTS_PER_PAGE}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
               />
             </div>
 

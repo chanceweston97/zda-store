@@ -1,4 +1,4 @@
-// PortableTextBlock type - no longer from Sanity
+// PortableTextBlock type - no longer from a CMS schema
 type PortableTextBlock = any;
 import { Author } from "./author";
 

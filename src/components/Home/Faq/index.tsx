@@ -67,14 +67,14 @@ const DEFAULT_FAQS: FaqItem[] = [
 ];
 
 export default function FaqSection({ faqData }: FaqSectionProps) {
-  // Fallback values if no data from Sanity
+  // Fallback values if no CMS data is provided
   const title = faqData?.title || "Frequently Asked Questions";
   const contactButton = faqData?.contactButton || {
     text: "Contact Us",
     link: "/contact",
   };
 
-  // Use Sanity data or fallback to defaults
+  // Use CMS data or fallback to defaults
   const faqItems = faqData?.items && faqData.items.length > 0
     ? faqData.items.sort((a, b) => (a.order || 0) - (b.order || 0))
     : DEFAULT_FAQS;

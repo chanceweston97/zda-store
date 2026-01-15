@@ -37,7 +37,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
     setIsVisible(true);
   }, []);
 
-  // Fallback values if no data from Sanity
+  // Fallback values if no CMS data is provided
   const backgroundImage = bannerData?.backgroundImage
     ? imageBuilder(bannerData.backgroundImage).url()
     : "/images/hero/banner.webp";

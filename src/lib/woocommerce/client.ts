@@ -23,9 +23,16 @@ function getAuthHeader(): string {
 /**
  * Base fetch function for WooCommerce API
  */
+type WcFetchOptions = RequestInit & {
+  next?: {
+    revalidate?: number;
+    tags?: string[];
+  };
+};
+
 export async function wcFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: WcFetchOptions = {}
 ): Promise<T> {
   if (!WC_API_URL || !WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
     throw new Error(
@@ -46,14 +53,19 @@ export async function wcFetch<T>(
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
     try {
-      const response = await fetch(url, {
+      const fetchOptions: WcFetchOptions = {
         ...options,
         headers,
-        cache: "no-store",
         signal: controller.signal,
         // Add keepalive for better connection handling
         keepalive: true,
-      } as RequestInit);
+      };
+
+      if (options.cache === undefined) {
+        fetchOptions.cache = "no-store";
+      }
+
+      const response = await fetch(url, fetchOptions);
       
       clearTimeout(timeoutId);
 

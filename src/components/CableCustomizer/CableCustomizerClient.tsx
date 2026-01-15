@@ -13,7 +13,7 @@ import Newsletter from "../Common/Newsletter";
 import { formatPrice } from "@/utils/price";
 import WorkWithUs from "../Home/Hero/WorkWithUs";
 
-// Types for Sanity data
+// Types for CMS data
 interface CableCustomizerData {
   cableSeries: Array<{ id: string; name: string; slug: string }>;
   cableTypes: Array<{
@@ -74,7 +74,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Build lookup maps from Sanity data
+  // Build lookup maps from CMS data
   const cableSeriesMap = useMemo(() => {
     const map = new Map<string, { id: string; name: string; slug: string }>();
     data.cableSeries.forEach((series) => {
@@ -163,7 +163,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     return pricing?.price || 0;
   };
 
-  // Calculate price based on Sanity data
+  // Calculate price based on CMS data
   const calculatePrice = (config: CableConfig & { cableType: string; connector1: string; connector2: string; length: number }): number => {
     const cableType = cableTypesMap.get(config.cableType);
     if (!cableType) return 0;
@@ -187,7 +187,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     return Math.round(unitPrice * 100) / 100;
   };
 
-  // Get connector image from Sanity or fallback
+  // Get connector image from CMS or fallback
   const getConnectorImage = (connectorSlug: string): string => {
     const connector = connectorsMap.get(connectorSlug);
     if (connector?.image) {

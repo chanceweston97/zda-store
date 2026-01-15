@@ -1,4 +1,4 @@
-// Local data fetching utilities - replaces Sanity
+// Local data fetching utilities
 import { Product } from "@/data/types";
 import { Category } from "@/data/types";
 import { getAllProducts as getAllProductsData, getProductBySlug as getProductBySlugData, getProductsByCategory, getProductsByType } from "@/data/products";
@@ -11,8 +11,8 @@ import { ourStory } from "@/data/content/our-story";
 import { faqs } from "@/data/content/faq";
 import { countdown } from "@/data/content/countdown";
 
-// Convert local Product to Sanity-compatible format
-function convertProductToSanityFormat(product: Product): any {
+// Convert local Product to frontend format
+function convertProductToFrontendFormat(product: Product): any {
   return {
     ...product,
     _id: product._id || product.id,
@@ -49,13 +49,13 @@ function convertProductToSanityFormat(product: Product): any {
   };
 }
 
-// Convert local Category to Sanity-compatible format
-function convertCategoryToSanityFormat(category: Category): any {
+// Convert local Category to frontend format
+function convertCategoryToFrontendFormat(category: Category): any {
   return {
     ...category,
     _id: category._id || category.id,
     slug: { current: category.slug, _type: "slug" },
-    subcategories: category.subcategories?.map(convertCategoryToSanityFormat),
+    subcategories: category.subcategories?.map(convertCategoryToFrontendFormat),
     parent: category.parent ? {
       ...category.parent,
       _id: category.parent._id || category.parent.id,
@@ -66,33 +66,33 @@ function convertCategoryToSanityFormat(category: Category): any {
 
 export async function getCategories() {
   const categories = getAllCategoriesData();
-  return categories.map(convertCategoryToSanityFormat);
+  return categories.map(convertCategoryToFrontendFormat);
 }
 
 export async function getCategoryBySlug(slug: string) {
   const category = getCategoryBySlugData(slug);
-  return category ? convertCategoryToSanityFormat(category) : null;
+  return category ? convertCategoryToFrontendFormat(category) : null;
 }
 
 export async function getCategoriesWithSubcategories() {
   const categories = getCategoriesWithSubcategoriesData();
-  return categories.map(convertCategoryToSanityFormat);
+  return categories.map(convertCategoryToFrontendFormat);
 }
 
 export async function getCategoryById(id: string) {
   const categories = getAllCategoriesData();
   const category = categories.find(c => c.id === id || c._id === id);
-  return category ? convertCategoryToSanityFormat(category) : null;
+  return category ? convertCategoryToFrontendFormat(category) : null;
 }
 
 export async function getAllProducts() {
   const products = getAllProductsData();
-  return products.map(convertProductToSanityFormat);
+  return products.map(convertProductToFrontendFormat);
 }
 
 export async function getProduct(slug: string) {
   const product = getProductBySlugData(slug);
-  return product ? convertProductToSanityFormat(product) : null;
+  return product ? convertProductToFrontendFormat(product) : null;
 }
 
 export async function getProductsByFilter(query: string, tags: string[]): Promise<any[]> {
@@ -119,7 +119,7 @@ export async function getProductsByFilter(query: string, tags: string[]): Promis
     products = getProductsByType("connector");
   }
   
-  return products.map(convertProductToSanityFormat);
+  return products.map(convertProductToFrontendFormat);
 }
 
 export async function getAllProductsCount() {
@@ -208,11 +208,11 @@ export async function getCableSeries() {
 }
 
 export async function getCableProducts() {
-  return getProductsByType("cable").map(convertProductToSanityFormat);
+  return getProductsByType("cable").map(convertProductToFrontendFormat);
 }
 
 export async function getConnectorProducts() {
-  return getProductsByType("connector").map(convertProductToSanityFormat);
+  return getProductsByType("connector").map(convertProductToFrontendFormat);
 }
 
 export async function getCableTypes() {
@@ -231,7 +231,7 @@ export async function getConnectors() {
   return cableCustomizerData.connectors || [];
 }
 
-// Image builder - maintains compatibility with Sanity image format
+// Image builder - maintains compatibility with image objects
 export function imageBuilder(source: any) {
   // Return an object with url() method for compatibility
   return {

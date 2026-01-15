@@ -1,4 +1,4 @@
-// NOTE: Sanity has been removed. Blog functionality is not available.
+// NOTE: Blog functionality is not available.
 
 import type { Blog } from '@/types/blogItem';
 
@@ -7,7 +7,7 @@ type PropsType = {
 };
 
 export default async function LatestPosts({ data }: PropsType) {
-  // Return empty state since Sanity blog data is no longer available
+  // Return empty state since blog data is not available
   return (
     <div className="shadow-1 bg-white rounded-xl mt-7.5">
       <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3">

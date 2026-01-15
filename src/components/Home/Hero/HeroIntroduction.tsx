@@ -30,7 +30,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
   const buttonsRef = useScrollAnimation({ threshold: 0.2 });
   const imageRef = useScrollAnimation({ threshold: 0.2 });
 
-  // Fallback values if no data from Sanity
+  // Fallback values if no CMS data is provided
   const title = introductionData?.title || "Enabling wireless networks since 2008";
   const description = introductionData?.description || "At ZDA Communications, we care about one thing above all: reliable wireless performance. We design and supply industrial-grade antennas, cabling, and RF accessories that help homes, enterprises, and field teams achieve clear, consistent connectivity. ";
   const buttons = (introductionData?.buttons || [

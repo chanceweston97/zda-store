@@ -4,7 +4,7 @@
  */
 
 import { getAllProducts as getLocalProducts } from "@/lib/data/shop-utils";
-import { getProducts, getProductBySlug as getWCProductBySlug, convertWCToSanityProduct } from "@/lib/woocommerce/products";
+import { getProducts, getProductBySlug as getWCProductBySlug, convertWCToProduct } from "@/lib/woocommerce/products";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
 /**
@@ -29,7 +29,9 @@ export async function getAllProducts() {
         // Filter out hidden products (already filtered in getProducts, but double-check)
         const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
         // Convert products (now async to fetch variations)
-        const converted = await Promise.all(visibleProducts.map(convertWCToSanityProduct));
+        const converted = await Promise.all(
+          visibleProducts.map((product) => convertWCToProduct(product, true))
+        );
         console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         return converted;
       } else {
@@ -74,9 +76,9 @@ export async function getProductBySlug(slug: string) {
           console.log(`[getProductBySlug] Product ${slug} is hidden, skipping`);
           throw new Error("Product is hidden");
         }
-        // Use convertWCToSanityProductWithVariations for PDP to get full variant details
-        const { convertWCToSanityProductWithVariations } = await import("@/lib/woocommerce/products");
-        const converted = await convertWCToSanityProductWithVariations(wcProduct);
+        // Use convertWCToProductWithVariations for PDP to get full variant details
+        const { convertWCToProductWithVariations } = await import("@/lib/woocommerce/products");
+        const converted = await convertWCToProductWithVariations(wcProduct);
         console.log(`[getProductBySlug] Successfully fetched product with variations from WooCommerce: ${slug}`);
         return converted;
       }

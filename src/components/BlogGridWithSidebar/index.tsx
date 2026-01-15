@@ -1,4 +1,4 @@
-// NOTE: Sanity has been removed. Blog functionality is not available.
+// NOTE: Blog functionality is not available.
 
 import Breadcrumb from "../Common/Breadcrumb";
 

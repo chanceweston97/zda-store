@@ -1,17 +1,15 @@
 "use client";
 import { Category } from "@/types/category";
-import { Product } from "@/types/product";
-import { useState, useMemo, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown } from "../Header/icons";
 import { CheckMarkIcon2 } from "@/assets/icons";
 
 type PropsType = {
   categories: Category[];
-  allProducts?: Product[];
 };
 
-const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
+const CategoryDropdown = ({ categories }: PropsType) => {
   const [isOpen, setIsOpen] = useState(true);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
   const [isPending, startTransition] = useTransition();
@@ -54,15 +52,15 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       
       categories.forEach((category) => {
         if (category.subcategories && category.subcategories.length > 0) {
-          const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
+          const categoryId = String(category.id || category._id || "");
           const hasCheckedSubcategory = category.subcategories.some(
             (sub: any) => {
-              const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
-              return selectedCategories.has(subHandle);
+              const subId = String(sub.id || sub._id || "");
+              return selectedCategories.has(subId);
             }
           );
-          if (hasCheckedSubcategory) {
-            newOpenCategories[categoryHandle] = true;
+          if (hasCheckedSubcategory && categoryId) {
+            newOpenCategories[categoryId] = true;
           }
         }
       });
@@ -78,57 +76,6 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }
   }, [selectedCategories, categories]);
 
-  // Calculate product counts per category (like front project)
-  // For parent categories: ONLY sum of subcategory counts (not parent's own products)
-  // For subcategories: count their own products
-  // OPTIMIZED: Build a map of product category IDs for O(1) lookup instead of filtering
-  const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    
-    // Build a map: categoryId -> product count (O(n) instead of O(n*m))
-    const categoryProductMap = new Map<string, number>();
-    
-    // First pass: count products per category ID
-    allProducts.forEach((product) => {
-      const productCategoryIds = product.categories?.map((cat: any) => cat.id).filter(Boolean) || [];
-      productCategoryIds.forEach((categoryId: string) => {
-        categoryProductMap.set(categoryId, (categoryProductMap.get(categoryId) || 0) + 1);
-      });
-    });
-
-    // Second pass: assign counts to category handles
-    categories.forEach((category) => {
-      const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
-      const categoryId = category.id || category._id;
-      
-      // For parent categories with subcategories: ONLY sum subcategory counts
-      if (category.subcategories && category.subcategories.length > 0) {
-        let subcategorySum = 0;
-        category.subcategories.forEach((sub: any) => {
-          const subId = sub.id || sub._id;
-          if (subId) {
-            const subCount = categoryProductMap.get(subId) || 0;
-            subcategorySum += subCount;
-            // Also store individual subcategory count
-            const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
-            if (subHandle) {
-              counts[subHandle] = subCount;
-            }
-          }
-        });
-        // Parent category count = sum of subcategories ONLY (not parent's own products)
-        counts[categoryHandle] = subcategorySum;
-      } else {
-        // If no subcategories, this is a leaf category - count its own products
-        if (categoryId) {
-          counts[categoryHandle] = categoryProductMap.get(categoryId) || 0;
-        }
-      }
-    });
-
-    return counts;
-  }, [categories, allProducts]);
-
   const toggleCategory = (categoryHandle: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -138,14 +85,14 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     }));
   };
 
-  const handleCategory = (categoryHandle: string, isChecked: boolean) => {
+  const handleCategory = (categoryId: string, isChecked: boolean) => {
     // ✅ INSTANT UI: Update local state immediately (checkbox appears checked instantly)
     setSelectedCategories((prev) => {
       const newSet = new Set(prev);
       if (isChecked) {
-        newSet.add(categoryHandle);
+        newSet.add(categoryId);
       } else {
-        newSet.delete(categoryHandle);
+        newSet.delete(categoryId);
       }
       return newSet;
     });
@@ -155,12 +102,12 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
     
     if (isChecked) {
       const existingCategories = params.get("category")?.split(",").filter(Boolean) || [];
-      if (!existingCategories.includes(categoryHandle)) {
-        params.set("category", [...existingCategories, categoryHandle].join(","));
+      if (!existingCategories.includes(categoryId)) {
+        params.set("category", [...existingCategories, categoryId].join(","));
       }
     } else {
       const existingCategories = params.get("category")?.split(",").filter(Boolean) || [];
-      const newCategories = existingCategories.filter((id) => id !== categoryHandle);
+      const newCategories = existingCategories.filter((id) => id !== categoryId);
 
       if (newCategories.length > 0) {
         params.set("category", newCategories.join(","));
@@ -178,16 +125,17 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   // Handle parent category click - toggle all subcategories at once
   const handleParentCategory = (subcategories: Category[], isChecked: boolean) => {
     // ✅ INSTANT UI: Update local state immediately
-    const subcategoryHandles = subcategories.map((sub: any) => 
-      (sub as any).handle || sub.slug?.current || sub.slug
-    );
+    const subcategoryIds = subcategories
+      .map((sub: any) => sub.id || sub._id)
+      .filter(Boolean)
+      .map(String);
     
     setSelectedCategories((prev) => {
       const newSet = new Set(prev);
       if (isChecked) {
-        subcategoryHandles.forEach(handle => newSet.add(handle));
+        subcategoryIds.forEach((id) => newSet.add(id));
       } else {
-        subcategoryHandles.forEach(handle => newSet.delete(handle));
+        subcategoryIds.forEach((id) => newSet.delete(id));
       }
       return newSet;
     });
@@ -198,11 +146,11 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
 
     if (isChecked) {
       const existingCategories = categoryParam ? categoryParam.split(",").filter(Boolean) : [];
-      const newCategories = [...new Set([...existingCategories, ...subcategoryHandles])];
+      const newCategories = [...new Set([...existingCategories, ...subcategoryIds])];
       params.set("category", newCategories.join(","));
     } else {
       const existingCategories = categoryParam?.split(",").filter(Boolean) || [];
-      const newCategories = existingCategories.filter((id) => !subcategoryHandles.includes(id));
+      const newCategories = existingCategories.filter((id) => !subcategoryIds.includes(id));
 
       if (newCategories.length > 0) {
         params.set("category", newCategories.join(","));
@@ -217,8 +165,8 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
   };
 
   // ✅ Use local state for instant UI feedback
-  const isCategoryChecked = (categoryHandle: string) => {
-    return selectedCategories.has(categoryHandle);
+  const isCategoryChecked = (categoryId: string) => {
+    return selectedCategories.has(categoryId);
   };
 
   // Check if all subcategories are selected for a parent category
@@ -231,18 +179,22 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       return false;
     }
     
-    const allSubcategoryHandles = category.subcategories.map((sub: any) => 
-      (sub as any).handle || sub.slug?.current || sub.slug
-    );
+    const allSubcategoryIds = category.subcategories
+      .map((sub: any) => sub.id || sub._id)
+      .filter(Boolean)
+      .map(String);
     
-    return allSubcategoryHandles.every((subHandle) => selectedCategories.has(subHandle));
+    return allSubcategoryIds.every((subId) => selectedCategories.has(subId));
   };
 
-  const getCategoryProductCount = (category: Category) => {
-    // Always use dynamically calculated counts (which only sum subcategories for parents)
-    // This ensures parent categories show ONLY subcategory counts, not their own products
-    const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
-    return categoryCounts[categoryHandle] || 0;
+  const getCategoryCount = (category: Category) => {
+    if (category.subcategories && category.subcategories.length > 0) {
+      return category.subcategories.reduce(
+        (sum, sub) => sum + (sub.productCount || 0),
+        0
+      );
+    }
+    return category.productCount || 0;
   };
 
   if (!categories.length) return null;
@@ -269,28 +221,27 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
       >
         {categories.map((category) => {
           const hasSubcategories = category.subcategories && category.subcategories.length > 0;
-          const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
+          const categoryId = String(category.id || category._id || "");
           // Check if any subcategory is checked - if so, keep parent open
           const hasCheckedSubcategory = hasSubcategories && category.subcategories?.some(
             (sub: any) => {
-              const subHandle = (sub as any).handle || sub.slug?.current || sub.slug;
-              return isCategoryChecked(subHandle);
+              const subId = String(sub.id || sub._id || "");
+              return isCategoryChecked(subId);
             }
           );
-          const isCategoryOpen = openCategories[categoryHandle] ?? hasCheckedSubcategory ?? false;
+          const isCategoryOpen = openCategories[categoryId] ?? hasCheckedSubcategory ?? false;
           // For parent categories with subcategories, check if ALL subcategories are selected
           // For categories without subcategories, use the normal check
           const isChecked = hasSubcategories
             ? areAllSubcategoriesChecked(category)
-            : isCategoryChecked(categoryHandle);
-          const totalProductCount = getCategoryProductCount(category);
+            : isCategoryChecked(categoryId);
 
           return (
-            <div key={categoryHandle} className="flex flex-col gap-2">
+            <div key={categoryId} className="flex flex-col gap-2">
               {/* Parent Category */}
               <div className="flex items-center justify-start gap-2">
                 <label
-                  htmlFor={categoryHandle}
+                  htmlFor={categoryId}
                   className="flex items-center justify-start gap-2 cursor-pointer group hover:text-blue flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -306,13 +257,13 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
                       if (category.subcategories && category.subcategories.length > 0) {
                         handleParentCategory(category.subcategories, e.target.checked);
                       } else {
-                        handleCategory(categoryHandle, e.target.checked);
+                        handleCategory(categoryId, e.target.checked);
                       }
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
-                    id={categoryHandle}
+                    id={categoryId}
                   />
 
                   <div
@@ -331,14 +282,14 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
                     }}
                     className="peer-checked:text-blue"
                   >
-                    {category.title} ({totalProductCount})
+                    {category.title} ({getCategoryCount(category)})
                   </span>
                 </label>
 
                 {hasSubcategories && (
                   <button
                     type="button"
-                    onClick={(e) => toggleCategory(categoryHandle, e)}
+                    onClick={(e) => toggleCategory(categoryId, e)}
                     className="p-1 hover:bg-gray-100 rounded flex-shrink-0"
                     aria-label="Toggle subcategories"
                   >
@@ -361,14 +312,13 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
                   }`}
                 >
                   {category.subcategories?.map((subcategory) => {
-                    const subHandle = (subcategory as any).handle || subcategory.slug?.current || subcategory.slug;
-                    const isSubChecked = isCategoryChecked(subHandle);
-                    const subCount = categoryCounts[subHandle] || 0;
+                    const subId = String(subcategory.id || subcategory._id || "");
+                    const isSubChecked = isCategoryChecked(subId);
 
                     return (
                       <label
-                        htmlFor={subHandle}
-                        key={subHandle}
+                        htmlFor={subId}
+                        key={subId}
                         className="flex items-center justify-start gap-2 cursor-pointer group hover:text-blue"
                       >
                         <input
@@ -380,12 +330,12 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
                             if (e.target.checked && !isCategoryOpen) {
                               setOpenCategories((prev) => ({
                                 ...prev,
-                                [categoryHandle]: true,
+                                [categoryId]: true,
                               }));
                             }
-                            handleCategory(subHandle, e.target.checked);
+                            handleCategory(subId, e.target.checked);
                           }}
-                          id={subHandle}
+                          id={subId}
                         />
 
                         <div
@@ -396,7 +346,7 @@ const CategoryDropdown = ({ categories, allProducts = [] }: PropsType) => {
                         </div>
 
                         <span className="flex-1 peer-checked:text-blue text-sm">
-                          {subcategory.title} ({subCount})
+                          {subcategory.title} ({subcategory.productCount || 0})
                         </span>
                       </label>
                     );

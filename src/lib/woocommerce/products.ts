@@ -122,9 +122,9 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
  * Convert WooCommerce product with full variation details
  * This is used for PDP where we need complete variant information
  */
-export async function convertWCToSanityProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
+export async function convertWCToProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
   // First do the basic conversion
-  const baseProduct = await convertWCToSanityProduct(wcProduct);
+  const baseProduct = await convertWCToProduct(wcProduct);
   
   // If product has variations, fetch full variation details
   if (wcProduct.variations && wcProduct.variations.length > 0) {
@@ -202,7 +202,7 @@ export async function convertWCToSanityProductWithVariations(wcProduct: WooComme
       // Replace placeholder variants with full variant data
       baseProduct.variants = fullVariants;
     } catch (error) {
-      console.error(`[convertWCToSanityProductWithVariations] Error fetching variations:`, error);
+      console.error(`[convertWCToProductWithVariations] Error fetching variations:`, error);
       // Keep the placeholder variants if fetch fails
     }
   }
@@ -294,7 +294,10 @@ export async function getCategories(): Promise<Array<{
     description?: string;
     count?: number;
     parent?: number;
-  }>>("/products/categories?per_page=100");
+  }>>("/products/categories?per_page=100", {
+    cache: "force-cache",
+    next: { revalidate: 3600, tags: ["wc-categories"] },
+  });
 }
 
 /**
@@ -302,7 +305,7 @@ export async function getCategories(): Promise<Array<{
  * This matches the format expected by the shop page components
  * @param skipVariations - If true, skip fetching variations (faster for listing pages)
  */
-export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
+export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
@@ -416,7 +419,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
   if (datasheetImageRaw && !skipVariations) {
     // Skip ACF field keys - they need to be resolved differently
     if (isACFFieldKey(datasheetImageRaw)) {
-      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetImage is an ACF field key (${datasheetImageRaw}), not a media ID. This needs to be resolved from ACF field data.`);
+      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: datasheetImage is an ACF field key (${datasheetImageRaw}), not a media ID. Resolve it from ACF field data.`);
       datasheetImage = null; // ACF field keys can't be resolved this way
     } else if (isMediaId(datasheetImageRaw)) {
       datasheetImage = await resolveMediaId(datasheetImageRaw);
@@ -424,7 +427,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
       datasheetImage = datasheetImageRaw;
     } else {
       // Invalid format, skip it
-      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetImage format:`, datasheetImageRaw);
+      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: Invalid datasheetImage format:`, datasheetImageRaw);
       datasheetImage = null;
     }
   } else if (datasheetImageRaw && typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
@@ -437,7 +440,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
   if (datasheetPdfRaw && !skipVariations) {
     // Skip ACF field keys - they need to be resolved differently
     if (isACFFieldKey(datasheetPdfRaw)) {
-      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: datasheetPdf is an ACF field key (${datasheetPdfRaw}), not a media ID. This needs to be resolved from ACF field data.`);
+      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: datasheetPdf is an ACF field key (${datasheetPdfRaw}), not a media ID. Resolve it from ACF field data.`);
       datasheetPdf = null; // ACF field keys can't be resolved this way
     } else if (isMediaId(datasheetPdfRaw)) {
       datasheetPdf = await resolveMediaId(datasheetPdfRaw);
@@ -445,7 +448,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
       datasheetPdf = datasheetPdfRaw;
     } else {
       // Invalid format, skip it
-      console.warn(`[convertWCToSanityProduct] Product ${wcProduct.id}: Invalid datasheetPdf format:`, datasheetPdfRaw);
+      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: Invalid datasheetPdf format:`, datasheetPdfRaw);
       datasheetPdf = null;
     }
   } else if (datasheetPdfRaw && typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
@@ -507,7 +510,7 @@ export async function convertWCToSanityProduct(wcProduct: WooCommerceProduct, sk
         });
       });
     } catch (error) {
-      console.error(`[convertWCToSanityProduct] Error fetching variations for product ${wcProduct.id}:`, error);
+      console.error(`[convertWCToProduct] Error fetching variations for product ${wcProduct.id}:`, error);
       // Fallback: create placeholder variants if fetch fails
       // But mark them so we know they need to be fetched
       wcProduct.variations.forEach((variationId: number) => {

@@ -1,5 +1,5 @@
 // Type definitions for local data files
-// These match the Sanity schema structure but use local data
+// These match the frontend data shape but use local data
 
 export type ProductType = "antenna" | "cable" | "connector";
 

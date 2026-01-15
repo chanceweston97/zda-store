@@ -4,7 +4,6 @@ import { Product } from "@/types/product";
 import { useState } from "react";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
-import CustomSelect from "../ShopWithSidebar/CustomSelect";
 import Pagination from "../Common/Pagination";
 
 const PRODUCTS_PER_PAGE = 8;
@@ -26,8 +25,6 @@ const ShopWithoutSidebar = ({ shopData }: { shopData: Product[] }) => {
               <div className="flex items-center justify-between">
                 {/* <!-- top bar left --> */}
                 <div className="flex flex-wrap items-center gap-4">
-                  <CustomSelect />
-
                   <p>
                     Showing{" "}
                     <span className="text-dark">
