@@ -155,21 +155,86 @@ export async function GET(req: Request) {
     }
 
     const wcProducts = (await res.json()) as WooCommerceProduct[];
+    
+    // Log all products for debugging
+    console.log(`[API /products] Total products from WooCommerce: ${wcProducts.length}`);
+    wcProducts.forEach((p) => {
+      console.log(`[API /products] Product: ${p.name} | Status: ${p.status} | Visibility: ${p.catalog_visibility}`);
+    });
+    
     const visibleProducts = wcProducts.filter((product) => {
+      // Normalize visibility value to lowercase for case-insensitive comparison
+      const visibility = (product.catalog_visibility || "").toLowerCase();
+      
       const isVisible =
-        product.catalog_visibility !== "hidden" &&
-        product.catalog_visibility !== "search" &&
+        visibility !== "hidden" &&
+        visibility !== "search" &&
         product.status !== "private" &&
         product.status !== "draft";
       const hasCategory =
         (product.categories?.length || 0) > 0 &&
         !product.categories?.some((cat) => cat.slug === "uncategorized");
-      return isVisible && hasCategory;
+      const shouldShow = isVisible && hasCategory;
+      
+      if (!shouldShow) {
+        console.log(`[API /products] FILTERED OUT: ${product.name} | Status: ${product.status} | Visibility: ${product.catalog_visibility} (normalized: ${visibility}) | isVisible: ${isVisible} | hasCategory: ${hasCategory}`);
+      }
+      
+      return shouldShow;
     });
-    const totalCount = await fetchShowableCount(categoryFilterParam || undefined);
-    const allCount = await fetchShowableCount(
-      categoryFilterIds.length > 0 ? categoryFilterIds.join(",") : undefined
-    );
+    
+    console.log(`[API /products] Visible products after filtering: ${visibleProducts.length}`);
+    
+    // For category-specific requests, use WooCommerce count
+    // For "all products", we need to fetch and count because WooCommerce doesn't know about our uncategorized filter
+    const totalCount = hasCategoryFilter
+      ? await fetchShowableCount(categoryFilterParam || undefined)
+      : visibleProducts.length;
+    
+    // For allCount (used when no category selected), fetch all products and apply same filtering
+    let allCount: number;
+    if (hasCategoryFilter) {
+      // If a specific category is selected, fetch the global count
+      allCount = await fetchShowableCount(
+        categoryFilterIds.length > 0 ? categoryFilterIds.join(",") : undefined
+      );
+    } else {
+      // If no category filter, fetch all products and count after filtering
+      const allProductsParams = new URLSearchParams({
+        consumer_key: consumerKey,
+        consumer_secret: consumerSecret,
+        per_page: "100", // Get all products
+        _fields: "id,categories,status,catalog_visibility",
+        status: "publish",
+      });
+      if (categoryFilterIds.length > 0) {
+        allProductsParams.append("category", categoryFilterIds.join(","));
+      }
+      
+      const allProductsRes = await fetch(`${apiUrl}/products?${allProductsParams.toString()}`, {
+        next: { revalidate: 60, tags: ["wc-products"] },
+      });
+      
+      if (allProductsRes.ok) {
+        const allProducts = (await allProductsRes.json()) as WooCommerceProduct[];
+        // Apply same filtering logic
+        allCount = allProducts.filter((product) => {
+          const visibility = (product.catalog_visibility || "").toLowerCase();
+          const isVisible =
+            visibility !== "hidden" &&
+            visibility !== "search" &&
+            product.status !== "private" &&
+            product.status !== "draft";
+          const hasCategory =
+            (product.categories?.length || 0) > 0 &&
+            !product.categories?.some((cat) => cat.slug === "uncategorized");
+          return isVisible && hasCategory;
+        }).length;
+        console.log(`[API /products] Calculated allCount from actual products: ${allCount}`);
+      } else {
+        allCount = visibleProducts.length;
+      }
+    }
 
     const fetchFirstVariationSku = async (
       productId: number

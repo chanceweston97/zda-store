@@ -68,19 +68,37 @@ export async function getProducts(params?: {
   
   const products = await wcFetch<WooCommerceProduct[]>(endpoint);
   
+  // Log all products for debugging
+  console.log(`[getProducts] Total products from WooCommerce: ${products.length}`);
+  products.forEach((p) => {
+    console.log(`[getProducts] Product: ${p.name} | Status: ${p.status} | Visibility: ${p.catalog_visibility}`);
+  });
+  
   // Filter out hidden/private/draft products and uncategorized items
   // These products should not appear in shop pages
-  return products.filter((product) => {
+  const filtered = products.filter((product) => {
+    // Normalize visibility value to lowercase for case-insensitive comparison
+    const visibility = (product.catalog_visibility || "").toLowerCase();
+    
     const isVisible =
-      product.catalog_visibility !== "hidden" &&
-      product.catalog_visibility !== "search" &&
+      visibility !== "hidden" &&
+      visibility !== "search" &&
       product.status !== "private" &&
       product.status !== "draft";
     const hasCategory =
       (product.categories?.length || 0) > 0 &&
       !product.categories?.some((cat) => cat.slug === "uncategorized");
-    return isVisible && hasCategory;
+    const shouldShow = isVisible && hasCategory;
+    
+    if (!shouldShow) {
+      console.log(`[getProducts] FILTERED OUT: ${product.name} | Status: ${product.status} | Visibility: ${product.catalog_visibility} (normalized: ${visibility}) | isVisible: ${isVisible} | hasCategory: ${hasCategory}`);
+    }
+    
+    return shouldShow;
   });
+  
+  console.log(`[getProducts] Visible products after filtering: ${filtered.length}`);
+  return filtered;
 }
 
 /**
@@ -312,8 +330,7 @@ export async function getCategories(): Promise<Array<{
     count?: number;
     parent?: number;
   }>>("/products/categories?per_page=100", {
-    cache: "force-cache",
-    next: { revalidate: 3600, tags: ["wc-categories"] },
+    next: { revalidate: 60, tags: ["wc-categories"] },
   });
 }
 

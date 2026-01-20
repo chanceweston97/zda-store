@@ -299,15 +299,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     return [];
   }, [categoryParam, currentCategory]);
 
-  const inFlightController = useRef<AbortController | null>(null);
-
   const fetchProducts = async (categoryIds?: string, pageOverride?: number) => {
-    if (inFlightController.current) {
-      inFlightController.current.abort();
-    }
-    const controller = new AbortController();
-    inFlightController.current = controller;
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
     const params = new URLSearchParams({
       per_page: String(PRODUCTS_PER_PAGE),
       page: String(pageOverride ?? currentPage),
@@ -315,20 +307,12 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     if (categoryIds) {
       params.set("category", categoryIds);
     }
-    try {
-      const response = await fetch(`/api/products?${params.toString()}`, {
-        signal: controller.signal,
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to load products (${response.status})`);
-      }
-      return response.json();
-    } finally {
-      clearTimeout(timeoutId);
-      if (inFlightController.current === controller) {
-        inFlightController.current = null;
-      }
+    
+    const response = await fetch(`/api/products?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error(`Failed to load products (${response.status})`);
     }
+    return response.json();
   };
 
   const categoryKey = activeCategoryIds.join(",");
@@ -340,7 +324,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     () => fetchProducts(activeCategoryIds.join(","), currentPage),
     {
       keepPreviousData: true,
-      dedupingInterval: 30000,
+      dedupingInterval: 2000, // Reduced from 30000 for faster filter updates
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       errorRetryCount: 2,
@@ -380,13 +364,6 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   }, [products, filteredTotalCount, globalTotalCount, activeCategoryIds, currentPage]);
 
   const prefetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    return () => {
-      if (inFlightController.current) {
-        inFlightController.current.abort();
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (prefetchTimeoutRef.current) {

@@ -27,7 +27,10 @@ export async function getAllProducts() {
       
       if (wcProducts && wcProducts.length > 0) {
         // Filter out hidden products (already filtered in getProducts, but double-check)
-        const visibleProducts = wcProducts.filter((p: any) => p.catalog_visibility !== "hidden");
+        const visibleProducts = wcProducts.filter((p: any) => {
+          const visibility = (p.catalog_visibility || "").toLowerCase();
+          return visibility !== "hidden" && visibility !== "search";
+        });
         // Convert products (now async to fetch variations)
         const converted = await Promise.all(
           visibleProducts.map((product) => convertWCToProduct(product, true))
