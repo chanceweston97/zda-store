@@ -13,6 +13,7 @@ import CheckoutPaymentArea from "./CheckoutPaymentArea";
 import CheckoutAreaWithoutStripe from "./CheckoutAreaWithoutStripe";
 import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { convertCartPriceToDollars } from "@/utils/price";
+import { trackBeginCheckout } from "@/lib/ga4";
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
   throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
@@ -97,6 +98,21 @@ export default function CheckoutMain() {
 
   const { totalPrice = 0, cartDetails } = useShoppingCart();
   const cartIsEmpty = !cartDetails || Object.keys(cartDetails).length === 0;
+
+  // GA4: Track begin checkout
+  useEffect(() => {
+    if (cartIsEmpty) return;
+    
+    const cartItems = Object.values(cartDetails!).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price / 100, // Convert from cents to dollars
+      category: item.category,
+      quantity: item.quantity,
+    }));
+    
+    trackBeginCheckout(cartItems);
+  }, []); // Only track once on mount
 
   const shippingFee = watch("shippingMethod");
   // totalPrice from use-shopping-cart - convert to dollars using helper

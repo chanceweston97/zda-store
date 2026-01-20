@@ -3,15 +3,64 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useEffect } from "react";
 import { useShoppingCart } from "use-shopping-cart";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeftIcon } from "./_components/icons";
+import { trackPurchase } from "@/lib/ga4";
 
 const CheckoutSuccess = () => {
-  const { clearCart } = useShoppingCart();
+  const { clearCart, cartDetails } = useShoppingCart();
   const [loading, setLoading] = React.useState(true);
+  const searchParams = useSearchParams();
 
   const { data: session } = useSession();
 
   useEffect(() => {
+    // GA4: Track purchase
+    const trackOrder = () => {
+      try {
+        // Try to get order data from sessionStorage or URL params
+        const orderDataStr = sessionStorage.getItem('lastOrder') || searchParams?.get('order');
+        
+        if (orderDataStr) {
+          const orderData = typeof orderDataStr === 'string' ? JSON.parse(orderDataStr) : orderDataStr;
+          
+          if (orderData && orderData.id) {
+            trackPurchase({
+              id: orderData.id,
+              total: orderData.total || 0,
+              items: orderData.items || [],
+            });
+            
+            // Clear the order data from sessionStorage after tracking
+            sessionStorage.removeItem('lastOrder');
+          }
+        } else if (cartDetails && Object.keys(cartDetails).length > 0) {
+          // Fallback: If no order data, track from cart before clearing
+          const cartItems = Object.values(cartDetails).map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price / 100,
+            category: item.category,
+            quantity: item.quantity,
+          }));
+          
+          const total = Object.values(cartDetails).reduce((sum: number, item: any) => 
+            sum + (item.price * item.quantity / 100), 0
+          );
+          
+          trackPurchase({
+            id: `order_${Date.now()}`, // Temporary ID if real order ID not available
+            total,
+            items: cartItems,
+          });
+        }
+      } catch (error) {
+        console.error('[GA4] Error tracking purchase:', error);
+      }
+    };
+
+    trackOrder();
+
     setTimeout(() => {
       setLoading(false);
       clearCart();

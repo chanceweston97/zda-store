@@ -29,6 +29,7 @@ import FaqSection from "../Home/Faq";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/utils/price";
 import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
+import { trackViewItem, trackAddToCart } from "@/lib/ga4";
 
 type SelectedAttributesType = {
   [key: number]: string | undefined;
@@ -66,6 +67,20 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // GA4: Track product view
+  useEffect(() => {
+    if (!product) return;
+    
+    const category = product.categories?.[0]?.name || product.category?.name || undefined;
+    
+    trackViewItem({
+      id: product._id,
+      name: product.name,
+      price: product.discountedPrice || product.price || 0,
+      category,
+    });
+  }, [product._id, product.name]);
 
   const isProductInCart = useMemo(
     () => Object.values(cartDetails ?? {}).some((cartItem) => cartItem.id === product._id),
@@ -733,6 +748,16 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     // @ts-ignore
     addItemWithAutoOpen(cartItem, itemQuantity);
 
+    // GA4: Track add to cart
+    const category = product.categories?.[0]?.name || product.category?.name || undefined;
+    trackAddToCart({
+      id: product._id,
+      name: product.name,
+      price: totalPrice || product.discountedPrice || product.price || 0,
+      category,
+      quantity: itemQuantity,
+    });
+
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -801,6 +826,17 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     const itemQuantity = quantity;
     // @ts-ignore
     addItemWithAutoOpen(cartItem, itemQuantity);
+    
+    // GA4: Track add to cart
+    const category = product.categories?.[0]?.name || product.category?.name || undefined;
+    trackAddToCart({
+      id: product._id,
+      name: product.name,
+      price: totalPrice || product.discountedPrice || product.price || 0,
+      category,
+      quantity: itemQuantity,
+    });
+    
     toast.success("Product added to cart!");
   };
 
