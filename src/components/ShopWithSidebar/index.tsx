@@ -270,7 +270,7 @@ type PropsType = {
   categoryName?: string; // Optional: category name for hero section (from category page)
 };
 
-const PRODUCTS_PER_PAGE = 9;
+const PRODUCTS_PER_PAGE = 10;
 
 const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) => {
   const { products: initialProducts, categories, totalCount: initialTotalCount, currentCategory } = data;
@@ -332,35 +332,30 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   );
 
   const products: Product[] = productsData?.products || [];
-  const totalCount: number = productsData?.totalCount || 0;
-  const allProductsCount: number =
-    initialTotalCount || productsData?.allCount || totalCount;
 
-  const categoryCountMap = useMemo(() => {
-    const map = new Map<string, number>();
-    const walk = (cats: any[]) => {
-      cats.forEach((cat) => {
-        const id = String(cat.id || cat._id || "");
-        if (id) {
-          map.set(id, Number(cat.productCount || 0));
-        }
-        if (cat.subcategories?.length) walk(cat.subcategories);
-      });
-    };
-    walk(categories || []);
-    return map;
-  }, [categories]);
+  // products actually rendered on this page
+  const showingCount = products.length;
+  // total products matching current filter
+  const filteredTotalCount: number = productsData?.totalCount ?? 0;
+  // total products in the store (used only when no category selected)
+  const globalTotalCount: number =
+    productsData?.allCount ?? filteredTotalCount;
+  // for "of X Products"
+  const displayAllCount = activeCategoryIds.length
+    ? filteredTotalCount
+    : globalTotalCount;
+  const paginationCount = displayAllCount;
 
-  const selectedCategoryCount = useMemo(() => {
-    if (!activeCategoryIds.length) return null;
-    return activeCategoryIds.reduce((sum, id) => {
-      return sum + (categoryCountMap.get(id) || 0);
-    }, 0);
-  }, [activeCategoryIds, categoryCountMap]);
-
-  const showingCount = selectedCategoryCount ?? totalCount;
-  const displayAllCount = activeCategoryIds.length ? showingCount : allProductsCount;
-  const paginationCount = activeCategoryIds.length ? showingCount : totalCount;
+  useEffect(() => {
+    console.log("[Shop Page] Products from WooCommerce:", {
+      count: products.length,
+      products,
+      filteredTotalCount,
+      globalTotalCount,
+      activeCategoryIds,
+      currentPage,
+    });
+  }, [products, filteredTotalCount, globalTotalCount, activeCategoryIds, currentPage]);
 
   useEffect(() => {
     const ids: string[] = [];

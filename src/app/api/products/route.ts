@@ -88,9 +88,11 @@ export async function GET(req: Request) {
         baseParams.append("category", categoryParam);
       }
 
-      const fetchCountForVisibility = async (visibility: "visible" | "catalog") => {
+      const fetchCount = async (visibility?: "visible" | "catalog" | "hidden" | "search") => {
         const params = new URLSearchParams(baseParams);
-        params.append("catalog_visibility", visibility);
+        if (visibility) {
+          params.append("catalog_visibility", visibility);
+        }
         const res = await fetch(`${apiUrl}/products?${params.toString()}`, {
           next: { revalidate: 60, tags: ["wc-products"] },
         });
@@ -98,10 +100,30 @@ export async function GET(req: Request) {
         return Number(res.headers.get("X-WP-Total") || 0);
       };
 
-      const [visibleCount, catalogCount] = await Promise.all([
-        fetchCountForVisibility("visible"),
-        fetchCountForVisibility("catalog"),
-      ]);
+      const [totalPublished, visibleCount, catalogCount, hiddenCount, searchCount] =
+        await Promise.all([
+          fetchCount(),
+          fetchCount("visible"),
+          fetchCount("catalog"),
+          fetchCount("hidden"),
+          fetchCount("search"),
+        ]);
+
+      if (!totalPublished) return 0;
+
+      const visibilityIgnored =
+        visibleCount === totalPublished && catalogCount === totalPublished;
+
+      if (visibilityIgnored) {
+        const hiddenIgnored = hiddenCount === totalPublished;
+        const searchIgnored = searchCount === totalPublished;
+        if (!hiddenIgnored || !searchIgnored) {
+          const adjustedHidden = hiddenIgnored ? 0 : hiddenCount;
+          const adjustedSearch = searchIgnored ? 0 : searchCount;
+          return Math.max(totalPublished - adjustedHidden - adjustedSearch, 0);
+        }
+        return totalPublished;
+      }
 
       return visibleCount + catalogCount;
     };
