@@ -1,16 +1,14 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useShoppingCart } from "use-shopping-cart";
-import { useSearchParams } from "next/navigation";
 import { ArrowLeftIcon } from "./_components/icons";
 import { trackPurchase } from "@/lib/ga4";
 
-const CheckoutSuccess = () => {
+const CheckoutSuccessContent = () => {
   const { clearCart, cartDetails } = useShoppingCart();
   const [loading, setLoading] = React.useState(true);
-  const searchParams = useSearchParams();
 
   const { data: session } = useSession();
 
@@ -18,11 +16,11 @@ const CheckoutSuccess = () => {
     // GA4: Track purchase
     const trackOrder = () => {
       try {
-        // Try to get order data from sessionStorage or URL params
-        const orderDataStr = sessionStorage.getItem('lastOrder') || searchParams?.get('order');
+        // Try to get order data from sessionStorage
+        const orderDataStr = sessionStorage.getItem('lastOrder');
         
         if (orderDataStr) {
-          const orderData = typeof orderDataStr === 'string' ? JSON.parse(orderDataStr) : orderDataStr;
+          const orderData = JSON.parse(orderDataStr);
           
           if (orderData && orderData.id) {
             trackPurchase({
@@ -155,6 +153,27 @@ const CheckoutSuccess = () => {
         )}
       </div>
     </section>
+  );
+};
+
+// Wrapper with Suspense boundary
+const CheckoutSuccess = () => {
+  return (
+    <Suspense fallback={
+      <section className="overflow-hidden py-20 bg-gray-2">
+        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="bg-white rounded-xl shadow-1 px-4 py-10 sm:py-15 lg:py-20 xl:py-25">
+            <div className="text-center">
+              <h2 className="font-bold text-blue text-4xl lg:text-[45px] lg:leading-[57px] mb-5">
+                Loading...
+              </h2>
+            </div>
+          </div>
+        </div>
+      </section>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 };
 
