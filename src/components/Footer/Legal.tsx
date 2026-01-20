@@ -3,18 +3,18 @@ import Link from 'next/link'
 const quickLinks = [
   {
     id: 1,
+    label: 'Catalog',
+    href: '/catalog',
+  },
+  {
+    id: 2,
     label: 'Privacy Policy',
     href: '/privacy-policy',
   },
   {
-    id: 2,
-    label: 'Terms & Conditions',
-    href: 'terms-and-conditions',
-  },
-  {
     id: 3,
-    label: 'Site Map',
-    href: 'site-map',
+    label: 'Terms & Conditions',
+    href: '/terms-and-conditions',
   },
 ]
 
@@ -40,9 +40,8 @@ export default function Legal() {
           quickLinks.map((link) => (
             <li key={link.id}>
               <Link
-                className="ease-out duration-200 hover:text-[#70C8FF]"
+                className="text-white ease-out duration-200 hover:text-[#70C8FF]"
                 href={link.href}
-                style={{ color: '#fff' }}
               >
                 {link.label}
               </Link>

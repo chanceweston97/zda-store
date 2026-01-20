@@ -163,11 +163,21 @@ export async function getCategories() {
   return categories;
 }
 
+const RESERVED_CATEGORY_SLUGS = new Set([
+  "terms-and-conditions",
+  "privacy-policy",
+  "site-map",
+  "sitemap",
+]);
+
 /**
  * Get category by slug
  * Tries WooCommerce first, then local data
  */
 export async function getCategoryBySlug(slug: string) {
+  if (RESERVED_CATEGORY_SLUGS.has(slug)) {
+    return null;
+  }
   const useWooCommerce = isWooCommerceEnabled();
 
   // Try WooCommerce first if enabled

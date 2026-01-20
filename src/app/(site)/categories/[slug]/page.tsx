@@ -8,9 +8,16 @@ import {
   getAllProducts,
 } from "@/lib/data/unified-data";
 import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
+import { notFound } from "next/navigation";
 
-// Force dynamic rendering to prevent static generation in production
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+const RESERVED_SLUGS = new Set([
+  "terms-and-conditions",
+  "privacy-policy",
+  "site-map",
+  "sitemap",
+]);
 
 type Params = {
   params: Promise<{
@@ -55,6 +62,16 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params) {
   const { slug } = await params;
+  if (RESERVED_SLUGS.has(slug)) {
+    return {
+      title: "Not Found",
+      description: "No product category has been found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
   let categoryData;
   
   try {
@@ -136,6 +153,10 @@ export async function generateMetadata({ params }: Params) {
 const CategoryPage = async ({ params, searchParams }: Params) => {
   const { slug } = await params; // This is actually the handle from the URL
   const { date, sort } = await searchParams;
+  
+  if (RESERVED_SLUGS.has(slug)) {
+    notFound();
+  }
 
   let categoryData;
   let allProducts: any[] = [];
@@ -147,7 +168,6 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     // If category not found, return 404
     if (!categoryData) {
       console.warn(`[CategoryPage] Category not found for slug: ${slug}`);
-      const { notFound } = await import("next/navigation");
       notFound();
     }
   } catch (error: any) {
@@ -163,14 +183,12 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
     });
     
     // Return not found if category fetch fails (prevents 500 error)
-    const { notFound } = await import("next/navigation");
     notFound();
   }
   
   // Validate categoryData exists before accessing properties
   if (!categoryData) {
     console.warn(`[CategoryPage] Category data is null for slug: ${slug}`);
-    const { notFound } = await import("next/navigation");
     notFound();
   }
 
