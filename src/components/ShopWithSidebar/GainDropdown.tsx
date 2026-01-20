@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "../Header/icons";
 
 type PropsType = {
@@ -14,6 +14,25 @@ export default function GainDropdown({ availableGains }: PropsType) {
   const router = useRouter();
   const searchParams = useSearchParams() || new URLSearchParams();
   const pathname = usePathname();
+  const replaceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (replaceTimeoutRef.current) {
+        clearTimeout(replaceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleReplace = (params: URLSearchParams) => {
+    if (replaceTimeoutRef.current) {
+      clearTimeout(replaceTimeoutRef.current);
+    }
+    const query = params.toString();
+    replaceTimeoutRef.current = setTimeout(() => {
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    }, 350);
+  };
 
   if (!availableGains.length) return null;
 
@@ -35,7 +54,7 @@ export default function GainDropdown({ availableGains }: PropsType) {
       }
     }
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    scheduleReplace(params);
   }
 
   return (

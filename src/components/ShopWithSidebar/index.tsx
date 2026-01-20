@@ -299,19 +299,36 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     return [];
   }, [categoryParam, currentCategory]);
 
-  const fetchProducts = async (categoryIds?: string) => {
+  const inFlightController = useRef<AbortController | null>(null);
+
+  const fetchProducts = async (categoryIds?: string, pageOverride?: number) => {
+    if (inFlightController.current) {
+      inFlightController.current.abort();
+    }
+    const controller = new AbortController();
+    inFlightController.current = controller;
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     const params = new URLSearchParams({
       per_page: String(PRODUCTS_PER_PAGE),
-      page: String(currentPage),
+      page: String(pageOverride ?? currentPage),
     });
     if (categoryIds) {
       params.set("category", categoryIds);
     }
-    const response = await fetch(`/api/products?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error(`Failed to load products (${response.status})`);
+    try {
+      const response = await fetch(`/api/products?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to load products (${response.status})`);
+      }
+      return response.json();
+    } finally {
+      clearTimeout(timeoutId);
+      if (inFlightController.current === controller) {
+        inFlightController.current = null;
+      }
     }
-    return response.json();
   };
 
   const categoryKey = activeCategoryIds.join(",");
@@ -320,9 +337,14 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   const productsTopRef = useRef<HTMLDivElement | null>(null);
   const { data: productsData, isLoading } = useSWR(
     ["products", swrKey, currentPage],
-    () => fetchProducts(activeCategoryIds.join(",")),
+    () => fetchProducts(activeCategoryIds.join(","), currentPage),
     {
       keepPreviousData: true,
+      dedupingInterval: 30000,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      errorRetryCount: 2,
+      errorRetryInterval: 1500,
       fallbackData: {
         products: initialProducts || [],
         totalCount: initialTotalCount || 0,
@@ -357,21 +379,33 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     });
   }, [products, filteredTotalCount, globalTotalCount, activeCategoryIds, currentPage]);
 
+  const prefetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    const ids: string[] = [];
-    const collectIds = (cats: any[]) => {
-      cats.forEach((cat) => {
-        const id = cat.id || cat._id;
-        if (id) ids.push(String(id));
-        if (cat.subcategories?.length) collectIds(cat.subcategories);
-      });
+    return () => {
+      if (inFlightController.current) {
+        inFlightController.current.abort();
+      }
     };
-    collectIds(categories || []);
+  }, []);
 
-    ids.forEach((id) => {
-      mutate(["products", id, 1], fetchProducts(id), { revalidate: false });
-    });
-  }, [categories, mutate]);
+  useEffect(() => {
+    if (prefetchTimeoutRef.current) {
+      clearTimeout(prefetchTimeoutRef.current);
+    }
+    if (!activeCategoryIds.length) {
+      return;
+    }
+    prefetchTimeoutRef.current = setTimeout(() => {
+      activeCategoryIds.forEach((id) => {
+        mutate(["products", id, 1], fetchProducts(id, 1), { revalidate: false });
+      });
+    }, 400);
+    return () => {
+      if (prefetchTimeoutRef.current) {
+        clearTimeout(prefetchTimeoutRef.current);
+      }
+    };
+  }, [activeCategoryIds, mutate]);
 
   useEffect(() => {
     if (prevCategoryKey.current === categoryKey) {

@@ -1,6 +1,6 @@
 "use client";
 import { Category } from "@/types/category";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown } from "../Header/icons";
 import { CheckMarkIcon2 } from "@/assets/icons";
@@ -12,10 +12,11 @@ type PropsType = {
 const CategoryDropdown = ({ categories }: PropsType) => {
   const [isOpen, setIsOpen] = useState(true);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const replaceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ✅ INSTANT UI: Local state for selected categories (updates immediately)
   const categoryParam = searchParams?.get("category");
@@ -44,6 +45,26 @@ const CategoryDropdown = ({ categories }: PropsType) => {
       });
     }
   }, [categoryParam]);
+
+  useEffect(() => {
+    return () => {
+      if (replaceTimeoutRef.current) {
+        clearTimeout(replaceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleReplace = (params: URLSearchParams) => {
+    if (replaceTimeoutRef.current) {
+      clearTimeout(replaceTimeoutRef.current);
+    }
+    const query = params.toString();
+    replaceTimeoutRef.current = setTimeout(() => {
+      startTransition(() => {
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      });
+    }, 350);
+  };
 
   // Auto-open categories that have checked subcategories
   useEffect(() => {
@@ -117,9 +138,7 @@ const CategoryDropdown = ({ categories }: PropsType) => {
     }
 
     // Use startTransition for non-blocking URL update
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    scheduleReplace(params);
   };
 
   // Handle parent category click - toggle all subcategories at once
@@ -159,9 +178,7 @@ const CategoryDropdown = ({ categories }: PropsType) => {
       }
     }
 
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    scheduleReplace(params);
   };
 
   // ✅ Use local state for instant UI feedback
