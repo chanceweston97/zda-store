@@ -301,11 +301,27 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
         
         // It's a slug - find the category by slug and get its ID
         const category = categories?.find(
-          (cat: any) => 
-            cat.slug?.current === param || 
-            cat.slug === param || 
-            cat.handle === param ||
-            (cat as any).slug?.toLowerCase() === param.toLowerCase()
+          (cat: any) => {
+            // Handle different slug formats
+            const slugValue = typeof cat.slug === 'string' 
+              ? cat.slug 
+              : (cat.slug?.current || null);
+            
+            // Compare slug (case-insensitive)
+            if (slugValue && typeof slugValue === 'string') {
+              if (slugValue.toLowerCase() === param.toLowerCase()) return true;
+            }
+            
+            // Check other fields
+            if (cat.handle && typeof cat.handle === 'string') {
+              if (cat.handle.toLowerCase() === param.toLowerCase()) return true;
+            }
+            
+            // Direct string match (case-sensitive fallback)
+            if (slugValue === param || cat.handle === param) return true;
+            
+            return false;
+          }
         );
         
         if (category) {
