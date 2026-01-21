@@ -415,16 +415,19 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   const featureTitle = metadataObj.featureTitle ? stripHTML(metadataObj.featureTitle) : null; // Strip HTML from featureTitle
   
   // Get datasheet fields - they might be IDs (numbers) or URLs (strings)
-  // Check ACF fields first (they might be in acf object or directly in metadata)
-  const datasheetImageRaw = metadataObj.datasheetImage || 
+  // Check ACF object first (it contains resolved values), then metadata
+  const acfData = (wcProduct as any).acf || {};
+  const datasheetImageRaw = acfData.datasheet_image || 
+                            acfData.datasheetImage ||
+                            metadataObj.datasheetImage || 
                             metadataObj.datasheet_image || 
                             metadataObj._datasheet_image ||
-                            (wcProduct as any).acf?.datasheet_image ||
                             null;
-  const datasheetPdfRaw = metadataObj.datasheetPdf || 
+  const datasheetPdfRaw = acfData.datasheet_pdf ||
+                          acfData.datasheetPdf ||
+                          metadataObj.datasheetPdf || 
                           metadataObj.datasheet_pdf || 
                           metadataObj._datasheet_pdf ||
-                          (wcProduct as any).acf?.datasheet_pdf ||
                           null;
   
   // Resolve media IDs to URLs if needed
@@ -451,17 +454,17 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   // Resolve datasheet image
   let datasheetImage: string | null = null;
   if (datasheetImageRaw && !skipVariations) {
-    // Skip ACF field keys - they need to be resolved differently
+    // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetImageRaw)) {
-      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: datasheetImage is an ACF field key (${datasheetImageRaw}), not a media ID. Resolve it from ACF field data.`);
-      datasheetImage = null; // ACF field keys can't be resolved this way
+      // Field key detected - ACF field should be configured as URL type in WordPress
+      // WooCommerce should return the URL, not the field key
+      datasheetImage = null;
     } else if (isMediaId(datasheetImageRaw)) {
       datasheetImage = await resolveMediaId(datasheetImageRaw);
     } else if (typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
       datasheetImage = datasheetImageRaw;
     } else {
-      // Invalid format, skip it
-      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: Invalid datasheetImage format:`, datasheetImageRaw);
+      // Invalid format, skip it silently
       datasheetImage = null;
     }
   } else if (datasheetImageRaw && typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
@@ -472,17 +475,17 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   // Resolve datasheet PDF
   let datasheetPdf: string | null = null;
   if (datasheetPdfRaw && !skipVariations) {
-    // Skip ACF field keys - they need to be resolved differently
+    // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetPdfRaw)) {
-      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: datasheetPdf is an ACF field key (${datasheetPdfRaw}), not a media ID. Resolve it from ACF field data.`);
-      datasheetPdf = null; // ACF field keys can't be resolved this way
+      // Field key detected - ACF field should be configured as URL type in WordPress
+      // WooCommerce should return the URL, not the field key
+      datasheetPdf = null;
     } else if (isMediaId(datasheetPdfRaw)) {
       datasheetPdf = await resolveMediaId(datasheetPdfRaw);
     } else if (typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
       datasheetPdf = datasheetPdfRaw;
     } else {
-      // Invalid format, skip it
-      console.warn(`[convertWCToProduct] Product ${wcProduct.id}: Invalid datasheetPdf format:`, datasheetPdfRaw);
+      // Invalid format, skip it silently
       datasheetPdf = null;
     }
   } else if (datasheetPdfRaw && typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
