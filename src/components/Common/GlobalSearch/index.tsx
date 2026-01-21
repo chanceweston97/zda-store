@@ -1,23 +1,8 @@
 import { XIcon } from "@/assets/icons";
-import algoliasearch from "algoliasearch";
-import { useEffect, useRef, useState } from "react";
-import { InstantSearch, SearchBox } from "react-instantsearch";
-import Results from "./Results";
-import SearchFilter from "./SearchFilter";
-
-const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_PROJECT_ID as string;
-const algoliaSearchApiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY as string;
-const algoliaIndexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX as string;
-
-// Only initialize Algolia if all required env vars are present
-const isAlgoliaConfigured = algoliaAppId && algoliaSearchApiKey && algoliaIndexName;
-const algoliaClient = isAlgoliaConfigured 
-  ? algoliasearch(algoliaAppId, algoliaSearchApiKey)
-  : null;
+import { useEffect, useRef } from "react";
 
 const GlobalSearchModal = (props: any) => {
-  const { searchModalOpen, setSearchModalOpen, currentFilter } = props;
-  const [filterValue, setFilterValue] = useState(currentFilter || "all");
+  const { searchModalOpen, setSearchModalOpen } = props;
 
   // handle ClickOutside
   const ref = useRef(null);
@@ -54,49 +39,10 @@ const GlobalSearchModal = (props: any) => {
             </button>
 
             <div className="h-auto max-h-[calc(100vh-70px)] overflow-y-auto rounded-b-[15px]">
-              {!isAlgoliaConfigured ? (
-                <div className="p-10 text-center text-gray-500">
-                  <p>Search is not configured. Please set Algolia environment variables.</p>
-                </div>
-              ) : (
-              <InstantSearch
-                insights={false}
-                searchClient={algoliaClient!}
-                indexName={algoliaIndexName}
-              >
-                <SearchBox
-                  placeholder="Type anything to search..."
-                  classNames={{
-                    root: "rounded-t-[15px] bg-white p-10 pb-3",
-                    form: "sticky top-0 z-999",
-                    input:
-                      "flex h-[56px] w-full items-center rounded-lg border border-gray-3 pl-12 pr-6 outline-hidden duration-300 focus:border-primary",
-                    submitIcon:
-                      "absolute left-0 top-0 w-[56px] h-[56px] flex items-center justify-center p-5",
-                    reset: "hidden",
-                    resetIcon: "hidden",
-                    loadingIndicator: "hidden",
-                    loadingIcon: "hidden",
-                  }}
-                />
-
-                <SearchFilter
-                  filterValue={filterValue}
-                  setFilterValue={setFilterValue}
-                />
-
-                <div className="bg-white p-5 sm:p-10 pt-7.5">
-                  {/* <EmptyState /> */}
-                  <div className="flex flex-wrap -mx-4">
-                    <Results
-                      {...props}
-                      filterValue={filterValue}
-                      setFilterValue={setFilterValue}
-                    />
-                  </div>
-                </div>
-              </InstantSearch>
-              )}
+              <div className="p-10 text-center text-gray-500">
+                <p className="text-lg mb-2">Search functionality is currently disabled.</p>
+                <p className="text-sm">Please use the navigation menu to browse products.</p>
+              </div>
             </div>
           </div>
         </div>

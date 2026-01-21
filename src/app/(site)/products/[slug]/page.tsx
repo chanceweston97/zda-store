@@ -1,4 +1,3 @@
-import { structuredAlgoliaHtmlData } from "@/algolia/crawlIndex";
 import ShopDetails from "@/components/ShopDetails";
 import {
   getCableSeries,
@@ -37,9 +36,9 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${
       product.name || "Single Product Page"
-    } | NextMerce - Next.js E-commerce Template`,
+    }`,
     description: `${product?.shortDescription?.slice(0, 136)}...`,
-    author: "NextMerce",
+    author: "ZDA Communications",
     alternates: {
       canonical: `${siteURL}/products/${product?.slug?.current}`,
       languages: {
@@ -107,24 +106,6 @@ const ProductDetails = async ({ params }: Props) => {
   const [cableSeries, cableTypes] = isStandaloneConnector
     ? await Promise.all([getCableSeries(), getCableTypes()])
     : [null, null];
-  
-  await structuredAlgoliaHtmlData({
-    type: "products",
-    title: product?.name,
-    htmlString: product?.shortDescription,
-    pageUrl: `${process.env.SITE_URL}/products/${product?.slug?.current}`,
-    imageURL: imageBuilder(product?.previewImages?.[0]?.image || product?.thumbnails?.[0]?.image).url() as string,
-    price: productPrice,
-    discountedPrice: product?.discountedPrice || productPrice,
-    reviews: product?.reviews?.length || 0,
-    category: product?.category,
-    colors: product?.colors as [],
-    sizes: product?.sizes as [],
-    _id: product?._id,
-    thumbnails: product?.thumbnails,
-    status: product?.status,
-    previewImages: product?.previewImages,
-  });
 
   return (
     <main>

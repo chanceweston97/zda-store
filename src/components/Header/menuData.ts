@@ -29,7 +29,7 @@ export const menuData: Menu[] = [
             id: 613,
             title: "Parabolic Antennas",
             newTab: false,
-            path: "/categories/parabolic-antennas",
+            path: "/categories/grid-parabolic-antennas",
           },
         ],
       },
