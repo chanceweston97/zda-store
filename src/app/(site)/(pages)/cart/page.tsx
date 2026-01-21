@@ -4,7 +4,7 @@ import Cart from "@/components/Cart";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Cart Page | ZDA Communications",
-  description: "This is Cart Page for ZDAComm Template",
+  description: "This is Cart Page for ZDA Communications",
   // other metadata
 };
 

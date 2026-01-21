@@ -49,8 +49,9 @@ export async function wcFetch<T>(
 
   try {
     // Create abort controller for timeout (more compatible)
+    // Reduced to 10 seconds to prevent 504 gateway timeouts
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     try {
       const fetchOptions: WcFetchOptions = {
@@ -121,8 +122,11 @@ export async function wcFetch<T>(
     console.error(`[WooCommerce] Fetch error:`, errorDetails);
     
     // Check for specific error types
-    if (error?.name === 'AbortError' || error?.message?.includes('aborted')) {
-      throw new Error(`Request to WooCommerce API timed out after 30 seconds. Please check your network connection and try again. URL: ${url}`);
+    if (error?.name === 'AbortError' || error?.message?.includes('aborted') || error?.message?.includes('timeout')) {
+      const timeoutError = new Error(`Request to WooCommerce API timed out after 10 seconds. URL: ${url}`);
+      (timeoutError as any).code = 'TIMEOUT';
+      (timeoutError as any).status = 504;
+      throw timeoutError;
     }
     
     if (error?.message?.includes('certificate') || error?.message?.includes('SSL') || error?.message?.includes('TLS') || error?.code === 'CERT_HAS_EXPIRED') {

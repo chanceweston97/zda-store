@@ -3,7 +3,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact Page | ZDA Communications",
-  description: "This is Contact Page for ZDAComm Template",
+  description: "This is Contact Page for ZDA Communications",
   // other metadata
 };
 

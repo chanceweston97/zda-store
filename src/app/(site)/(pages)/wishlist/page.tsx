@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Wishlist Page | ZDA Communications",
-  description: "This is Wishlist Page for ZDAComm Template",
+  description: "This is Wishlist Page for ZDA Communications",
   // other metadata
 };
 

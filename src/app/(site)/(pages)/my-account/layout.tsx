@@ -8,7 +8,7 @@ import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'My Account | ZDA Communications',
-  description: 'This is My Account page for ZDAComm Template',
+  description: 'This is My Account page for ZDA Communications',
   // other metadata
 };
 

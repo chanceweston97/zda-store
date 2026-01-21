@@ -488,7 +488,7 @@ export default function HeroScrollItems() {
                 Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
-                href="/manufacturing"
+                href="/contact"
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',

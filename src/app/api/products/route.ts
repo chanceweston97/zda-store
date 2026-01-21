@@ -239,23 +239,47 @@ export async function GET(req: Request) {
     const fetchFirstVariationSku = async (
       productId: number
     ): Promise<string | null> => {
-      const variationParams = new URLSearchParams({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        per_page: "1",
-        page: "1",
-        orderby: "id",
-        order: "asc",
-        _fields: "sku",
-      });
-      const variationRes = await fetch(
-        `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
-        { next: { revalidate: 60, tags: ["wc-products"] } }
-      );
-      if (!variationRes.ok) return null;
-      const variations = (await variationRes.json()) as Array<{ sku?: string }>;
-      const sku = variations?.[0]?.sku?.trim();
-      return sku || null;
+      try {
+        const variationParams = new URLSearchParams({
+          consumer_key: consumerKey,
+          consumer_secret: consumerSecret,
+          per_page: "1",
+          page: "1",
+          orderby: "id",
+          order: "asc",
+          _fields: "sku",
+        });
+        
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for variations
+        
+        try {
+          const variationRes = await fetch(
+            `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
+            { 
+              next: { revalidate: 60, tags: ["wc-products"] },
+              signal: controller.signal
+            }
+          );
+          clearTimeout(timeoutId);
+          
+          if (!variationRes.ok) return null;
+          const variations = (await variationRes.json()) as Array<{ sku?: string }>;
+          const sku = variations?.[0]?.sku?.trim();
+          return sku || null;
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError?.name === 'AbortError') {
+            // Timeout - return null silently
+            return null;
+          }
+          throw fetchError;
+        }
+      } catch (error) {
+        // Silently fail - don't block product listing if variation fetch fails
+        return null;
+      }
     };
 
     const products = await Promise.all(
@@ -307,11 +331,20 @@ export async function GET(req: Request) {
         },
       }
     );
-  } catch (error) {
-    console.error("Error fetching products:", error);
+  } catch (error: any) {
+    // Handle timeout errors specifically
+    if (error?.name === 'AbortError' || error?.message?.includes('timeout') || error?.message?.includes('aborted') || error?.code === 'TIMEOUT') {
+      console.error("[API /products] Timeout error:", error?.message || error);
+      return NextResponse.json(
+        { products: [], totalCount: 0, error: "Request timeout - please try again" },
+        { status: 504 }
+      );
+    }
+    
+    console.error("[API /products] Error fetching products:", error?.message || error);
     return NextResponse.json(
-      { products: [], totalCount: 0, error: "Failed to fetch products" },
-      { status: 500 }
+      { products: [], totalCount: 0, error: error?.message || "Failed to fetch products" },
+      { status: error?.status || 500 }
     );
   }
 }

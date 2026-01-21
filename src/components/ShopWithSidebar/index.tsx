@@ -290,14 +290,40 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
 
   const activeCategoryIds = useMemo(() => {
     if (categoryParam) {
-      return categoryParam.split(",").filter(Boolean);
+      const paramValues = categoryParam.split(",").filter(Boolean);
+      
+      // Convert slugs to IDs if needed
+      const resolvedIds = paramValues.map((param) => {
+        // Check if it's already a numeric ID
+        if (/^\d+$/.test(param)) {
+          return param;
+        }
+        
+        // It's a slug - find the category by slug and get its ID
+        const category = categories?.find(
+          (cat: any) => 
+            cat.slug?.current === param || 
+            cat.slug === param || 
+            cat.handle === param ||
+            (cat as any).slug?.toLowerCase() === param.toLowerCase()
+        );
+        
+        if (category) {
+          const id = category.id || category._id;
+          return id ? String(id) : null;
+        }
+        
+        return null;
+      }).filter(Boolean) as string[];
+      
+      return resolvedIds;
     }
     if (currentCategory) {
       const id = (currentCategory as any).id || currentCategory._id;
       return id ? [String(id)] : [];
     }
     return [];
-  }, [categoryParam, currentCategory]);
+  }, [categoryParam, currentCategory, categories]);
 
   const fetchProducts = async (categoryIds?: string, pageOverride?: number) => {
     const params = new URLSearchParams({

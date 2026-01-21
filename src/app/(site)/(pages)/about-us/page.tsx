@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import AboutUs from "@/components/AboutUs";
 export const metadata: Metadata = {
   title: "About Us Page | ZDA Communications",
-  description: "This is Cart Page for ZDAComm Template",
+  description: "This is Cart Page for ZDA Communications",
   // other metadata
 };
 

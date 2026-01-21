@@ -4,7 +4,7 @@ import Checkout from "@/components/Checkout";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Checkout Page | ZDA Communications",
-  description: "This is Checkout Page for ZDAComm Template",
+  description: "This is Checkout Page for ZDA Communications",
   // other metadata
 };
 

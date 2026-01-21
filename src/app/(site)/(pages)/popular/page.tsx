@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Shop Page | ZDA Communications',
-  description: 'This is Shop Page for ZDAComm Template',
+  description: 'This is Shop Page for ZDA Communications',
   // other metadata
 };
 

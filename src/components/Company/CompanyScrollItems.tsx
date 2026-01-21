@@ -40,7 +40,7 @@ const items = [
     label: "Reliable Results",
     description: "We believe our RF-focused approach and U.S.-based assembly position us to deliver dependable, build-to-spec connectivity solutions that address performance, reliability, and end-to-end signal integrity requirements. Our technically driven team brings deep industry experience supporting government, infrastructure, and mission-critical wireless deployments.",
     image: "/images/company/manufacture.jpg",
-    link: "/manufacturing",
+    link: "/contact",
     linkText: "Explore Manufacturing"
   }
 ];
