@@ -55,6 +55,18 @@ jobs:
             [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
             [ -s "$HOME/.profile" ] && . "$HOME/.profile"
 
+            # Fix nvm/npmrc conflict by removing incompatible settings
+            if [ -f "$HOME/.npmrc" ]; then
+              # Backup original .npmrc
+              cp "$HOME/.npmrc" "$HOME/.npmrc.backup" || true
+              # Remove globalconfig and prefix lines that conflict with nvm
+              sed -i '/^globalconfig=/d' "$HOME/.npmrc" || true
+              sed -i '/^prefix=/d' "$HOME/.npmrc" || true
+            fi
+
+            # Use nvm to set Node version (fixes prefix issue)
+            nvm use --delete-prefix default --silent || nvm use default || true
+
             # Ensure Node exists
             if ! command -v node >/dev/null 2>&1; then
               echo "❌ Node.js not found"

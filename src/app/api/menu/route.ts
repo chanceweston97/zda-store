@@ -11,10 +11,14 @@ export async function GET() {
     const categories = await getCategoriesWithSubcategories();
     
     console.log(`[Menu API] Received ${categories?.length || 0} categories`);
+    if (categories && categories.length > 0) {
+      console.log("[Menu API] Category names:", categories.map((c: any) => c.title || c.name).slice(0, 5));
+    }
     
     // If no categories, return empty array (frontend uses static menu)
     if (!categories || categories.length === 0) {
       console.warn("[Menu API] No categories found, returning empty menu");
+      console.warn("[Menu API] This means getCategoriesWithSubcategories() returned empty. Check WooCommerce connection.");
       return NextResponse.json([], {
         status: 200, // Return 200 with empty array
         headers: {

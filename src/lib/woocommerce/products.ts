@@ -381,16 +381,27 @@ export async function getCategories(): Promise<Array<{
   parent?: number;
 }>> {
   // WC_API_URL already includes /wp-json/wc/v3, so just use /products/categories
-  return wcFetch<Array<{
-    id: number;
-    name: string;
-    slug: string;
-    description?: string;
-    count?: number;
-    parent?: number;
-  }>>("/products/categories?per_page=100", {
-    next: { revalidate: 60, tags: ["wc-categories"] },
-  });
+  console.log("[getCategories] Fetching from WooCommerce API: /products/categories?per_page=100");
+  try {
+    const categories = await wcFetch<Array<{
+      id: number;
+      name: string;
+      slug: string;
+      description?: string;
+      count?: number;
+      parent?: number;
+    }>>("/products/categories?per_page=100", {
+      next: { revalidate: 60, tags: ["wc-categories"] },
+    });
+    console.log(`[getCategories] Successfully fetched ${categories?.length || 0} categories from WooCommerce API`);
+    if (categories && categories.length > 0) {
+      console.log(`[getCategories] First category:`, { id: categories[0].id, name: categories[0].name, slug: categories[0].slug });
+    }
+    return categories;
+  } catch (error: any) {
+    console.error("[getCategories] Error fetching categories:", error?.message || error);
+    throw error;
+  }
 }
 
 /**

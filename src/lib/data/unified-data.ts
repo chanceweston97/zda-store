@@ -154,26 +154,41 @@ export async function getAllProductsCount(): Promise<number> {
  */
 export async function getCategoriesWithSubcategories() {
   const useWooCommerce = isWooCommerceEnabled();
+  console.log(`[getCategoriesWithSubcategories] WooCommerce enabled: ${useWooCommerce}`);
 
   // Try WooCommerce first if enabled
   if (useWooCommerce) {
     try {
+      console.log("[getCategoriesWithSubcategories] Attempting to fetch from WooCommerce...");
       const { getWooCommerceCategories } = await import("@/lib/woocommerce/categories");
       const categories = await getWooCommerceCategories();
       
+      console.log(`[getCategoriesWithSubcategories] WooCommerce returned ${categories?.length || 0} categories`);
+      
       if (categories && categories.length > 0) {
         console.log(`[getCategoriesWithSubcategories] Successfully fetched ${categories.length} categories from WooCommerce`);
+        console.log(`[getCategoriesWithSubcategories] First category:`, categories[0]?.title || categories[0]?.name);
         return categories;
+      } else {
+        console.warn("[getCategoriesWithSubcategories] WooCommerce returned empty categories array");
       }
     } catch (error: any) {
-      console.error("[getCategoriesWithSubcategories] WooCommerce fetch failed, falling back to local data:", error?.message || error);
+      console.error("[getCategoriesWithSubcategories] WooCommerce fetch failed:", error?.message || error);
+      if (error?.stack) {
+        console.error("[getCategoriesWithSubcategories] Error stack:", error.stack);
+      }
     }
+  } else {
+    console.warn("[getCategoriesWithSubcategories] WooCommerce is not enabled - check environment variables");
   }
 
   // Fallback to local data
+  console.log("[getCategoriesWithSubcategories] Falling back to local data...");
   try {
     const { getCategoriesWithSubcategories: getLocalCategories } = await import("@/lib/data/shop-utils");
-    return getLocalCategories() || [];
+    const localCategories = getLocalCategories() || [];
+    console.log(`[getCategoriesWithSubcategories] Local data returned ${localCategories.length} categories`);
+    return localCategories;
   } catch (error) {
     console.error("[getCategoriesWithSubcategories] Local data fetch also failed:", error);
     return [];

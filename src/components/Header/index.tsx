@@ -44,21 +44,31 @@ const Header = () => {
   useEffect(() => {
     async function fetchMenuData() {
       try {
+        console.log('[Header] Fetching menu from /api/menu...');
         const response = await fetch('/api/menu');
+        console.log('[Header] Menu API response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
-          // Only update if we got valid menu data with items
+          console.log('[Header] Menu API returned data:', {
+            isArray: Array.isArray(data),
+            length: data?.length,
+            firstItem: data?.[0],
+          });
+          
           if (data && Array.isArray(data) && data.length > 0) {
+            console.log('[Header] Updating menu with', data.length, 'items');
             setMenuData(data);
+          } else {
+            console.warn('[Header] Menu API returned empty or invalid data, keeping static menu');
           }
-          // If data is empty or invalid, keep static menu (don't update)
         } else {
-          // API returned error status, keep static menu
-          console.warn('[Header] Menu API returned error, using static menu');
+          console.error('[Header] Menu API returned error status:', response.status);
+          const errorText = await response.text();
+          console.error('[Header] Error response:', errorText);
         }
       } catch (error) {
         console.error('[Header] Error fetching menu:', error);
-        // Keep using static menuData on error - don't update state
       }
     }
 

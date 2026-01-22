@@ -349,7 +349,6 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     if (categoryIds) {
       params.set("category", categoryIds);
     }
-    
     const response = await fetch(`/api/products?${params.toString()}`);
     if (!response.ok) {
       throw new Error(`Failed to load products (${response.status})`);
@@ -361,12 +360,13 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   const swrKey = activeCategoryIds.length ? categoryKey : "all";
   const prevCategoryKey = useRef(categoryKey);
   const productsTopRef = useRef<HTMLDivElement | null>(null);
+  
   const { data: productsData, isLoading } = useSWR(
     ["products", swrKey, currentPage],
     () => fetchProducts(activeCategoryIds.join(","), currentPage),
     {
       keepPreviousData: true,
-      dedupingInterval: 2000, // Reduced from 30000 for faster filter updates
+      dedupingInterval: 2000,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       errorRetryCount: 2,
@@ -515,8 +515,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
        <section className="relative pt-5 pb-10 overflow-hidden lg:pt-10 xl:pt-12 bg-white">
         <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="flex gap-7.5">
-            {/* Sidebar Start - Hide completely on category/subcategory pages */}
-            {!currentCategory && (
+            {/* Sidebar with filters - always visible */}
             <div
               className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static xl:w-1/4 w-full ease-out duration-200 ${
                 productSidebar ? "translate-x-0 bg-white" : "-translate-x-full"
@@ -547,11 +546,10 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
                 {/* Size filter removed */}
               </div>
             </div>
-            )}
             {/* Sidebar End */}
 
             {/* Content Start */}
-            <div className={currentCategory ? "w-full" : "w-full xl:w-3/4"}>
+            <div className="w-full xl:w-3/4">
               <div className="rounded-lg bg-white shadow-1 pl-3 pr-2.5 py-2.5 mb-6">
                 <div className="flex items-center justify-between">
                   {/* top bar left */}

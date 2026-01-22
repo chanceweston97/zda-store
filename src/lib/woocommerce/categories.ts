@@ -69,28 +69,37 @@ export function convertWCToCategory(
 export async function getWooCommerceCategories(): Promise<any[]> {
   const now = Date.now();
   if (cachedCategories && now - cachedAt < CATEGORY_CACHE_TTL_MS) {
+    console.log(`[getWooCommerceCategories] Returning ${cachedCategories.length} cached categories`);
     return cachedCategories;
   }
 
   try {
+    console.log("[getWooCommerceCategories] Fetching categories from WooCommerce API...");
     const categories = await getCategories();
+    console.log(`[getWooCommerceCategories] Received ${categories?.length || 0} raw categories from API`);
     
     if (!categories || categories.length === 0) {
-      console.warn("[getWooCommerceCategories] No categories in WooCommerce");
+      console.warn("[getWooCommerceCategories] No categories in WooCommerce - API returned empty array");
       return [];
     }
 
     // Convert all categories
+    console.log("[getWooCommerceCategories] Converting categories to frontend format...");
     const converted = categories.map((cat) =>
       convertWCToCategory(cat, categories)
     );
+    console.log(`[getWooCommerceCategories] Converted ${converted.length} categories`);
 
     // Filter to only return top-level categories (no parent)
     const topLevelCategories = converted.filter((cat) => !cat.parent);
+    console.log(`[getWooCommerceCategories] Found ${topLevelCategories.length} top-level categories (filtered from ${converted.length} total)`);
 
     if (topLevelCategories.length > 0) {
+      console.log(`[getWooCommerceCategories] Top-level category names:`, topLevelCategories.map((c: any) => c.title || c.name).slice(0, 5));
       cachedCategories = topLevelCategories;
       cachedAt = now;
+    } else {
+      console.warn("[getWooCommerceCategories] No top-level categories found - all categories have parents");
     }
 
     return topLevelCategories;
@@ -98,6 +107,9 @@ export async function getWooCommerceCategories(): Promise<any[]> {
     console.error("[getWooCommerceCategories] Error fetching categories from WooCommerce:", error);
     if (error instanceof Error) {
       console.error("[getWooCommerceCategories] Error details:", error.message);
+      if (error.stack) {
+        console.error("[getWooCommerceCategories] Error stack:", error.stack);
+      }
     }
     if (cachedCategories) {
       console.warn("[getWooCommerceCategories] Returning cached categories due to error");
