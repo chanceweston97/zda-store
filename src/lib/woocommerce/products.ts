@@ -158,8 +158,8 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
  * This is used for PDP where we need complete variant information
  */
 export async function convertWCToProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
-  // First do the basic conversion
-  const baseProduct = await convertWCToProduct(wcProduct);
+  // First do the basic conversion (skip variations here, we'll fetch them separately below)
+  const baseProduct = await convertWCToProduct(wcProduct, true);
   
   // If product has variations, fetch full variation details
   if (wcProduct.variations && wcProduct.variations.length > 0) {
@@ -379,7 +379,9 @@ export async function getCategories(): Promise<Array<{
  * This matches the format expected by the shop page components
  * @param skipVariations - If true, skip fetching variations (faster for listing pages)
  */
-export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
+// ⚠️ CRITICAL: Default to skipVariations=true to prevent MySQL overload
+// Only pass skipVariations=false for product detail pages
+export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = true): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
