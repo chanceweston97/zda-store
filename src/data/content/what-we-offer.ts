@@ -16,7 +16,7 @@ export const whatWeOffer: WhatWeOffer = {
       description: "Directional and omnidirectional options engineered for reliable coverage—from VHF/UHF to LTE/5G sub-6 GHz. Field-ready builds with verified VSWR for clean links in real-world conditions.",
       button: {
         text: "Explore Antennas",
-        link: "/shop?category=antennas",
+        link: "/categories/antennas",
       },
       image: "/images/hero/what-we-offer/antennas.webp",
       imagePosition: "right",
@@ -27,7 +27,7 @@ export const whatWeOffer: WhatWeOffer = {
       description: "Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.",
       button: {
         text: "Explore Cables",
-        link: "/shop?category=cables",
+        link: "/categories/cables",
       },
       image: "/images/hero/what-we-offer/cables.jpg",
       imagePosition: "left",
@@ -38,7 +38,7 @@ export const whatWeOffer: WhatWeOffer = {
       description: "Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.",
       button: {
         text: "Explore Accessories",
-        link: "/shop?category=connectors",
+        link: "/categories/connectors",
       },
       image: "/images/hero/what-we-offer/connectors.webp",
       imagePosition: "right",

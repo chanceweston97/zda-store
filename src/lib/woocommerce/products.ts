@@ -66,7 +66,10 @@ export async function getProducts(params?: {
   // WC_API_URL already includes /wp-json/wc/v3, so just use /products
   const endpoint = `/products${query ? `?${query}` : ""}`;
   
-  const products = await wcFetch<WooCommerceProduct[]>(endpoint);
+  // Add caching to reduce MySQL load
+  const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
+    next: { revalidate: 300, tags: ["wc-products"] }, // Cache for 5 minutes
+  });
   
   // Log all products for debugging
   console.log(`[getProducts] Total products from WooCommerce: ${products.length}`);
@@ -106,7 +109,10 @@ export async function getProducts(params?: {
  */
 export async function getProductById(id: number): Promise<WooCommerceProduct> {
   // WC_API_URL already includes /wp-json/wc/v3, so just use /products
-  return wcFetch<WooCommerceProduct>(`/products/${id}`);
+  // Add caching to reduce MySQL load
+  return wcFetch<WooCommerceProduct>(`/products/${id}`, {
+    next: { revalidate: 300, tags: [`wc-product-${id}`] }, // Cache for 5 minutes
+  });
 }
 
 /**
@@ -118,7 +124,7 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
   try {
     // First try to get products with the slug
     // WooCommerce search might not find by slug directly, so we'll fetch and filter
-    // Note: getProducts already filters hidden products, so we don't need to filter again
+    // Note: getProducts already filters hidden products and has caching, so we don't need to filter again
     const products = await getProducts({ per_page: 100 });
     const product = products.find(p => p.slug === slug);
     
@@ -138,6 +144,7 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
     }
     
     // If not found in first 100, try searching (though search might not match slug)
+    // getProducts already has caching, so this is safe
     const searchResults = await getProducts({ search: slug, per_page: 10 });
     const foundProduct = searchResults.find(p => p.slug === slug);
     
@@ -149,6 +156,7 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
     return foundProduct || null;
   } catch (error) {
     console.error(`[getProductBySlug] Error fetching product by slug ${slug}:`, error);
+    // HARD FAILURE: Return null immediately, don't retry
     return null;
   }
 }
@@ -297,16 +305,69 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
 }
 
 /**
+ * Circuit breaker state for variation fetches
+ * Prevents cascading failures when MySQL is down
+ */
+const OPEN_THRESHOLD = 3; // Open after 3 failures
+const RESET_TIMEOUT = 60000; // Reset after 60 seconds
+
+const variationCircuitBreaker = {
+  failures: 0,
+  lastFailureTime: 0,
+  isOpen: false,
+  OPEN_THRESHOLD,
+  RESET_TIMEOUT,
+};
+
+/**
  * Get product variations for a specific product
+ * CRITICAL: This function should ONLY be called on product detail pages, NOT on listing pages
+ * 
+ * Circuit breaker pattern: If WooCommerce fails multiple times, stop trying to prevent 504s
  */
 export async function getProductVariations(productId: number): Promise<any[]> {
+  // Check circuit breaker - if open, fail fast to prevent cascading failures
+  const now = Date.now();
+  if (variationCircuitBreaker.isOpen) {
+    if (now - variationCircuitBreaker.lastFailureTime < variationCircuitBreaker.RESET_TIMEOUT) {
+      console.warn(`[getProductVariations] Circuit breaker OPEN - skipping variation fetch for product ${productId} to prevent 504`);
+      throw new Error('WooCommerce circuit breaker is open - variations temporarily unavailable');
+    } else {
+      // Reset circuit breaker after timeout
+      variationCircuitBreaker.isOpen = false;
+      variationCircuitBreaker.failures = 0;
+      console.log(`[getProductVariations] Circuit breaker RESET after timeout`);
+    }
+  }
+
   try {
     // WC_API_URL already includes /wp-json/wc/v3, so just use /products/{id}/variations
-    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`);
+    // Add caching to reduce MySQL load
+    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`, {
+      next: { revalidate: 300, tags: [`wc-variations-${productId}`] }, // Cache for 5 minutes
+    });
+    
+    // Reset circuit breaker on success
+    variationCircuitBreaker.failures = 0;
+    variationCircuitBreaker.isOpen = false;
+    
     return variations || [];
   } catch (error) {
+    // Increment failure count
+    variationCircuitBreaker.failures++;
+    variationCircuitBreaker.lastFailureTime = Date.now();
+    
+    // Open circuit breaker if threshold reached
+    if (variationCircuitBreaker.failures >= variationCircuitBreaker.OPEN_THRESHOLD) {
+      variationCircuitBreaker.isOpen = true;
+      console.error(`[getProductVariations] Circuit breaker OPENED after ${variationCircuitBreaker.failures} failures. WooCommerce appears to be down.`);
+    }
+    
     console.error(`[getProductVariations] Error fetching variations for product ${productId}:`, error);
-    return [];
+    
+    // HARD FAILURE: Don't return empty array - throw error to stop render cascade
+    // This prevents Next.js from retrying and causing 504s
+    throw error;
   }
 }
 
@@ -492,67 +553,66 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   }
 
   // Handle variants - WooCommerce uses variations
-  // Fetch variations to get actual SKUs (required for listing pages to show SKU)
   const variants: any[] = [];
   
   // Check if product has variations
   if (wcProduct.variations && wcProduct.variations.length > 0) {
-    // Always fetch variations to get actual SKU data (required for shop page)
-    // Even for listing pages, we need variation SKUs, not parent SKU
-    try {
-      // Fetch actual variations to get their SKUs
-      // This is required because WooCommerce doesn't include variation data in product listings
-      const variations = await getProductVariations(wcProduct.id);
-    
-      // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
-      const sortedVariations = [...variations].sort((a: any, b: any) => {
-        return (a.id || 0) - (b.id || 0);
-      });
+    // CRITICAL FIX: Only fetch variations if skipVariations is false (i.e., on product detail pages)
+    // For listing pages (skipVariations=true), use placeholder variants to prevent MySQL overload
+    if (!skipVariations) {
+      // Product detail page - fetch full variation data
+      try {
+        const variations = await getProductVariations(wcProduct.id);
       
-      // Map variations to variants with actual variation data (not parent product data)
-      sortedVariations.forEach((variation: any) => {
-        const variationPrice = parseFloat(variation.price || variation.regular_price || variation.sale_price || priceStr || "0");
-        
-        // Build variant title from attributes if available, otherwise use variation name or parent name
-        let variantTitle = wcProduct.name;
-        if (variation.attributes && Array.isArray(variation.attributes) && variation.attributes.length > 0) {
-          const attributeStrings = variation.attributes
-            .filter((attr: any) => attr.name && attr.option)
-            .map((attr: any) => `${attr.name}: ${attr.option}`);
-          if (attributeStrings.length > 0) {
-            variantTitle = attributeStrings.join(", ");
-          }
-        } else if (variation.name && variation.name !== wcProduct.name) {
-          variantTitle = variation.name;
-        }
-        
-        variants.push({
-          id: variation.id.toString(),
-          title: variantTitle, // Use variation-specific title, not parent name
-          sku: variation.sku || "", // Use variation SKU only (don't fallback to parent SKU)
-          price: variationPrice, // Use variation price, not parent price
-          calculated_price: {
-            calculated_amount: variationPrice * 100,
-            currency_code: "USD",
-          },
-          inventory_quantity: variation.stock_quantity || 0,
-          options: variation.attributes || [],
-          metadata: {
-            ...metadataObj,
-            variation_id: variation.id,
-            variation_attributes: variation.attributes,
-          },
+        // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
+        const sortedVariations = [...variations].sort((a: any, b: any) => {
+          return (a.id || 0) - (b.id || 0);
         });
-      });
-    } catch (error) {
-      console.error(`[convertWCToProduct] Error fetching variations for product ${wcProduct.id}:`, error);
-      // Fallback: create placeholder variants if fetch fails
-      // But mark them so we know they need to be fetched
-      wcProduct.variations.forEach((variationId: number) => {
+        
+        // Map variations to variants with actual variation data (not parent product data)
+        sortedVariations.forEach((variation: any) => {
+          const variationPrice = parseFloat(variation.price || variation.regular_price || variation.sale_price || priceStr || "0");
+          
+          // Build variant title from attributes if available, otherwise use variation name or parent name
+          let variantTitle = wcProduct.name;
+          if (variation.attributes && Array.isArray(variation.attributes) && variation.attributes.length > 0) {
+            const attributeStrings = variation.attributes
+              .filter((attr: any) => attr.name && attr.option)
+              .map((attr: any) => `${attr.name}: ${attr.option}`);
+            if (attributeStrings.length > 0) {
+              variantTitle = attributeStrings.join(", ");
+            }
+          } else if (variation.name && variation.name !== wcProduct.name) {
+            variantTitle = variation.name;
+          }
+          
+          variants.push({
+            id: variation.id.toString(),
+            title: variantTitle,
+            sku: variation.sku || "",
+            price: variationPrice,
+            calculated_price: {
+              calculated_amount: variationPrice * 100,
+              currency_code: "USD",
+            },
+            inventory_quantity: variation.stock_quantity || 0,
+            options: variation.attributes || [],
+            metadata: {
+              ...metadataObj,
+              variation_id: variation.id,
+              variation_attributes: variation.attributes,
+            },
+          });
+        });
+      } catch (error) {
+        // HARD FAILURE: If variations fail on PDP, we can't render the page properly
+        // But don't cascade - log and use parent product data as fallback
+        console.error(`[convertWCToProduct] CRITICAL: Error fetching variations for product ${wcProduct.id} on PDP:`, error);
+        // Create a single variant from parent product as emergency fallback
         variants.push({
-          id: variationId.toString(),
+          id: wcProduct.id.toString(),
           title: wcProduct.name,
-          sku: "", // Don't use parent SKU as fallback - leave empty
+          sku: wcProduct.sku || "",
           price: price,
           calculated_price: {
             calculated_amount: price * 100,
@@ -562,8 +622,29 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
           options: [],
           metadata: {
             ...metadataObj,
+            _variationFetchFailed: true,
+          },
+        });
+      }
+    } else {
+      // Listing page - use placeholder variants (NO variation fetch to prevent MySQL overload)
+      // Use parent product SKU and price for all variants
+      wcProduct.variations.forEach((variationId: number) => {
+        variants.push({
+          id: variationId.toString(),
+          title: wcProduct.name,
+          sku: wcProduct.sku || "", // Use parent SKU for listing pages
+          price: price, // Use parent price for listing pages
+          calculated_price: {
+            calculated_amount: price * 100,
+            currency_code: "USD",
+          },
+          inventory_quantity: 0,
+          options: [],
+          metadata: {
+            ...metadataObj,
             variation_id: variationId,
-            _needsVariationFetch: true,
+            _needsVariationFetch: true, // Flag to fetch on PDP
           },
         });
       });
@@ -633,9 +714,6 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
     categories: allCategories,
     handle: wcProduct.slug,
     sku: wcProduct.sku,
-    // Include datasheet fields at top level for easy access in components
-    datasheetImage: datasheetImage,
-    datasheetPdf: datasheetPdf,
   };
 }
 

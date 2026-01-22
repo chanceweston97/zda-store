@@ -31,10 +31,34 @@ export async function getAllProducts() {
           const visibility = (p.catalog_visibility || "").toLowerCase();
           return visibility !== "hidden" && visibility !== "search";
         });
-        // Convert products (now async to fetch variations)
-        const converted = await Promise.all(
-          visibleProducts.map((product) => convertWCToProduct(product, true))
-        );
+        
+        // CRITICAL FIX: Limit concurrency to prevent MySQL overload
+        // Process products in batches of 10 to avoid overwhelming the database
+        const BATCH_SIZE = 10;
+        const converted: any[] = [];
+        
+        for (let i = 0; i < visibleProducts.length; i += BATCH_SIZE) {
+          const batch = visibleProducts.slice(i, i + BATCH_SIZE);
+          try {
+            const batchResults = await Promise.all(
+              batch.map((product) => convertWCToProduct(product, true))
+            );
+            converted.push(...batchResults);
+          } catch (error) {
+            // If a batch fails, log but continue with other batches
+            // This prevents one failed product from blocking all products
+            console.error(`[getAllProducts] Error converting batch ${i / BATCH_SIZE + 1}:`, error);
+            // Add placeholder products for failed batch to maintain array consistency
+            batch.forEach((product) => {
+              converted.push({
+                _id: product.id?.toString() || 'unknown',
+                name: product.name || 'Unknown Product',
+                _conversionFailed: true,
+              });
+            });
+          }
+        }
+        
         console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         return converted;
       } else {

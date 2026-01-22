@@ -256,7 +256,7 @@ export default function HeroScrollItems() {
                 Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.
               </p>
               <Link
-                href="/shop?category=antennas"
+                href="/categories/antennas"
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
@@ -334,7 +334,7 @@ export default function HeroScrollItems() {
                 Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.
               </p>
               <Link
-                href="/shop?category=cables"
+                href="/categories/cables"
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
@@ -412,7 +412,7 @@ export default function HeroScrollItems() {
                 Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.<br></br><br></br> For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
-                href="/shop?category=connectors"
+                href="/categories/connectors"
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',

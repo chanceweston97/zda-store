@@ -161,18 +161,19 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
   let categoryData;
   let allProducts: any[] = [];
 
+  // CRITICAL FIX: Fail fast on category fetch - don't retry or continue rendering
   try {
-    // Try to fetch category
+    // Try to fetch category - single attempt, no retries
     categoryData = await getCategoryBySlug(slug);
     
-    // If category not found, return 404
+    // If category not found, return 404 immediately
     if (!categoryData) {
       console.warn(`[CategoryPage] Category not found for slug: ${slug}`);
-      notFound();
+      notFound(); // This will stop execution
     }
   } catch (error: any) {
     // Enhanced error logging for production debugging
-    console.error("[CategoryPage] Error fetching category:", {
+    console.error("[CategoryPage] CRITICAL: Error fetching category - failing fast to prevent retry loop:", {
       slug,
       error: error?.message || String(error),
       status: error?.status,
@@ -182,13 +183,15 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       stack: process.env.NODE_ENV !== 'production' ? error?.stack : undefined,
     });
     
-    // Return not found if category fetch fails (prevents 500 error)
-    notFound();
+    // HARD FAILURE: Return 404 immediately to stop Next.js retry cascade
+    // This prevents the retry loop that causes 504s
+    notFound(); // This will stop execution and prevent further rendering attempts
   }
   
   // Validate categoryData exists before accessing properties
+  // This should never execute if notFound() was called, but safety check
   if (!categoryData) {
-    console.warn(`[CategoryPage] Category data is null for slug: ${slug}`);
+    console.warn(`[CategoryPage] Category data is null for slug: ${slug} - this should not happen`);
     notFound();
   }
 

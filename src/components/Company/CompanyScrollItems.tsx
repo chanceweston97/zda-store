@@ -22,7 +22,7 @@ const items = [
     label: "Our Focus",
     description: "We focus on the RF path, delivering engineered antennas, cabling, and RF components that support reliable connectivity, signal integrity, and long-term system performance. Our solutions are designed to simplify deployment and help ensure wireless links remain stable in real-world environments.",
     image: "/images/company/cable.png",
-    link: "/shop?category=antennas",
+    link: "/categories/antennas",
     linkText: "Explore Antennas"
   },
   {
@@ -31,7 +31,7 @@ const items = [
     label: "Founded in 2008",
     description: "Since 2008, ZDA Communications has focused on designing and supplying dependable RF connectivity solutions for real-world wireless systems. Built on practical engineering experience, our antennas, cabling, and RF components are developed to address performance challenges in demanding industrial, public safety, and infrastructure environments. With a long history of supporting critical deployments, we continue to refine and expand our RF product portfolio to meet evolving connectivity requirements.",
     image: "/images/company/antenna.png",
-    link: "/shop?category=cables",
+    link: "/categories/cables",
     linkText: "Explore Cables"
   },
   {
