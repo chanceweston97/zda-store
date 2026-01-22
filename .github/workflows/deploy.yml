@@ -66,8 +66,25 @@ jobs:
             corepack enable
             corepack prepare yarn@4.6.0 --activate
 
-            # Install deps
-            yarn install --immutable
+            # Check disk space
+            df -h
+            
+            # Install deps with retry logic
+            echo "📦 Installing dependencies..."
+            yarn cache clean || true
+            
+            # Try install with extended timeout
+            if ! yarn install --network-timeout 120000; then
+              echo "⚠️ First install attempt failed, cleaning cache and retrying..."
+              yarn cache clean
+              rm -rf node_modules .yarn/cache || true
+              yarn install --network-timeout 120000 || {
+                echo "❌ Install failed after retry"
+                exit 1
+              }
+            fi
+            
+            echo "✅ Dependencies installed successfully"
 
             # Clean build
             rm -rf .next
