@@ -143,7 +143,7 @@ export default function CheckoutMain() {
         </h2>
         <div className="flex justify-center">
           <Link
-            href="/shop"
+            href="/products"
             className="group inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
           >
@@ -169,7 +169,7 @@ export default function CheckoutMain() {
           Some products may not have prices set. Please remove items without prices or contact support.
         </p>
         <Link
-          href="/shop"
+            href="/products"
           className="w-96 mx-auto inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
           style={{ fontFamily: 'Satoshi, sans-serif' }}
         >

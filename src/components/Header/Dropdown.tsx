@@ -80,7 +80,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
               <Link
                 href={item.path || "#"}
                 className={`
-                  flex items-center gap-1.5 w-full rounded-md px-4 py-2 text-sm text-[#2958A4]
+                  flex items-center gap-1.5 w-full rounded-md px-4 py-2 text-sm text-[#2958A4] whitespace-nowrap
                   transition-colors duration-150
                   hover:bg-gray-100 hover:text-[#2958A4]
                   ${isActiveChild && "bg-gray-100 text-[#2958A4]"}

@@ -236,58 +236,48 @@ export default function HeroScrollItems() {
             }}
           >
             {/* Left Content Section */}
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>01/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Antennas</h3>
               </div>
-              <p style={{ 
-                maxWidth: '100%', 
-                width: '100%',
-                color: '#000',
-                fontFamily: 'Satoshi',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px',
-                margin: 0,
-                marginTop: '100px'
-              }}>
+              <p 
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  color: '#000',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px',
+                  width: '640px',
+                  maxWidth: '100%',
+                  marginTop: '92px',
+                  marginBottom: 0
+                }}
+              >
                 Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.
               </p>
               <Link
                 href="/categories/antennas"
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 20px',
-                  paddingRight: '20px',
+                  padding: '10px 30px',
+                  paddingRight: '30px',
                   cursor: 'pointer',
-                  maxWidth: '600px',
-                  borderColor: '#2958A4',
-                  borderWidth: '1px',
-                  backgroundColor: 'transparent',
-                  color: '#2958A4',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
+                  width: '252px',
+                  minWidth: '252px',
                   marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
-                  e.currentTarget.style.backgroundColor = '#2958A4';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '20px';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#2958A4';
+                  e.currentTarget.style.paddingRight = '30px';
                 }}
               >
                 <ButtonArrowHomepage />
-                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Antennas</span>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Antennas</p>
               </Link>
             </div>
             {/* Right Image Section */}
@@ -319,53 +309,43 @@ export default function HeroScrollItems() {
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>02/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Cables</h3>
               </div>
-              <p style={{ 
-                maxWidth: '100%', 
-                width: '100%',
-                color: '#000',
-                fontFamily: 'Satoshi',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px',
-                margin: 0,
-                marginTop: '100px'
-              }}>
-                Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability. Any length, assembled in the United States.
+              <p 
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  color: '#000',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px',
+                  width: '640px',
+                  maxWidth: '100%',
+                  marginTop: '92px',
+                  marginBottom: 0
+                }}
+              >
+                Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability.<br></br> Any length, assembled in the United States.
               </p>
               <Link
                 href="/categories/cables"
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 20px',
-                  paddingRight: '20px',
+                  padding: '10px 30px',
+                  paddingRight: '30px',
                   cursor: 'pointer',
-                  maxWidth: '600px',
-                  borderColor: '#2958A4',
-                  borderWidth: '1px',
-                  backgroundColor: 'transparent',
-                  color: '#2958A4',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
+                  width: '252px',
+                  minWidth: '252px',
                   marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
-                  e.currentTarget.style.backgroundColor = '#2958A4';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '20px';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#2958A4';
+                  e.currentTarget.style.paddingRight = '30px';
                 }}
               >
                 <ButtonArrowHomepage />
-                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Cables</span>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Cables</p>
               </Link>
             </div>
             {/* Right Image Section */}
@@ -397,53 +377,43 @@ export default function HeroScrollItems() {
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>03/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Connectors & Accessories</h3>
               </div>
-              <p style={{ 
-                maxWidth: '100%', 
-                width: '100%',
-                color: '#000',
-                fontFamily: 'Satoshi',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px',
-                margin: 0,
-                marginTop: '100px'
-              }}>
+              <p 
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  color: '#000',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px',
+                  width: '640px',
+                  maxWidth: '100%',
+                  marginTop: '92px',
+                  marginBottom: 0
+                }}
+              >
                 Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.<br></br><br></br> For radios and signal boosters, reach out to a product expert.
               </p>
               <Link
                 href="/categories/connectors"
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 20px',
-                  paddingRight: '20px',
+                  padding: '10px 30px',
+                  paddingRight: '30px',
                   cursor: 'pointer',
-                  maxWidth: '600px',
-                  borderColor: '#2958A4',
-                  borderWidth: '1px',
-                  backgroundColor: 'transparent',
-                  color: '#2958A4',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
+                  width: '252px',
+                  minWidth: '252px',
                   marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
-                  e.currentTarget.style.backgroundColor = '#2958A4';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '20px';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#2958A4';
+                  e.currentTarget.style.paddingRight = '30px';
                 }}
               >
                 <ButtonArrowHomepage />
-                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Connectors</span>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Connectors</p>
               </Link>
             </div>
             {/* Right Image Section */}
@@ -473,53 +443,45 @@ export default function HeroScrollItems() {
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>04/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Manufacturing</h3>
               </div>
-              <p style={{ 
-                maxWidth: '100%', 
-                width: '100%',
-                color: '#000',
-                fontFamily: 'Satoshi',
-                fontSize: '18px',
-                fontStyle: 'normal',
-                fontWeight: 400,
-                lineHeight: '28px',
-                margin: 0,
-                marginTop: '100px'
-              }}>
-                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more. For radios and signal boosters, reach out to a product expert.
+              <p 
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  color: '#000',
+                  fontSize: '18px',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  lineHeight: '28px',
+                  width: '640px',
+                  maxWidth: '100%',
+                  marginTop: '92px',
+                  marginBottom: 0
+                }}
+              >
+                Antennas manufactured to exact frequency and application requirements.<br></br> Built to spec for enterprise and infrastructure networks.
+                <br /><br />
+                Get in touch to explore frequency-specific antenna manufacturing solutions.
               </p>
               <Link
                 href="/contact"
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out w-full sm:w-auto"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 20px',
-                  paddingRight: '20px',
+                  padding: '10px 30px',
+                  paddingRight: '30px',
                   cursor: 'pointer',
-                  maxWidth: '600px',
-                  borderColor: '#2958A4',
-                  borderWidth: '1px',
-                  backgroundColor: 'transparent',
-                  color: '#2958A4',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
+                  width: '252px',
+                  minWidth: '252px',
                   marginTop: '30px'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(20px + 11px)';
-                  e.currentTarget.style.backgroundColor = '#2958A4';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '20px';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#2958A4';
+                  e.currentTarget.style.paddingRight = '30px';
                 }}
               >
                 <ButtonArrowHomepage />
-                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">Explore Manufacturing</span>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Manufacturing</p>
               </Link>
             </div>
             {/* Right Image Section */}

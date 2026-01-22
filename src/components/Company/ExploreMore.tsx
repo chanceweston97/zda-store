@@ -7,7 +7,7 @@ const exploreItems = [
   {
     title: "Products",
     description: "Get to know our antennas, cables, and RF components.",
-    link: "/shop"
+    link: "/products"
   },
   {
     title: "Catalog",

@@ -5,7 +5,7 @@ export const menuData: Menu[] = [
     id: 1,
     title: "Products",
     newTab: false,
-    path: "/shop",
+    path: "/products",
     submenu: [
       {
         id: 61,

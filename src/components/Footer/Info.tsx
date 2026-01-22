@@ -18,7 +18,7 @@ export default function Info() {
           fontFamily: 'Satoshi, sans-serif',
           fontSize: '20px',
           fontStyle: 'normal',
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: '30px'
         }}
       >
@@ -48,7 +48,7 @@ export default function Info() {
           fontFamily: 'Satoshi, sans-serif',
           fontSize: '20px',
           fontStyle: 'normal',
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: '30px'
         }}
       >

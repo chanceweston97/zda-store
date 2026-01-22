@@ -46,7 +46,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   const [quantity, setQuantity] = useState(1);
   const [mounted, setMounted] = useState(false);
 
-  const { cartDetails } = useShoppingCart();
+  const { cartDetails, incrementItem, decrementItem } = useShoppingCart();
   const { addItemWithAutoOpen } = useAutoOpenCart();
   const wishlistItems = useAppSelector((state) => state.wishlistReducer.items);
 
@@ -81,11 +81,6 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       category,
     });
   }, [product._id, product.name]);
-
-  const isProductInCart = useMemo(
-    () => Object.values(cartDetails ?? {}).some((cartItem) => cartItem.id === product._id),
-    [cartDetails, product._id]
-  );
 
   const isProductInWishlist = useMemo(
     () =>
@@ -221,6 +216,33 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
   const [selectedCableSeriesSlug, setSelectedCableSeriesSlug] = useState<string>("");
   const [selectedCableTypeSlug, setSelectedCableTypeSlug] = useState<string>("");
   
+  // Check if the exact same variant is in cart (not just the product)
+  // Create a unique ID based on product and variant selection
+  const currentCartItemId = useMemo(() => {
+    if (isCableProduct && selectedLengthIndex >= 0 && (product as any).variants?.[selectedLengthIndex]) {
+      return `${product._id}-${(product as any).variants[selectedLengthIndex].id}`;
+    }
+    if (product.productType === "antenna" && selectedLengthIndex >= 0 && (product as any).variants?.[selectedLengthIndex]) {
+      return `${product._id}-${(product as any).variants[selectedLengthIndex].id}`;
+    }
+    if (isSimpleConnector && selectedLengthIndex >= 0 && (product as any).variants?.[selectedLengthIndex]) {
+      return `${product._id}-${(product as any).variants[selectedLengthIndex].id}`;
+    }
+    if (isConnectorProduct && selectedLength) {
+      return `${product._id}-${selectedLength}`;
+    }
+    if (isStandaloneConnector && selectedCableSeriesSlug && selectedCableTypeSlug) {
+      return `${product._id}-${selectedCableSeriesSlug}-${selectedCableTypeSlug}`;
+    }
+    return product._id;
+  }, [product._id, selectedLengthIndex, selectedLength, selectedCableSeriesSlug, selectedCableTypeSlug, isCableProduct, isSimpleConnector, isConnectorProduct, isStandaloneConnector, product]);
+
+  // Update isProductInCart to check for exact variant match
+  const isProductInCart = useMemo(
+    () => Object.values(cartDetails ?? {}).some((cartItem) => cartItem.id === currentCartItemId),
+    [cartDetails, currentCartItemId]
+  );
+  
   // Get connector slug/name to check if it's N-Male or N-Female
   const connectorSlug = product.slug?.current?.toLowerCase() || "";
   const connectorName = product.name?.toLowerCase() || "";
@@ -340,107 +362,19 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     return 0;
   };
 
-  // Auto-select first length option (for cables) or first variant (for simple connectors or antenna products)
-  useEffect(() => {
-    // For cable products with variants (WooCommerce) - work like antennas: sort and select index 0
-    if (isCableProduct && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
-      // Sort variants by length (smallest to largest) - same as display sorting
-      const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
-        const getLengthNumber = (variant: any): number => {
-          const title = variant.title || "";
-          const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-          return match ? parseFloat(match[1]) : 0;
-        };
-        return getLengthNumber(a) - getLengthNumber(b);
-      });
-      
-      // After sorting, the first variant (index 0) is the smallest - select it
-      // Find its original index in the unsorted array for price calculation
-      if (sortedVariants.length > 0) {
-        const firstVariant = sortedVariants[0];
-        
-        // Extract length from first variant to find matching variant in original array
-        const firstVariantTitle = firstVariant.title || "";
-        const firstCleaned = firstVariantTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-        const firstMatch = firstCleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-        const firstLength = firstMatch ? parseFloat(firstMatch[1]) : 0;
-        
-        console.log("[ShopDetails] Finding smallest variant - sorted first:", {
-          title: firstVariantTitle,
-          length: firstLength,
-          id: firstVariant.id
-        });
-        
-        // Find original index by matching length value (most reliable method)
-        let originalIndex = (product as any).variants.findIndex((v: any) => {
-          const vTitle = v.title || "";
-          const vCleaned = vTitle.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-          const vMatch = vCleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-          const vLength = vMatch ? parseFloat(vMatch[1]) : 0;
-          return vLength === firstLength && firstLength > 0;
-        });
-        
-        // Fallback: try matching by ID
-        if (originalIndex < 0 && firstVariant.id) {
-          originalIndex = (product as any).variants.findIndex((v: any) => v.id === firstVariant.id);
-        }
-        
-        // Fallback: try matching by title
-        if (originalIndex < 0) {
-          originalIndex = (product as any).variants.findIndex((v: any) => v.title === firstVariantTitle);
-        }
-        
-        // Fallback: try matching by reference
-        if (originalIndex < 0) {
-          originalIndex = (product as any).variants.findIndex((v: any) => v === firstVariant);
-        }
-        
-        if (originalIndex >= 0) {
-          setSelectedLengthIndex(originalIndex);
-          const lengthValue = firstMatch ? `${firstMatch[1]} ft` : firstCleaned;
-          setSelectedLength(lengthValue);
-          console.log("[ShopDetails] ✅ Auto-selected smallest length variant (original index:", originalIndex, "):", firstVariantTitle, "→", lengthValue);
-        } else {
-          console.error("[ShopDetails] ❌ Could not find original index for smallest variant. Variants:", (product as any).variants.map((v: any) => v.title));
-          // Don't set selectedLengthIndex - let display logic handle selection
-        }
-      }
-    } else if (isCableProduct && lengthOptions.length > 0 && selectedLengthIndex < 0) {
-      // For cable products with lengthOptions - sort and select smallest
-      const sortedLengthOptions = [...lengthOptions].sort((a: any, b: any) => {
-        const getLengthNumber = (option: any): number => {
-          const value = getLengthValue(option);
-          if (!value) return 0;
-          const cleaned = value.replace(/^Length:\s*/i, "").replace(/\s*dBi/gi, "").trim();
-          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-          return match ? parseFloat(match[1]) : 0;
-        };
-        return getLengthNumber(a) - getLengthNumber(b);
-      });
-      
-      if (sortedLengthOptions.length > 0) {
-        const firstLength = sortedLengthOptions[0];
-        const originalIndex = lengthOptions.findIndex((opt: any) => 
-          (opt.variantId && opt.variantId === firstLength.variantId) ||
-          (opt.id && opt.id === firstLength.id) ||
-          opt === firstLength
-        );
-        if (originalIndex >= 0) {
-          setSelectedLengthIndex(originalIndex);
-          setSelectedLength(getLengthValue(firstLength));
-          console.log("[ShopDetails] Auto-selected smallest length option for cable product:", firstLength);
-        }
-      }
-    } else if (isSimpleConnector && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
-      setSelectedLengthIndex(0);
-    } else if (product.productType === "antenna" && (product as any).variants && (product as any).variants.length > 0 && selectedLengthIndex < 0) {
-      // Auto-select first variant for antenna products with variants (WooCommerce)
-      // Variants are already sorted by gain value (smallest to largest)
-      setSelectedLengthIndex(0);
-      console.log("[ShopDetails] Auto-selected first variant for antenna product:", (product as any).variants[0]);
+  // Helper function to get variant price
+  const getVariantPrice = (variant: any): number => {
+    if (variant?.calculated_price?.calculated_amount) {
+      return variant.calculated_price.calculated_amount / 100;
     }
-  }, [lengthOptions, selectedLengthIndex, isCableProduct, isSimpleConnector, product, (product as any).variants]);
+    if (variant?.price) {
+      return parseFloat(variant.price) || 0;
+    }
+    return 0;
+  };
+
+  // Don't auto-select - keep dropdown showing "Select Gain" or "Select Length" by default
+  // The price will still show the lowest price via dynamicPrice calculation
 
   // Parse length from string (e.g., "25 ft" -> 25)
   const parseLengthInFeet = (lengthStr: string): number => {
@@ -567,24 +501,13 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           return selectedVariant.price;
         }
       }
-      // Fallback to first variant's price if no selection (sorted by length, smallest first)
+      // Fallback to lowest price variant if no selection (for display purposes)
       const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
-        const getLengthNumber = (variant: any): number => {
-          const title = variant.title || "";
-          const cleaned = title.replace(/Length:\s*/gi, "").replace(/\s*dBi/gi, "").trim();
-          const match = cleaned.match(/(\d+(?:\.\d+)?)\s*ft/i);
-          return match ? parseFloat(match[1]) : 0;
-        };
-        return getLengthNumber(a) - getLengthNumber(b);
+        return getVariantPrice(a) - getVariantPrice(b);
       });
       if (sortedVariants.length > 0) {
-        const firstVariant = sortedVariants[0];
-        if (firstVariant?.calculated_price?.calculated_amount) {
-          return firstVariant.calculated_price.calculated_amount / 100;
-        }
-        if (firstVariant?.price) {
-          return firstVariant.price;
-        }
+        const lowestPriceVariant = sortedVariants[0];
+        return getVariantPrice(lowestPriceVariant);
       }
     }
     
@@ -594,10 +517,12 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
         // Calculate price from selected length
         return getLengthPrice(lengthOptions[selectedLengthIndex]);
       }
-      // Fallback to first length option if no selection
-      const firstLength = lengthOptions[0];
-      if (firstLength) {
-        return getLengthPrice(firstLength);
+      // Fallback to lowest price length option if no selection (for display purposes)
+      const sortedLengthOptions = [...lengthOptions].sort((a: any, b: any) => {
+        return getLengthPrice(a) - getLengthPrice(b);
+      });
+      if (sortedLengthOptions.length > 0) {
+        return getLengthPrice(sortedLengthOptions[0]);
       }
     }
     // Fallback to pricePerFoot if no lengthOptions
@@ -619,13 +544,13 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
           return selectedVariant.price;
         }
       }
-      // Fallback to first variant's price if no selection
-      const firstVariant = (product as any).variants[0];
-      if (firstVariant?.calculated_price?.calculated_amount) {
-        return firstVariant.calculated_price.calculated_amount / 100;
-      }
-      if (firstVariant?.price) {
-        return firstVariant.price;
+      // Fallback to lowest price variant if no selection (for display purposes)
+      const sortedVariants = [...(product as any).variants].sort((a: any, b: any) => {
+        return getVariantPrice(a) - getVariantPrice(b);
+      });
+      if (sortedVariants.length > 0) {
+        const lowestPriceVariant = sortedVariants[0];
+        return getVariantPrice(lowestPriceVariant);
       }
     }
     
@@ -642,14 +567,11 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     return getGainPrice(currentGainOption, gainIndex);
   }, [currentGainOption, gainIndex, product.gainOptions, isConnectorProduct, isStandaloneConnector, isSimpleConnector, isCableProduct, selectedLength, selectedLengthIndex, lengthOptions, cableTypePricePerFoot, connectorPrice, product.price, selectedCableTypeSlug, standaloneConnectorPrice, (product as any).variants]);
 
-  // Calculate total price for display (unit price × quantity)
-  const totalPrice = useMemo(() => {
-    if (!dynamicPrice) return 0;
-    return dynamicPrice * quantity; // Return exact price without rounding
-  }, [dynamicPrice, quantity]);
+  // Calculate total price for display (unit price × quantity) - REMOVED: Price should not scale with quantity
+  // Price display will show dynamicPrice (unit price) only
 
-  const cartItem = {
-    id: product._id,
+  const cartItem = useMemo(() => ({
+    id: currentCartItemId, // Use unique ID that includes variant
     name: product.name,
     price: dynamicPrice * 100, // Convert to cents
     currency: "usd",
@@ -696,9 +618,9 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       variantId: (product as any).variants[selectedLengthIndex].id,
       cableType: (product as any).variants[selectedLengthIndex].title || (product as any).variants[selectedLengthIndex].sku,
     }),
-  };
+  }), [currentCartItemId, product.name, dynamicPrice, cartImageUrl, product?.price_id, product?.slug?.current, currentGain, isConnectorProduct, productCableSeries, cableType, product.cableType?._id, selectedLength, isCableProduct, isStandaloneConnector, selectedCableSeriesSlug, selectedCableTypeSlug, selectedCableType?._id, product.productType, selectedLengthIndex, isSimpleConnector, product]);
 
-  // Console log when variant selection changes (must be after selectedLengthIndex, dynamicPrice, and totalPrice are declared)
+  // Console log when variant selection changes
   useEffect(() => {
     if (selectedLengthIndex >= 0 && (product as any).variants && (product as any).variants[selectedLengthIndex]) {
       const selectedVariant = (product as any).variants[selectedLengthIndex];
@@ -707,10 +629,9 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       console.log("Selected Variant:", JSON.stringify(selectedVariant, null, 2));
       console.log("Variant Price:", selectedVariant.price);
       console.log("Variant Calculated Price:", selectedVariant.calculated_price?.calculated_amount);
-      console.log("Dynamic Price:", dynamicPrice);
-      console.log("Total Price:", totalPrice);
+      console.log("Dynamic Price (Unit Price):", dynamicPrice);
     }
-  }, [selectedLengthIndex, product, dynamicPrice, totalPrice]);
+  }, [selectedLengthIndex, product, dynamicPrice]);
 
   // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
@@ -753,7 +674,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
     trackAddToCart({
       id: product._id,
       name: product.name,
-      price: totalPrice || product.discountedPrice || product.price || 0,
+      price: dynamicPrice || product.discountedPrice || product.price || 0,
       category,
       quantity: itemQuantity,
     });
@@ -822,22 +743,50 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
       }
     }
 
-    // Use quantity for both antenna and connector products
-    const itemQuantity = quantity;
-    // @ts-ignore
-    addItemWithAutoOpen(cartItem, itemQuantity);
-    
-    // GA4: Track add to cart
-    const category = product.categories?.[0]?.name || product.category?.name || undefined;
-    trackAddToCart({
-      id: product._id,
-      name: product.name,
-      price: totalPrice || product.discountedPrice || product.price || 0,
-      category,
-      quantity: itemQuantity,
-    });
-    
-    toast.success("Product added to cart!");
+    // Check if item is already in cart with same variant
+    if (isProductInCart) {
+      // Update quantity using incrementItem/decrementItem
+      const existingCartItem = Object.values(cartDetails ?? {}).find((item) => item.id === currentCartItemId);
+      if (existingCartItem) {
+        const currentQuantity = existingCartItem.quantity || 1;
+        const quantityDifference = quantity - currentQuantity;
+        
+        if (quantityDifference > 0) {
+          // Increase quantity
+          for (let i = 0; i < quantityDifference; i++) {
+            incrementItem(currentCartItemId);
+          }
+          toast.success(`Quantity updated to ${quantity}`);
+        } else if (quantityDifference < 0) {
+          // Decrease quantity
+          for (let i = 0; i < Math.abs(quantityDifference); i++) {
+            if (currentQuantity - i > 1) {
+              decrementItem(currentCartItemId);
+            }
+          }
+          toast.success(`Quantity updated to ${quantity}`);
+        } else {
+          toast.success("Quantity unchanged");
+        }
+      }
+    } else {
+      // Add new item to cart
+      const itemQuantity = quantity;
+      // @ts-ignore
+      addItemWithAutoOpen(cartItem, itemQuantity);
+      
+      // GA4: Track add to cart
+      const category = product.categories?.[0]?.name || product.category?.name || undefined;
+      trackAddToCart({
+        id: product._id,
+        name: product.name,
+        price: dynamicPrice || product.discountedPrice || product.price || 0,
+        category,
+        quantity: itemQuantity,
+      });
+      
+      toast.success("Product added to cart!");
+    }
   };
 
   const handleToggleWishlist = () => {
@@ -1079,7 +1028,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '48px',
+                    fontSize: '30px',
                     fontStyle: 'normal',
                     fontWeight: 400,
                     lineHeight: '58px',
@@ -1095,7 +1044,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '36px',
+                    fontSize: '30px',
                     fontStyle: 'normal',
                     fontWeight: 400,
                     lineHeight: '36px',
@@ -1104,7 +1053,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                     margin: 0
                   }}
                 >
-                  ${formatPrice(totalPrice)}
+                  ${formatPrice(dynamicPrice)}
                 </h3>
               </div>
 
@@ -2001,33 +1950,24 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                       <button
                         type="button"
                         onClick={handleAddToCart}
-                        disabled={isProductInCart}
-                        className={`btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full ${
-                          isProductInCart
-                            ? "opacity-70 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
                         style={{ 
                           fontFamily: 'Satoshi, sans-serif',
                           padding: '10px 30px',
                           paddingRight: '30px',
-                          cursor: isProductInCart ? 'not-allowed' : 'pointer',
+                          cursor: 'pointer',
                           minWidth: 'fit-content'
                         }}
                         onMouseEnter={(e) => {
-                          if (!isProductInCart) {
-                            e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
-                          }
+                          e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
                         }}
                         onMouseLeave={(e) => {
-                          if (!isProductInCart) {
-                            e.currentTarget.style.paddingRight = '30px';
-                          }
+                          e.currentTarget.style.paddingRight = '30px';
                         }}
                       >
                         <ButtonArrowHomepage />
                         <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">
-                          {isProductInCart ? "Added to Cart" : "Add to Cart"}
+                          {isProductInCart ? "Update Cart" : "Add to Cart"}
                         </p>
                       </button>
 

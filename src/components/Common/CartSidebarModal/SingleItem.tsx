@@ -1,25 +1,14 @@
-import { MinusIcon, PlusIcon, TrashIcon } from "@/assets/icons";
-import cn from "@/utils/cn";
+import { TrashIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useShoppingCart } from "use-shopping-cart";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
 
 const SingleItem = ({ item, toggle }: any) => {
-  const { incrementItem, decrementItem, removeItem } = useShoppingCart();
+  const { removeItem } = useShoppingCart();
 
   const handleRemoveFromCart = () => {
     removeItem(item.id);
-  };
-
-  const handleIncreaseQuantity = () => {
-    incrementItem(item.id);
-  };
-
-  const handleDecreaseQuantity = () => {
-    if (item.quantity > 1) {
-      decrementItem(item.id);
-    }
   };
 
   return (
@@ -40,7 +29,9 @@ const SingleItem = ({ item, toggle }: any) => {
                 </Link>
               )}
             </h3>
-            <p className="text-custom-sm">Price: ${formatPrice(convertCartPriceToDollars(item.price))}</p>
+            <p className="text-custom-sm">
+              Price: ${formatPrice(convertCartPriceToDollars(item.price))} <span className="text-dark font-medium">x {item.quantity}</span>
+            </p>
             {item.metadata?.isCustom && (
               <div className="mt-1 text-xs text-[#383838]">
                 {item.metadata.cableType} • {item.metadata.length}ft • {item.metadata.connector1} → {item.metadata.connector2}
@@ -58,36 +49,8 @@ const SingleItem = ({ item, toggle }: any) => {
         </button>
       </div>
 
-      {/* Quantity Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center border rounded-full border-gray-3">
-          <button
-            onClick={handleDecreaseQuantity}
-            aria-label="Decrease quantity"
-            className={cn(
-              "flex items-center justify-center w-9 h-9 ease-out duration-200 hover:text-blue",
-              {
-                "opacity-50 pointer-events-none": item.quantity === 1,
-              }
-            )}
-            disabled={item.quantity === 1}
-          >
-            <MinusIcon className="w-4 h-4" />
-          </button>
-
-          <span className="flex items-center justify-center w-12 h-9 border-x border-gray-4 font-medium text-sm">
-            {item.quantity}
-          </span>
-
-          <button
-            onClick={handleIncreaseQuantity}
-            aria-label="Increase quantity"
-            className="flex items-center justify-center w-9 h-9 ease-out duration-200 hover:text-blue"
-          >
-            <PlusIcon className="w-4 h-4" />
-          </button>
-        </div>
-
+      {/* Total Display */}
+      <div className="flex items-center justify-end">
         <p className="text-dark font-semibold text-sm">
           Total: ${formatPrice(convertCartPriceToDollars(item.price) * item.quantity)}
         </p>

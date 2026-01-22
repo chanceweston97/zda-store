@@ -45,7 +45,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
   const title = bannerData?.title || "Field-tested antennas and cabling <br /> built to improve signal where it counts.";
   const brandName = bannerData?.brandName || "ZDA Communications";
   const buttons = bannerData?.buttons || [
-    { text: "All Products", link: "/shop" },
+    { text: "All Products", link: "/products" },
     { text: "Cable Builder", link: "/cable-builder" },
   ];
   const card = bannerData?.card;
@@ -65,7 +65,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
   };
 
   return (
-    <section className="relative w-full h-[600px] rounded-2xl overflow-hidden">
+    <section className="relative w-full h-[600px] rounded-[10px] overflow-hidden">
       {/* Background */}
       <Image
         src={backgroundImage}

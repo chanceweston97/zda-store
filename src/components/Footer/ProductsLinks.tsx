@@ -24,7 +24,7 @@ const accountLinks = [
   {
     id: 5,
     label: 'All',
-    href: '/shop',
+    href: '/products',
   }
 ]
 export default function ProductsLinks() {
@@ -37,7 +37,7 @@ export default function ProductsLinks() {
           fontFamily: 'Satoshi, sans-serif',
           fontSize: '20px',
           fontStyle: 'normal',
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: '30px'
         }}
       >

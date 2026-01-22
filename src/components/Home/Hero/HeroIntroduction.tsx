@@ -35,7 +35,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
   const description = introductionData?.description || "At ZDA Communications, we care about one thing above all: reliable wireless performance. We design and supply industrial-grade antennas, cabling, and RF accessories that help homes, enterprises, and field teams achieve clear, consistent connectivity. ";
   const buttons = (introductionData?.buttons || [
     { text: "More About Us", link: "/about" },
-    { text: "Explore Products", link: "/shop" },
+    { text: "Explore Products", link: "/products" },
   ]).filter(button => button.text !== "More About Us").map(button => 
     button.text === "Explore Products" 
       ? { ...button, text: "Discover our Products" }
@@ -199,17 +199,14 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
               <Link
                 key={index}
                 href={button.link}
-                className="group"
+                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{ 
-                  display: 'flex',
+                  fontFamily: 'Satoshi, sans-serif',
                   padding: '10px 30px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
-                  borderRadius: '10px',
-                  background: '#2958A4',
+                  paddingRight: '30px',
                   cursor: 'pointer',
-                  textDecoration: 'none'
+                  width: '252px',
+                  minWidth: '252px'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
@@ -218,10 +215,8 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
                   e.currentTarget.style.paddingRight = '30px';
                 }}
               >
-                <div style={{ color: '#FFFFFF' }}>
-                  <ButtonArrowHomepage />
-                </div>
-                <span className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]" style={{ color: '#FFFFFF' }}>{button.text}</span>
+                <ButtonArrowHomepage />
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{button.text}</p>
               </Link>
             ))}
           </div>

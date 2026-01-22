@@ -1,25 +1,14 @@
-import { MinusIcon, PlusIcon, TrashIcon } from "@/assets/icons";
-import cn from "@/utils/cn";
+import { TrashIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useShoppingCart } from "use-shopping-cart";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
 
 const SingleItem = ({ item }: any) => {
-  const { incrementItem, decrementItem, removeItem } = useShoppingCart();
+  const { removeItem } = useShoppingCart();
 
   const handleRemoveFromCart = () => {
     removeItem(item.id);
-  };
-
-  const handleIncreaseQuantity = () => {
-    incrementItem(item.id);
-  };
-
-  const handleDecreaseQuantity = () => {
-    if (item.quantity > 1) {
-      decrementItem(item.id);
-    }
   };
 
   return (
@@ -61,33 +50,7 @@ const SingleItem = ({ item }: any) => {
       </td>
 
       <td className="py-5 px-4">
-        <div className="flex items-center border rounded-full w-max border-gray-3">
-          <button
-            onClick={() => handleDecreaseQuantity()}
-            aria-label="Decrease quantity"
-            className={cn(
-              "flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue",
-              {
-                "opacity-50 pointer-events-none": item.quantity === 1,
-              }
-            )}
-            disabled={item.quantity === 1}
-          >
-            <MinusIcon />
-          </button>
-
-          <span className="flex items-center justify-center w-16 h-11.5 border-x border-gray-4 font-medium">
-            {item.quantity}
-          </span>
-
-          <button
-            onClick={() => handleIncreaseQuantity()}
-            aria-label="Increase quantity"
-            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
-          >
-            <PlusIcon />
-          </button>
-        </div>
+        <p className="text-dark font-medium">x {item.quantity}</p>
       </td>
 
       <td className="py-5 px-4">

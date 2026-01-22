@@ -62,7 +62,7 @@ export async function GET() {
         id: 1,
         title: "Products",
         newTab: false,
-        path: "/shop",
+        path: "/products",
         submenu: productsSubmenu,
       },
       {
@@ -87,7 +87,9 @@ export async function GET() {
 
     return NextResponse.json(menuData, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (error) {

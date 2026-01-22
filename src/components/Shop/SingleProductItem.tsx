@@ -96,7 +96,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
   return (
     <div className="group">
-      <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[270px] mb-4">
+      <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[200px] mb-4">
         <Link href={`/products/${item?.slug?.current}`}>
           <Image
             src={
@@ -109,8 +109,8 @@ const SingleGridItem = ({ item }: { item: Product }) => {
                 : "/images/placeholder.png"
             }
             alt={"Image for " + item.name}
-            width={250}
-            height={250}
+            width={200}
+            height={200}
           />
         </Link>
 
@@ -161,11 +161,22 @@ const SingleGridItem = ({ item }: { item: Product }) => {
           <p className="text-custom-sm">( {item?.reviews.length} )</p>
         </div> */}
 
-        <h3 className="font-medium text-dark line-clamp-1 ease-out duration-200 hover:text-blue mb-1.5">
+        <h3 
+          className="font-medium text-dark line-clamp-1 ease-out duration-200 hover:text-blue mb-1.5"
+          style={{
+            fontFamily: 'Satoshi, sans-serif',
+            fontSize: '30px',
+            fontWeight: 500,
+            lineHeight: '36px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
           {item.name}
         </h3>
 
-        <span className="flex items-center gap-2 text-lg font-medium">
+        <span className="flex items-center gap-2 font-medium" style={{ fontSize: '30px', fontFamily: 'Satoshi, sans-serif' }}>
           <span className="text-dark">${formatPrice(productPrice)}</span>
         </span>
       </Link>

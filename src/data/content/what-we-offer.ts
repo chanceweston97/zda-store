@@ -7,7 +7,7 @@ export const whatWeOffer: WhatWeOffer = {
   isActive: true,
   headerButton: {
     text: "Explore Products",
-    link: "/shop",
+    link: "/products",
   },
   offerItems: [
     {

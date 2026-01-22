@@ -158,7 +158,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
   return (
     <div className="group">
-      <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[270px] mb-4">
+      <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[200px] mb-4">
         <Link href={`/products/${item?.slug?.current}`}>
           <Image
             src={
@@ -167,8 +167,8 @@ const SingleGridItem = ({ item }: { item: Product }) => {
                 : ""
             }
             alt={item.name}
-            width={250}
-            height={250}
+            width={200}
+            height={200}
           />
         </Link>
 
@@ -217,12 +217,15 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         {/* Product Title */}
         <Link href={`/products/${item?.slug?.current}`}>
           <h3 
-            className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 line-clamp-2"
+            className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 line-clamp-1"
             style={{
               fontFamily: 'Satoshi, sans-serif',
-              fontSize: '18px',
+              fontSize: '30px',
               fontWeight: 500,
-              lineHeight: '26px'
+              lineHeight: '36px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
             {item.name}
@@ -260,7 +263,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             className="text-dark font-medium"
             style={{
               fontFamily: 'Satoshi, sans-serif',
-              fontSize: '18px',
+              fontSize: '30px',
               fontWeight: 500
             }}
           >

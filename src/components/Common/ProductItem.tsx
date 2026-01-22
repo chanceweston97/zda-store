@@ -147,7 +147,7 @@ const ProductItem = ({ item }: { item: Product }) => {
 
   return (
     <div className="group">
-      <div className="relative overflow-hidden flex border items-center justify-center rounded-lg border-gray-2 bg-[#F6F7FB] min-h-[270px] mb-4">
+      <div className="relative overflow-hidden flex border items-center justify-center rounded-lg border-gray-2 bg-[#F6F7FB] min-h-[200px] mb-4">
         <Link
           href={`${
             pathUrl.includes("products")
@@ -162,8 +162,8 @@ const ProductItem = ({ item }: { item: Product }) => {
                 : ""
             }
             alt={item.name}
-            width={250}
-            height={250}
+            width={200}
+            height={200}
           />
         </Link>
 
@@ -211,6 +211,15 @@ const ProductItem = ({ item }: { item: Product }) => {
       <h3
         className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5 line-clamp-1"
         onClick={() => handleProductDetails()}
+        style={{
+          fontFamily: 'Satoshi, sans-serif',
+          fontSize: '30px',
+          fontWeight: 500,
+          lineHeight: '36px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}
       >
         <Link
           href={`${
@@ -243,7 +252,7 @@ const ProductItem = ({ item }: { item: Product }) => {
         </span>
       )}
 
-      <span className="flex items-center gap-2 text-lg font-medium">
+      <span className="flex items-center gap-2 font-medium" style={{ fontSize: '30px', fontFamily: 'Satoshi, sans-serif' }}>
         <span className="text-dark">${formatPrice(productPrice)}</span>
         {item.discountedPrice && item.discountedPrice < productPrice && (
           <span className="line-through text-dark-4">${formatPrice(productPrice)}</span>

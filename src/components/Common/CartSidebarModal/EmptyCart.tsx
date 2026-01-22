@@ -17,7 +17,7 @@ const EmptyCart = () => {
         onClick={() => {
           handleCartClick();
         }}
-        href="/shop"
+        href="/products"
         className="w-full lg:w-10/12 mx-auto inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium px-6 py-3 transition-all duration-300 ease-in-out hover:bg-[#214683]"
         style={{ fontFamily: 'Satoshi, sans-serif' }}
       >

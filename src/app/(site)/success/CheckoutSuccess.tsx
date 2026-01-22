@@ -140,7 +140,7 @@ const CheckoutSuccessContent = () => {
                   </Link>
 
                   <Link
-                    href="/shop"
+                    href="/products"
                     className="inline-flex items-center gap-2 rounded-full border border-transparent bg-[#2958A4] text-white text-sm font-medium px-6 py-3 transition-colors hover:border-[#2958A4] hover:bg-white hover:text-[#2958A4]"
                   >
                     Continue Shopping

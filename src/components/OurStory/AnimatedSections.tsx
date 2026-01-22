@@ -171,7 +171,7 @@ export function AnimatedLetsWorkTogether({ workData }: { workData?: LetsWorkToge
   ];
   const closingText = workData?.closingText || "Whether you're maintaining a mission-critical network or setting up a single link at a remote site, we want to make the RF side of your job simpler and more dependable.";
   const buttons = workData?.buttons || [
-    { text: "Explore Products", link: "/shop" },
+    { text: "Explore Products", link: "/products" },
     { text: "Contact Us", link: "/contact" },
   ];
   const imageUrl = workData?.image

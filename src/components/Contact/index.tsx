@@ -115,28 +115,37 @@ export default function Contact() {
 
   return (
     <section
-      className="mx-auto"
+      className="w-full overflow-hidden"
       style={{
-        background: 'conic-gradient(from -74deg at 74.37% 54.74%, #FFF 131.53754711151123deg, #70C8FF 162.69198417663574deg, #1870D5 197.30801582336426deg, #70C8FF 295.9637188911438deg, #FFF 330.5797505378723deg)',
-        marginTop: '100px',
-        width: '1440px',
-        padding: '50px',
-        maxWidth: '100%',
-        boxSizing: 'border-box'
+        marginTop: '100px'
       }}
     >
       <div
-        className="flex flex-col md:flex-row h-full"
         style={{
-          display: 'flex',
-          padding: 0,
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          alignSelf: 'stretch',
-          height: '100%',
-          gap: 0
+          background: 'conic-gradient(from -74deg at 74.37% 54.74%, #FFF 131.53754711151123deg, #70C8FF 162.69198417663574deg, #1870D5 197.30801582336426deg, #70C8FF 295.9637188911438deg, #FFF 330.5797505378723deg)',
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          padding: '50px',
+          boxSizing: 'border-box'
         }}
       >
+        <div className="max-w-[1440px] mx-auto">
+          <div
+            className="flex flex-col md:flex-row h-full"
+            style={{
+              display: 'flex',
+              padding: 0,
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              alignSelf: 'stretch',
+              height: '100%',
+              gap: 0
+            }}
+          >
           {/* LEFT COLUMN — WHITE BACKGROUND */}
         <div className="flex flex-col bg-white w-full md:w-[523px]" style={{ flex: '0 0 auto', padding: 0 }}>
           <div style={{ padding: 0 }}>
@@ -436,6 +445,8 @@ export default function Contact() {
                 </button>
               </div>
             </form>
+        </div>
+          </div>
         </div>
       </div>
     </section>

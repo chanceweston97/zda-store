@@ -3,7 +3,7 @@ import Link from 'next/link'
 const quickLinks = [
   {
     id: 1,
-    label: 'Contact Us',
+    label: 'Contact',
     href: '/contact',
   },
 ]
@@ -18,7 +18,7 @@ export default function QuickLinks() {
           fontFamily: 'Satoshi, sans-serif',
           fontSize: '20px',
           fontStyle: 'normal',
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: '30px'
         }}
       >

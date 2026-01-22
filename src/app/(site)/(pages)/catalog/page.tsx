@@ -83,11 +83,11 @@ const CatalogPage = () => {
             >
               In the meantime, browse our{" "}
               <Link 
-                href="/shop" 
+                href="/products" 
                 className="underline hover:no-underline transition-all"
                 style={{ color: '#2958A4' }}
               >
-                online shop
+                online products
               </Link>{" "}
               to view our available products.
             </p>

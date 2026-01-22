@@ -42,7 +42,7 @@ export default function WhatWeOffer({ whatWeOfferData }: WhatWeOfferProps) {
     const title = whatWeOfferData?.title || "What We Offer";
     const headerButton = whatWeOfferData?.headerButton || {
         text: "Explore Products",
-        link: "/shop",
+        link: "/products",
     };
 
     // Default offer items if no data

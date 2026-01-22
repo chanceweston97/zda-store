@@ -676,7 +676,15 @@ export default function Description({ product, metadata }: Props) {
                                                             vertical-align: top;
                                                             background-color: #2958A4;
                                                             color: white;
-                                                            font-weight: 700;
+                                                            font-weight: 400;
+                                                        }
+                                                        .specifications-content table th:first-child {
+                                                            border-top-left-radius: 10px;
+                                                            border-bottom-left-radius: 10px;
+                                                        }
+                                                        .specifications-content table th:last-child {
+                                                            border-top-right-radius: 10px;
+                                                            border-bottom-right-radius: 10px;
                                                         }
                                                         .specifications-content table td {
                                                             border: none;

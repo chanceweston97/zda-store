@@ -28,7 +28,7 @@ export default function Legal() {
           fontFamily: 'Satoshi, sans-serif',
           fontSize: '20px',
           fontStyle: 'normal',
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: '30px'
         }}
       >

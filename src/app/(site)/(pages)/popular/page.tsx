@@ -4,8 +4,8 @@ import { getProductsByFilter } from "@/lib/data/shop-utils";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shop Page | ZDA Communications',
-  description: 'This is Shop Page for ZDA Communications',
+  title: 'Products | ZDA Communications',
+  description: 'Browse our products at ZDA Communications',
   // other metadata
 };
 
@@ -31,7 +31,7 @@ const ShopWithoutSidebarPage = async ({ searchParams }: PageProps) => {
     <main>
       <Breadcrumb
         title={'Our Best Products'}
-        pages={['shop', '/', 'popular']}
+        pages={['products', '/', 'popular']}
       />
       <ShopWithoutSidebar key={sort} shopData={data} />
     </main>

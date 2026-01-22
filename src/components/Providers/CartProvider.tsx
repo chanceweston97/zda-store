@@ -8,7 +8,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   // This allows using WooCommerce checkout instead
   const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || undefined;
   const successUrl = process.env.NEXT_PUBLIC_SUCCESS_URL || `${typeof window !== 'undefined' ? window.location.origin : ''}/success`;
-  const cancelUrl = process.env.NEXT_PUBLIC_CANCEL_URL || `${typeof window !== 'undefined' ? window.location.origin : ''}/shop`;
+  const cancelUrl = process.env.NEXT_PUBLIC_CANCEL_URL || `${typeof window !== 'undefined' ? window.location.origin : ''}/products`;
 
   return (
     <USCProvider

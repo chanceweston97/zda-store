@@ -80,7 +80,7 @@ const ShopWithoutSidebar = ({ shopData }: { shopData: Product[] }) => {
                 )}
               </div>
             ) : (
-              <p className="py-5 text-2xl text-center">No products found!</p>
+              <p className="py-5 text-lg text-center max-w-2xl mx-auto px-4">We are in the process of refining our online product offerings. If you are searching for a specific item or configuration, please reach out to a product expert.</p>
             )}
             <Pagination
               currentPage={currentPage}

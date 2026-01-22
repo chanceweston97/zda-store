@@ -6,7 +6,7 @@ import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 export default function CatalogButton() {
   return (
     <Link
-      href="/shop"
+      href="/products"
       className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
       style={{ 
         fontFamily: 'Satoshi, sans-serif',
@@ -23,7 +23,7 @@ export default function CatalogButton() {
       }}
     >
       <ButtonArrowHomepage />
-      <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Our Shop</p>
+      <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Our Products</p>
     </Link>
   );
 }
