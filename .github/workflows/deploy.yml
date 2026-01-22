@@ -66,46 +66,8 @@ jobs:
             corepack enable
             corepack prepare yarn@4.6.0 --activate
 
-            # Check disk space
-            df -h
-            
-            # Clean everything before install (critical for Yarn 4)
-            echo "🧹 Cleaning previous install artifacts..."
-            yarn cache clean || true
-            rm -rf node_modules .yarn/cache .yarn/install-state.gz || true
-            
-            # Verify Node version (must be 18+)
-            echo "🔍 Checking Node version..."
-            node -v
-            NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-            if [ "$NODE_VERSION" -lt 18 ]; then
-              echo "❌ Node version must be 18 or higher. Current: $(node -v)"
-              exit 1
-            fi
-            
-            # Verify yarn.lock exists
-            if [ ! -f "yarn.lock" ]; then
-              echo "❌ yarn.lock file not found!"
-              exit 1
-            fi
-            echo "✅ yarn.lock found"
-            
-            # Install deps with retry logic
-            echo "📦 Installing dependencies..."
-            if ! yarn install 2>&1; then
-              echo "⚠️ First install attempt failed, performing deep clean and retrying..."
-              yarn cache clean
-              rm -rf node_modules .yarn/cache .yarn/install-state.gz .pnp.* || true
-              if ! yarn install 2>&1; then
-                echo "❌ Install failed after retry"
-                echo "🔍 Checking yarn version and config..."
-                yarn --version
-                cat .yarnrc.yml || echo "No .yarnrc.yml found"
-                exit 1
-              fi
-            fi
-            
-            echo "✅ Dependencies installed successfully"
+            # Install deps
+            yarn install --immutable
 
             # Clean build
             rm -rf .next

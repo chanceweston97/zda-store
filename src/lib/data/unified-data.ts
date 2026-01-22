@@ -10,13 +10,8 @@ import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 /**
  * Get all products from WooCommerce or local data
  * Priority: WooCommerce (if enabled) > Local Data
- * 
- * ⚠️ CRITICAL: By default, variations are NOT fetched (includeVariations=false)
- * This prevents MySQL overload and 504 errors on listing pages.
- * Only product detail pages should fetch variations.
  */
-export async function getAllProducts(options?: { includeVariations?: boolean }) {
-  const includeVariations = options?.includeVariations ?? false;
+export async function getAllProducts() {
   const useWooCommerce = isWooCommerceEnabled();
 
   // Log status (always log in production for debugging)
@@ -36,10 +31,9 @@ export async function getAllProducts(options?: { includeVariations?: boolean }) 
           const visibility = (p.catalog_visibility || "").toLowerCase();
           return visibility !== "hidden" && visibility !== "search";
         });
-        // Convert products - skip variations by default (only fetch for PDP)
-        // includeVariations=false means skipVariations=true in convertWCToProduct
+        // Convert products (now async to fetch variations)
         const converted = await Promise.all(
-          visibleProducts.map((product) => convertWCToProduct(product, !includeVariations))
+          visibleProducts.map((product) => convertWCToProduct(product, true))
         );
         console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
         return converted;

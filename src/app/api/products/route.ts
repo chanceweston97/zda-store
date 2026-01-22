@@ -236,9 +236,52 @@ export async function GET(req: Request) {
       }
     }
 
-    // ⚠️ CRITICAL: Do NOT fetch variations in API route (listing pages)
-    // This prevents MySQL overload and 504 errors
-    // Variation SKUs are only needed on product detail pages, not listing pages
+    const fetchFirstVariationSku = async (
+      productId: number
+    ): Promise<string | null> => {
+      try {
+        const variationParams = new URLSearchParams({
+          consumer_key: consumerKey,
+          consumer_secret: consumerSecret,
+          per_page: "1",
+          page: "1",
+          orderby: "id",
+          order: "asc",
+          _fields: "sku",
+        });
+        
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for variations
+        
+        try {
+          const variationRes = await fetch(
+            `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
+            { 
+              next: { revalidate: 60, tags: ["wc-products"] },
+              signal: controller.signal
+            }
+          );
+          clearTimeout(timeoutId);
+          
+          if (!variationRes.ok) return null;
+          const variations = (await variationRes.json()) as Array<{ sku?: string }>;
+          const sku = variations?.[0]?.sku?.trim();
+          return sku || null;
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError?.name === 'AbortError') {
+            // Timeout - return null silently
+            return null;
+          }
+          throw fetchError;
+        }
+      } catch (error) {
+        // Silently fail - don't block product listing if variation fetch fails
+        return null;
+      }
+    };
+
     const products = await Promise.all(
       visibleProducts.map(async (product) => {
         const image = product.images?.[0]?.src || "";
@@ -251,9 +294,11 @@ export async function GET(req: Request) {
             ? featuresValue
             : null;
 
-        // Use parent SKU only - do NOT fetch variation SKUs (prevents MySQL overload)
-        // Variation SKUs will be fetched on product detail pages only
-        const sku = product.sku || "";
+        let sku = product.sku || "";
+        if (!sku && product.variations && product.variations.length > 0) {
+          const variationSku = await fetchFirstVariationSku(product.id);
+          if (variationSku) sku = variationSku;
+        }
 
         return {
           _id: String(product.id),

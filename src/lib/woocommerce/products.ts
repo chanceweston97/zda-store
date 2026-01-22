@@ -158,8 +158,8 @@ export async function getProductBySlug(slug: string): Promise<WooCommerceProduct
  * This is used for PDP where we need complete variant information
  */
 export async function convertWCToProductWithVariations(wcProduct: WooCommerceProduct): Promise<any> {
-  // First do the basic conversion (skip variations here, we'll fetch them separately below)
-  const baseProduct = await convertWCToProduct(wcProduct, true);
+  // First do the basic conversion
+  const baseProduct = await convertWCToProduct(wcProduct);
   
   // If product has variations, fetch full variation details
   if (wcProduct.variations && wcProduct.variations.length > 0) {
@@ -296,56 +296,16 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
   }
 }
 
-// Circuit breaker for variation fetches (prevents cascading failures)
-const variationFailures = new Map<number, { count: number; lastFailure: number }>();
-const CIRCUIT_BREAKER_THRESHOLD = 3; // Fail 3 times, then skip for 60 seconds
-const CIRCUIT_BREAKER_RESET_TIME = 60000; // 60 seconds
-
 /**
  * Get product variations for a specific product
- * ⚠️ CRITICAL: Only call this on product detail pages, NOT listing pages
- * This prevents MySQL overload and 504 errors
  */
 export async function getProductVariations(productId: number): Promise<any[]> {
-  // Circuit breaker: Skip if this product has failed too many times recently
-  const failureRecord = variationFailures.get(productId);
-  if (failureRecord) {
-    const timeSinceFailure = Date.now() - failureRecord.lastFailure;
-    if (failureRecord.count >= CIRCUIT_BREAKER_THRESHOLD && timeSinceFailure < CIRCUIT_BREAKER_RESET_TIME) {
-      console.warn(`[getProductVariations] Circuit breaker active for product ${productId} - skipping fetch`);
-      return [];
-    }
-    // Reset if enough time has passed
-    if (timeSinceFailure >= CIRCUIT_BREAKER_RESET_TIME) {
-      variationFailures.delete(productId);
-    }
-  }
-
   try {
     // WC_API_URL already includes /wp-json/wc/v3, so just use /products/{id}/variations
-    // Add caching to reduce load
-    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`, {
-      next: { revalidate: 300, tags: [`wc-variations-${productId}`] }, // Cache for 5 minutes
-    });
-    
-    // Reset failure count on success
-    variationFailures.delete(productId);
-    
+    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`);
     return variations || [];
-  } catch (error: any) {
-    // Track failures for circuit breaker
-    const currentFailures = variationFailures.get(productId) || { count: 0, lastFailure: 0 };
-    variationFailures.set(productId, {
-      count: currentFailures.count + 1,
-      lastFailure: Date.now(),
-    });
-    
-    // Only log first failure to reduce noise
-    if (currentFailures.count === 0) {
-      console.error(`[getProductVariations] Error fetching variations for product ${productId}:`, error?.message || error);
-    }
-    
-    // Return empty array - don't throw (prevents cascading failures)
+  } catch (error) {
+    console.error(`[getProductVariations] Error fetching variations for product ${productId}:`, error);
     return [];
   }
 }
@@ -379,9 +339,7 @@ export async function getCategories(): Promise<Array<{
  * This matches the format expected by the shop page components
  * @param skipVariations - If true, skip fetching variations (faster for listing pages)
  */
-// ⚠️ CRITICAL: Default to skipVariations=true to prevent MySQL overload
-// Only pass skipVariations=false for product detail pages
-export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = true): Promise<any> {
+export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
@@ -536,17 +494,16 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   }
 
   // Handle variants - WooCommerce uses variations
-  // ⚠️ CRITICAL: Only fetch variations on product detail pages, NOT listing pages
-  // This prevents MySQL overload and 504 errors
+  // Fetch variations to get actual SKUs (required for listing pages to show SKU)
   const variants: any[] = [];
   
-  // Check if product has variations AND we're not skipping (listing pages should skip)
-  if (!skipVariations && wcProduct.variations && wcProduct.variations.length > 0) {
-    // Only fetch variations for product detail pages (PDP)
-    // Listing pages should use parent SKU to avoid MySQL overload
+  // Check if product has variations
+  if (wcProduct.variations && wcProduct.variations.length > 0) {
+    // Always fetch variations to get actual SKU data (required for shop page)
+    // Even for listing pages, we need variation SKUs, not parent SKU
     try {
       // Fetch actual variations to get their SKUs
-      // This is ONLY for product detail pages - listing pages skip this
+      // This is required because WooCommerce doesn't include variation data in product listings
       const variations = await getProductVariations(wcProduct.id);
     
       // Sort variations by ID (ascending) to ensure first variation is the one with lowest ID
