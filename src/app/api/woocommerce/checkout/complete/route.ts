@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
       cartItems, // Items from use-shopping-cart
       payment_status,
       payment_intent_id,
+      shipping_method, // Selected shipping method from frontend
     } = body;
 
     if (!email || !shipping_address) {
@@ -124,6 +125,15 @@ export async function POST(req: NextRequest) {
       paymentMethodTitle = "Direct Bank Transfer";
     }
 
+    // Prepare shipping lines if shipping method is provided
+    const shipping_lines = shipping_method && shipping_method.name ? [
+      {
+        method_id: shipping_method.provider || shipping_method.name,
+        method_title: shipping_method.name || "Shipping",
+        total: shipping_method.price ? shipping_method.price.toFixed(2) : "0.00",
+      },
+    ] : undefined;
+
     // Prepare order data
     const orderData = {
       payment_method: paymentMethod,
@@ -132,9 +142,11 @@ export async function POST(req: NextRequest) {
       billing,
       shipping: same_as_billing ? billing : shipping,
       line_items: lineItems,
+      shipping_lines,
       meta_data: [
         { key: "order_source", value: "nextjs_frontend" },
         ...(payment_intent_id ? [{ key: "stripe_payment_intent_id", value: payment_intent_id }] : []),
+        ...(shipping_method ? [{ key: "shipping_method_id", value: shipping_method.name }] : []),
       ],
     };
 

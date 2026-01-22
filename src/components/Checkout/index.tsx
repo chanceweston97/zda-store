@@ -42,7 +42,7 @@ export default function CheckoutMain() {
     useForm<CheckoutInput>({
       defaultValues: {
         shippingMethod: {
-          name: "free",
+          name: "",
           price: 0,
         },
         paymentMethod: "bank",

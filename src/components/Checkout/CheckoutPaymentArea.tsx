@@ -240,6 +240,7 @@ const CheckoutPaymentArea = ({ amount }: { amount: number }) => {
             same_as_billing: !data.shipToDifferentAddress,
             cartItems,
             payment_status: paymentStatus,
+            shipping_method: data.shippingMethod,
             ...(paymentIntentId && { payment_intent_id: paymentIntentId }),
           }),
         });

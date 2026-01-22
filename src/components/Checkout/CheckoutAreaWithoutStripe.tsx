@@ -126,6 +126,7 @@ const CheckoutAreaWithoutStripe = ({ amount }: { amount: number }) => {
             same_as_billing: !data.shipToDifferentAddress,
             cartItems,
             payment_status: "pending",
+            shipping_method: data.shippingMethod,
           }),
         });
 
