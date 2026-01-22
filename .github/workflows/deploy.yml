@@ -83,18 +83,26 @@ jobs:
               exit 1
             fi
             
+            # Verify yarn.lock exists
+            if [ ! -f "yarn.lock" ]; then
+              echo "❌ yarn.lock file not found!"
+              exit 1
+            fi
+            echo "✅ yarn.lock found"
+            
             # Install deps with retry logic
             echo "📦 Installing dependencies..."
-            if ! yarn install; then
+            if ! yarn install 2>&1; then
               echo "⚠️ First install attempt failed, performing deep clean and retrying..."
               yarn cache clean
               rm -rf node_modules .yarn/cache .yarn/install-state.gz .pnp.* || true
-              yarn install || {
+              if ! yarn install 2>&1; then
                 echo "❌ Install failed after retry"
-                echo "🔍 Running verbose install to diagnose..."
-                yarn install --verbose 2>&1 | tail -50
+                echo "🔍 Checking yarn version and config..."
+                yarn --version
+                cat .yarnrc.yml || echo "No .yarnrc.yml found"
                 exit 1
-              }
+              fi
             fi
             
             echo "✅ Dependencies installed successfully"
