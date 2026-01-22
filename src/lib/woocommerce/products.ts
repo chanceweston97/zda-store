@@ -310,9 +310,7 @@ export async function getProductVariations(productId: number): Promise<any[]> {
   }
 }
 
-/**
- * Get product categories
- */
+
 export async function getCategories(): Promise<Array<{
   id: number;
   name: string;
