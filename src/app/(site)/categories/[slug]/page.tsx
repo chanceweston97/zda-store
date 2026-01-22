@@ -171,6 +171,21 @@ const CategoryPage = async ({ params, searchParams }: Params) => {
       notFound();
     }
   } catch (error: any) {
+    // Hard failure boundary - stop immediately on timeout or MySQL errors
+    const isTimeout = error?.name === 'AbortError' || 
+                     error?.message?.includes('timeout') || 
+                     error?.message?.includes('aborted') ||
+                     error?.code === 'TIMEOUT';
+    const isDBError = error?.message?.includes('database') ||
+                     error?.message?.includes('MySQL') ||
+                     error?.message?.includes('connection');
+    
+    if (isTimeout || isDBError) {
+      // Log once and stop - do NOT retry
+      console.error(`[CategoryPage] Hard failure (${isTimeout ? 'timeout' : 'database'}) for slug: ${slug} - returning 404 immediately`);
+      notFound();
+    }
+    
     // Enhanced error logging for production debugging
     console.error("[CategoryPage] Error fetching category:", {
       slug,
