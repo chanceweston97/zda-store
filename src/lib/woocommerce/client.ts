@@ -62,9 +62,13 @@ export async function wcFetch<T>(
         keepalive: true,
       };
 
-      if (options.cache === undefined) {
+      // CRITICAL FIX: Only set no-store if no next.revalidate is provided
+      // When next.revalidate is set, Next.js handles caching automatically
+      // Setting cache: "no-store" prevents static generation
+      if (options.cache === undefined && !options.next?.revalidate) {
         fetchOptions.cache = "no-store";
       }
+      // If next.revalidate is provided, don't set cache - let Next.js handle it
 
       const response = await fetch(url, fetchOptions);
       
