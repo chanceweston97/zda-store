@@ -841,7 +841,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       </svg>
                     </button>
 
-                    <span className="flex items-center justify-center font-medium text-[#2958A4]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                    <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                       {config.quantity}
                     </span>
 
