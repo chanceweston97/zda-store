@@ -1516,7 +1516,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{
                                 display: 'flex',
                                 height: '50px',
-                                padding: '0 16px',
+                                padding: '0 10px',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 alignSelf: 'stretch',
@@ -1534,10 +1534,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', margin: 0, padding: 0, lineHeight: 0 }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1550,10 +1550,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1607,7 +1607,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               style={{
                                 display: 'flex',
                                 height: '50px',
-                                padding: '0 16px',
+                                padding: '0 10px',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 alignSelf: 'stretch',
@@ -1625,10 +1625,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', margin: 0, padding: 0, lineHeight: 0 }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1641,10 +1641,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1744,10 +1744,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 }}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={quantity <= 1}
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Decrease quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center', margin: 0, padding: 0, lineHeight: 0 }}>
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1760,10 +1760,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                                 type="button"
                                 onClick={() => setQuantity((prev) => prev + 1)}
                                 className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                               >
                                 <span className="sr-only">Increase quantity</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ display: 'block' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
                                   <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                                 </svg>
                               </button>
@@ -1862,7 +1862,7 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               }}
                               className="flex items-center justify-center ease-out duration-200 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={quantity <= 1}
-                              style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer' }}
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: quantity <= 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                             >
                               <span className="sr-only">Decrease quantity</span>
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1" style={{ transform: 'scaleX(-1)', transformOrigin: 'center' }}>
@@ -1878,10 +1878,10 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
                               type="button"
                               onClick={() => setQuantity((prev) => prev + 1)}
                               className="flex items-center justify-center ease-out duration-200 hover:opacity-70"
-                              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
                             >
                               <span className="sr-only">Increase quantity</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#383838" strokeWidth="1">
                                 <path d="M4.7168 12.1543L5.3457 12.7832L10.8145 7.31445L11.1152 7L10.8145 6.68555L5.3457 1.2168L4.7168 1.8457L9.87109 7L4.7168 12.1543Z" fill="#383838"/>
                               </svg>
                             </button>

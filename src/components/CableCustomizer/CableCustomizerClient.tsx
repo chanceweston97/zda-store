@@ -819,7 +819,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                     style={{
                       display: 'flex',
                       height: '50px',
-                      padding: '0 16px',
+                      padding: '0 10px',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       alignSelf: 'stretch',
