@@ -45,30 +45,49 @@ const Header = () => {
     async function fetchMenuData() {
       try {
         console.log('[Header] Fetching menu from /api/menu...');
-        const response = await fetch('/api/menu');
-        console.log('[Header] Menu API response status:', response.status);
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('[Header] Menu API returned data:', {
-            isArray: Array.isArray(data),
-            length: data?.length,
-            firstItem: data?.[0],
+        // Use AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        
+        try {
+          const response = await fetch('/api/menu', {
+            signal: controller.signal,
           });
+          clearTimeout(timeoutId);
           
-          if (data && Array.isArray(data) && data.length > 0) {
-            console.log('[Header] Updating menu with', data.length, 'items');
-            setMenuData(data);
+          console.log('[Header] Menu API response status:', response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('[Header] Menu API returned data:', {
+              isArray: Array.isArray(data),
+              length: data?.length,
+              firstItem: data?.[0],
+            });
+            
+            if (data && Array.isArray(data) && data.length > 0) {
+              console.log('[Header] Updating menu with', data.length, 'items');
+              setMenuData(data);
+            } else {
+              console.warn('[Header] Menu API returned empty or invalid data, keeping static menu');
+            }
           } else {
-            console.warn('[Header] Menu API returned empty or invalid data, keeping static menu');
+            console.error('[Header] Menu API returned error status:', response.status);
+            // Swallow error - keep static menu
           }
-        } else {
-          console.error('[Header] Menu API returned error status:', response.status);
-          const errorText = await response.text();
-          console.error('[Header] Error response:', errorText);
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError?.name === 'AbortError') {
+            console.warn('[Header] Menu fetch timed out, keeping static menu');
+          } else {
+            console.error('[Header] Error fetching menu:', fetchError);
+          }
+          // Swallow error - keep static menu
         }
       } catch (error) {
         console.error('[Header] Error fetching menu:', error);
+        // Swallow error - keep static menu
       }
     }
 

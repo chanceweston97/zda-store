@@ -66,7 +66,7 @@ export async function getProducts(params?: {
   // WC_API_URL already includes /wp-json/wc/v3, so just use /products
   const endpoint = `/products${query ? `?${query}` : ""}`;
   
-  // Add caching to reduce MySQL load
+  // Add aggressive caching to reduce MySQL load and prevent 504 errors
   const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
     next: { revalidate: 300, tags: ["wc-products"] }, // Cache for 5 minutes
   });
@@ -281,7 +281,16 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
     // WordPress REST API endpoint for media
     const mediaUrl = `${WC_SITE_URL}/wp-json/wp/v2/media/${id}`;
     
-    const response = await fetch(mediaUrl);
+    // Use fetchWithTimeout to prevent 504 errors
+    const { fetchWithTimeout } = await import("@/lib/fetch-with-timeout");
+    const response = await fetchWithTimeout(
+      mediaUrl,
+      {
+        next: { revalidate: 3600 }, // 1 hour cache
+      },
+      3000 // 3 second timeout
+    );
+    
     if (!response.ok) {
       console.warn(`[resolveMediaId] Failed to fetch media ${id}: ${response.status} ${response.statusText}`);
       return null;

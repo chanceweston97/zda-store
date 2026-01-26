@@ -5,10 +5,20 @@ import { useShoppingCart } from "use-shopping-cart";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
 
 const SingleItem = ({ item }: any) => {
-  const { removeItem } = useShoppingCart();
+  const { removeItem, incrementItem, decrementItem } = useShoppingCart();
 
   const handleRemoveFromCart = () => {
     removeItem(item.id);
+  };
+
+  const handleIncrement = () => {
+    incrementItem(item.id);
+  };
+
+  const handleDecrement = () => {
+    if (item.quantity > 1) {
+      decrementItem(item.id);
+    }
   };
 
   return (
@@ -50,7 +60,26 @@ const SingleItem = ({ item }: any) => {
       </td>
 
       <td className="py-5 px-4">
-        <p className="text-dark font-medium">x {item.quantity}</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDecrement}
+            disabled={item.quantity <= 1}
+            aria-label="Decrease quantity"
+            className="flex items-center justify-center rounded-full w-8 h-8 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-gray-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="text-lg leading-none">−</span>
+          </button>
+          <span className="text-dark font-medium min-w-[2rem] text-center">
+            {item.quantity}
+          </span>
+          <button
+            onClick={handleIncrement}
+            aria-label="Increase quantity"
+            className="flex items-center justify-center rounded-full w-8 h-8 bg-gray-2 border border-gray-3 text-dark ease-out duration-200 hover:bg-gray-3"
+          >
+            <span className="text-lg leading-none">+</span>
+          </button>
+        </div>
       </td>
 
       <td className="py-5 px-4">

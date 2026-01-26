@@ -5,6 +5,7 @@ import { InputGroup } from "../ui/input";
 import { useCheckoutForm } from "./form";
 import { ChevronDown } from "./icons";
 import { useSession } from "next-auth/react";
+import { COUNTRIES } from "@/lib/countries";
 
 export default function Billing() {
   const { register, errors, control } = useCheckoutForm();
@@ -72,7 +73,7 @@ export default function Billing() {
             htmlFor="regionName"
             className="block mb-2.5"
           >
-            Region
+            Country
             <span className="text-red">*</span>
           </label>
 
@@ -87,14 +88,16 @@ export default function Billing() {
                 Select your country
               </option>
 
-              <option value="australia">Australia</option>
-              <option value="america">America</option>
-              <option value="england">England</option>
+              {COUNTRIES.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
             </select>
           </div>
 
           {errors.billing?.regionName && (
-            <p className="text-sm text-red mt-1.5">Region is required</p>
+            <p className="text-sm text-red mt-1.5">Country is required</p>
           )}
         </div>
 
@@ -134,10 +137,30 @@ export default function Billing() {
             name="billing.town"
             render={({ field, fieldState }) => (
               <InputGroup
-                label="Town/City"
+                label="City"
                 required
                 error={!!fieldState.error}
-                errorMessage="Town is required"
+                errorMessage="City is required"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </div>
+
+        <div className="mb-5">
+          <Controller
+            control={control}
+            rules={{ required: true }}
+            name="billing.zipCode"
+            render={({ field, fieldState }) => (
+              <InputGroup
+                label="Zip / postal code"
+                placeholder="Enter zip code"
+                required
+                error={!!fieldState.error}
+                errorMessage="Zip code is required"
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}

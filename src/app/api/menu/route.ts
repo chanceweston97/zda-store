@@ -87,9 +87,7 @@ export async function GET() {
 
     return NextResponse.json(menuData, {
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
       },
     });
   } catch (error) {

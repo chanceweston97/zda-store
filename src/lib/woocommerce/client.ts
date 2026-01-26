@@ -28,6 +28,7 @@ type WcFetchOptions = RequestInit & {
     revalidate?: number;
     tags?: string[];
   };
+  timeout?: number; // Timeout in milliseconds (default: 3000ms for GET, 30000ms for POST/PUT/DELETE)
 };
 
 export async function wcFetch<T>(
@@ -49,9 +50,14 @@ export async function wcFetch<T>(
 
   try {
     // Create abort controller for timeout (more compatible)
-    // Reduced to 10 seconds to prevent 504 gateway timeouts
+    // Use longer timeout for POST/PUT/DELETE operations (like order creation)
+    // Default: 3 seconds for GET requests, 30 seconds for mutations
+    const isMutation = options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase());
+    const defaultTimeout = isMutation ? 30000 : 3000; // 30s for mutations, 3s for reads
+    const timeout = options.timeout ?? defaultTimeout;
+    
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     
     try {
       const fetchOptions: WcFetchOptions = {
@@ -127,7 +133,8 @@ export async function wcFetch<T>(
     
     // Check for specific error types
     if (error?.name === 'AbortError' || error?.message?.includes('aborted') || error?.message?.includes('timeout')) {
-      const timeoutError = new Error(`Request to WooCommerce API timed out after 10 seconds. URL: ${url}`);
+      const timeoutSeconds = Math.round((options.timeout ?? (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase()) ? 30000 : 3000)) / 1000);
+      const timeoutError = new Error(`Request to WooCommerce API timed out after ${timeoutSeconds} seconds. URL: ${url}`);
       (timeoutError as any).code = 'TIMEOUT';
       (timeoutError as any).status = 504;
       throw timeoutError;

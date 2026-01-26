@@ -3,6 +3,7 @@ import { Controller } from "react-hook-form";
 import { InputGroup } from "../ui/input";
 import { useCheckoutForm } from "./form";
 import { ChevronDown } from "./icons";
+import { COUNTRIES } from "@/lib/countries";
 
 export default function Shipping() {
   const [dropdown, setDropdown] = useState(false);
@@ -39,7 +40,7 @@ export default function Shipping() {
               htmlFor="shipping-country-name"
               className="block mb-1.5"
             >
-              Country/ Region
+              Country
               <span className="text-red">*</span>
             </label>
 
@@ -54,9 +55,11 @@ export default function Shipping() {
                 className="w-full bg-gray-1 rounded-full border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               >
                 <option value="">Select a country</option>
-                <option value="australia">Australia</option>
-                <option value="america">America</option>
-                <option value="england">England</option>
+                {COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -93,8 +96,28 @@ export default function Shipping() {
               name="shipping.town"
               render={({ field }) => (
                 <InputGroup
-                  label="Town/City"
+                  label="City"
                   required
+                  name={field.name}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </div>
+
+          <div className="mb-5">
+            <Controller
+              control={control}
+              rules={{ required: shipToDifferentAddress }}
+              name="shipping.zipCode"
+              render={({ field, fieldState }) => (
+                <InputGroup
+                  label="Zip / postal code"
+                  placeholder="Enter zip code"
+                  required={shipToDifferentAddress}
+                  error={!!fieldState.error}
+                  errorMessage="Zip code is required"
                   name={field.name}
                   value={field.value}
                   onChange={field.onChange}

@@ -53,6 +53,7 @@ export type CheckoutInput = {
       apartment?: string;
     };
     town: string;
+    zipCode: string;
     country?: string;
     phone: string;
     email: string;
@@ -66,6 +67,7 @@ export type CheckoutInput = {
       apartment?: string;
     };
     town: string;
+    zipCode: string;
     country?: string;
     phone: string;
     email: string;

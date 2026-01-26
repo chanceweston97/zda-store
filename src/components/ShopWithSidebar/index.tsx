@@ -341,19 +341,59 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     return [];
   }, [categoryParam, currentCategory, categories]);
 
+  // AbortController for canceling previous requests when filters change
+  const activeControllerRef = useRef<AbortController | null>(null);
+
   const fetchProducts = async (categoryIds?: string, pageOverride?: number) => {
-    const params = new URLSearchParams({
-      per_page: String(PRODUCTS_PER_PAGE),
-      page: String(pageOverride ?? currentPage),
-    });
-    if (categoryIds) {
-      params.set("category", categoryIds);
+    // Cancel previous request if still active
+    if (activeControllerRef.current) {
+      activeControllerRef.current.abort();
     }
-    const response = await fetch(`/api/products?${params.toString()}`);
-    if (!response.ok) {
-      throw new Error(`Failed to load products (${response.status})`);
+
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    activeControllerRef.current = controller;
+
+    try {
+      const params = new URLSearchParams({
+        per_page: String(PRODUCTS_PER_PAGE),
+        page: String(pageOverride ?? currentPage),
+      });
+      if (categoryIds) {
+        params.set("category", categoryIds);
+      }
+      const response = await fetch(`/api/products?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      
+      // Check if request was aborted
+      if (controller.signal.aborted) {
+        throw new Error("Request cancelled");
+      }
+
+      if (!response.ok) {
+        // Swallow errors - return empty data instead of crashing
+        console.error(`[ShopWithSidebar] Failed to load products (${response.status})`);
+        return {
+          products: [],
+          totalCount: 0,
+          allCount: 0,
+        };
+      }
+      return response.json();
+    } catch (error: any) {
+      // Handle abort errors gracefully
+      if (error?.name === 'AbortError' || error?.message === 'Request cancelled') {
+        throw error; // Let SWR handle cancellation
+      }
+      // Swallow other errors - return empty data instead of crashing
+      console.error("[ShopWithSidebar] Error fetching products:", error);
+      return {
+        products: [],
+        totalCount: 0,
+        allCount: 0,
+      };
     }
-    return response.json();
   };
 
   const categoryKey = activeCategoryIds.join(",");

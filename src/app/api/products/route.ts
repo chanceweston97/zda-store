@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 
 type WooCommerceProduct = {
   id: number;
@@ -50,20 +51,30 @@ export async function GET(req: Request) {
     }
 
     const fetchCategoryIdsExcludingUncategorized = async (): Promise<string[]> => {
-      const categoryParams = new URLSearchParams({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        per_page: "100",
-        _fields: "id,slug",
-      });
-      const categoryRes = await fetch(`${apiUrl}/products/categories?${categoryParams.toString()}`, {
-        next: { revalidate: 3600, tags: ["wc-categories"] },
-      });
-      if (!categoryRes.ok) return [];
-      const categories = (await categoryRes.json()) as Array<{ id: number; slug: string }>;
-      return categories
-        .filter((cat) => cat.slug !== "uncategorized")
-        .map((cat) => String(cat.id));
+      try {
+        const categoryParams = new URLSearchParams({
+          consumer_key: consumerKey,
+          consumer_secret: consumerSecret,
+          per_page: "100",
+          _fields: "id,slug",
+        });
+        const categoryRes = await fetchWithTimeout(
+          `${apiUrl}/products/categories?${categoryParams.toString()}`,
+          {
+            next: { revalidate: 3600, tags: ["wc-categories"] }, // 1 hour cache
+          },
+          3000 // 3 second timeout
+        );
+        if (!categoryRes.ok) return [];
+        const categories = (await categoryRes.json()) as Array<{ id: number; slug: string }>;
+        return categories
+          .filter((cat) => cat.slug !== "uncategorized")
+          .map((cat) => String(cat.id));
+      } catch (error) {
+        // Swallow errors - return empty array to prevent page crash
+        console.error("[API /products] Error fetching categories:", error);
+        return [];
+      }
     };
 
     const categoryFilterIds = await fetchCategoryIdsExcludingUncategorized();
@@ -89,25 +100,34 @@ export async function GET(req: Request) {
       }
 
       const fetchCount = async (visibility?: "visible" | "catalog" | "hidden" | "search") => {
-        const params = new URLSearchParams(baseParams);
-        if (visibility) {
-          params.append("catalog_visibility", visibility);
+        try {
+          const params = new URLSearchParams(baseParams);
+          if (visibility) {
+            params.append("catalog_visibility", visibility);
+          }
+          const res = await fetchWithTimeout(
+            `${apiUrl}/products?${params.toString()}`,
+            {
+              next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
+            },
+            3000 // 3 second timeout
+          );
+          if (!res.ok) return 0;
+          return Number(res.headers.get("X-WP-Total") || 0);
+        } catch (error) {
+          // Swallow errors - return 0 to prevent page crash
+          console.error(`[API /products] fetchCount error for visibility ${visibility}:`, error);
+          return 0;
         }
-        const res = await fetch(`${apiUrl}/products?${params.toString()}`, {
-          next: { revalidate: 60, tags: ["wc-products"] },
-        });
-        if (!res.ok) return 0;
-        return Number(res.headers.get("X-WP-Total") || 0);
       };
 
-      const [totalPublished, visibleCount, catalogCount, hiddenCount, searchCount] =
-        await Promise.all([
-          fetchCount(),
-          fetchCount("visible"),
-          fetchCount("catalog"),
-          fetchCount("hidden"),
-          fetchCount("search"),
-        ]);
+      // CRITICAL FIX: Sequential requests instead of parallel to prevent WordPress overload
+      // One request at a time reduces MySQL pressure
+      const totalPublished = await fetchCount();
+      const visibleCount = await fetchCount("visible");
+      const catalogCount = await fetchCount("catalog");
+      const hiddenCount = await fetchCount("hidden");
+      const searchCount = await fetchCount("search");
 
       if (!totalPublished) return 0;
 
@@ -142,9 +162,13 @@ export async function GET(req: Request) {
       params.append("category", categoryFilterParam);
     }
 
-    const res = await fetch(`${apiUrl}/products?${params.toString()}`, {
-      next: { revalidate: 60, tags: ["wc-products"] },
-    });
+    const res = await fetchWithTimeout(
+      `${apiUrl}/products?${params.toString()}`,
+      {
+        next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
+      },
+      3000 // 3 second timeout
+    );
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => "");
@@ -211,9 +235,13 @@ export async function GET(req: Request) {
         allProductsParams.append("category", categoryFilterIds.join(","));
       }
       
-      const allProductsRes = await fetch(`${apiUrl}/products?${allProductsParams.toString()}`, {
-        next: { revalidate: 60, tags: ["wc-products"] },
-      });
+      const allProductsRes = await fetchWithTimeout(
+        `${apiUrl}/products?${allProductsParams.toString()}`,
+        {
+          next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
+        },
+        3000 // 3 second timeout
+      );
       
       if (allProductsRes.ok) {
         const allProducts = (await allProductsRes.json()) as WooCommerceProduct[];
@@ -250,40 +278,29 @@ export async function GET(req: Request) {
           _fields: "sku",
         });
         
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for variations
+        const variationRes = await fetchWithTimeout(
+          `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
+          { 
+            next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
+          },
+          3000 // 3 second timeout
+        );
         
-        try {
-          const variationRes = await fetch(
-            `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
-            { 
-              next: { revalidate: 60, tags: ["wc-products"] },
-              signal: controller.signal
-            }
-          );
-          clearTimeout(timeoutId);
-          
-          if (!variationRes.ok) return null;
-          const variations = (await variationRes.json()) as Array<{ sku?: string }>;
-          const sku = variations?.[0]?.sku?.trim();
-          return sku || null;
-        } catch (fetchError: any) {
-          clearTimeout(timeoutId);
-          if (fetchError?.name === 'AbortError') {
-            // Timeout - return null silently
-            return null;
-          }
-          throw fetchError;
-        }
+        if (!variationRes.ok) return null;
+        const variations = (await variationRes.json()) as Array<{ sku?: string }>;
+        const sku = variations?.[0]?.sku?.trim();
+        return sku || null;
       } catch (error) {
         // Silently fail - don't block product listing if variation fetch fails
         return null;
       }
     };
 
-    const products = await Promise.all(
-      visibleProducts.map(async (product) => {
+    // CRITICAL FIX: Sequential processing instead of Promise.all to prevent WordPress overload
+    // Process products one at a time to reduce MySQL pressure
+    const products = [];
+    for (const product of visibleProducts) {
+      try {
         const image = product.images?.[0]?.src || "";
         const featuresMeta = product.meta_data?.find((item) => item.key === "features");
         const featuresValue = featuresMeta?.value ?? null;
@@ -300,7 +317,7 @@ export async function GET(req: Request) {
           if (variationSku) sku = variationSku;
         }
 
-        return {
+        products.push({
           _id: String(product.id),
           name: product.name,
           slug: { current: product.slug },
@@ -319,9 +336,25 @@ export async function GET(req: Request) {
               slug: { current: cat.slug },
             })) || [],
           reviews: [],
-        };
-      })
-    );
+        });
+      } catch (error) {
+        // If a product fails, log but continue - don't block other products
+        console.error(`[API /products] Error processing product ${product.id}:`, error);
+        // Add a placeholder product to maintain array consistency
+        products.push({
+          _id: String(product.id),
+          name: product.name || "Unknown Product",
+          slug: { current: product.slug || "" },
+          price: 0,
+          sku: "",
+          features: null,
+          thumbnails: [],
+          previewImages: [],
+          categories: [],
+          reviews: [],
+        });
+      }
+    }
 
     return NextResponse.json(
       { products, totalCount, allCount },

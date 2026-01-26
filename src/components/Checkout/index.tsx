@@ -61,6 +61,7 @@ export default function CheckoutMain() {
           phone: "",
           regionName: "",
           town: "",
+          zipCode: "",
           createAccount: false,
         },
         shipping: {
@@ -72,6 +73,7 @@ export default function CheckoutMain() {
           email: "",
           phone: "",
           town: "",
+          zipCode: "",
           countryName: "",
         },
         notes: "",
