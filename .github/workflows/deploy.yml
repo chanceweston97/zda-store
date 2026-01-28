@@ -22,6 +22,8 @@ jobs:
       - name: Rsync source to EC2
         run: |
           rsync -az --delete \
+            --exclude scanner_linux \
+            --exclude "scanner_*" \
             --exclude node_modules \
             --exclude .next \
             --exclude .git \
