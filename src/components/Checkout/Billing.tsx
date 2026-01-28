@@ -1,15 +1,25 @@
 "use client";
+import { useEffect } from "react";
 import { CheckMarkIcon } from "@/assets/icons";
 import { Controller } from "react-hook-form";
 import { InputGroup } from "../ui/input";
 import { useCheckoutForm } from "./form";
 import { ChevronDown } from "./icons";
 import { useSession } from "next-auth/react";
-import { COUNTRIES } from "@/lib/countries";
+import { useCountries } from "@/hooks/useCountries";
 
 export default function Billing() {
-  const { register, errors, control } = useCheckoutForm();
+  const { register, errors, control, watch, setValue } = useCheckoutForm();
   const session = useSession();
+  const { countries, getStatesForCountry, hasStateDropdown } = useCountries();
+  const selectedCountry = watch("billing.regionName");
+  const statesOrProvinces = getStatesForCountry(selectedCountry);
+  const showStateDropdown = hasStateDropdown(selectedCountry);
+
+  // Clear state when country changes so we don't keep an invalid state code
+  useEffect(() => {
+    setValue("billing.stateOrProvince", "");
+  }, [selectedCountry, setValue]);
 
   return (
     <div>
@@ -31,6 +41,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -48,6 +59,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -63,6 +75,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -81,14 +94,14 @@ export default function Billing() {
             <select
               {...register("billing.regionName", { required: true })}
               id="regionName"
-              className="w-full bg-gray-1 rounded-full border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               required
             >
               <option value="" hidden>
                 Select your country
               </option>
 
-              {COUNTRIES.map((country) => (
+              {countries.map((country) => (
                 <option key={country.code} value={country.code}>
                   {country.name}
                 </option>
@@ -100,6 +113,45 @@ export default function Billing() {
             <p className="text-sm text-red mt-1.5">Country is required</p>
           )}
         </div>
+
+        {/* State / Province: dropdown when country has states, else optional text */}
+        {(showStateDropdown || selectedCountry) && (
+          <div className="mb-5">
+            <label htmlFor="billing-state" className="block mb-2.5">
+              State / Province
+              {showStateDropdown ? <span className="text-red">*</span> : null}
+            </label>
+            {showStateDropdown ? (
+              <div className="relative">
+                <select
+                  {...register("billing.stateOrProvince", {
+                    required: showStateDropdown ? "State / Province is required" : false,
+                  })}
+                  id="billing-state"
+                  className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                >
+                  <option value="">Select state / province</option>
+                  {statesOrProvinces.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <input
+                type="text"
+                {...register("billing.stateOrProvince")}
+                id="billing-state"
+                placeholder="State / Province (optional)"
+                className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-5 duration-200 outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              />
+            )}
+            {errors.billing?.stateOrProvince && (
+              <p className="text-sm text-red mt-1.5">{errors.billing.stateOrProvince.message}</p>
+            )}
+          </div>
+        )}
 
         <div className="mb-5">
           <Controller
@@ -116,6 +168,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -125,7 +178,7 @@ export default function Billing() {
               type="text"
               {...register("billing.address.apartment")}
               placeholder="Apartment, suite, unit, etc. (optional)"
-              className="rounded-full mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="rounded-[10px] mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
             />
           </div>
         </div>
@@ -144,6 +197,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -164,23 +218,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
-              />
-            )}
-          />
-        </div>
-
-        <div className="mb-5">
-          <Controller
-            control={control}
-            rules={{ required: true }}
-            name="billing.country"
-            render={({ field }) => (
-              <InputGroup
-                label="Country"
-                required
-                name={field.name}
-                value={field.value}
-                onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -201,6 +239,7 @@ export default function Billing() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />
@@ -222,6 +261,7 @@ export default function Billing() {
                 value={field.value}
                 onChange={field.onChange}
                 readOnly={!!session?.data?.user?.email}
+                className="!rounded-[10px]"
               />
             )}
           />

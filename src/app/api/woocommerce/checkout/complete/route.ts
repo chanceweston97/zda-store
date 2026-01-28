@@ -85,14 +85,14 @@ export async function POST(req: NextRequest) {
       return wcItem;
     });
 
-    // Prepare billing address
+    // Prepare billing address (state from stateOrProvince / state; regionName is country code)
     const billing = {
       first_name: billing_address?.firstName || shipping_address.firstName,
       last_name: billing_address?.lastName || shipping_address.lastName,
       address_1: billing_address?.street || shipping_address.street,
       address_2: billing_address?.apartment || shipping_address.apartment || "",
       city: billing_address?.town || shipping_address.town,
-      state: billing_address?.state || shipping_address.regionName || "",
+      state: billing_address?.state ?? shipping_address.state ?? "",
       postcode: billing_address?.postalCode || shipping_address.postalCode || "00000",
       country: billing_address?.country_code || billing_address?.country || shipping_address.country || "US",
       email: email,
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       address_1: shipping_address.street,
       address_2: shipping_address.apartment || "",
       city: shipping_address.town,
-      state: shipping_address.regionName || "",
+      state: shipping_address.state ?? "",
       postcode: shipping_address.postalCode || "00000",
       country: shipping_address.country_code || shipping_address.country || "US",
     };

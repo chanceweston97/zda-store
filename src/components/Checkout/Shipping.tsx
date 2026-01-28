@@ -3,12 +3,21 @@ import { Controller } from "react-hook-form";
 import { InputGroup } from "../ui/input";
 import { useCheckoutForm } from "./form";
 import { ChevronDown } from "./icons";
-import { COUNTRIES } from "@/lib/countries";
+import { useCountries } from "@/hooks/useCountries";
 
 export default function Shipping() {
   const [dropdown, setDropdown] = useState(false);
   const { register, control, setValue, watch } = useCheckoutForm();
   const shipToDifferentAddress = watch("shipToDifferentAddress");
+  const { countries, getStatesForCountry, hasStateDropdown } = useCountries();
+  const selectedShippingCountry = watch("shipping.countryName");
+  const statesOrProvinces = getStatesForCountry(selectedShippingCountry);
+  const showStateDropdown = hasStateDropdown(selectedShippingCountry);
+
+  useEffect(() => {
+    setValue("shipping.stateOrProvince", "");
+  }, [selectedShippingCountry, setValue]);
+
   useEffect(() => {
     if (dropdown) {
       setValue("shipToDifferentAddress", true);
@@ -52,10 +61,10 @@ export default function Shipping() {
                     : false,
                 })}
                 id="shipping-country-name"
-                className="w-full bg-gray-1 rounded-full border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               >
                 <option value="">Select a country</option>
-                {COUNTRIES.map((country) => (
+                {countries.map((country) => (
                   <option key={country.code} value={country.code}>
                     {country.name}
                   </option>
@@ -63,6 +72,41 @@ export default function Shipping() {
               </select>
             </div>
           </div>
+
+          {(showStateDropdown || selectedShippingCountry) && (
+            <div className="mb-5">
+              <label htmlFor="shipping-state" className="block mb-1.5">
+                State / Province
+                {showStateDropdown ? <span className="text-red">*</span> : null}
+              </label>
+              {showStateDropdown ? (
+                <div className="relative">
+                  <select
+                    {...register("shipping.stateOrProvince", {
+                      required: shipToDifferentAddress && showStateDropdown ? "State / Province is required" : false,
+                    })}
+                    id="shipping-state"
+                    className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                  >
+                    <option value="">Select state / province</option>
+                    {statesOrProvinces.map((s) => (
+                      <option key={s.code} value={s.code}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  {...register("shipping.stateOrProvince")}
+                  id="shipping-state"
+                  placeholder="State / Province (optional)"
+                  className="w-full bg-gray-1 rounded-[10px] border border-gray-3 text-dark-4 py-3 pl-5 pr-5 duration-200 outline-hidden focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                />
+              )}
+            </div>
+          )}
 
           <div className="mb-5">
             <Controller
@@ -76,6 +120,7 @@ export default function Shipping() {
                   name={field.name}
                   value={field.value}
                   onChange={field.onChange}
+                  className="!rounded-[10px]"
                 />
               )}
             />
@@ -85,7 +130,7 @@ export default function Shipping() {
                 type="text"
                 {...register("shipping.address.apartment")}
                 placeholder="Apartment, suite, unit, etc. (optional)"
-                className="rounded-full mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="rounded-[10px] mt-5 border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
               />
             </div>
           </div>
@@ -101,6 +146,7 @@ export default function Shipping() {
                   name={field.name}
                   value={field.value}
                   onChange={field.onChange}
+                  className="!rounded-[10px]"
                 />
               )}
             />
@@ -121,21 +167,7 @@ export default function Shipping() {
                   name={field.name}
                   value={field.value}
                   onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
-
-          <div className="mb-5">
-            <Controller
-              control={control}
-              name="shipping.country"
-              render={({ field }) => (
-                <InputGroup
-                  label="Country"
-                  name={field.name}
-                  value={field.value}
-                  onChange={field.onChange}
+                  className="!rounded-[10px]"
                 />
               )}
             />
@@ -153,6 +185,7 @@ export default function Shipping() {
                   name={field.name}
                   value={field.value}
                   onChange={field.onChange}
+                  className="!rounded-[10px]"
                 />
               )}
             />
@@ -169,6 +202,7 @@ export default function Shipping() {
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}
+                className="!rounded-[10px]"
               />
             )}
           />

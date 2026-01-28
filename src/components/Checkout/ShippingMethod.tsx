@@ -72,6 +72,8 @@ export default function ShippingMethod() {
           throw new Error("Warehouse address not configured. Please set NEXT_PUBLIC_WAREHOUSE_* environment variables.");
         }
 
+        const cartItems = cartDetails ? Object.values(cartDetails) : [];
+
         const response = await fetch("/api/shipping/rates", {
           method: "POST",
           headers: {
@@ -94,15 +96,16 @@ export default function ShippingMethod() {
               street: addressTo.address?.street || "",
               apartment: addressTo.address?.apartment || "",
               town: addressTo.town || "",
-              state: addressTo.regionName || "",
-              postalCode: addressTo.postalCode || "",
-              country: addressTo.country || "US",
-              country_code: addressTo.country || "US",
+              state: addressTo.stateOrProvince || addressTo.regionName || "",
+              postalCode: addressTo.zipCode || addressTo.postalCode || "",
+              country: addressTo.countryName || addressTo.country || "US",
+              country_code: addressTo.countryName || addressTo.country || "US",
               phone: addressTo.phone || "",
               email: addressTo.email || "",
             },
             parcels,
-            use_shippo: true, // Use Shippo if available
+            cart_items: cartItems,
+            use_shippo: true,
           }),
         });
 
@@ -244,7 +247,7 @@ function ShippingMethodCard({
   providerImage: string | null;
 }) {
   return (
-    <div className="rounded-md border-[0.5px] shadow-1 border-gray-4 py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none peer-checked:shadow-none peer-checked:border-transparent peer-checked:bg-gray-2">
+    <div className="rounded-[10px] border-[0.5px] shadow-1 border-gray-4 py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 hover:border-transparent hover:shadow-none peer-checked:shadow-none peer-checked:border-transparent peer-checked:bg-gray-2">
       <div className="flex items-center">
         {providerImage && (
           <div className="pr-4">

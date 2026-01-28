@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getShippoRates, isShippoEnabled, convertShippoRateToShippingMethod, ShippoAddress, ShippoParcel } from "@/lib/shippo/client";
-import { getWooCommerceShippingMethods } from "@/lib/woocommerce/shipping";
-import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
+import { getStoreApiShippingRates, isStoreApiShippingEnabled } from "@/lib/woocommerce/store-api-shipping";
+import { convertCartItemToWC } from "@/lib/woocommerce/utils";
 
 /**
- * Get shipping rates
- * Priority: Shippo (if enabled) > WooCommerce shipping methods
+ * Get shipping rates for checkout.
+ * 1) Store API–style (WordPress): HEADLESS_SHIPPING_RATES_URL with cart + address → calculated rates (zones, FedEx, etc.)
+ * 2) Fallback: Shippo if enabled and requested
+ *
+ * Do NOT use /wc/v3/shipping/zones for checkout — that only lists zones, it does not calculate prices.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +17,8 @@ export async function POST(req: NextRequest) {
       address_from,
       address_to,
       parcels,
-      use_shippo = true, // Default to Shippo if enabled
+      cart_items: rawCartItems, // From use-shopping-cart (needed for Store API–style)
+      use_shippo = false,
     } = body;
 
     // Validate required fields
@@ -25,7 +29,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Try Shippo first if enabled and requested
+    // 1. Store API–style: custom WordPress endpoint with cart + address (calculates real rates)
+    if (isStoreApiShippingEnabled() && rawCartItems && Array.isArray(rawCartItems) && rawCartItems.length > 0) {
+      try {
+        const wcCartItems = rawCartItems.map((item: any) => convertCartItemToWC(item));
+        const storeApiItems = wcCartItems.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          variation_id: item.variation_id,
+          ...(item.price != null && { price: String(item.price) }),
+        }));
+
+        const methods = await getStoreApiShippingRates(storeApiItems, {
+          country: address_to.country || address_to.country_code || "US",
+          state: address_to.state || address_to.regionName || address_to.stateOrProvince || "",
+          postcode: address_to.postalCode || address_to.zipCode || address_to.zip || "",
+          city: address_to.town || address_to.city || "",
+          address_1: address_to.street || address_to.address?.street || "",
+        });
+
+        if (methods.length > 0) {
+          return NextResponse.json({
+            success: true,
+            methods,
+            source: "woocommerce_store_api",
+          });
+        }
+      } catch (storeApiError: any) {
+        console.error("[Shipping Rates API] Store API shipping error:", storeApiError);
+        // Fall through to Shippo
+      }
+    }
+
+    // 2. Fallback: Shippo if enabled and requested
     if (use_shippo && isShippoEnabled()) {
       try {
         // Validate Shippo required fields
@@ -50,8 +86,8 @@ export async function POST(req: NextRequest) {
           street1: address_to.street1 || address_to.street || "",
           street2: address_to.street2 || address_to.apartment || "",
           city: address_to.city || address_to.town || "",
-          state: address_to.state || address_to.regionName || "",
-          zip: address_to.zip || address_to.postalCode || "",
+          state: address_to.state || address_to.stateOrProvince || address_to.regionName || "",
+          zip: address_to.zip || address_to.postalCode || address_to.zipCode || "",
           country: address_to.country || address_to.country_code || "US",
           phone: address_to.phone || "",
           email: address_to.email || "",
@@ -77,38 +113,10 @@ export async function POST(req: NextRequest) {
         });
       } catch (shippoError: any) {
         console.error("[Shipping Rates API] Shippo error:", shippoError);
-        // Fall through to WooCommerce if Shippo fails
       }
     }
 
-    // Fallback to WooCommerce shipping methods
-    if (isWooCommerceEnabled()) {
-      try {
-        const wcMethods = await getWooCommerceShippingMethods();
-        
-        if (wcMethods && wcMethods.length > 0) {
-          const shippingMethods = wcMethods
-            .filter(method => method.enabled)
-            .map(method => ({
-              id: method.id,
-              name: method.title || method.method_title,
-              price: parseFloat(method.settings?.cost || "0"),
-              provider: method.method_id,
-              methodId: method.method_id,
-            }));
-
-          return NextResponse.json({
-            success: true,
-            methods: shippingMethods,
-            source: "woocommerce",
-          });
-        }
-      } catch (wcError: any) {
-        console.error("[Shipping Rates API] WooCommerce error:", wcError);
-      }
-    }
-
-    // If both fail, return empty array
+    // If both WooCommerce and Shippo fail or return nothing
     return NextResponse.json({
       success: true,
       methods: [],
@@ -133,6 +141,6 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     shippo_enabled: isShippoEnabled(),
-    woocommerce_enabled: isWooCommerceEnabled(),
+    store_api_shipping_enabled: isStoreApiShippingEnabled(),
   });
 }

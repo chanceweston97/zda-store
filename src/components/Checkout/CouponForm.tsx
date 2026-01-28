@@ -35,7 +35,7 @@ export default function CouponForm() {
       <input
         type="text"
         placeholder="Enter coupon code"
-        className="rounded-full border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-80"
+        className="rounded-[10px] border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-hidden duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-80"
         disabled={alreadyApplied}
         value={coupon}
         onChange={(e) => setCoupon(e.target.value)}

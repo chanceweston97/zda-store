@@ -27,12 +27,30 @@ export interface WooCommerceShippingZone {
   methods: WooCommerceShippingMethod[];
 }
 
+/** Raw zone from WC REST API (GET /shipping/zones) */
+interface WCShippingZoneRaw {
+  id: number;
+  name?: string;
+  order?: number;
+}
+
+/** Raw method from WC REST API (GET /shipping/zones/{id}/methods) */
+interface WCShippingMethodRaw {
+  instance_id?: number;
+  method_id: string;
+  method_title?: string;
+  title?: string;
+  enabled: boolean;
+  settings?: {
+    title?: { value?: string };
+    cost?: { value?: string };
+    [key: string]: { value?: string } | undefined;
+  };
+}
+
 /**
- * Get shipping methods from WooCommerce
- * Note: WooCommerce REST API doesn't have a direct shipping methods endpoint
- * This would require a custom WordPress endpoint or using WooCommerce settings API
- * 
- * For now, this is a placeholder that can be extended with a custom WordPress endpoint
+ * Get shipping methods from WooCommerce (WordPress)
+ * Uses WC REST: GET /shipping/zones then GET /shipping/zones/{id}/methods per zone.
  */
 export async function getWooCommerceShippingMethods(): Promise<WooCommerceShippingMethod[]> {
   if (!isWooCommerceEnabled()) {
@@ -40,17 +58,34 @@ export async function getWooCommerceShippingMethods(): Promise<WooCommerceShippi
   }
 
   try {
-    // Option 1: Use a custom WordPress REST endpoint
-    // Example: /wp-json/custom/v1/shipping-methods
-    // This would need to be implemented in WordPress
-    
-    // Option 2: Fetch from WooCommerce settings (requires custom endpoint)
-    // The standard WooCommerce REST API doesn't expose shipping methods directly
-    
-    // For now, return empty array - this should be implemented via custom WordPress endpoint
-    console.warn("[getWooCommerceShippingMethods] WooCommerce REST API doesn't expose shipping methods directly. A custom WordPress endpoint is required.");
-    
-    return [];
+    const zones = await wcFetch<WCShippingZoneRaw[]>("/shipping/zones");
+    if (!zones?.length) return [];
+
+    const allMethods: WooCommerceShippingMethod[] = [];
+
+    for (const zone of zones) {
+      const zoneId = zone.id;
+      const methods = await wcFetch<WCShippingMethodRaw[]>(`/shipping/zones/${zoneId}/methods`);
+      if (!methods?.length) continue;
+
+      for (const m of methods) {
+        if (!m.enabled) continue;
+        const costVal = m.settings?.cost;
+        const cost = typeof costVal === "object" && costVal && "value" in costVal ? (costVal as { value?: string }).value : String(costVal ?? "0");
+        const titleVal = m.settings?.title ?? m.title ?? m.method_title ?? m.method_id;
+        const title = typeof titleVal === "object" && titleVal && "value" in titleVal ? (titleVal as { value?: string }).value : String(titleVal ?? "");
+        allMethods.push({
+          id: `${zoneId}_${m.method_id}_${m.instance_id ?? 0}`,
+          title,
+          method_title: m.method_title ?? m.method_id,
+          method_id: m.method_id,
+          enabled: true,
+          settings: { cost: String(cost ?? "0"), title },
+        });
+      }
+    }
+
+    return allMethods;
   } catch (error) {
     console.error("[getWooCommerceShippingMethods] Error:", error);
     throw error;
@@ -67,11 +102,38 @@ export async function getWooCommerceShippingZones(): Promise<WooCommerceShipping
   }
 
   try {
-    // This would require a custom WordPress REST endpoint
-    // Example: /wp-json/custom/v1/shipping-zones
-    console.warn("[getWooCommerceShippingZones] WooCommerce REST API doesn't expose shipping zones directly. A custom WordPress endpoint is required.");
-    
-    return [];
+    const zonesRaw = await wcFetch<WCShippingZoneRaw[]>("/shipping/zones");
+    if (!zonesRaw?.length) return [];
+
+    const zones: WooCommerceShippingZone[] = [];
+
+    for (const z of zonesRaw) {
+      const methods = await wcFetch<WCShippingMethodRaw[]>(`/shipping/zones/${z.id}/methods`);
+      const mapped: WooCommerceShippingMethod[] = (methods || [])
+        .filter((m) => m.enabled)
+        .map((m) => {
+          const costVal = m.settings?.cost;
+          const cost = typeof costVal === "object" && costVal && "value" in costVal ? (costVal as { value?: string }).value : String(costVal ?? "0");
+          const titleVal = m.settings?.title ?? m.title ?? m.method_title ?? m.method_id;
+          const title = typeof titleVal === "object" && titleVal && "value" in titleVal ? (titleVal as { value?: string }).value : String(titleVal);
+          return {
+            id: `${z.id}_${m.method_id}_${m.instance_id ?? 0}`,
+            title,
+            method_title: m.method_title ?? m.method_id,
+            method_id: m.method_id,
+            enabled: true,
+            settings: { cost, title },
+          };
+        });
+      zones.push({
+        id: z.id,
+        name: z.name ?? "",
+        order: z.order ?? 0,
+        methods: mapped,
+      });
+    }
+
+    return zones;
   } catch (error) {
     console.error("[getWooCommerceShippingZones] Error:", error);
     throw error;

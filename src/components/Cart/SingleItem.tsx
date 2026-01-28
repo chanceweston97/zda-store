@@ -4,8 +4,20 @@ import Link from "next/link";
 import { useShoppingCart } from "use-shopping-cart";
 import { formatPrice, convertCartPriceToDollars } from "@/utils/price";
 
+/** Display length: metadata.length may already be "123ft", so don't append "ft" again */
+function formatLengthDisplay(length: unknown): string {
+  if (length == null || length === "") return "";
+  const s = String(length).trim();
+  if (s.toLowerCase().endsWith("ft")) return s;
+  return `${s}ft`;
+}
+
 const SingleItem = ({ item }: any) => {
   const { removeItem, incrementItem, decrementItem } = useShoppingCart();
+  const m = item.metadata;
+  const cableLabel = m?.cableTypeName ?? m?.cable ?? m?.cableType ?? "";
+  const fromLabel = m?.from ?? m?.connector1Name ?? m?.connector1 ?? "";
+  const toLabel = m?.to ?? m?.connector2Name ?? m?.connector2 ?? "";
 
   const handleRemoveFromCart = () => {
     removeItem(item.id);
@@ -47,8 +59,8 @@ const SingleItem = ({ item }: any) => {
             </h3>
             {item.metadata?.isCustom && (
               <div className="mt-1 text-sm text-[#383838]">
-                <div>Type: {item.metadata.cableType} | Length: {item.metadata.length}ft</div>
-                <div>Connectors: {item.metadata.connector1} → {item.metadata.connector2}</div>
+                <div>Type: {cableLabel} | Length: {formatLengthDisplay(m?.length)}</div>
+                <div>Connectors: {fromLabel} → {toLabel}</div>
               </div>
             )}
           </div>

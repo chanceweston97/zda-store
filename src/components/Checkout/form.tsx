@@ -55,6 +55,7 @@ export type CheckoutInput = {
     town: string;
     zipCode: string;
     country?: string;
+    stateOrProvince?: string;
     phone: string;
     email: string;
     createAccount?: boolean;
@@ -62,6 +63,7 @@ export type CheckoutInput = {
   shipToDifferentAddress: boolean;
   shipping?: {
     countryName: string;
+    stateOrProvince?: string;
     address: {
       street: string;
       apartment?: string;
