@@ -493,8 +493,14 @@ export async function getCategories(): Promise<Array<{
  * Convert WooCommerce product to frontend product format for compatibility
  * This matches the format expected by the shop page components
  * @param skipVariations - If true, skip fetching variations (faster for listing pages)
+ * @param resolveMedia - If true, resolve ACF media IDs (datasheet image/PDF) via WP REST
+ *                       For listing pages you can set this to false to avoid extra calls.
  */
-export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVariations: boolean = false): Promise<any> {
+export async function convertWCToProduct(
+  wcProduct: WooCommerceProduct,
+  skipVariations: boolean = false,
+  resolveMedia: boolean = true
+): Promise<any> {
   // Helper function to strip HTML tags from text
   const stripHTML = (html: string): string => {
     if (!html) return "";
@@ -608,7 +614,7 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   // ✅ OPTIMIZATION: Skip media ID resolution for listing pages (only needed on PDP)
   // Resolve datasheet image
   let datasheetImage: string | null = null;
-  if (datasheetImageRaw && !skipVariations) {
+  if (datasheetImageRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetImageRaw)) {
       // Field key detected - ACF field should be configured as URL type in WordPress
@@ -629,7 +635,7 @@ export async function convertWCToProduct(wcProduct: WooCommerceProduct, skipVari
   
   // Resolve datasheet PDF
   let datasheetPdf: string | null = null;
-  if (datasheetPdfRaw && !skipVariations) {
+  if (datasheetPdfRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetPdfRaw)) {
       // Field key detected - ACF field should be configured as URL type in WordPress

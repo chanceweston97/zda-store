@@ -41,7 +41,8 @@ export async function getAllProducts() {
           const batch = visibleProducts.slice(i, i + BATCH_SIZE);
           try {
             const batchResults = await Promise.all(
-              batch.map((product) => convertWCToProduct(product, true))
+              // Listing page: skip variations + skip media ID resolution for performance
+              batch.map((product) => convertWCToProduct(product, true, false))
             );
             converted.push(...batchResults);
           } catch (error) {
