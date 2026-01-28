@@ -31,6 +31,7 @@ export default function AboutUs() {
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
               href="/products"
+              prefetch={false}
               className="inline-flex items-center rounded-full 
     border border-transparent bg-[#2958A4] 
     text-white text-sm font-medium px-6 py-3 

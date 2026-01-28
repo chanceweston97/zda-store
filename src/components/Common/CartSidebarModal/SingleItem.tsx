@@ -24,7 +24,7 @@ const SingleItem = ({ item, toggle }: any) => {
               {item.metadata?.isCustom ? (
                 <span>{item.name}</span>
               ) : (
-                <Link onClick={toggle} href={`/products/${item.slug}`}>
+                <Link onClick={toggle} href={`/products/${item.slug}`} prefetch={false}>
                   {item.name}
                 </Link>
               )}

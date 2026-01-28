@@ -97,7 +97,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
   return (
     <div className="group">
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[200px] mb-4">
-        <Link href={`/products/${item?.slug?.current}`}>
+        <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
           <Image
             src={
               item?.previewImages?.[0]?.image
@@ -155,7 +155,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <Link href={`/products/${item?.slug?.current}`}>
+      <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
         {/* <div className="flex items-center gap-2.5 mb-2">
           <ReviewStar reviews={item.reviews.length} />
           <p className="text-custom-sm">( {item?.reviews.length} )</p>

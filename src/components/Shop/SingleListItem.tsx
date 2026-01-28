@@ -187,7 +187,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
             }}
           >
             {hasImage && productImageUrl ? (
-              <Link href={`/products/${item?.slug?.current}`}>
+              <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
                 <Image
                   src={productImageUrl}
               alt={item.name}
@@ -248,7 +248,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
             ) : null}
 
             {/* Product Title */}
-            <Link href={`/products/${item?.slug?.current}`}>
+            <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
               <h2
                 style={{
                   color: '#000',

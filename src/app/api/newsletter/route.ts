@@ -10,7 +10,6 @@
 
   // Route segment config
   export const runtime = 'nodejs';
-  export const dynamic = 'force-dynamic';
 
   // Get CMS URL and Form ID from environment variables
   const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";

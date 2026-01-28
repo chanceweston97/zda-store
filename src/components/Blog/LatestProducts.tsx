@@ -20,6 +20,7 @@ const LatestProducts = async () => {
                 <Link
                   href={`/products/${product?.slug?.current}`}
                   className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5"
+                  prefetch={false}
                 >
                   <Image
                     src={
@@ -35,7 +36,7 @@ const LatestProducts = async () => {
 
                 <div>
                   <h3 className="font-medium text-dark mb-1 ease-out duration-200 hover:text-blue">
-                    <Link href={`/products/${product?.slug?.current}`}>
+                    <Link href={`/products/${product?.slug?.current}`} prefetch={false}>
                       {" "}
                       {product?.name}{" "}
                     </Link>

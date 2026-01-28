@@ -107,7 +107,8 @@ export async function getProductBySlug(slug: string) {
         // ✅ CRITICAL: Do NOT fetch variations during SSR.
         // Variations are fetched lazily client-side via /api/product-variations to prevent 504s.
         const { convertWCToProduct } = await import("@/lib/woocommerce/products");
-        const converted = await convertWCToProduct(wcProduct, true); // skip variations
+        // skip variations (lazy client-side); resolveMedia=true so PDP gets images via ?acf_format=standard
+        const converted = await convertWCToProduct(wcProduct, true, true);
         const hasVariations = Array.isArray((wcProduct as any).variations) && (wcProduct as any).variations.length > 0;
         if (hasVariations) {
           (converted as any)._variationsLazy = true;

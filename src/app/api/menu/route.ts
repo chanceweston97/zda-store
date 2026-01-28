@@ -2,10 +2,9 @@ import { getCategoriesWithSubcategories } from "@/lib/data/unified-data";
 import { Menu } from "@/types/Menu";
 import { NextResponse } from "next/server";
 
-// Force dynamic rendering to prevent static generation in production
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+  const timerLabel = `[Menu API] GET|${Date.now()}`;
+  console.time(timerLabel);
   try {
     console.log("[Menu API] Fetching categories...");
     const categories = await getCategoriesWithSubcategories();
@@ -85,19 +84,21 @@ export async function GET() {
       },
     ];
 
+    console.timeEnd(timerLabel);
     return NextResponse.json(menuData, {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
       },
     });
   } catch (error) {
+    try { console.timeEnd(timerLabel); } catch { /* no-op */ }
     console.error("[Menu API] Error fetching menu data:", error);
     // Return empty array instead of 500 error to prevent frontend crashes
     // Frontend will fall back to static menu
-    return NextResponse.json([], { 
-      status: 200, // Return 200 with empty array, not 500
+    return NextResponse.json([], {
+      status: 200,
       headers: {
-        'Cache-Control': 'no-store', // Don't cache errors
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
   }

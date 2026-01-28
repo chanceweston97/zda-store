@@ -92,7 +92,7 @@ const CustomSelect = () => {
               selectedOption === category ? "same-as-selected" : ""
             }`}
           >
-            <Link href={`/categories/${(category as any).handle || category.slug?.current || category.slug}`}>
+            <Link href={`/categories/${(category as any).handle || category.slug?.current || category.slug}`} prefetch={false}>
               {category.title}
             </Link>
           </div>

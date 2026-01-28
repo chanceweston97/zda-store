@@ -6,6 +6,7 @@
 const WC_API_URL = process.env.NEXT_PUBLIC_WC_API_URL || "";
 const WC_CONSUMER_KEY = process.env.NEXT_PUBLIC_WC_CONSUMER_KEY || "";
 const WC_CONSUMER_SECRET = process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET || "";
+const WOO_ENABLED = (process.env.WOO_ENABLED || "true").toLowerCase() !== "false";
 
 /**
  * Create Basic Auth header for WooCommerce REST API
@@ -35,6 +36,9 @@ export async function wcFetch<T>(
   endpoint: string,
   options: WcFetchOptions = {}
 ): Promise<T> {
+  if (!WOO_ENABLED) {
+    throw new Error("WooCommerce is disabled (WOO_ENABLED=false).");
+  }
   if (!WC_API_URL || !WC_CONSUMER_KEY || !WC_CONSUMER_SECRET) {
     throw new Error(
       "WooCommerce API credentials are not configured. Set WC_API_URL, WC_CONSUMER_KEY, and WC_CONSUMER_SECRET in environment variables."

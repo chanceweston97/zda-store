@@ -61,14 +61,18 @@ export function convertWCToCategory(
 }
 
 /**
- * Core function that fetches and converts categories from WooCommerce
+ * Core function that fetches and converts categories from WooCommerce.
+ * Returns [] on error so cache never blocks SSR; never throws.
  */
 const fetchWooCategories = async (): Promise<any[]> => {
+  const timerLabel = `[WooCommerce] getCategories|${Date.now()}`;
   try {
+    console.time(timerLabel);
     console.log("[getWooCommerceCategories] Fetching categories from WooCommerce API...");
     const categories = await getCategories();
+    console.timeEnd(timerLabel);
     console.log(`[getWooCommerceCategories] Received ${categories?.length || 0} raw categories from API`);
-    
+
     if (!categories || categories.length === 0) {
       console.warn("[getWooCommerceCategories] No categories in WooCommerce - API returned empty array");
       return [];
@@ -93,14 +97,12 @@ const fetchWooCategories = async (): Promise<any[]> => {
 
     return topLevelCategories;
   } catch (error) {
+    try { console.timeEnd(timerLabel); } catch { /* no-op if already ended */ }
     console.error("[getWooCommerceCategories] Error fetching categories from WooCommerce:", error);
     if (error instanceof Error) {
       console.error("[getWooCommerceCategories] Error details:", error.message);
-      if (error.stack) {
-        console.error("[getWooCommerceCategories] Error stack:", error.stack);
-      }
     }
-    throw error; // Re-throw to let cache handle fallback
+    return []; // Never block SSR; return empty so cache stores safe fallback
   }
 };
 

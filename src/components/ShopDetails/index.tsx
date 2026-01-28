@@ -68,6 +68,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
       dedupingInterval: 5000,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      refreshInterval: 0,
     }
   );
 

@@ -113,7 +113,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </div> */}
 
           <h3 className="font-medium text-dark ease-out text-base duration-200 hover:text-blue mb-1.5 line-clamp-1">
-            <Link href={`/products/${item?.slug?.current}`}>{item.name}</Link>
+            <Link href={`/products/${item?.slug?.current}`} prefetch={false}>{item.name}</Link>
           </h3>
 
           <span className="flex items-center justify-center gap-2 text-lg font-medium">
@@ -124,7 +124,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </span>
         </div>
         <div className="flex items-center justify-center">
-          <Link href={`/products/${item?.slug?.current}`}>
+          <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
             <Image
               src={
                 item?.previewImages

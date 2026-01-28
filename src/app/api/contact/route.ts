@@ -10,7 +10,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Route segment config
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 // Get CMS URL and Form ID from environment variables
 // NOTE: Form ID changed after migration - update CONTACT_FORM_7_CONTACT_ID with correct ID

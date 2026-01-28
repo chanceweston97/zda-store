@@ -46,7 +46,8 @@ const getProductsFromWoo = async (query: string) => {
   const url = `${apiUrl}/products${query}`;
   const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
-  console.time(`[WooCommerce] ${query}`);
+  const wooTimerLabel = `[WooCommerce] ${query}|${Date.now()}`;
+  console.time(wooTimerLabel);
   const res = await fetchWithTimeout(
     url,
     {
@@ -57,7 +58,7 @@ const getProductsFromWoo = async (query: string) => {
     },
     3000 // 3 second timeout
   );
-  console.timeEnd(`[WooCommerce] ${query}`);
+  console.timeEnd(wooTimerLabel);
 
   if (!res.ok) {
     throw new Error(`WooCommerce API failed: ${res.status} ${res.statusText}`);
@@ -79,12 +80,23 @@ export const getCachedProducts = async (query: string) => {
   )();
 };
 
+const WOO_ENABLED = (process.env.WOO_ENABLED || "true").toLowerCase() !== "false";
+
 export async function GET(req: Request) {
-  console.time("api/products");
+  const apiTimerLabel = `api/products|${Date.now()}`;
+  console.time(apiTimerLabel);
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category") || "";
   const page = searchParams.get("page") || "1";
   const perPage = searchParams.get("per_page") || "12";
+
+  if (!WOO_ENABLED) {
+    console.timeEnd(apiTimerLabel);
+    return NextResponse.json(
+      { products: [], totalCount: 0, allCount: 0, _cached: false, _error: "woo_disabled" },
+      { status: 200, headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+    );
+  }
 
   const apiUrl =
     process.env.WC_API_URL ||
@@ -100,11 +112,10 @@ export async function GET(req: Request) {
     "";
 
   if (!apiUrl || !consumerKey || !consumerSecret) {
-    console.timeEnd("api/products");
-    // NEVER fail client - return 200 with empty data
+    console.timeEnd(apiTimerLabel);
     return NextResponse.json(
-      { products: [], totalCount: 0, allCount: 0, _cached: false },
-      { status: 200 }
+      { products: [], totalCount: 0, allCount: 0, _cached: false, _error: "woo_not_configured" },
+      { status: 200, headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
     );
   }
 
@@ -431,7 +442,7 @@ export async function GET(req: Request) {
       }
     }
 
-    console.timeEnd("api/products");
+    console.timeEnd(apiTimerLabel);
     return NextResponse.json(
       { products, totalCount, allCount, _cached: true },
       {
@@ -441,17 +452,22 @@ export async function GET(req: Request) {
       }
     );
   } catch (error: any) {
-    console.timeEnd("api/products");
-    // NEVER fail client - return 200 with empty data
-    // This prevents 504s from propagating to users
+    console.timeEnd(apiTimerLabel);
     console.error("[API /products] Error (returning cached/empty data):", error?.message || error);
-    
-    // If log doesn't run → WordPress down
-    // If log runs slow → hosting issue  
-    // If log runs fast → Next.js is fine
     return NextResponse.json(
-      { products: [], totalCount: 0, allCount: 0, _cached: false },
-      { status: 200 } // NEVER fail client
+      {
+        products: [],
+        totalCount: 0,
+        allCount: 0,
+        _cached: false,
+        _error: error?.message || "woo_failed",
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
     );
   }
 }

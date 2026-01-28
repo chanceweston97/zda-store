@@ -10,7 +10,7 @@ import {
 import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
 import { notFound } from "next/navigation";
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 const RESERVED_SLUGS = new Set([
   "terms-and-conditions",

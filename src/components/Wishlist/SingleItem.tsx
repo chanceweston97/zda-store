@@ -73,7 +73,7 @@ const SingleItem = ({ item }: any) => {
           {/* Product Name */}
           <div className="flex-1">
             <h3 className="text-base font-medium text-dark ease-out duration-200 hover:text-blue line-clamp-2">
-              <Link href={`/products/${item.slug.current}`}>{item.name}</Link>
+              <Link href={`/products/${item.slug.current}`} prefetch={false}>{item.name}</Link>
             </h3>
           </div>
         </div>

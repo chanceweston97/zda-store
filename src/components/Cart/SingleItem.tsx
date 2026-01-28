@@ -40,7 +40,7 @@ const SingleItem = ({ item }: any) => {
               {item.metadata?.isCustom ? (
                 <span>{item.name}</span>
               ) : (
-                <Link href={`/products/${item.slug}`} className="hover:underline">
+                <Link href={`/products/${item.slug}`} className="hover:underline" prefetch={false}>
                   {item.name}
                 </Link>
               )}

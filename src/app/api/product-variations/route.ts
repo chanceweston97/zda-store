@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import { getProductVariations, convertWCVariationsToVariants } from "@/lib/woocommerce/products";
 
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
 export async function GET(req: Request) {
+  const timerLabel = `[API] product-variations|${Date.now()}`;
+  console.time(timerLabel);
   const { searchParams } = new URL(req.url);
   const idParam = searchParams.get("id");
   const productName = searchParams.get("name") || "Product";
 
   const id = idParam ? Number(idParam) : NaN;
   if (!Number.isFinite(id) || id <= 0) {
-    return NextResponse.json({ variants: [], _cached: false, _error: "missing_id" }, { status: 200 });
+    console.timeEnd(timerLabel);
+    return NextResponse.json(
+      { variants: [], _cached: false, _error: "missing_id" },
+      { status: 200, headers: CACHE_HEADERS }
+    );
   }
 
   try {
@@ -17,12 +27,16 @@ export async function GET(req: Request) {
       productName,
       variations,
     });
-    return NextResponse.json({ variants, _cached: true }, { status: 200 });
+    console.timeEnd(timerLabel);
+    return NextResponse.json(
+      { variants, _cached: true },
+      { status: 200, headers: CACHE_HEADERS }
+    );
   } catch (error: any) {
-    // Never fail the client; return empty variants so PDP can still render
+    console.timeEnd(timerLabel);
     return NextResponse.json(
       { variants: [], _cached: false, _error: error?.message || "variations_failed" },
-      { status: 200 }
+      { status: 200, headers: CACHE_HEADERS }
     );
   }
 }

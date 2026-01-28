@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Increase timeout for production (default is 10s on Vercel, 30s on Node.js)
 export const maxDuration = 30; // 30 seconds
-export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {

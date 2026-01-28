@@ -4,8 +4,7 @@ import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { Metadata } from 'next';
 
-// Force dynamic rendering to prevent static generation in production
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Products | ZDA Communications',

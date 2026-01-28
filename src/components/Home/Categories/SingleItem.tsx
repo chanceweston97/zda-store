@@ -9,6 +9,7 @@ const SingleItem = ({ item }: { item: Category }) => {
     <Link
       href={`/categories/${(item as any).handle || item.slug?.current || item.slug}`}
       className="group flex flex-col items-center"
+      prefetch={false}
     >
       <div className="max-w-[130px] w-full bg-[#F2F3F8] h-32.5 rounded-full flex items-center justify-center mb-4">
         <Image

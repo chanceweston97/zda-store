@@ -259,6 +259,7 @@ export default function HeroScrollItems() {
               </p>
               <Link
                 href="/categories/antennas"
+                prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
@@ -327,6 +328,7 @@ export default function HeroScrollItems() {
               </p>
               <Link
                 href="/categories/cables"
+                prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',
@@ -395,6 +397,7 @@ export default function HeroScrollItems() {
               </p>
               <Link
                 href="/categories/connectors"
+                prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
                   fontFamily: 'Satoshi, sans-serif',

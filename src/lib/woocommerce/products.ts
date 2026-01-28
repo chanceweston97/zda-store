@@ -2,6 +2,7 @@
  * WooCommerce Product Functions
  */
 
+import { unstable_cache } from "next/cache";
 import { wcFetch } from "./client";
 
 export interface WooCommerceProduct {
@@ -42,8 +43,10 @@ export interface WooCommerceProduct {
   catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
 }
 
+const WOO_PRODUCTS_REVALIDATE = 60;
+
 /**
- * Get all products from WooCommerce
+ * Get all products from WooCommerce (cached per unique query, 60s)
  */
 export async function getProducts(params?: {
   per_page?: number;
@@ -54,111 +57,89 @@ export async function getProducts(params?: {
   order?: "asc" | "desc";
 }): Promise<WooCommerceProduct[]> {
   const queryParams = new URLSearchParams();
-  
   if (params?.per_page) queryParams.append("per_page", params.per_page.toString());
   if (params?.page) queryParams.append("page", params.page.toString());
   if (params?.category) queryParams.append("category", params.category.toString());
   if (params?.search) queryParams.append("search", params.search);
   if (params?.orderby) queryParams.append("orderby", params.orderby);
   if (params?.order) queryParams.append("order", params.order);
-
   const query = queryParams.toString();
-  // WC_API_URL already includes /wp-json/wc/v3, so just use /products
   const endpoint = `/products${query ? `?${query}` : ""}`;
-  
-  // Add aggressive caching to reduce MySQL load and prevent 504 errors
-  const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
-    next: { revalidate: 300, tags: ["wc-products"] }, // Cache for 5 minutes
-  });
-  
-  // Log all products for debugging
-  console.log(`[getProducts] Total products from WooCommerce: ${products.length}`);
-  products.forEach((p) => {
-    console.log(`[getProducts] Product: ${p.name} | Status: ${p.status} | Visibility: ${p.catalog_visibility}`);
-  });
-  
-  // Filter out hidden/private/draft products and uncategorized items
-  // These products should not appear in shop pages
-  const filtered = products.filter((product) => {
-    // Normalize visibility value to lowercase for case-insensitive comparison
-    const visibility = (product.catalog_visibility || "").toLowerCase();
-    
-    const isVisible =
-      visibility !== "hidden" &&
-      visibility !== "search" &&
-      product.status !== "private" &&
-      product.status !== "draft";
-    const hasCategory =
-      (product.categories?.length || 0) > 0 &&
-      !product.categories?.some((cat) => cat.slug === "uncategorized");
-    const shouldShow = isVisible && hasCategory;
-    
-    if (!shouldShow) {
-      console.log(`[getProducts] FILTERED OUT: ${product.name} | Status: ${product.status} | Visibility: ${product.catalog_visibility} (normalized: ${visibility}) | isVisible: ${isVisible} | hasCategory: ${hasCategory}`);
-    }
-    
-    return shouldShow;
-  });
-  
-  console.log(`[getProducts] Visible products after filtering: ${filtered.length}`);
-  return filtered;
+
+  const cached = unstable_cache(
+    async () => {
+      const timerLabel = `[getProducts] ${endpoint}|${Date.now()}`;
+      console.time(timerLabel);
+      const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
+        timeout: 3000,
+        next: { revalidate: WOO_PRODUCTS_REVALIDATE, tags: ["wc-products"] },
+      });
+      console.timeEnd(timerLabel);
+      const filtered = products.filter((product) => {
+        const visibility = (product.catalog_visibility || "").toLowerCase();
+        const isVisible =
+          visibility !== "hidden" &&
+          visibility !== "search" &&
+          product.status !== "private" &&
+          product.status !== "draft";
+        const hasCategory =
+          (product.categories?.length || 0) > 0 &&
+          !product.categories?.some((cat) => cat.slug === "uncategorized");
+        return isVisible && hasCategory;
+      });
+      return filtered;
+    },
+    ["woo-products", query || "all"],
+    { revalidate: WOO_PRODUCTS_REVALIDATE }
+  );
+  return cached();
 }
 
 /**
- * Get product by ID
+ * Get product by ID (cached 60s, 3s timeout)
  */
 export async function getProductById(id: number): Promise<WooCommerceProduct> {
-  // WC_API_URL already includes /wp-json/wc/v3, so just use /products
-  // Add caching to reduce MySQL load
   return wcFetch<WooCommerceProduct>(`/products/${id}`, {
-    next: { revalidate: 300, tags: [`wc-product-${id}`] }, // Cache for 5 minutes
+    timeout: 3000,
+    next: { revalidate: WOO_PRODUCTS_REVALIDATE, tags: [`wc-product-${id}`] },
   });
 }
 
 /**
- * Get product by slug
- * WooCommerce REST API doesn't have a direct "get by slug" endpoint,
- * so we search and filter by slug
+ * Get product by slug (cached 60s per slug; uses cached getProducts)
  */
 export async function getProductBySlug(slug: string): Promise<WooCommerceProduct | null> {
-  try {
-    // First try to get products with the slug
-    // WooCommerce search might not find by slug directly, so we'll fetch and filter
-    // Note: getProducts already filters hidden products and has caching, so we don't need to filter again
-    const products = await getProducts({ per_page: 100 });
-    const product = products.find(p => p.slug === slug);
-    
-    if (product) {
-      // Double-check visibility/status/category (should already be filtered, but be safe)
-      if (
-        product.catalog_visibility === "hidden" ||
-        product.catalog_visibility === "search" ||
-        product.status === "private" ||
-        product.status === "draft" ||
-        !product.categories?.length ||
-        product.categories?.some((cat) => cat.slug === "uncategorized")
-      ) {
+  const cached = unstable_cache(
+    async () => {
+      try {
+        const products = await getProducts({ per_page: 100 });
+        const product = products.find((p) => p.slug === slug);
+        if (product) {
+          if (
+            product.catalog_visibility === "hidden" ||
+            product.catalog_visibility === "search" ||
+            product.status === "private" ||
+            product.status === "draft" ||
+            !product.categories?.length ||
+            product.categories?.some((cat) => cat.slug === "uncategorized")
+          ) {
+            return null;
+          }
+          return product;
+        }
+        const searchResults = await getProducts({ search: slug, per_page: 10 });
+        const found = searchResults.find((p) => p.slug === slug);
+        if (found && found.catalog_visibility === "hidden") return null;
+        return found || null;
+      } catch (error) {
+        console.error(`[getProductBySlug] Error for slug ${slug}:`, error);
         return null;
       }
-      return product;
-    }
-    
-    // If not found in first 100, try searching (though search might not match slug)
-    // getProducts already has caching, so this is safe
-    const searchResults = await getProducts({ search: slug, per_page: 10 });
-    const foundProduct = searchResults.find(p => p.slug === slug);
-    
-    // Double-check catalog visibility
-    if (foundProduct && foundProduct.catalog_visibility === "hidden") {
-      return null;
-    }
-    
-    return foundProduct || null;
-  } catch (error) {
-    console.error(`[getProductBySlug] Error fetching product by slug ${slug}:`, error);
-    // HARD FAILURE: Return null immediately, don't retry
-    return null;
-  }
+    },
+    ["woo-product-slug", slug],
+    { revalidate: WOO_PRODUCTS_REVALIDATE }
+  );
+  return cached();
 }
 
 /**
@@ -330,6 +311,30 @@ export function convertWCVariationsToVariants(params: {
 }
 
 /**
+ * Fetch product from WordPress REST API with ACF in standard format.
+ * ACF returns image URLs instead of IDs when using ?acf_format=standard.
+ * Used for PDP so images (thumbnails, datasheet, etc.) display correctly.
+ */
+async function fetchProductWithACF(productId: number): Promise<{ acf?: Record<string, any>; [key: string]: any } | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_WC_SITE_URL || process.env.NEXT_PUBLIC_CMS_URL || "";
+  if (!baseUrl) return null;
+  try {
+    const url = `${baseUrl}/wp-json/wp/v2/product/${productId}?acf_format=standard`;
+    const { fetchWithTimeout } = await import("@/lib/fetch-with-timeout");
+    const response = await fetchWithTimeout(
+      url,
+      { next: { revalidate: 300 } },
+      3000
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.warn(`[fetchProductWithACF] Failed for product ${productId}:`, error);
+    return null;
+  }
+}
+
+/**
  * Resolve WordPress media ID to URL
  * WordPress REST API endpoint: /wp-json/wp/v2/media/{id}
  */
@@ -426,10 +431,10 @@ export async function getProductVariations(productId: number): Promise<any[]> {
   }
 
   try {
-    // WC_API_URL already includes /wp-json/wc/v3, so just use /products/{id}/variations
-    // Add caching to reduce MySQL load
+    // WC_API_URL already includes /wp-json/wc/v3; 3s timeout so Woo never blocks
     const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`, {
-      next: { revalidate: 300, tags: [`wc-variations-${productId}`] }, // Cache for 5 minutes
+      timeout: 3000,
+      next: { revalidate: 300, tags: [`wc-variations-${productId}`] },
     });
     
     // Reset circuit breaker on success
@@ -457,6 +462,39 @@ export async function getProductVariations(productId: number): Promise<any[]> {
 }
 
 
+const WOO_CATEGORIES_REVALIDATE = 300;
+
+const getCategoriesUncached = async (): Promise<Array<{
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  count?: number;
+  parent?: number;
+}>> => {
+  const timerLabel = `[getCategories] WooCommerce|${Date.now()}`;
+  console.time(timerLabel);
+  const categories = await wcFetch<Array<{
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    count?: number;
+    parent?: number;
+  }>>("/products/categories?per_page=100", {
+    timeout: 3000,
+    next: { revalidate: WOO_CATEGORIES_REVALIDATE, tags: ["wc-categories"] },
+  });
+  console.timeEnd(timerLabel);
+  return categories;
+};
+
+const getCachedCategoriesRaw = unstable_cache(
+  getCategoriesUncached,
+  ["woo-categories-raw"],
+  { revalidate: WOO_CATEGORIES_REVALIDATE }
+);
+
 export async function getCategories(): Promise<Array<{
   id: number;
   name: string;
@@ -465,24 +503,8 @@ export async function getCategories(): Promise<Array<{
   count?: number;
   parent?: number;
 }>> {
-  // WC_API_URL already includes /wp-json/wc/v3, so just use /products/categories
-  console.log("[getCategories] Fetching from WooCommerce API: /products/categories?per_page=100");
   try {
-    const categories = await wcFetch<Array<{
-      id: number;
-      name: string;
-      slug: string;
-      description?: string;
-      count?: number;
-      parent?: number;
-    }>>("/products/categories?per_page=100", {
-      next: { revalidate: 60, tags: ["wc-categories"] },
-    });
-    console.log(`[getCategories] Successfully fetched ${categories?.length || 0} categories from WooCommerce API`);
-    if (categories && categories.length > 0) {
-      console.log(`[getCategories] First category:`, { id: categories[0].id, name: categories[0].name, slug: categories[0].slug });
-    }
-    return categories;
+    return await getCachedCategoriesRaw();
   } catch (error: any) {
     console.error("[getCategories] Error fetching categories:", error?.message || error);
     throw error;
@@ -513,14 +535,51 @@ export async function convertWCToProduct(
   const priceStr = wcProduct.sale_price || wcProduct.price || wcProduct.regular_price || "0";
   const price = parseFloat(priceStr); // Keep in dollars
 
-  // Convert images to expected format
-  const thumbnails = (wcProduct.images && wcProduct.images.length > 0)
-    ? wcProduct.images.map((img) => ({
+  // PDP: fetch product with ACF standard format so image fields return URLs, not IDs
+  let acfProduct: { acf?: Record<string, any> } | null = null;
+  if (resolveMedia) {
+    acfProduct = await fetchProductWithACF(wcProduct.id);
+  }
+
+  // Convert images to expected format (use ACF URLs when WooCommerce returns IDs or empty)
+  let thumbnails: Array<{ image: string; color: null }> = [];
+  if (wcProduct.images && wcProduct.images.length > 0) {
+    const firstImg = wcProduct.images[0];
+    const firstSrc = firstImg?.src;
+    const isFirstSrcUrl = typeof firstSrc === "string" && (firstSrc.startsWith("http://") || firstSrc.startsWith("https://"));
+    if (isFirstSrcUrl) {
+      thumbnails = wcProduct.images.map((img) => ({
         image: img.src,
         color: null,
-      }))
-    : [];
-
+      }));
+    }
+    // If WooCommerce returned image ID(s) instead of URL(s), use ACF standard format image
+    if (thumbnails.length === 0 && acfProduct?.acf) {
+      const acf = acfProduct.acf;
+      const mainImageUrl =
+        (typeof acf.featured_image === "object" && acf.featured_image?.url) ||
+        (typeof acf.product_image === "object" && acf.product_image?.url) ||
+        (typeof acf.image === "object" && acf.image?.url) ||
+        (typeof acf.main_image === "object" && acf.main_image?.url) ||
+        (typeof acf.featured_image === "string" && acf.featured_image.startsWith("http") ? acf.featured_image : null) ||
+        (typeof acf.product_image === "string" && acf.product_image?.startsWith("http") ? acf.product_image : null);
+      if (mainImageUrl) {
+        thumbnails = [{ image: mainImageUrl, color: null }];
+      }
+    }
+  } else if (acfProduct?.acf) {
+    const acf = acfProduct.acf;
+    const mainImageUrl =
+      (typeof acf.featured_image === "object" && acf.featured_image?.url) ||
+      (typeof acf.product_image === "object" && acf.product_image?.url) ||
+      (typeof acf.image === "object" && acf.image?.url) ||
+      (typeof acf.main_image === "object" && acf.main_image?.url) ||
+      (typeof acf.featured_image === "string" && acf.featured_image?.startsWith("http") ? acf.featured_image : null) ||
+      (typeof acf.product_image === "string" && acf.product_image?.startsWith("http") ? acf.product_image : null);
+    if (mainImageUrl) {
+      thumbnails = [{ image: mainImageUrl, color: null }];
+    }
+  }
   const previewImages = thumbnails.length > 0 ? thumbnails : [];
 
   // Get primary category (first category)
@@ -575,21 +634,23 @@ export async function convertWCToProduct(
   const subtitle = stripHTML(metadataObj.subtitle || metadataObj.shortDescription || wcProduct.short_description || "");
   const featureTitle = metadataObj.featureTitle ? stripHTML(metadataObj.featureTitle) : null; // Strip HTML from featureTitle
   
-  // Get datasheet fields - they might be IDs (numbers) or URLs (strings)
-  // Check ACF object first (it contains resolved values), then metadata
+  // Get datasheet fields - prefer ACF standard format (URLs from ?acf_format=standard), else IDs/raw
   const acfData = (wcProduct as any).acf || {};
-  const datasheetImageRaw = acfData.datasheet_image || 
-                            acfData.datasheetImage ||
-                            metadataObj.datasheetImage || 
-                            metadataObj.datasheet_image || 
-                            metadataObj._datasheet_image ||
-                            null;
-  const datasheetPdfRaw = acfData.datasheet_pdf ||
-                          acfData.datasheetPdf ||
-                          metadataObj.datasheetPdf || 
-                          metadataObj.datasheet_pdf || 
-                          metadataObj._datasheet_pdf ||
-                          null;
+  const acfStandard = acfProduct?.acf || {};
+  const datasheetImageFromACF =
+    (typeof acfStandard.datasheet_image === "object" && acfStandard.datasheet_image?.url) ||
+    (typeof acfStandard.datasheetImage === "object" && acfStandard.datasheetImage?.url) ||
+    (typeof acfStandard.datasheet_image === "string" && acfStandard.datasheet_image?.startsWith("http") ? acfStandard.datasheet_image : null) ||
+    (typeof acfStandard.datasheetImage === "string" && acfStandard.datasheetImage?.startsWith("http") ? acfStandard.datasheetImage : null);
+  const datasheetPdfFromACF =
+    (typeof acfStandard.datasheet_pdf === "object" && acfStandard.datasheet_pdf?.url) ||
+    (typeof acfStandard.datasheetPdf === "object" && acfStandard.datasheetPdf?.url) ||
+    (typeof acfStandard.datasheet_pdf === "string" && acfStandard.datasheet_pdf?.startsWith("http") ? acfStandard.datasheet_pdf : null) ||
+    (typeof acfStandard.datasheetPdf === "string" && acfStandard.datasheetPdf?.startsWith("http") ? acfStandard.datasheetPdf : null);
+  const datasheetImageRaw = datasheetImageFromACF ?? acfData.datasheet_image ?? acfData.datasheetImage ??
+    metadataObj.datasheetImage ?? metadataObj.datasheet_image ?? metadataObj._datasheet_image ?? null;
+  const datasheetPdfRaw = datasheetPdfFromACF ?? acfData.datasheet_pdf ?? acfData.datasheetPdf ??
+    metadataObj.datasheetPdf ?? metadataObj.datasheet_pdf ?? metadataObj._datasheet_pdf ?? null;
   
   // Resolve media IDs to URLs if needed
   // If the value is a number or numeric string, it's likely a media ID
@@ -611,10 +672,11 @@ export async function convertWCToProduct(
     return typeof value === 'string' && value.startsWith('field_');
   };
   
-  // ✅ OPTIMIZATION: Skip media ID resolution for listing pages (only needed on PDP)
-  // Resolve datasheet image
+  // Resolve datasheet image (ACF standard format already gives URL)
   let datasheetImage: string | null = null;
-  if (datasheetImageRaw && resolveMedia) {
+  if (datasheetImageFromACF) {
+    datasheetImage = datasheetImageFromACF;
+  } else if (datasheetImageRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetImageRaw)) {
       // Field key detected - ACF field should be configured as URL type in WordPress
@@ -633,9 +695,11 @@ export async function convertWCToProduct(
     datasheetImage = datasheetImageRaw;
   }
   
-  // Resolve datasheet PDF
+  // Resolve datasheet PDF (ACF standard format already gives URL)
   let datasheetPdf: string | null = null;
-  if (datasheetPdfRaw && resolveMedia) {
+  if (datasheetPdfFromACF) {
+    datasheetPdf = datasheetPdfFromACF;
+  } else if (datasheetPdfRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetPdfRaw)) {
       // Field key detected - ACF field should be configured as URL type in WordPress

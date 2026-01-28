@@ -405,9 +405,10 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     () => fetchProducts(activeCategoryIds.join(","), currentPage),
     {
       keepPreviousData: true,
-      dedupingInterval: 5000, // Increased from 2000 to reduce duplicate requests
+      dedupingInterval: 5000,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      refreshInterval: 0,
       errorRetryCount: 2,
       errorRetryInterval: 1500,
       fallbackData: {

@@ -4,8 +4,7 @@ import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { Metadata } from 'next';
 
-// Removed force-dynamic to allow caching to work properly
-// This prevents 504 errors by enabling Next.js caching
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Products Page | ZDA Communications',

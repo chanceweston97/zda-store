@@ -9,7 +9,15 @@ import CartProvider from "@/components/Providers/CartProvider";
 import { AutoOpenCartProvider } from "@/components/Providers/AutoOpenCartProvider";
 import { SessionProvider } from "next-auth/react";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import { SWRConfig } from "swr";
 
+const swrOptions = {
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false,
+  dedupingInterval: 5000,
+  keepPreviousData: true,
+  refreshInterval: 0,
+};
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
@@ -31,25 +39,27 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <ReduxProvider>
-      <SessionProvider>
-        {recaptchaSiteKey ? (
-          <GoogleReCaptchaProvider
-            reCaptchaKey={recaptchaSiteKey}
-            scriptProps={{
-              async: false,
-              defer: false,
-              appendTo: "head",
-              nonce: undefined,
-            }}
-          >
-            {content}
-          </GoogleReCaptchaProvider>
-        ) : (
-          content
-        )}
-      </SessionProvider>
-    </ReduxProvider>
+    <SWRConfig value={swrOptions}>
+      <ReduxProvider>
+        <SessionProvider>
+          {recaptchaSiteKey ? (
+            <GoogleReCaptchaProvider
+              reCaptchaKey={recaptchaSiteKey}
+              scriptProps={{
+                async: false,
+                defer: false,
+                appendTo: "head",
+                nonce: undefined,
+              }}
+            >
+              {content}
+            </GoogleReCaptchaProvider>
+          ) : (
+            content
+          )}
+        </SessionProvider>
+      </ReduxProvider>
+    </SWRConfig>
   );
 };
 

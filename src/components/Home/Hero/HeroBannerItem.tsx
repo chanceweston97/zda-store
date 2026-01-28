@@ -16,7 +16,7 @@ export default function HeroBannerItem({
       <div className="flex  justify-between gap-4">
         <div className="max-w-[153px] flex flex-col justify-between w-full">
           <h2 className="max-w-[153px] font-semibold text-dark text-[22px]   hover:text-blue">
-            <Link href={`/products/${bannerItem?.product?.slug.current}`}>
+            <Link href={`/products/${bannerItem?.product?.slug.current}`} prefetch={false}>
               {bannerItem.name}{" "}
             </Link>
           </h2>

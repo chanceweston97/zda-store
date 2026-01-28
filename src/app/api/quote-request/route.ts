@@ -11,9 +11,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Route segment config
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
-// Force reload - ensure Next.js picks up this route
 
 // Get CMS URL and Form ID from environment variables
 // NOTE: Form ID changed after migration - current correct ID is 3445
