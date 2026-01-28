@@ -68,7 +68,7 @@ export async function getProducts(params?: {
 
   const cached = unstable_cache(
     async () => {
-      const timerLabel = `[getProducts] ${endpoint}|${Date.now()}`;
+      const timerLabel = `[getProducts] ${endpoint}|${crypto.randomUUID()}`;
       console.time(timerLabel);
       const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
         timeout: 3000,
@@ -472,7 +472,7 @@ const getCategoriesUncached = async (): Promise<Array<{
   count?: number;
   parent?: number;
 }>> => {
-  const timerLabel = `[getCategories] WooCommerce|${Date.now()}`;
+  const timerLabel = `[getCategories] WooCommerce|${crypto.randomUUID()}`;
   console.time(timerLabel);
   const categories = await wcFetch<Array<{
     id: number;

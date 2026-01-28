@@ -3,7 +3,7 @@ import { Menu } from "@/types/Menu";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const timerLabel = `[Menu API] GET|${Date.now()}`;
+  const timerLabel = `[Menu API] GET|${crypto.randomUUID()}`;
   console.time(timerLabel);
   try {
     console.log("[Menu API] Fetching categories...");

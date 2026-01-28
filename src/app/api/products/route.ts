@@ -46,7 +46,7 @@ const getProductsFromWoo = async (query: string) => {
   const url = `${apiUrl}/products${query}`;
   const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
 
-  const wooTimerLabel = `[WooCommerce] ${query}|${Date.now()}`;
+  const wooTimerLabel = `[WooCommerce] ${query}|${crypto.randomUUID()}`;
   console.time(wooTimerLabel);
   const res = await fetchWithTimeout(
     url,
@@ -83,7 +83,7 @@ export const getCachedProducts = async (query: string) => {
 const WOO_ENABLED = (process.env.WOO_ENABLED || "true").toLowerCase() !== "false";
 
 export async function GET(req: Request) {
-  const apiTimerLabel = `api/products|${Date.now()}`;
+  const apiTimerLabel = `api/products|${crypto.randomUUID()}`;
   console.time(apiTimerLabel);
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category") || "";

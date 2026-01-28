@@ -65,7 +65,7 @@ export function convertWCToCategory(
  * Returns [] on error so cache never blocks SSR; never throws.
  */
 const fetchWooCategories = async (): Promise<any[]> => {
-  const timerLabel = `[WooCommerce] getCategories|${Date.now()}`;
+  const timerLabel = `[WooCommerce] getCategories|${crypto.randomUUID()}`;
   try {
     console.time(timerLabel);
     console.log("[getWooCommerceCategories] Fetching categories from WooCommerce API...");

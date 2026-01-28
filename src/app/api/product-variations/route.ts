@@ -6,7 +6,7 @@ const CACHE_HEADERS = {
 };
 
 export async function GET(req: Request) {
-  const timerLabel = `[API] product-variations|${Date.now()}`;
+  const timerLabel = `[API] product-variations|${crypto.randomUUID()}`;
   console.time(timerLabel);
   const { searchParams } = new URL(req.url);
   const idParam = searchParams.get("id");
