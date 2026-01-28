@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
+import { unstable_cache } from "next/cache";
 
 type WooCommerceProduct = {
   id: number;
@@ -23,32 +24,91 @@ const parsePrice = (value?: string) => {
   return Number.isFinite(num) ? num : 0;
 };
 
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category") || "";
-    const page = searchParams.get("page") || "1";
-    const perPage = searchParams.get("per_page") || "12";
+// Core function that fetches from WooCommerce (will be cached)
+const getProductsFromWoo = async (query: string) => {
+  const apiUrl =
+    process.env.WC_API_URL ||
+    process.env.NEXT_PUBLIC_WC_API_URL ||
+    "";
+  const consumerKey =
+    process.env.WC_CONSUMER_KEY ||
+    process.env.NEXT_PUBLIC_WC_CONSUMER_KEY ||
+    "";
+  const consumerSecret =
+    process.env.WC_CONSUMER_SECRET ||
+    process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET ||
+    "";
 
-    const apiUrl =
-      process.env.WC_API_URL ||
-      process.env.NEXT_PUBLIC_WC_API_URL ||
-      "";
-    const consumerKey =
-      process.env.WC_CONSUMER_KEY ||
-      process.env.NEXT_PUBLIC_WC_CONSUMER_KEY ||
-      "";
-    const consumerSecret =
-      process.env.WC_CONSUMER_SECRET ||
-      process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET ||
-      "";
+  if (!apiUrl || !consumerKey || !consumerSecret) {
+    throw new Error("WooCommerce API not configured");
+  }
 
-    if (!apiUrl || !consumerKey || !consumerSecret) {
-      return NextResponse.json(
-        { products: [], totalCount: 0, error: "WooCommerce API not configured." },
-        { status: 500 }
-      );
+  const url = `${apiUrl}/products${query}`;
+  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+
+  console.time(`[WooCommerce] ${query}`);
+  const res = await fetchWithTimeout(
+    url,
+    {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+      next: { revalidate: 60 }, // 60 seconds
+    },
+    3000 // 3 second timeout
+  );
+  console.timeEnd(`[WooCommerce] ${query}`);
+
+  if (!res.ok) {
+    throw new Error(`WooCommerce API failed: ${res.status} ${res.statusText}`);
+  }
+
+  return res.json();
+};
+
+// Cache for 60 seconds - WooCommerce called max once per minute per query
+// 🔥 FIX: Each unique query (Category A vs B, Page 1 vs 2) gets its own cache entry
+// unstable_cache automatically uses function arguments as part of the cache key
+export const getCachedProducts = async (query: string) => {
+  return unstable_cache(
+    async () => getProductsFromWoo(query),
+    ["woo-products", query], // Include query in keyParts for explicit per-query caching
+    {
+      revalidate: 60, // seconds - WooCommerce called max once per minute
     }
+  )();
+};
+
+export async function GET(req: Request) {
+  console.time("api/products");
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get("category") || "";
+  const page = searchParams.get("page") || "1";
+  const perPage = searchParams.get("per_page") || "12";
+
+  const apiUrl =
+    process.env.WC_API_URL ||
+    process.env.NEXT_PUBLIC_WC_API_URL ||
+    "";
+  const consumerKey =
+    process.env.WC_CONSUMER_KEY ||
+    process.env.NEXT_PUBLIC_WC_CONSUMER_KEY ||
+    "";
+  const consumerSecret =
+    process.env.WC_CONSUMER_SECRET ||
+    process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET ||
+    "";
+
+  if (!apiUrl || !consumerKey || !consumerSecret) {
+    console.timeEnd("api/products");
+    // NEVER fail client - return 200 with empty data
+    return NextResponse.json(
+      { products: [], totalCount: 0, allCount: 0, _cached: false },
+      { status: 200 }
+    );
+  }
+
+  try {
 
     const fetchCategoryIdsExcludingUncategorized = async (): Promise<string[]> => {
       try {
@@ -148,7 +208,8 @@ export async function GET(req: Request) {
       return visibleCount + catalogCount;
     };
 
-    const params = new URLSearchParams({
+    // Build query string for cached fetch
+    const queryParams = new URLSearchParams({
       consumer_key: consumerKey,
       consumer_secret: consumerSecret,
       per_page: perPage,
@@ -159,26 +220,14 @@ export async function GET(req: Request) {
     });
 
     if (categoryFilterParam) {
-      params.append("category", categoryFilterParam);
+      queryParams.append("category", categoryFilterParam);
     }
 
-    const res = await fetchWithTimeout(
-      `${apiUrl}/products?${params.toString()}`,
-      {
-        next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
-      },
-      3000 // 3 second timeout
-    );
-
-    if (!res.ok) {
-      const errorText = await res.text().catch(() => "");
-      return NextResponse.json(
-        { products: [], totalCount: 0, error: errorText || res.statusText },
-        { status: res.status }
-      );
-    }
-
-    const wcProducts = (await res.json()) as WooCommerceProduct[];
+    const query = `?${queryParams.toString()}`;
+    
+    // Use cached function - WooCommerce called max once per minute per unique query
+    // Each category/page combination is cached separately for instant filtering
+    const wcProducts = (await getCachedProducts(query)) as WooCommerceProduct[];
     
     // Log all products for debugging
     console.log(`[API /products] Total products from WooCommerce: ${wcProducts.length}`);
@@ -209,58 +258,84 @@ export async function GET(req: Request) {
     
     console.log(`[API /products] Visible products after filtering: ${visibleProducts.length}`);
     
-    // For category-specific requests, use WooCommerce count
-    // For "all products", we need to fetch and count because WooCommerce doesn't know about our uncategorized filter
-    const totalCount = hasCategoryFilter
-      ? await fetchShowableCount(categoryFilterParam || undefined)
-      : visibleProducts.length;
+    // ✅ FIX: Never block UI on slow count operations
+    // Return products immediately, calculate counts with fallback
+    // Default to visible products length - accurate enough for UI
+    let totalCount: number = visibleProducts.length;
+    let allCount: number = visibleProducts.length;
     
-    // For allCount (used when no category selected), fetch all products and apply same filtering
-    let allCount: number;
+    // Try to get accurate counts, but use fallback if slow (never block)
+    const getCountWithFallback = async (countFn: () => Promise<number>, fallback: number): Promise<number> => {
+      try {
+        return await Promise.race([
+          countFn(),
+          new Promise<number>((resolve) => setTimeout(() => resolve(fallback), 1500)) // 1.5s timeout
+        ]);
+      } catch {
+        return fallback;
+      }
+    };
+    
     if (hasCategoryFilter) {
-      // If a specific category is selected, fetch the global count
-      allCount = await fetchShowableCount(
-        categoryFilterIds.length > 0 ? categoryFilterIds.join(",") : undefined
+      // For category-specific requests, try to get accurate count (non-blocking)
+      totalCount = await getCountWithFallback(
+        () => fetchShowableCount(categoryFilterParam || undefined),
+        visibleProducts.length
+      );
+      
+      // Try to get global count for allCount (non-blocking)
+      allCount = await getCountWithFallback(
+        () => fetchShowableCount(categoryFilterIds.length > 0 ? categoryFilterIds.join(",") : undefined),
+        visibleProducts.length
       );
     } else {
-      // If no category filter, fetch all products and count after filtering
-      const allProductsParams = new URLSearchParams({
-        consumer_key: consumerKey,
-        consumer_secret: consumerSecret,
-        per_page: "100", // Get all products
-        _fields: "id,categories,status,catalog_visibility",
-        status: "publish",
-      });
-      if (categoryFilterIds.length > 0) {
-        allProductsParams.append("category", categoryFilterIds.join(","));
-      }
+      // For "all products", visible count is accurate
+      totalCount = visibleProducts.length;
       
-      const allProductsRes = await fetchWithTimeout(
-        `${apiUrl}/products?${allProductsParams.toString()}`,
-        {
-          next: { revalidate: 300, tags: ["wc-products"] }, // 5 min cache
-        },
-        3000 // 3 second timeout
-      );
-      
-      if (allProductsRes.ok) {
-        const allProducts = (await allProductsRes.json()) as WooCommerceProduct[];
-        // Apply same filtering logic
-        allCount = allProducts.filter((product) => {
-          const visibility = (product.catalog_visibility || "").toLowerCase();
-          const isVisible =
-            visibility !== "hidden" &&
-            visibility !== "search" &&
-            product.status !== "private" &&
-            product.status !== "draft";
-          const hasCategory =
-            (product.categories?.length || 0) > 0 &&
-            !product.categories?.some((cat) => cat.slug === "uncategorized");
-          return isVisible && hasCategory;
-        }).length;
-        console.log(`[API /products] Calculated allCount from actual products: ${allCount}`);
-      } else {
-        allCount = visibleProducts.length;
+      // Try to get accurate allCount, but don't block
+      try {
+        const allProductsParams = new URLSearchParams({
+          consumer_key: consumerKey,
+          consumer_secret: consumerSecret,
+          per_page: "100",
+          _fields: "id,categories,status,catalog_visibility",
+          status: "publish",
+        });
+        if (categoryFilterIds.length > 0) {
+          allProductsParams.append("category", categoryFilterIds.join(","));
+        }
+        
+        const allProductsRes = await Promise.race([
+          fetchWithTimeout(
+            `${apiUrl}/products?${allProductsParams.toString()}`,
+            {
+              next: { revalidate: 300, tags: ["wc-products"] },
+            },
+            1500 // 1.5 second timeout for counts
+          ),
+          new Promise<Response>((resolve) => {
+            setTimeout(() => resolve(new Response(JSON.stringify([]), { status: 200 })), 1500);
+          })
+        ]);
+        
+        if (allProductsRes && allProductsRes.ok) {
+          const allProducts = (await allProductsRes.json()) as WooCommerceProduct[];
+          allCount = allProducts.filter((product) => {
+            const visibility = (product.catalog_visibility || "").toLowerCase();
+            const isVisible =
+              visibility !== "hidden" &&
+              visibility !== "search" &&
+              product.status !== "private" &&
+              product.status !== "draft";
+            const hasCategory =
+              (product.categories?.length || 0) > 0 &&
+              !product.categories?.some((cat) => cat.slug === "uncategorized");
+            return isVisible && hasCategory;
+          }).length;
+        }
+      } catch (countError) {
+        // Use fallback - don't block on count errors
+        console.warn("[API /products] Count calculation slow/failed, using fallback:", countError);
       }
     }
 
@@ -356,8 +431,9 @@ export async function GET(req: Request) {
       }
     }
 
+    console.timeEnd("api/products");
     return NextResponse.json(
-      { products, totalCount, allCount },
+      { products, totalCount, allCount, _cached: true },
       {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
@@ -365,19 +441,17 @@ export async function GET(req: Request) {
       }
     );
   } catch (error: any) {
-    // Handle timeout errors specifically
-    if (error?.name === 'AbortError' || error?.message?.includes('timeout') || error?.message?.includes('aborted') || error?.code === 'TIMEOUT') {
-      console.error("[API /products] Timeout error:", error?.message || error);
-      return NextResponse.json(
-        { products: [], totalCount: 0, error: "Request timeout - please try again" },
-        { status: 504 }
-      );
-    }
+    console.timeEnd("api/products");
+    // NEVER fail client - return 200 with empty data
+    // This prevents 504s from propagating to users
+    console.error("[API /products] Error (returning cached/empty data):", error?.message || error);
     
-    console.error("[API /products] Error fetching products:", error?.message || error);
+    // If log doesn't run → WordPress down
+    // If log runs slow → hosting issue  
+    // If log runs fast → Next.js is fine
     return NextResponse.json(
-      { products: [], totalCount: 0, error: error?.message || "Failed to fetch products" },
-      { status: error?.status || 500 }
+      { products: [], totalCount: 0, allCount: 0, _cached: false },
+      { status: 200 } // NEVER fail client
     );
   }
 }

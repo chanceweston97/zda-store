@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import CategoryDropdown from "./CategoryDropdown";
@@ -277,7 +277,6 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { mutate } = useSWRConfig();
 
   // Always use list view - grid view removed
   const productStyle = "list";
@@ -406,7 +405,7 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     () => fetchProducts(activeCategoryIds.join(","), currentPage),
     {
       keepPreviousData: true,
-      dedupingInterval: 2000,
+      dedupingInterval: 5000, // Increased from 2000 to reduce duplicate requests
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       errorRetryCount: 2,
@@ -445,26 +444,9 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
     });
   }, [products, filteredTotalCount, globalTotalCount, activeCategoryIds, currentPage]);
 
-  const prefetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (prefetchTimeoutRef.current) {
-      clearTimeout(prefetchTimeoutRef.current);
-    }
-    if (!activeCategoryIds.length) {
-      return;
-    }
-    prefetchTimeoutRef.current = setTimeout(() => {
-      activeCategoryIds.forEach((id) => {
-        mutate(["products", id, 1], fetchProducts(id, 1), { revalidate: false });
-      });
-    }, 400);
-    return () => {
-      if (prefetchTimeoutRef.current) {
-        clearTimeout(prefetchTimeoutRef.current);
-      }
-    };
-  }, [activeCategoryIds, mutate]);
+  // REMOVED: Prefetch logic that was causing traffic spikes
+  // WordPress cannot handle speculative prefetching
+  // This was removed to prevent 504 errors
 
   useEffect(() => {
     if (prevCategoryKey.current === categoryKey) {

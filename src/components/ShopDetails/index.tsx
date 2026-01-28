@@ -17,6 +17,7 @@ import { Product } from "@/types/product";
 import Image from "next/image";
 
 import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { useDispatch } from "react-redux";
 import { useShoppingCart } from "use-shopping-cart";
 import toast from "react-hot-toast";
@@ -40,7 +41,7 @@ type ShopDetailsProps = {
   cableTypes?: any[] | null;
 };
 
-const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => {
+const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopDetailsProps) => {
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -52,6 +53,35 @@ const ShopDetails = ({ product, cableSeries, cableTypes }: ShopDetailsProps) => 
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+
+  // ✅ Lazy-load WooCommerce variations on the client (prevents SSR 504s)
+  const wcProductId = (initialProduct as any)?._wcProductId as number | undefined;
+  const variationsLazy = Boolean((initialProduct as any)?._variationsLazy && wcProductId);
+
+  const { data: variationsResp } = useSWR(
+    variationsLazy ? `/api/product-variations?id=${wcProductId}&name=${encodeURIComponent(initialProduct.name || "Product")}` : null,
+    async (url: string) => {
+      const res = await fetch(url);
+      return res.json();
+    },
+    {
+      dedupingInterval: 5000,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+
+  const product = useMemo(() => {
+    const variants = variationsResp?.variants;
+    if (Array.isArray(variants) && variants.length > 0) {
+      return {
+        ...(initialProduct as any),
+        variants,
+        _variationsLazy: false,
+      } as Product;
+    }
+    return initialProduct;
+  }, [initialProduct, variationsResp?.variants]);
   
   // Console log product details from API for debugging
   useEffect(() => {

@@ -254,6 +254,82 @@ export async function convertWCToProductWithVariations(wcProduct: WooCommercePro
 }
 
 /**
+ * Convert WooCommerce variations → frontend `variants` format.
+ * Used by server API routes so PDP can load variations lazily client-side.
+ */
+export function convertWCVariationsToVariants(params: {
+  productName: string;
+  baseMetadata?: Record<string, any>;
+  variations: any[];
+}): any[] {
+  const { productName, baseMetadata = {}, variations } = params;
+
+  const fullVariants = (variations || []).map((variation: any) => {
+    const variationPrice = parseFloat(
+      variation.price || variation.regular_price || variation.sale_price || "0"
+    );
+
+    // Build variant title from attributes
+    let variantTitle = productName;
+    if (variation.attributes && Array.isArray(variation.attributes) && variation.attributes.length > 0) {
+      const attributeStrings = variation.attributes
+        .filter((attr: any) => attr.name && attr.option)
+        .map((attr: any) => `${attr.name}: ${attr.option}`);
+      if (attributeStrings.length > 0) {
+        variantTitle = attributeStrings.join(", ");
+      }
+    } else if (variation.name && variation.name !== productName) {
+      variantTitle = variation.name;
+    }
+
+    // Extract gain value for sorting (e.g., "Gain: 8dBi" -> 8)
+    let gainValue = 0;
+    const gainMatch = variantTitle.match(/(\d+(?:\.\d+)?)\s*dBi/i);
+    if (gainMatch) {
+      gainValue = parseFloat(gainMatch[1]);
+    } else if (variation.attributes && Array.isArray(variation.attributes)) {
+      const gainAttr = variation.attributes.find(
+        (attr: any) =>
+          attr.name?.toLowerCase() === "gain" || attr.slug?.toLowerCase() === "gain"
+      );
+      if (gainAttr?.option) {
+        const match = String(gainAttr.option).match(/(\d+(?:\.\d+)?)/);
+        if (match) gainValue = parseFloat(match[1]);
+      }
+    }
+
+    return {
+      id: String(variation.id),
+      title: variantTitle,
+      sku: variation.sku || "",
+      price: variationPrice, // dollars
+      calculated_price: {
+        calculated_amount: variationPrice * 100,
+        currency_code: "USD",
+      },
+      inventory_quantity: variation.stock_quantity || 0,
+      options: variation.attributes || [],
+      gainValue,
+      menu_order: variation.menu_order || 0,
+      metadata: {
+        ...baseMetadata,
+        variation_id: variation.id,
+        variation_attributes: variation.attributes,
+      },
+    };
+  });
+
+  fullVariants.sort((a: any, b: any) => {
+    if (a.gainValue > 0 && b.gainValue > 0) return a.gainValue - b.gainValue;
+    if (a.gainValue > 0 && b.gainValue === 0) return -1;
+    if (a.gainValue === 0 && b.gainValue > 0) return 1;
+    return (a.menu_order || 0) - (b.menu_order || 0);
+  });
+
+  return fullVariants;
+}
+
+/**
  * Resolve WordPress media ID to URL
  * WordPress REST API endpoint: /wp-json/wp/v2/media/{id}
  */

@@ -103,10 +103,16 @@ export async function getProductBySlug(slug: string) {
           console.log(`[getProductBySlug] Product ${slug} is hidden, skipping`);
           throw new Error("Product is hidden");
         }
-        // Use convertWCToProductWithVariations for PDP to get full variant details
-        const { convertWCToProductWithVariations } = await import("@/lib/woocommerce/products");
-        const converted = await convertWCToProductWithVariations(wcProduct);
-        console.log(`[getProductBySlug] Successfully fetched product with variations from WooCommerce: ${slug}`);
+        // ✅ CRITICAL: Do NOT fetch variations during SSR.
+        // Variations are fetched lazily client-side via /api/product-variations to prevent 504s.
+        const { convertWCToProduct } = await import("@/lib/woocommerce/products");
+        const converted = await convertWCToProduct(wcProduct, true); // skip variations
+        const hasVariations = Array.isArray((wcProduct as any).variations) && (wcProduct as any).variations.length > 0;
+        if (hasVariations) {
+          (converted as any)._variationsLazy = true;
+          (converted as any)._wcProductId = wcProduct.id;
+        }
+        console.log(`[getProductBySlug] Successfully fetched base product (variations lazy) from WooCommerce: ${slug}`);
         return converted;
       }
     } catch (error) {

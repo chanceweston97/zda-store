@@ -4,12 +4,12 @@ import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { Metadata } from 'next';
 
-// Force dynamic rendering to prevent static generation in production
-export const dynamic = "force-dynamic";
+// Removed force-dynamic to allow caching to work properly
+// This prevents 504 errors by enabling Next.js caching
 
 export const metadata: Metadata = {
-  title: 'Shop Page | ZDA Communications',
-  description: 'This is Shop Page for ZDA Communications',
+  title: 'Products Page | ZDA Communications',
+  description: 'This is Products Page for ZDA Communications',
   // other metadata
 };
 

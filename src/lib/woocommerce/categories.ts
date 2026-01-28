@@ -3,10 +3,7 @@
  */
 
 import { getCategories } from "./products";
-
-const CATEGORY_CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
-let cachedCategories: any[] | null = null;
-let cachedAt = 0;
+import { unstable_cache } from "next/cache";
 
 export interface WooCommerceCategory {
   id: number;
@@ -64,15 +61,9 @@ export function convertWCToCategory(
 }
 
 /**
- * Get all categories from WooCommerce
+ * Core function that fetches and converts categories from WooCommerce
  */
-export async function getWooCommerceCategories(): Promise<any[]> {
-  const now = Date.now();
-  if (cachedCategories && now - cachedAt < CATEGORY_CACHE_TTL_MS) {
-    console.log(`[getWooCommerceCategories] Returning ${cachedCategories.length} cached categories`);
-    return cachedCategories;
-  }
-
+const fetchWooCategories = async (): Promise<any[]> => {
   try {
     console.log("[getWooCommerceCategories] Fetching categories from WooCommerce API...");
     const categories = await getCategories();
@@ -96,8 +87,6 @@ export async function getWooCommerceCategories(): Promise<any[]> {
 
     if (topLevelCategories.length > 0) {
       console.log(`[getWooCommerceCategories] Top-level category names:`, topLevelCategories.map((c: any) => c.title || c.name).slice(0, 5));
-      cachedCategories = topLevelCategories;
-      cachedAt = now;
     } else {
       console.warn("[getWooCommerceCategories] No top-level categories found - all categories have parents");
     }
@@ -111,10 +100,31 @@ export async function getWooCommerceCategories(): Promise<any[]> {
         console.error("[getWooCommerceCategories] Error stack:", error.stack);
       }
     }
-    if (cachedCategories) {
-      console.warn("[getWooCommerceCategories] Returning cached categories due to error");
-      return cachedCategories;
-    }
+    throw error; // Re-throw to let cache handle fallback
+  }
+};
+
+/**
+ * Get all categories from WooCommerce (cached for 5 minutes)
+ * ✅ FIX: Uses unstable_cache for Next.js server-side caching
+ * Shop page loads instantly without waiting on WordPress
+ */
+export const getCachedCategories = unstable_cache(
+  async () => fetchWooCategories(),
+  ["woo-categories"],
+  { revalidate: 300 } // 5 minutes - categories don't change often
+);
+
+/**
+ * Get all categories from WooCommerce (backwards compatibility)
+ * Now uses cached version
+ */
+export async function getWooCommerceCategories(): Promise<any[]> {
+  try {
+    return await getCachedCategories();
+  } catch (error) {
+    // If cache fails, return empty array - never block page load
+    console.error("[getWooCommerceCategories] Cache error, returning empty array:", error);
     return [];
   }
 }
