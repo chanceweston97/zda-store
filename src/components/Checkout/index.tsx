@@ -15,12 +15,8 @@ import convertToSubcurrency from "@/lib/convertToSubcurrency";
 import { convertCartPriceToDollars } from "@/utils/price";
 import { trackBeginCheckout } from "@/lib/ga4";
 
-if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === undefined) {
-  throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined");
-}
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 export default function CheckoutMain() {
   const session = useSession();
@@ -185,7 +181,7 @@ export default function CheckoutMain() {
     );
   }
 
-  return amount > 0 ? (
+  return amount > 0 && stripePromise ? (
     <Elements
       stripe={stripePromise}
       options={{
@@ -207,6 +203,19 @@ export default function CheckoutMain() {
         <CheckoutPaymentArea amount={amount} />
       </CheckoutFormProvider>
     </Elements>
+  ) : amount > 0 ? (
+    <CheckoutFormProvider
+      value={{
+        register,
+        watch,
+        control,
+        setValue,
+        errors: formState.errors,
+        handleSubmit,
+      }}
+    >
+      <CheckoutAreaWithoutStripe amount={amount} />
+    </CheckoutFormProvider>
   ) : (
     <CheckoutFormProvider
       value={{
