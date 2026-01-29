@@ -18,7 +18,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # .next excluded so EC2 keeps previous .next/cache = faster yarn build
       - name: Upload source
         run: |
           rsync -az \
@@ -31,7 +30,7 @@ jobs:
             ./ \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/app/
 
-      - name: Install, build and start (with cache)
+      - name: Install, build and start
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -49,6 +48,7 @@ jobs:
             corepack enable 2>/dev/null || true
             yarn install --immutable
 
+            rm -rf .next
             export NODE_ENV=production
             yarn build
 
