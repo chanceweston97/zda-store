@@ -1,62 +1,57 @@
-name: Deploy Store to EC2
+name: Deploy Frontend (Store) to EC2
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: yarn
-
-      # --------------------
-      # Yarn cache (Berry)
-      # --------------------
-      - name: Restore Yarn cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .yarn/cache
-            .yarn/unplugged
-            .yarn/install-state.gz
-            .yarn/build-state.yml
-          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-${{ runner.os }}-
-
-      # --------------------
-      # Next.js build cache
-      # --------------------
-      - name: Restore Next.js cache
+      # 2️⃣ Restore Next.js build cache (NOT yarn cache)
+      - name: Restore Next.js build cache
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: nextjs-${{ runner.os }}-${{ hashFiles('**/package.json', '**/yarn.lock') }}
+          key: nextjs-${{ runner.os }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
             nextjs-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: yarn install --immutable
+      # 3️⃣ Setup SSH
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Build Next.js
-        env:
-          NODE_ENV: production
-          NEXT_TELEMETRY_DISABLED: 1
-        run: yarn build
+      # 4️⃣ Sync source to EC2
+      - name: Rsync source to EC2
+        run: |
+          rsync -az --delete \
+            --exclude node_modules \
+            --exclude .next \
+            --exclude .git \
+            --exclude .github \
+            --exclude .vercel \
+            --exclude coverage \
+            --exclude logs \
+            --exclude build \
+            --exclude out \
+            --exclude .yarn/cache \
+            --exclude "*.log" \
+            --exclude "*.tar.gz" \
+            --exclude ".env*" \
+            ./ \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}/
 
-      # --------------------
-      # Deploy + Run on EC2
-      # --------------------
-      - name: Deploy & Restart via PM2
+      # 5️⃣ Build & Restart on EC2
+      - name: Build & Restart Store on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -65,19 +60,52 @@ jobs:
           command_timeout: 30m
           script: |
             set -e
+
             cd ${{ secrets.APP_PATH }}
 
-            # Pull latest build artifacts
-            git pull origin main
+            # Load NVM
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+            [ -s "$HOME/.profile" ] && . "$HOME/.profile"
 
-            # Ensure pm2 exists
-            if ! command -v pm2 >/dev/null; then
-              npm install -g pm2
+            # Fix npm / nvm conflicts
+            if [ -f "$HOME/.npmrc" ]; then
+              sed -i '/^prefix=/d' "$HOME/.npmrc" || true
+              sed -i '/^globalconfig=/d' "$HOME/.npmrc" || true
             fi
 
-            # Restart app safely
+            # Ensure Node
+            nvm use --delete-prefix default --silent || nvm use default
+            node -v
+            npm -v
+
+            # Enable Corepack + Yarn
+            export COREPACK_ENABLE_STRICT=0
+            corepack enable
+            corepack prepare yarn@4.6.0 --activate
+
+            # Install deps (stream native builds)
+            yarn install --immutable --inline-builds
+
+            # Clean previous build
+            rm -rf .next
+
+            # Load production env
+            if [ -f ".env.production" ]; then
+              set -a
+              source .env.production
+              set +a
+            fi
+
+            export NODE_ENV=production
+
+            # Build Next.js
+            yarn build
+
+            # Restart PM2
             pm2 delete store || true
             pm2 start "yarn start" --name store
             pm2 save
 
-            echo "✅ Store is live via PM2"
+            echo "✅ Deployment successful"
