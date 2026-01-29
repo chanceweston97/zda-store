@@ -1,8 +1,8 @@
-name: Deploy Frontend (Store) to EC2
+name: Deploy Store to EC2
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
   deploy:
@@ -16,51 +16,68 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: "yarn"
+          cache: yarn
 
-      - name: Enable Corepack
-        run: |
-          corepack enable
-          corepack prepare yarn@4.6.0 --activate
+      # --------------------
+      # Yarn cache (Berry)
+      # --------------------
+      - name: Restore Yarn cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/unplugged
+            .yarn/install-state.gz
+            .yarn/build-state.yml
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      # --------------------
+      # Next.js build cache
+      # --------------------
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('**/package.json', '**/yarn.lock') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-
 
       - name: Install dependencies
         run: yarn install --immutable
 
       - name: Build Next.js
-        run: |
-          export NODE_ENV=production
-          yarn build
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+        run: yarn build
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Rsync build artifacts to EC2
-        run: |
-          rsync -az --delete \
-            --exclude ".git" \
-            --exclude ".github" \
-            --exclude "node_modules" \
-            --exclude ".env*" \
-            .next \
-            public \
-            package.json \
-            yarn.lock \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}/
-
-      - name: Restart app on EC2
+      # --------------------
+      # Deploy + Run on EC2
+      # --------------------
+      - name: Deploy & Restart via PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          command_timeout: 30m
           script: |
             set -e
             cd ${{ secrets.APP_PATH }}
+
+            # Pull latest build artifacts
+            git pull origin main
+
+            # Ensure pm2 exists
+            if ! command -v pm2 >/dev/null; then
+              npm install -g pm2
+            fi
+
+            # Restart app safely
             pm2 delete store || true
             pm2 start "yarn start" --name store
             pm2 save
-            echo "✅ Deployment successful"
+
+            echo "✅ Store is live via PM2"
