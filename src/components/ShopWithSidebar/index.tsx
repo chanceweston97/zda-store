@@ -538,25 +538,24 @@ const ShopWithSidebar = ({ data, categoryName: categoryNameProp }: PropsType) =>
        <section className="relative pt-5 pb-10 overflow-hidden lg:pt-10 xl:pt-12 bg-white">
         <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 xl:px-0">
           <div className="flex gap-7.5">
-            {/* Sidebar with filters - always visible */}
+            {/* Sidebar toggle - outside sidebar so it's visible when sidebar is closed (below xl) */}
+            <button
+              onClick={() => setProductSidebar(!productSidebar)}
+              aria-label="Toggle filter sidebar"
+              className={`xl:hidden fixed left-4 z-[9998] flex items-center justify-center w-10 h-10 rounded-lg bg-white shadow-1 border border-gray-2 ${
+                stickyMenu ? "top-24" : "top-36"
+              }`}
+            >
+              <SidebarToggleIcon />
+            </button>
+
+            {/* Sidebar with filters - visible on xl, slide-in on smaller screens */}
             <div
               className={`sidebar-content fixed xl:z-1 z-9999 left-0 top-0 xl:translate-x-0 xl:static xl:w-1/4 w-full ease-out duration-200 ${
                 productSidebar ? "translate-x-0 bg-white" : "-translate-x-full"
               }`}
             >
-              <button
-                onClick={() => setProductSidebar(!productSidebar)}
-                aria-label="button for product sidebar toggle"
-                className={`xl:hidden absolute -right-12.5 sm:-right-8 flex items-center justify-center w-8 h-8 rounded-md bg-white shadow-1 ${
-                  stickyMenu
-                    ? "lg:top-20 sm:top-34.5 top-35"
-                    : "lg:top-24 sm:top-39 top-37"
-                }`}
-              >
-                <SidebarToggleIcon />
-              </button>
-
-              <div className="flex flex-col gap-6 overflow-y-auto max-xl:h-screen max-xl:p-5">
+              <div className="flex flex-col gap-6 overflow-y-auto max-xl:h-screen max-xl:p-5 max-xl:pt-14">
                 {/* filter box */}
                 <ClearFilters />
 

@@ -214,8 +214,6 @@ const CategoryDropdown = ({ categories }: PropsType) => {
     return category.productCount || 0;
   };
 
-  if (!categories.length) return null;
-
   return (
     <div className="bg-white rounded-lg shadow-1">
       <button
@@ -236,6 +234,10 @@ const CategoryDropdown = ({ categories }: PropsType) => {
           isOpen ? "max-h-[2000px] opacity-100 py-6" : "max-h-0 opacity-0 py-0"
         }`}
       >
+        {!categories.length ? (
+          <p className="text-gray-5 text-sm py-2">No categories available yet.</p>
+        ) : (
+        <>
         {categories.map((category) => {
           const hasSubcategories = category.subcategories && category.subcategories.length > 0;
           const categoryId = String(category.id || category._id || "");
@@ -373,6 +375,8 @@ const CategoryDropdown = ({ categories }: PropsType) => {
             </div>
           );
         })}
+        </>
+        )}
       </div>
     </div>
   );
