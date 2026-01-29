@@ -1,11 +1,10 @@
 import Link from 'next/link'
 
-const quickLinks = [
-  {
-    id: 1,
-    label: 'Contact',
-    href: '/contact',
-  },
+const resourceLinks = [
+  { id: 1, label: 'Company', href: '/company' },
+  { id: 2, label: 'Contact', href: '/contact' },
+  { id: 3, label: 'Catalog', href: '/catalog' },
+  { id: 4, label: 'Solutions', href: '/company' },
 ]
 
 export default function QuickLinks() {
@@ -22,12 +21,12 @@ export default function QuickLinks() {
           lineHeight: '30px'
         }}
       >
-        CONNECT
+        RESOURCES
       </h2>
 
       <ul className="flex flex-col gap-3">
         {
-          quickLinks.map((link) => (
+          resourceLinks.map((link) => (
             <li key={link.id}>
               <Link
                 className="text-white ease-out duration-200 hover:text-[#70C8FF]"

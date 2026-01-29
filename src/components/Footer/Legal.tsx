@@ -1,21 +1,10 @@
 import Link from 'next/link'
 
-const quickLinks = [
-  {
-    id: 1,
-    label: 'Catalog',
-    href: '/catalog',
-  },
-  {
-    id: 2,
-    label: 'Privacy Policy',
-    href: '/privacy-policy',
-  },
-  {
-    id: 3,
-    label: 'Terms & Conditions',
-    href: '/terms-and-conditions',
-  },
+const legalLinks = [
+  { id: 1, label: 'Terms of Sale', href: '/terms-of-sale' },
+  { id: 2, label: 'Terms and Conditions', href: '/terms-and-conditions' },
+  { id: 3, label: 'Privacy Policy', href: '/privacy-policy' },
+  { id: 4, label: 'Return Policy', href: '/return-policy' },
 ]
 
 export default function Legal() {
@@ -32,12 +21,12 @@ export default function Legal() {
           lineHeight: '30px'
         }}
       >
-        RESOURCES
+        LEGAL
       </h2>
 
       <ul className="flex flex-col gap-3">
         {
-          quickLinks.map((link) => (
+          legalLinks.map((link) => (
             <li key={link.id}>
               <Link
                 className="text-white ease-out duration-200 hover:text-[#70C8FF]"
@@ -47,7 +36,6 @@ export default function Legal() {
               </Link>
             </li>
           ))}
-
       </ul>
     </div>
   )
