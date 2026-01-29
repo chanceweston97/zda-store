@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Next.js build cache (speed)
+      # Next.js build cache (FAST rebuilds)
       - name: Restore Next.js cache
         uses: actions/cache@v4
         with:
@@ -28,8 +28,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # Upload code WITHOUT delete
-      - name: Upload source to EC2 (safe)
+      - name: Upload source (safe rsync)
         run: |
           rsync -az \
             --exclude node_modules \
@@ -46,7 +45,7 @@ jobs:
             --exclude "*.tar.gz" \
             --exclude ".env*" \
             ./ \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/store-release/
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/store/.incoming/
 
       - name: Build & Activate Release
         uses: appleboy/ssh-action@v1.0.3
@@ -58,19 +57,21 @@ jobs:
           script: |
             set -e
 
+            BASE_DIR=/home/ubuntu/store
+            RELEASES_DIR=$BASE_DIR/releases
+            INCOMING_DIR=$BASE_DIR/.incoming
+            CURRENT_DIR=$BASE_DIR/current
+
             TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-            RELEASE_DIR=/var/www/store/releases/$TIMESTAMP
-            CURRENT_DIR=/var/www/store/current
+            RELEASE_DIR=$RELEASES_DIR/$TIMESTAMP
 
             mkdir -p $RELEASE_DIR
-            mkdir -p /var/www/store/releases
-
-            mv /tmp/store-release/* $RELEASE_DIR
-            rm -rf /tmp/store-release
+            mv $INCOMING_DIR/* $RELEASE_DIR
+            rm -rf $INCOMING_DIR
 
             cd $RELEASE_DIR
 
-            # Load NVM
+            # Load Node
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
@@ -83,10 +84,8 @@ jobs:
             corepack enable
             corepack prepare yarn@4.6.0 --activate
 
-            # Install deps
             yarn install --immutable --inline-builds
 
-            # Env
             if [ -f ".env.production" ]; then
               set -a
               source .env.production
@@ -95,15 +94,12 @@ jobs:
 
             export NODE_ENV=production
 
-            # Build
             yarn build
 
-            # Switch live version (atomic)
             ln -sfn $RELEASE_DIR $CURRENT_DIR
 
-            # Restart PM2
             pm2 delete store || true
             pm2 start "yarn start" --name store --cwd $CURRENT_DIR
             pm2 save
 
-            echo "✅ Store deployed successfully"
+            echo "✅ Deployment successful"
