@@ -1,4 +1,4 @@
-name: Deploy Frontend (Store) to EC2
+name: Deploy Store (Vercel-style) to EC2
 
 on:
   push:
@@ -9,12 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2️⃣ Restore Next.js build cache (NOT yarn cache)
-      - name: Restore Next.js build cache
+      # Next.js build cache (speed)
+      - name: Restore Next.js cache
         uses: actions/cache@v4
         with:
           path: .next/cache
@@ -22,7 +21,6 @@ jobs:
           restore-keys: |
             nextjs-${{ runner.os }}-
 
-      # 3️⃣ Setup SSH
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -30,10 +28,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      # 4️⃣ Sync source to EC2
-      - name: Rsync source to EC2
+      # Upload code WITHOUT delete
+      - name: Upload source to EC2 (safe)
         run: |
-          rsync -az --delete \
+          rsync -az \
             --exclude node_modules \
             --exclude .next \
             --exclude .git \
@@ -48,10 +46,9 @@ jobs:
             --exclude "*.tar.gz" \
             --exclude ".env*" \
             ./ \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}/
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/store-release/
 
-      # 5️⃣ Build & Restart on EC2
-      - name: Build & Restart Store on EC2
+      - name: Build & Activate Release
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -61,7 +58,17 @@ jobs:
           script: |
             set -e
 
-            cd ${{ secrets.APP_PATH }}
+            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            RELEASE_DIR=/var/www/store/releases/$TIMESTAMP
+            CURRENT_DIR=/var/www/store/current
+
+            mkdir -p $RELEASE_DIR
+            mkdir -p /var/www/store/releases
+
+            mv /tmp/store-release/* $RELEASE_DIR
+            rm -rf /tmp/store-release
+
+            cd $RELEASE_DIR
 
             # Load NVM
             export NVM_DIR="$HOME/.nvm"
@@ -69,29 +76,17 @@ jobs:
             [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
             [ -s "$HOME/.profile" ] && . "$HOME/.profile"
 
-            # Fix npm / nvm conflicts
-            if [ -f "$HOME/.npmrc" ]; then
-              sed -i '/^prefix=/d' "$HOME/.npmrc" || true
-              sed -i '/^globalconfig=/d' "$HOME/.npmrc" || true
-            fi
-
-            # Ensure Node
             nvm use --delete-prefix default --silent || nvm use default
-            node -v
-            npm -v
 
-            # Enable Corepack + Yarn
+            # Yarn
             export COREPACK_ENABLE_STRICT=0
             corepack enable
             corepack prepare yarn@4.6.0 --activate
 
-            # Install deps (stream native builds)
+            # Install deps
             yarn install --immutable --inline-builds
 
-            # Clean previous build
-            rm -rf .next
-
-            # Load production env
+            # Env
             if [ -f ".env.production" ]; then
               set -a
               source .env.production
@@ -100,12 +95,15 @@ jobs:
 
             export NODE_ENV=production
 
-            # Build Next.js
+            # Build
             yarn build
+
+            # Switch live version (atomic)
+            ln -sfn $RELEASE_DIR $CURRENT_DIR
 
             # Restart PM2
             pm2 delete store || true
-            pm2 start "yarn start" --name store
+            pm2 start "yarn start" --name store --cwd $CURRENT_DIR
             pm2 save
 
-            echo "✅ Deployment successful"
+            echo "✅ Store deployed successfully"
