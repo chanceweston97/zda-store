@@ -12,6 +12,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "yarn"
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.6.0 --activate
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Next.js
+        run: |
+          export NODE_ENV=production
+          yarn build
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -19,90 +38,29 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rsync source to EC2
+      - name: Rsync build artifacts to EC2
         run: |
           rsync -az --delete \
-            --exclude scanner_linux \
-            --exclude "scanner_*" \
-            --exclude node_modules \
-            --exclude .next \
-            --exclude .git \
-            --exclude .github \
-            --exclude coverage \
-            --exclude build \
-            --exclude out \
-            --exclude logs \
-            --exclude .vercel \
-            --exclude .yarn/cache \
-            --exclude "*.log" \
-            --exclude "*.tar.gz" \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude "node_modules" \
             --exclude ".env*" \
-            ./ \
+            .next \
+            public \
+            package.json \
+            yarn.lock \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.APP_PATH }}/
 
-      - name: Build & Restart Store on EC2
+      - name: Restart app on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          # Native rebuilds (bcrypt, esbuild) on small EC2 can take 10+ min; avoid SSH timeout
-          command_timeout: 30m
           script: |
             set -e
-
             cd ${{ secrets.APP_PATH }}
-
-            # Load environment
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-            [ -s "$HOME/.profile" ] && . "$HOME/.profile"
-
-            # Fix nvm/npmrc conflict by removing incompatible settings
-            if [ -f "$HOME/.npmrc" ]; then
-              # Backup original .npmrc
-              cp "$HOME/.npmrc" "$HOME/.npmrc.backup" || true
-              # Remove globalconfig and prefix lines that conflict with nvm
-              sed -i '/^globalconfig=/d' "$HOME/.npmrc" || true
-              sed -i '/^prefix=/d' "$HOME/.npmrc" || true
-            fi
-
-            # Use nvm to set Node version (fixes prefix issue)
-            nvm use --delete-prefix default --silent || nvm use default || true
-
-            # Ensure Node exists
-            if ! command -v node >/dev/null 2>&1; then
-              echo "❌ Node.js not found"
-              exit 1
-            fi
-
-            # Enable Corepack + Yarn (USER SPACE)
-            export COREPACK_ENABLE_STRICT=0
-            corepack enable
-            corepack prepare yarn@4.6.0 --activate
-
-            # Install deps: --inline-builds streams native build output so SSH doesn't timeout
-            yarn install --immutable --inline-builds
-
-            # Clean build
-            rm -rf .next
-
-            # Load env vars for build
-            if [ -f ".env.production" ]; then
-              set -a
-              source .env.production
-              set +a
-            fi
-
-            export NODE_ENV=production
-
-            # Build Next.js
-            yarn build
-
-            # Restart PM2
             pm2 delete store || true
             pm2 start "yarn start" --name store
             pm2 save
-
             echo "✅ Deployment successful"
