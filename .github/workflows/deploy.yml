@@ -1,4 +1,4 @@
-name: Deploy Store (Vercel-style) to EC2
+name: Deploy to EC2
 
 on:
   push:
@@ -7,19 +7,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # Next.js build cache (FAST rebuilds)
-      - name: Restore Next.js cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: nextjs-${{ runner.os }}-${{ hashFiles('**/package.json') }}
-          restore-keys: |
-            nextjs-${{ runner.os }}-
 
       - name: Setup SSH
         run: |
@@ -28,78 +18,41 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Upload source (safe rsync)
+      # .next excluded so EC2 keeps previous .next/cache = faster yarn build
+      - name: Upload source
         run: |
           rsync -az \
             --exclude node_modules \
             --exclude .next \
             --exclude .git \
             --exclude .github \
-            --exclude .vercel \
-            --exclude coverage \
-            --exclude logs \
-            --exclude build \
-            --exclude out \
-            --exclude .yarn/cache \
             --exclude "*.log" \
-            --exclude "*.tar.gz" \
             --exclude ".env*" \
             ./ \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/store/.incoming/
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/app/
 
-      - name: Build & Activate Release
+      - name: Install, build and start (with cache)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          command_timeout: 30m
+          command_timeout: 15m
           script: |
             set -e
+            cd ~/app
 
-            BASE_DIR=/home/ubuntu/store
-            RELEASES_DIR=$BASE_DIR/releases
-            INCOMING_DIR=$BASE_DIR/.incoming
-            CURRENT_DIR=$BASE_DIR/current
-
-            TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-            RELEASE_DIR=$RELEASES_DIR/$TIMESTAMP
-
-            mkdir -p $RELEASE_DIR
-            mv $INCOMING_DIR/* $RELEASE_DIR
-            rm -rf $INCOMING_DIR
-
-            cd $RELEASE_DIR
-
-            # Load Node
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            [ -s "$HOME/.bashrc" ] && . "$HOME/.bashrc"
-            [ -s "$HOME/.profile" ] && . "$HOME/.profile"
+            nvm use default 2>/dev/null || true
 
-            nvm use --delete-prefix default --silent || nvm use default
-
-            # Yarn
-            export COREPACK_ENABLE_STRICT=0
-            corepack enable
-            corepack prepare yarn@4.6.0 --activate
-
-            yarn install --immutable --inline-builds
-
-            if [ -f ".env.production" ]; then
-              set -a
-              source .env.production
-              set +a
-            fi
+            corepack enable 2>/dev/null || true
+            yarn install --immutable
 
             export NODE_ENV=production
-
             yarn build
 
-            ln -sfn $RELEASE_DIR $CURRENT_DIR
-
-            pm2 delete store || true
-            pm2 start "yarn start" --name store --cwd $CURRENT_DIR
+            pm2 delete app 2>/dev/null || true
+            pm2 start "yarn start" --name app --cwd ~/app
             pm2 save
-
-            echo "✅ Deployment successful"
+            echo "Deploy done."
