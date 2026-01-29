@@ -2,11 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-// Import Swiper styles
 import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/icons";
 import { useGetCategoriesQuery } from "@/redux/features/api/category";
-import "swiper/css";
-import "swiper/css/navigation";
 import SingleItem from "./SingleItem";
 
 const Categories = () => {

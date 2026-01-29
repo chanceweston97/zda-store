@@ -1,5 +1,9 @@
 @import url("https://fonts.cdnfonts.com/css/general-sans");
 
+@import "swiper/css";
+@import "swiper/css/free-mode";
+@import "swiper/css/navigation";
+
 @import "tailwindcss";
 
 @layer base {

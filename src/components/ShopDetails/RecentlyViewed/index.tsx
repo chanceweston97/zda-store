@@ -5,8 +5,6 @@ import Image from "next/image";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/assets/icons";
 import { useGetProductsQuery } from "@/redux/features/api/product";
 import { useCallback, useRef } from "react";
-import "swiper/css";
-import "swiper/css/navigation";
 import { Swiper, SwiperRef, SwiperSlide } from "swiper/react";
 
 const RecentlyViewedItems = () => {

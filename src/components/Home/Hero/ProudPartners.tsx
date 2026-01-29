@@ -5,8 +5,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, FreeMode } from "swiper/modules";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { imageBuilder } from "@/lib/data/shop-utils";
-import "swiper/css";
-import "swiper/css/free-mode";
 
 type Brand = { name: string; logo: string };
 

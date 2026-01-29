@@ -1,8 +1,6 @@
 "use client";
 import Image from 'next/image';
 import { useCallback, useRef } from 'react';
-import 'swiper/css';
-import 'swiper/css/navigation';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";

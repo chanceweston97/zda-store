@@ -5,10 +5,6 @@ import testimonialsData from "./testimonialsData";
 import TestimonialsHeader from "./TestimonialsHeader";
 import { useTestimonialSwiper } from "./useTestimonialSwiper";
 
-// Import Swiper styles
-import "swiper/css";
-import "swiper/css/navigation";
-
 const BREAKPOINTS = {
   0: { slidesPerView: 1 },
   1000: { slidesPerView: 2 },
