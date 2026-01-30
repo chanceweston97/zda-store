@@ -9,8 +9,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const HEADER_OFFSET = 80;
-const NUMBER_HEIGHT = 20; // Approximate height of number section (14px font + line height)
-const NUMBER_MARGIN = 50; // Margin below number
+const NUMBER_HEIGHT = 20;
+const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 450;
 const GAP = 50;
 
@@ -226,62 +226,60 @@ export default function HeroScrollItems() {
             className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
-              height: 'auto',
+              height: "auto",
               background: "#F1F6FF",
               borderRadius: 10,
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: '400px',
+              marginBottom: "400px",
             }}
           >
-            {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>01/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Antennas</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>In-Building Wireless and DAS</h3>
               </div>
-              <p 
+              <p
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  color: '#000',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
+                  fontFamily: "Satoshi, sans-serif",
+                  color: "#000",
+                  fontSize: "18px",
+                  fontStyle: "normal",
                   fontWeight: 400,
-                  lineHeight: '28px',
-                  width: '640px',
-                  maxWidth: '100%',
-                  marginTop: '92px',
-                  marginBottom: 0
+                  lineHeight: "28px",
+                  width: "600px",
+                  maxWidth: "100%",
+                  marginTop: "92px",
+                  marginBottom: 0,
                 }}
               >
-                Directional and omnidirectional options engineered for reliable coverage from VHF/UHF to LTE/5G sub-6 GHz. ZDA Communications provides field ready builds with verified VSWR for clean links in real-world conditions.
+                Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.
               </p>
               <Link
                 href="/categories/antennas"
                 prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 30px',
-                  paddingRight: '30px',
-                  cursor: 'pointer',
-                  width: '252px',
-                  minWidth: '252px',
-                  marginTop: '30px'
+                  fontFamily: "Satoshi, sans-serif",
+                  padding: "10px 30px",
+                  paddingRight: "30px",
+                  cursor: "pointer",
+                  width: "252px",
+                  minWidth: "252px",
+                  marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  e.currentTarget.style.paddingRight = "calc(30px + 17px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '30px';
+                  e.currentTarget.style.paddingRight = "30px";
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Antennas</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore DAS Solutions</p>
               </Link>
             </div>
-            {/* Right Image Section */}
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
                 <span>Antenna Image</span>
@@ -295,62 +293,60 @@ export default function HeroScrollItems() {
             className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
-              height: 'auto',
+              height: "auto",
               background: "#F1F6FF",
               borderRadius: 10,
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: '400px',
+              marginBottom: "400px",
             }}
           >
-            {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>02/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Cables</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Public Safety & ERRCS</h3>
               </div>
-              <p 
+              <p
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  color: '#000',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
+                  fontFamily: "Satoshi, sans-serif",
+                  color: "#000",
+                  fontSize: "18px",
+                  fontStyle: "normal",
                   fontWeight: 400,
-                  lineHeight: '28px',
-                  width: '640px',
-                  maxWidth: '100%',
-                  marginTop: '92px',
-                  marginBottom: 0
+                  lineHeight: "28px",
+                  width: "600px",
+                  maxWidth: "100%",
+                  marginTop: "92px",
+                  marginBottom: 0,
                 }}
               >
-                Low-loss 50-ohm assemblies cut to length with precise terminations for minimal attenuation and maximum durability.<br></br> Any length, assembled in the United States.
+                RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.
               </p>
               <Link
                 href="/categories/cables"
                 prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 30px',
-                  paddingRight: '30px',
-                  cursor: 'pointer',
-                  width: '252px',
-                  minWidth: '252px',
-                  marginTop: '30px'
+                  fontFamily: "Satoshi, sans-serif",
+                  padding: "10px 30px",
+                  paddingRight: "30px",
+                  cursor: "pointer",
+                  width: "252px",
+                  minWidth: "252px",
+                  marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  e.currentTarget.style.paddingRight = "calc(30px + 17px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '30px';
+                  e.currentTarget.style.paddingRight = "30px";
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Cables</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Public Safety Solutions</p>
               </Link>
             </div>
-            {/* Right Image Section */}
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
                 <span>Cable Image</span>
@@ -364,62 +360,60 @@ export default function HeroScrollItems() {
             className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
-              height: 'auto',
+              height: "auto",
               background: "#F1F6FF",
               borderRadius: 10,
               transition: "box-shadow 0.3s",
               overflow: "hidden",
               position: "relative",
-              marginBottom: '400px',
+              marginBottom: "400px",
             }}
           >
-            {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>03/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Connectors & Accessories</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Utilities, SCADA & Industrial</h3>
               </div>
-              <p 
+              <p
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  color: '#000',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
+                  fontFamily: "Satoshi, sans-serif",
+                  color: "#000",
+                  fontSize: "18px",
+                  fontStyle: "normal",
                   fontWeight: 400,
-                  lineHeight: '28px',
-                  width: '640px',
-                  maxWidth: '100%',
-                  marginTop: '92px',
-                  marginBottom: 0
+                  lineHeight: "28px",
+                  width: "600px",
+                  maxWidth: "100%",
+                  marginTop: "92px",
+                  marginBottom: 0,
                 }}
               >
-                Industry-standard RF connectors, adapters, and couplers for secure, low-resistance joins across your network. Available in N, SMA, TNC, and more.<br></br><br></br> For radios and signal boosters, reach out to a product expert.
+                Directional and omnidirectional antennas designed for long-range, low-noise communications in utility, telemetry, and industrial control networks.
               </p>
               <Link
                 href="/categories/connectors"
                 prefetch={false}
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 30px',
-                  paddingRight: '30px',
-                  cursor: 'pointer',
-                  width: '252px',
-                  minWidth: '252px',
-                  marginTop: '30px'
+                  fontFamily: "Satoshi, sans-serif",
+                  padding: "10px 30px",
+                  paddingRight: "30px",
+                  cursor: "pointer",
+                  width: "252px",
+                  minWidth: "252px",
+                  marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  e.currentTarget.style.paddingRight = "calc(30px + 17px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '30px';
+                  e.currentTarget.style.paddingRight = "30px";
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Connectors</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Industrial Solutions</p>
               </Link>
             </div>
-            {/* Right Image Section */}
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
                 <span>Connector Image</span>
@@ -433,61 +427,57 @@ export default function HeroScrollItems() {
             className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
-              height: 'auto',
+              height: "auto",
               background: "#F1F6FF",
               borderRadius: 10,
               position: "relative",
-              zIndex: 4, // Highest z-index so it's always visible
+              zIndex: 4,
             }}
           >
-            {/* Left Content Section */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>04/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginTop: '10px', marginBottom: 0 }}>Manufacturing</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Private LTE/5G & Infrastructure</h3>
               </div>
-              <p 
+              <p
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  color: '#000',
-                  fontSize: '18px',
-                  fontStyle: 'normal',
+                  fontFamily: "Satoshi, sans-serif",
+                  color: "#000",
+                  fontSize: "18px",
+                  fontStyle: "normal",
                   fontWeight: 400,
-                  lineHeight: '28px',
-                  width: '640px',
-                  maxWidth: '100%',
-                  marginTop: '92px',
-                  marginBottom: 0
+                  lineHeight: "28px",
+                  width: "600px",
+                  maxWidth: "100%",
+                  marginTop: "92px",
+                  marginBottom: 0,
                 }}
               >
-                Antennas manufactured to exact frequency and application requirements.<br></br> Built to spec for enterprise and infrastructure networks.
-                <br /><br />
-                Get in touch to explore frequency-specific antenna manufacturing solutions.
+                RF solutions supporting private LTE, private 5G, and fixed wireless deployments where controlled coverage and system reliability are critical.
               </p>
               <Link
                 href="/contact"
                 className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
                 style={{
-                  fontFamily: 'Satoshi, sans-serif',
-                  padding: '10px 30px',
-                  paddingRight: '30px',
-                  cursor: 'pointer',
-                  width: '252px',
-                  minWidth: '252px',
-                  marginTop: '30px'
+                  fontFamily: "Satoshi, sans-serif",
+                  padding: "10px 30px",
+                  paddingRight: "30px",
+                  cursor: "pointer",
+                  width: "252px",
+                  minWidth: "252px",
+                  marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
+                  e.currentTarget.style.paddingRight = "calc(30px + 17px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.paddingRight = '30px';
+                  e.currentTarget.style.paddingRight = "30px";
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Manufacturing</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Private Wireless</p>
               </Link>
             </div>
-            {/* Right Image Section */}
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
                 <span>Manufacturing Image</span>

@@ -1,5 +1,4 @@
-import ShopWithSidebar from "@/components/ShopWithSidebar";
-import Newsletter from "@/components/Common/Newsletter";
+import ProductsPageWithCategoriesFallback from "@/components/ShopWithSidebar/ProductsPageWithCategoriesFallback";
 import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 import { Metadata } from 'next';
@@ -21,13 +20,12 @@ type PageProps = {
 const ProductsPage = async ({ searchParams }: PageProps) => {
   await searchParams;
 
-  // Fetch categories from WooCommerce
+  // Fetch categories from WooCommerce (SSR); empty on Vercel if env/cold start fails → client fallback
   let categories: any[] = [];
   const products: any[] = [];
   const totalCount = 0;
 
   const useWooCommerce = isWooCommerceEnabled();
-
 
   try {
     if (useWooCommerce) {
@@ -43,14 +41,13 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
 
   return (
     <main>
-      <ShopWithSidebar
-        data={{
+      <ProductsPageWithCategoriesFallback
+        initialData={{
           products,
           categories,
           totalCount,
         }}
       />
-      <Newsletter />
     </main>
   );
 };

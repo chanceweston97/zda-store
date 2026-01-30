@@ -11,7 +11,7 @@ export const whatWeOffer: WhatWeOffer = {
   },
   offerItems: [
     {
-      title: "Antennas",
+      title: "In-Building Wireless and DAS",
       tags: ["Yagi", "Omnidirectional", "Grid Parabolic", "Rubber Ducky"],
       description: "Directional and omnidirectional options engineered for reliable coverage—from VHF/UHF to LTE/5G sub-6 GHz. Field-ready builds with verified VSWR for clean links in real-world conditions.",
       button: {
