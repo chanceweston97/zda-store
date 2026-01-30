@@ -26,10 +26,11 @@ const parsePrice = (value?: string) => {
 
 // Core function that fetches from WooCommerce (will be cached)
 const getProductsFromWoo = async (query: string) => {
-  const apiUrl =
+  const apiUrl = (
     process.env.WC_API_URL ||
     process.env.NEXT_PUBLIC_WC_API_URL ||
-    "";
+    ""
+  ).replace(/\/+$/, "");
   const consumerKey =
     process.env.WC_CONSUMER_KEY ||
     process.env.NEXT_PUBLIC_WC_CONSUMER_KEY ||
@@ -43,17 +44,20 @@ const getProductsFromWoo = async (query: string) => {
     throw new Error("WooCommerce API not configured");
   }
 
-  const url = `${apiUrl}/products${query}`;
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+  // Use query params for auth (matches browser; some servers strip Basic Auth)
+  const authParams = new URLSearchParams({
+    consumer_key: consumerKey,
+    consumer_secret: consumerSecret,
+  });
+  const baseUrl = `${apiUrl}/products${query}`;
+  const url = `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${authParams.toString()}`;
 
   const wooTimerLabel = `[WooCommerce] ${query}|${crypto.randomUUID()}`;
   console.time(wooTimerLabel);
   const res = await fetchWithTimeout(
     url,
     {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
+      headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 }, // 60 seconds
     },
     3000 // 3 second timeout
@@ -98,10 +102,11 @@ export async function GET(req: Request) {
     );
   }
 
-  const apiUrl =
+  const apiUrl = (
     process.env.WC_API_URL ||
     process.env.NEXT_PUBLIC_WC_API_URL ||
-    "";
+    ""
+  ).replace(/\/+$/, "");
   const consumerKey =
     process.env.WC_CONSUMER_KEY ||
     process.env.NEXT_PUBLIC_WC_CONSUMER_KEY ||

@@ -316,7 +316,8 @@ export function convertWCVariationsToVariants(params: {
  * Used for PDP so images (thumbnails, datasheet, etc.) display correctly.
  */
 async function fetchProductWithACF(productId: number): Promise<{ acf?: Record<string, any>; [key: string]: any } | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_WC_SITE_URL || process.env.NEXT_PUBLIC_CMS_URL || "";
+  // Use WooCommerce site URL only (no CMS fallback)
+  const baseUrl = (process.env.NEXT_PUBLIC_WC_SITE_URL || "").replace(/\/+$/, "");
   if (!baseUrl) return null;
   try {
     const url = `${baseUrl}/wp-json/wp/v2/product/${productId}?acf_format=standard`;
@@ -530,6 +531,14 @@ export async function convertWCToProduct(
     return html.replace(/<[^>]*>/g, "").trim();
   };
 
+  // Rewrite old cms.zdacomm.com image URLs to current WC site (admin) so next/image works
+  const rewriteCmsImageUrl = (url: string | null | undefined): string => {
+    if (!url || typeof url !== "string") return url || "";
+    const wcSite = (process.env.NEXT_PUBLIC_WC_SITE_URL || "").replace(/\/+$/, "");
+    if (!wcSite) return url;
+    return url.replace(/https?:\/\/cms\.zdacomm\.com\/?/gi, wcSite + "/");
+  };
+
   // Parse price - WooCommerce prices are strings in the store currency (dollars)
   // The price field should be in dollars (components multiply by 100 for display)
   const priceStr = wcProduct.sale_price || wcProduct.price || wcProduct.regular_price || "0";
@@ -549,7 +558,7 @@ export async function convertWCToProduct(
     const isFirstSrcUrl = typeof firstSrc === "string" && (firstSrc.startsWith("http://") || firstSrc.startsWith("https://"));
     if (isFirstSrcUrl) {
       thumbnails = wcProduct.images.map((img) => ({
-        image: img.src,
+        image: rewriteCmsImageUrl(img.src),
         color: null,
       }));
     }
@@ -564,7 +573,7 @@ export async function convertWCToProduct(
         (typeof acf.featured_image === "string" && acf.featured_image.startsWith("http") ? acf.featured_image : null) ||
         (typeof acf.product_image === "string" && acf.product_image?.startsWith("http") ? acf.product_image : null);
       if (mainImageUrl) {
-        thumbnails = [{ image: mainImageUrl, color: null }];
+        thumbnails = [{ image: rewriteCmsImageUrl(mainImageUrl), color: null }];
       }
     }
   } else if (acfProduct?.acf) {
@@ -577,7 +586,7 @@ export async function convertWCToProduct(
       (typeof acf.featured_image === "string" && acf.featured_image?.startsWith("http") ? acf.featured_image : null) ||
       (typeof acf.product_image === "string" && acf.product_image?.startsWith("http") ? acf.product_image : null);
     if (mainImageUrl) {
-      thumbnails = [{ image: mainImageUrl, color: null }];
+      thumbnails = [{ image: rewriteCmsImageUrl(mainImageUrl), color: null }];
     }
   }
   const previewImages = thumbnails.length > 0 ? thumbnails : [];
@@ -675,7 +684,7 @@ export async function convertWCToProduct(
   // Resolve datasheet image (ACF standard format already gives URL)
   let datasheetImage: string | null = null;
   if (datasheetImageFromACF) {
-    datasheetImage = datasheetImageFromACF;
+    datasheetImage = rewriteCmsImageUrl(datasheetImageFromACF) || null;
   } else if (datasheetImageRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetImageRaw)) {
@@ -683,22 +692,23 @@ export async function convertWCToProduct(
       // WooCommerce should return the URL, not the field key
       datasheetImage = null;
     } else if (isMediaId(datasheetImageRaw)) {
-      datasheetImage = await resolveMediaId(datasheetImageRaw);
+      const resolved = await resolveMediaId(datasheetImageRaw);
+      datasheetImage = resolved ? rewriteCmsImageUrl(resolved) : null;
     } else if (typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
-      datasheetImage = datasheetImageRaw;
+      datasheetImage = rewriteCmsImageUrl(datasheetImageRaw);
     } else {
       // Invalid format, skip it silently
       datasheetImage = null;
     }
   } else if (datasheetImageRaw && typeof datasheetImageRaw === 'string' && (datasheetImageRaw.startsWith('http://') || datasheetImageRaw.startsWith('https://'))) {
     // For listing pages, only use direct URLs (skip media ID resolution)
-    datasheetImage = datasheetImageRaw;
+    datasheetImage = rewriteCmsImageUrl(datasheetImageRaw);
   }
   
   // Resolve datasheet PDF (ACF standard format already gives URL)
   let datasheetPdf: string | null = null;
   if (datasheetPdfFromACF) {
-    datasheetPdf = datasheetPdfFromACF;
+    datasheetPdf = rewriteCmsImageUrl(datasheetPdfFromACF) || null;
   } else if (datasheetPdfRaw && resolveMedia) {
     // Skip ACF field keys silently - if field type is URL, WooCommerce should return URL directly
     if (isACFFieldKey(datasheetPdfRaw)) {
@@ -706,16 +716,17 @@ export async function convertWCToProduct(
       // WooCommerce should return the URL, not the field key
       datasheetPdf = null;
     } else if (isMediaId(datasheetPdfRaw)) {
-      datasheetPdf = await resolveMediaId(datasheetPdfRaw);
+      const resolved = await resolveMediaId(datasheetPdfRaw);
+      datasheetPdf = resolved ? rewriteCmsImageUrl(resolved) : null;
     } else if (typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
-      datasheetPdf = datasheetPdfRaw;
+      datasheetPdf = rewriteCmsImageUrl(datasheetPdfRaw);
     } else {
       // Invalid format, skip it silently
       datasheetPdf = null;
     }
   } else if (datasheetPdfRaw && typeof datasheetPdfRaw === 'string' && (datasheetPdfRaw.startsWith('http://') || datasheetPdfRaw.startsWith('https://'))) {
     // For listing pages, only use direct URLs (skip media ID resolution)
-    datasheetPdf = datasheetPdfRaw;
+    datasheetPdf = rewriteCmsImageUrl(datasheetPdfRaw);
   }
 
   // Handle variants - WooCommerce uses variations

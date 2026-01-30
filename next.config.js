@@ -38,8 +38,8 @@ const nextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "http", hostname: "localhost", port: "9000" },
       { protocol: "https", hostname: "admin.zdacomm.com" },
-      { protocol: "https", hostname: "zdacomm.com" },
       { protocol: "https", hostname: "cms.zdacomm.com" },
+      { protocol: "https", hostname: "zdacomm.com" },
     ],
   },
 };

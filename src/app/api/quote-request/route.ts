@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 // Get CMS URL and Form ID from environment variables
 // NOTE: Form ID changed after migration - current correct ID is 3445
 // Update CONTACT_FORM_7_QUOTE_ID environment variable to 3445
-const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
+const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://admin.zdacomm.com";
 const CONTACT_FORM_7_QUOTE_ID = process.env.CONTACT_FORM_7_QUOTE_ID || "";
 
 export async function POST(req: NextRequest) {

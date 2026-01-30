@@ -3,7 +3,8 @@
  * Handles authentication and base API requests
  */
 
-const WC_API_URL = process.env.NEXT_PUBLIC_WC_API_URL || "";
+// Normalize: no trailing slash so endpoint "/products" builds correct URL
+const WC_API_URL = (process.env.NEXT_PUBLIC_WC_API_URL || "").replace(/\/+$/, "");
 const WC_CONSUMER_KEY = process.env.NEXT_PUBLIC_WC_CONSUMER_KEY || "";
 const WC_CONSUMER_SECRET = process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET || "";
 const WOO_ENABLED = (process.env.WOO_ENABLED || "true").toLowerCase() !== "false";
@@ -45,12 +46,26 @@ export async function wcFetch<T>(
     );
   }
 
-  const url = `${WC_API_URL}${endpoint}`;
-  const headers = {
+  const method = (options.method || "GET").toUpperCase();
+  const isGet = method === "GET";
+
+  // Build URL: for GET, pass credentials as query params (matches browser; some servers strip Basic Auth)
+  const authParams = new URLSearchParams({
+    consumer_key: WC_CONSUMER_KEY,
+    consumer_secret: WC_CONSUMER_SECRET,
+  });
+  const baseUrl = `${WC_API_URL}${endpoint}`;
+  const url = isGet
+    ? `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}${authParams.toString()}`
+    : baseUrl;
+
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: getAuthHeader(),
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
+  if (!isGet) {
+    headers.Authorization = getAuthHeader();
+  }
 
   try {
     // Create abort controller for timeout (more compatible)

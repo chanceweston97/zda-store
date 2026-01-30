@@ -140,24 +140,23 @@ export default function Description({ product, metadata }: Props) {
         "description"
     );
 
-    // Helper function to fix old CMS hostnames in URLs
+    // Helper function to fix old CMS/admin hostnames in URLs (rewrite to current WC site)
     const fixImageUrl = (url: string | null | undefined): string | null => {
       if (!url || typeof url !== 'string') return url || null;
       
-      const cmsUrl = process.env.NEXT_PUBLIC_CMS_URL;
-      if (!cmsUrl) return url;
+      const siteUrl = process.env.NEXT_PUBLIC_WC_SITE_URL || process.env.NEXT_PUBLIC_CMS_URL;
+      if (!siteUrl) return url;
 
       let currentUrl: URL;
       try {
-        currentUrl = new URL(cmsUrl);
+        currentUrl = new URL(siteUrl);
       } catch (e) {
         return url;
       }
       
       const currentHost = currentUrl.host;
       const oldHosts = [
-        '18.191.243.236:9000',
-        '18.191.243.236',
+        'admin.zdacomm.com',
       ];
       
       let fixedUrl = url;

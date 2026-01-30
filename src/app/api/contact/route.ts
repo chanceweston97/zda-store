@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Integrates with Contact Form 7 REST API (WordPress headless)
  * 
  * Endpoint: POST /wp-json/contact-form-7/v1/contact-forms/{FORM_ID}/feedback
- * CMS URL: cms.zdacomm.com
+ * CMS URL: admin.zdacomm.com
  */
 
 // Route segment config
@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 // Get CMS URL and Form ID from environment variables
 // NOTE: Form ID changed after migration - update CONTACT_FORM_7_CONTACT_ID with correct ID
 // Based on schema, this form should be form ID 3445 (same as quote-request)
-const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
+const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || process.env.NEXT_PUBLIC_WC_SITE_URL || "https://admin.zdacomm.com";
 const CONTACT_FORM_7_CONTACT_ID = process.env.CONTACT_FORM_7_CONTACT_ID || "";
 
 export async function POST(req: NextRequest) {

@@ -5,14 +5,14 @@
    * Integrates with Contact Form 7 REST API (WordPress headless)
    * 
    * Endpoint: POST /wp-json/contact-form-7/v1/contact-forms/{FORM_ID}/feedback
-   * CMS URL: cms.zdacomm.com
+   * CMS URL: admin.zdacomm.com
    */
 
   // Route segment config
   export const runtime = 'nodejs';
 
   // Get CMS URL and Form ID from environment variables
-  const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://cms.zdacomm.com";
+  const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL || "https://admin.zdacomm.com";
   const CONTACT_FORM_7_NEWSLETTER_ID = process.env.CONTACT_FORM_7_NEWSLETTER_ID || "";
 
   export async function GET(req: NextRequest) {
