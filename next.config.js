@@ -2,7 +2,6 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone", // 🔥 REQUIRED FOR EC2
   reactStrictMode: false,
 
   typescript: {
@@ -21,21 +20,28 @@ const nextConfig = {
     return config;
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/admin",
+        destination: "https://admin.zdacomm.com/wp-admin",
+        permanent: false,
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "cdn.sanity.io" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
-      { protocol: "http", hostname: "18.224.229.214", port: "9000" },
-      { protocol: "https", hostname: "18.224.229.214", port: "9000" },
       { protocol: "http", hostname: "localhost", port: "9000" },
       { protocol: "https", hostname: "admin.zdacomm.com" },
       { protocol: "https", hostname: "zdacomm.com" },
       { protocol: "https", hostname: "cms.zdacomm.com" },
-      { protocol: "http", hostname: "18.191.243.236", port: "9000" },
     ],
   },
 };
 
-module.exports = nextConfig; // ✅ THIS WAS MISSING
+module.exports = nextConfig;
