@@ -224,6 +224,13 @@
 html, body {
     font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
+
+/* Terms & Conditions: force Satoshi on all content (including WordPress HTML) */
+.terms-legal,
+.terms-legal * {
+  font-family: "Satoshi", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
 @utility container {
   margin-inline: auto;
   padding-inline: 1rem;

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { HomeOfferingItem } from "@/lib/wordpress/home-offering-items";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,7 +16,18 @@ const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 450;
 const GAP = 50;
 
-export default function HeroScrollItems() {
+const FALLBACK_ITEMS: HomeOfferingItem[] = [
+  { title: "In-Building Wireless and DAS", description: "Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.", button: { title: "Explore DAS Solutions", url: "/categories/antennas" }, image: null },
+  { title: "Public Safety & ERRCS", description: "RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.", button: { title: "Explore Public Safety Solutions", url: "/categories/cables" }, image: null },
+  { title: "Utilities, SCADA & Industrial", description: "Directional and omnidirectional antennas designed for long-range, low-noise communications in utility, telemetry, and industrial control networks.", button: { title: "Explore Industrial Solutions", url: "/categories/connectors" }, image: null },
+  { title: "Private LTE/5G & Infrastructure", description: "RF solutions supporting private LTE, private 5G, and fixed wireless deployments where controlled coverage and system reliability are critical.", button: { title: "Explore Private Wireless", url: "/contact" }, image: null },
+];
+
+interface HeroScrollItemsProps {
+  items?: HomeOfferingItem[] | null;
+}
+
+export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const card1Ref = useRef<HTMLDivElement>(null);
   const card2Ref = useRef<HTMLDivElement>(null);
@@ -22,6 +35,10 @@ export default function HeroScrollItems() {
   const card4Ref = useRef<HTMLDivElement>(null);
   const dotsRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const displayItems = useMemo(() => {
+    return [0, 1, 2, 3].map((i) => items?.[i] ?? FALLBACK_ITEMS[i]);
+  }, [items]);
 
   useEffect(() => {
     ScrollTrigger.getAll().forEach(t => t.kill());
@@ -223,7 +240,7 @@ export default function HeroScrollItems() {
           {/* Card 1 */}
           <div
             ref={card1Ref}
-            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-0 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
               height: "auto",
@@ -235,12 +252,13 @@ export default function HeroScrollItems() {
               marginBottom: "400px",
             }}
           >
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>01/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>In-Building Wireless and DAS</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{displayItems[0].title}</h3>
               </div>
               <p
+                className="mt-0 md:mt-[92px]"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   color: "#000",
@@ -248,25 +266,23 @@ export default function HeroScrollItems() {
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "28px",
-                  width: "600px",
+                  width: "565px",
                   maxWidth: "100%",
-                  marginTop: "92px",
                   marginBottom: 0,
                 }}
               >
-                Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.
+                {displayItems[0].description}
               </p>
               <Link
-                href="/categories/antennas"
+                href={displayItems[0].button.url}
                 prefetch={false}
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
                   paddingRight: "30px",
                   cursor: "pointer",
-                  width: "252px",
-                  minWidth: "252px",
+                  maxWidth: "600px",
                   marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
@@ -277,12 +293,12 @@ export default function HeroScrollItems() {
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore DAS Solutions</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[0].button.title}</p>
               </Link>
             </div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
-                <span>Antenna Image</span>
+            <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
+              <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                {displayItems[0].image ? <Image src={displayItems[0].image} alt={displayItems[0].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" /> : <span>Antenna Image</span>}
               </div>
             </div>
           </div>
@@ -290,7 +306,7 @@ export default function HeroScrollItems() {
           {/* Card 2 */}
           <div
             ref={card2Ref}
-            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-0 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
               height: "auto",
@@ -302,12 +318,13 @@ export default function HeroScrollItems() {
               marginBottom: "400px",
             }}
           >
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>02/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Public Safety & ERRCS</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[1].title}</h3>
               </div>
               <p
+                className="mt-0 md:mt-[92px]"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   color: "#000",
@@ -315,25 +332,23 @@ export default function HeroScrollItems() {
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "28px",
-                  width: "600px",
+                  width: "565px",
                   maxWidth: "100%",
-                  marginTop: "92px",
                   marginBottom: 0,
                 }}
               >
-                RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.
+                {displayItems[1].description}
               </p>
               <Link
-                href="/categories/cables"
+                href={displayItems[1].button.url}
                 prefetch={false}
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
                   paddingRight: "30px",
                   cursor: "pointer",
-                  width: "252px",
-                  minWidth: "252px",
+                  maxWidth: "600px",
                   marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
@@ -344,12 +359,12 @@ export default function HeroScrollItems() {
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Public Safety Solutions</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[1].button.title}</p>
               </Link>
             </div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
-                <span>Cable Image</span>
+            <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
+              <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                {displayItems[1].image ? <Image src={displayItems[1].image} alt={displayItems[1].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" /> : <span>Cable Image</span>}
               </div>
             </div>
           </div>
@@ -357,7 +372,7 @@ export default function HeroScrollItems() {
           {/* Card 3 */}
           <div
             ref={card3Ref}
-            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-0 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
               height: "auto",
@@ -369,12 +384,13 @@ export default function HeroScrollItems() {
               marginBottom: "400px",
             }}
           >
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>03/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Utilities, SCADA & Industrial</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[2].title}</h3>
               </div>
               <p
+                className="mt-0 md:mt-[92px]"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   color: "#000",
@@ -382,25 +398,23 @@ export default function HeroScrollItems() {
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "28px",
-                  width: "600px",
+                  width: "565px",
                   maxWidth: "100%",
-                  marginTop: "92px",
                   marginBottom: 0,
                 }}
               >
-                Directional and omnidirectional antennas designed for long-range, low-noise communications in utility, telemetry, and industrial control networks.
+                {displayItems[2].description}
               </p>
               <Link
-                href="/categories/connectors"
+                href={displayItems[2].button.url}
                 prefetch={false}
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
                   paddingRight: "30px",
                   cursor: "pointer",
-                  width: "252px",
-                  minWidth: "252px",
+                  maxWidth: "600px",
                   marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
@@ -411,12 +425,12 @@ export default function HeroScrollItems() {
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Industrial Solutions</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[2].button.title}</p>
               </Link>
             </div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
-                <span>Connector Image</span>
+            <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
+              <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                {displayItems[2].image ? <Image src={displayItems[2].image} alt={displayItems[2].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" /> : <span>Connector Image</span>}
               </div>
             </div>
           </div>
@@ -424,7 +438,7 @@ export default function HeroScrollItems() {
           {/* Card 4 - NOT sticky */}
           <div
             ref={card4Ref}
-            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-5 md:gap-10"
+            className="p-4 sm:p-6 lg:p-8 xl:p-[30px_50px] flex flex-col md:flex-row gap-0 md:gap-10"
             style={{
               minHeight: CARD_HEIGHT,
               height: "auto",
@@ -434,12 +448,13 @@ export default function HeroScrollItems() {
               zIndex: 4,
             }}
           >
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>04/04</div>
-                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "clamp(32px, 5vw, 48px)", marginTop: "10px", marginBottom: 0 }}>Private LTE/5G & Infrastructure</h3>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[3].title}</h3>
               </div>
               <p
+                className="mt-0 md:mt-[92px]"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   color: "#000",
@@ -447,24 +462,22 @@ export default function HeroScrollItems() {
                   fontStyle: "normal",
                   fontWeight: 400,
                   lineHeight: "28px",
-                  width: "600px",
+                  width: "565px",
                   maxWidth: "100%",
-                  marginTop: "92px",
                   marginBottom: 0,
                 }}
               >
-                RF solutions supporting private LTE, private 5G, and fixed wireless deployments where controlled coverage and system reliability are critical.
+                {displayItems[3].description}
               </p>
               <Link
-                href="/contact"
-                className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683]"
+                href={displayItems[3].button.url}
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
                   paddingRight: "30px",
                   cursor: "pointer",
-                  width: "252px",
-                  minWidth: "252px",
+                  maxWidth: "600px",
                   marginTop: "30px",
                 }}
                 onMouseEnter={(e) => {
@@ -475,12 +488,12 @@ export default function HeroScrollItems() {
                 }}
               >
                 <ButtonArrowHomepage />
-                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Explore Private Wireless</p>
+                <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[3].button.title}</p>
               </Link>
             </div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: "100%", height: "100%", minHeight: "300px", background: "#E0E7FF", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
-                <span>Manufacturing Image</span>
+            <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
+              <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                {displayItems[3].image ? <Image src={displayItems[3].image} alt={displayItems[3].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 360px" /> : <span>Manufacturing Image</span>}
               </div>
             </div>
           </div>

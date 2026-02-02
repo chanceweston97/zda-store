@@ -165,9 +165,16 @@ export async function getOrderById(orderId: string) {
   return null;
 }
 
-export const getHeroBanners = async () => {
-  // Return local hero banners data only (no backend fetch)
-  return heroBanners;
+/** Single hero banner for HeroStatic (from WordPress homepage_hero or fallback null). */
+export const getHeroBanners = async (): Promise<Record<string, unknown> | null> => {
+  try {
+    const { getHomepageHeroFromWordPress } = await import("@/lib/wordpress/homepage-hero");
+    const { banner } = await getHomepageHeroFromWordPress();
+    if (banner) return banner as Record<string, unknown>;
+  } catch (e) {
+    console.warn("[getHeroBanners] WordPress homepage hero fetch failed, using fallback:", e);
+  }
+  return heroBanners.length ? (heroBanners[0] as Record<string, unknown>) : null;
 };
 
 export const getHeroSliders = async () => await getHeroBanners(); // Alias
@@ -182,13 +189,32 @@ export const getProudPartners = async () => {
   return proudPartners;
 };
 
+/** Home offering items (scroll cards) from WordPress home_offering_items. */
+export const getHomeOfferingItems = async () => {
+  try {
+    const { getHomeOfferingItemsFromWordPress } = await import("@/lib/wordpress/home-offering-items");
+    return await getHomeOfferingItemsFromWordPress();
+  } catch (e) {
+    console.warn("[getHomeOfferingItems] WordPress fetch failed:", e);
+    return [];
+  }
+};
+
 export const getWhatWeOffer = async () => {
   // Return local what we offer data only (no backend fetch)
   return whatWeOffer;
 };
 export const getOurStory = async () => ourStory;
 export const getFaq = async () => {
-  // Return local FAQ data only (no backend fetch)
+  try {
+    const { getFaqFromWordPress } = await import("@/lib/wordpress/faq");
+    const wpFaq = await getFaqFromWordPress();
+    if (wpFaq && wpFaq.items && wpFaq.items.length > 0) {
+      return wpFaq;
+    }
+  } catch (e) {
+    console.warn("[getFaq] WordPress FAQ fetch failed, using fallback:", e);
+  }
   return { items: faqs };
 };
 export const getCountdown = async () => countdown;

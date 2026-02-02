@@ -1,12 +1,13 @@
 import Link from "next/link";
 
-const resourceLinks = [
-  { id: 1, label: "Catalog", href: "/catalog" },
-  { id: 2, label: "Privacy Policy", href: "/privacy-policy" },
-  { id: 3, label: "Terms & Conditions", href: "/terms-and-conditions" },
+const connectLinks = [
+  { id: 1, label: "Contact Us", href: "/contact" },
+  { id: 2, label: "Request a Quote", href: "/request-a-quote" },
+  { id: 3, label: "Returns", href: "/return-policy" },
+  { id: 4, label: "FAQs", href: "/contact#faq" },
 ];
 
-export default function Legal() {
+export default function ConnectLinks() {
   return (
     <div className="w-full sm:w-auto">
       <h2
@@ -20,11 +21,10 @@ export default function Legal() {
           lineHeight: "30px",
         }}
       >
-        RESOURCES
+        CONNECT
       </h2>
-
       <ul className="flex flex-col gap-3">
-        {resourceLinks.map((link) => (
+        {connectLinks.map((link) => (
           <li key={link.id}>
             <Link
               className="text-white ease-out duration-200 hover:text-[#70C8FF]"
@@ -36,5 +36,5 @@ export default function Legal() {
         ))}
       </ul>
     </div>
-  )
+  );
 }

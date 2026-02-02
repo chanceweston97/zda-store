@@ -13,7 +13,7 @@ const accountLinks = [
   },
   {
     id: 3,
-    label: 'Cable Builder',
+    label: 'Cable Customizer',
     href: '/cable-builder',
   },
   {

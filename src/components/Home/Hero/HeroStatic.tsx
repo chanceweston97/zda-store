@@ -12,6 +12,7 @@ interface HeroBannerData {
   name?: string;
   isActive?: boolean;
   backgroundImage?: any;
+  backgroundImageAlt?: string;
   title?: string;
   buttons?: Array<{
     text: string;
@@ -69,7 +70,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
       {/* Background */}
       <Image
         src={backgroundImage}
-        alt="Hero"
+        alt={bannerData?.backgroundImageAlt || "Hero"}
         fill
         priority
         className="object-cover brightness-50"

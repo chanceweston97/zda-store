@@ -26,19 +26,11 @@ export default function Info() {
       </h2>
 
       <ul className="flex flex-col gap-3">
-        {
-          hours.map((link) => (
-            <li key={link.id}>
-              <Link
-                className="ease-out duration-200 hover:text-[#70C8FF]"
-                href={link.href}
-                style={{ color: '#fff' }}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-
+        {hours.map((item) => (
+          <li key={item.id} className="text-white">
+            {item.label}
+          </li>
+        ))}
       </ul>
 
       <h2 
@@ -56,15 +48,9 @@ export default function Info() {
       </h2>
 
       <ul className="flex flex-col gap-3">
-        <li>
-          <Link
-            className="ease-out duration-200 hover:text-[#70C8FF]"
-            href="#"
-            style={{ color: '#fff' }}
-          >
-            3040 McNaughton Dr. Ste. A<br />
-            Columbia, SC 29223
-          </Link>
+        <li className="text-white">
+          3040 McNaughton Dr. Ste. A<br />
+          Columbia, SC 29223
         </li>
         <li>
           <Link

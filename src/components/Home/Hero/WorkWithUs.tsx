@@ -9,22 +9,22 @@ const services = [
   {
     icon: "/images/workwithus/antennas.svg",
     title: "Antennas",
-    description: "Directional and omni RF antennas for reliable, real-world coverage."
+    description: "Directional and omnidirectional antennas engineered for consistent RF performance across DAS, public safety, utility, and infrastructure deployments."
   },
   {
     icon: "/images/workwithus/cables.svg",
-    title: "Cables",
-    description: "Low-loss coaxial cable assemblies built to your spec, assembled in the United States."
+    title: "RF Cable Assemblies",
+    description: "Low-loss coaxial cable assemblies built to specification and assembled in the United States for long-term reliability."
   },
   {
     icon: "/images/workwithus/rf-accessories.svg",
-    title: "RF Accessories",
-    description: "Industrial RF connectors and adapters for secure, low-VSWR joins."
+    title: "RF Components",
+    description: "Industrial-grade RF components for professional wireless systems, including connectors, adapters, and attenuators optimized for low-VSWR performance."
   },
   {
     icon: "/images/workwithus/manufacturing.svg",
     title: "Manufacturing",
-    description: "Custom RF builds and assembles tailored to your network."
+    description: "Custom RF assemblies and antenna configurations tailored to application-specific network requirements and deployment conditions."
   }
 ];
 
@@ -67,7 +67,7 @@ export default function WorkWithUs() {
             Work with us
           </h2>
           <p 
-            className="mb-6 sm:mb-8 max-w-3xl"
+            className="mb-6 sm:mb-8 max-w-[800px] mx-auto"
             style={{
               color: '#000',
               textAlign: 'center',
@@ -79,7 +79,7 @@ export default function WorkWithUs() {
               marginTop: '10px'
             }}
           >
-            From government fleets to amateur radio enthusiasts, we're your partner for antennas, cables, connectors, and more.
+            From system integrators to government and enterprise operators, ZDA Communications is a trusted partner for antennas, RF cabling, connectivity components, and custom solutions.
           </p>
           <Link
             href="/contact"

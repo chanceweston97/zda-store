@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
 import toast from "react-hot-toast";
@@ -62,6 +63,7 @@ interface ValidationErrors {
 }
 
 export default function CableCustomizerClient({ data }: CableCustomizerClientProps) {
+  const router = useRouter();
   const { addItemWithAutoOpen } = useAutoOpenCart();
   const [config, setConfig] = useState<CableConfig>({
     cableSeries: "",
@@ -869,10 +871,10 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   </div>
                 )}
 
-                {/* Add to Cart Button */}
+                {/* Request a Quote Button */}
                 <button
                   type="button"
-                  onClick={handleAddToCart}
+                  onClick={() => router.push("/request-a-quote")}
                   className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 w-full"
                   style={{ 
                     fontFamily: 'Satoshi, sans-serif',
@@ -891,7 +893,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   }}
                 >
                   <ButtonArrowHomepage />
-                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Add to Cart</p>
+                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request a Quote</p>
                 </button>
               </div>
             </div>

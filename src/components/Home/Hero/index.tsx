@@ -1,4 +1,4 @@
-import { getHeroBanners, getHeroIntroduction, getProudPartners } from "@/lib/data/shop-utils";
+import { getHeroBanners, getHeroIntroduction, getHomeOfferingItems, getProudPartners } from "@/lib/data/shop-utils";
 import HeroStatic from "./HeroStatic";
 import HeroIntroduction from "./HeroIntroduction";
 import HeroBackbone from "./HeroBackbone";
@@ -9,6 +9,7 @@ import XetaWaveReseller from "./XetaWaveReseller";
 const Hero = async () => {
   const bannerData = await getHeroBanners();
   const introductionData = await getHeroIntroduction();
+  const offeringItems = await getHomeOfferingItems();
   const partnersData = await getProudPartners();
 
   return (
@@ -26,7 +27,7 @@ const Hero = async () => {
                 <HeroBackbone />
               </div>
               <div style={{ marginTop: '50px' }}>
-                <HeroScrollItems />
+                <HeroScrollItems items={offeringItems} />
               </div>
               <div style={{ marginTop: '50px' }}>
                 <ProudPartners partnersData={partnersData} />

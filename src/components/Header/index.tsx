@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useShoppingCart } from "use-shopping-cart";
 import GlobalSearchModal from "../Common/GlobalSearch";
 import CustomSelect from "./CustomSelect";
 import Dropdown from "./Dropdown";
@@ -23,13 +22,8 @@ const Header = () => {
 
   const { data: session } = useSession();
 
-  const { handleCartClick, cartCount, totalPrice } = useShoppingCart();
   const wishlistItems = useAppSelector((state) => state.wishlistReducer.items);
   const wishlistCount = wishlistItems?.length || 0;
-
-  const handleOpenCartModal = () => {
-    handleCartClick();
-  };
 
   // Sticky menu
   const handleStickyMenu = () => {
@@ -67,8 +61,9 @@ const Header = () => {
             });
             
             if (data && Array.isArray(data) && data.length > 0) {
-              console.log('[Header] Updating menu with', data.length, 'items');
-              setMenuData(data);
+              const solutionsItem = staticMenuData.find((m) => m.path === '/solutions') || staticMenuData[0];
+              const rest = data.filter((m: Menu) => m.path !== '/solutions');
+              setMenuData([solutionsItem, ...rest]);
             } else {
               console.warn('[Header] Menu API returned empty or invalid data, keeping static menu');
             }
@@ -155,7 +150,7 @@ const Header = () => {
                 {/* //   <!-- Main Nav End --> */}
               </div>
 
-              {/* Right side buttons - Contact + Cart + Mobile Hamburger */}
+              {/* Right side buttons - Contact + Mobile Hamburger */}
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Contact Button - Hidden on mobile/tablet, visible on xl+ */}
                 <Link
@@ -180,26 +175,6 @@ const Header = () => {
                   <ButtonArrowHomepage />
                   <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Contact</p>
                 </Link>
-
-                {/* Cart Icon Button - Visible on all screens */}
-                <button
-                  onClick={handleOpenCartModal}
-                  aria-label="Open cart"
-                  className="relative w-10 h-10 flex items-center justify-center text-[#2958A4] hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <Image
-                    src="/images/icons/cart.svg"
-                    alt="Cart"
-                    width={24}
-                    height={24}
-                    className="w-6 h-6"
-                  />
-                  {isMounted && typeof cartCount === 'number' && cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-[#2958A4] text-white text-xs font-medium rounded-full">
-                      {cartCount > 99 ? "99+" : cartCount}
-                    </span>
-                  )}
-                </button>
 
                 {/* Hamburger Toggle BTN - Visible on mobile/tablet, hidden on xl+ */}
                 <button

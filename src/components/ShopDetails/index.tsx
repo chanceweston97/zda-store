@@ -1980,30 +1980,6 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   <div className="pt-2 space-y-3 mt-4">
                       <button
                         type="button"
-                        onClick={handleAddToCart}
-                        className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
-                        style={{ 
-                          fontFamily: 'Satoshi, sans-serif',
-                          padding: '10px 30px',
-                          paddingRight: '30px',
-                          cursor: 'pointer',
-                          minWidth: 'fit-content'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.paddingRight = '30px';
-                        }}
-                      >
-                        <ButtonArrowHomepage />
-                        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">
-                          {isProductInCart ? "Update Cart" : "Add to Cart"}
-                        </p>
-                      </button>
-
-                      <button
-                        type="button"
                         onClick={() => router.push("/request-a-quote")}
                         className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
                         style={{ 

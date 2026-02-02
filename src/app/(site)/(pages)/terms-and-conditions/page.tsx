@@ -243,7 +243,7 @@ const TermsAndConditionsPage = () => {
                 OF CERTAIN WARRANTIES AND/OR THE EXCLUSION OR LIMITATION OF
                 LIABILITY FOR CONSEQUENTIAL, SPECIAL, INCIDENTAL, OR OTHER
                 DAMAGES, THE DISCLAIMERS AND LIMITATIONS SET FORTH IN SECTIONS 9
-                AND 10 MAY NOT APPLY TO YOU. IN SUCH CASES, THE LIABILITY OF CREDO
+                AND 10 MAY NOT APPLY TO YOU. IN SUCH CASES, THE LIABILITY OF ZDA
                 SHALL BE LIMITED TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW
                 IN THE RELEVANT JURISDICTION.
               </p>
@@ -283,7 +283,7 @@ const TermsAndConditionsPage = () => {
               </h2>
               <p className="mt-[25px] text-[16px] leading-[150%] tracking-[-0.32px]">
                 These Terms shall be governed by, construed, and enforced in
-                accordance with the laws of the State of Columbia, without
+                accordance with the laws of the State of South Carolina, without
                 reference to its conflict or choice-of-law rules. Each party
                 hereby irrevocably consents to the exclusive jurisdiction and
                 venue of the federal, state, and local courts located in Richland
