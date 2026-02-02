@@ -18,9 +18,9 @@ const GAP = 50;
 const items = [
   {
     number: "01/03",
-    title: "RF Connectivity Solutions",
+    title: "Engineered RF Connectivity",
     label: "Our Focus",
-    description: "We focus on the RF path, delivering engineered antennas, cabling, and RF components that support reliable connectivity, signal integrity, and long-term system performance. Our solutions are designed to simplify deployment and help ensure wireless links remain stable in real-world environments.",
+    description: "ZDA Communications is a manufacturer and supplier of RF connectivity solutions supporting industrial, public safety, utility, and infrastructure-grade wireless networks. We specialize in the RF path, supplying antennas, RF coaxial cable assemblies, and RF components that enable reliable signal transmission, predictable coverage, and long-term system performance in demanding real-world environments. Our products are engineered to integrate seamlessly into professional 50-ohm systems, supporting fixed infrastructure, distributed antenna systems (DAS), land mobile radio (LMR), private LTE/5G, and telemetry networks.",
     image: "/images/company/cable.png",
     link: "/categories/antennas",
     linkText: "Explore Antennas"
@@ -29,16 +29,16 @@ const items = [
     number: "02/03",
     title: "A Proven Track Record",
     label: "Founded in 2008",
-    description: "Since 2008, ZDA Communications has focused on designing and supplying dependable RF connectivity solutions for real-world wireless systems. Built on practical engineering experience, our antennas, cabling, and RF components are developed to address performance challenges in demanding industrial, public safety, and infrastructure environments. With a long history of supporting critical deployments, we continue to refine and expand our RF product portfolio to meet evolving connectivity requirements.",
+    description: "Founded in 2008, ZDA Communications has grown by supporting real-world wireless deployments where reliability matters. Our products are deployed across industrial facilities, utilities, public safety systems, environmental monitoring networks, and infrastructure environments where consistent performance is essential. We work closely with integrators, engineers, and system designers to address RF challenges encountered in complex installations.",
     image: "/images/company/antenna.png",
     link: "/categories/cables",
     linkText: "Explore Cables"
   },
   {
     number: "03/03",
-    title: "Built-to-spec Manufacturing",
+    title: "Built-to-spec with Verified Performance",
     label: "Reliable Results",
-    description: "We believe our RF-focused approach and U.S.-based assembly position us to deliver dependable, build-to-spec connectivity solutions that address performance, reliability, and end-to-end signal integrity requirements. Our technically driven team brings deep industry experience supporting government, infrastructure, and mission-critical wireless deployments.",
+    description: "ZDA Communications maintains a manufacturing and assembly process centered on build-to-spec execution, electrical consistency, and documented quality verification. All outgoing RF products are electrically verified using Anritsu RF test instrumentation to confirm critical performance parameters such as VSWR and impedance stability. This standards-driven approach ensures repeatable RF performance, protects connected radio equipment, and supports compliance with stated specifications across both catalog and build-to-order solutions.",
     image: "/images/company/manufacture.jpg",
     link: "/contact",
     linkText: "Explore Manufacturing"
