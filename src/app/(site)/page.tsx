@@ -6,6 +6,10 @@ import { getFaq } from "@/lib/data/shop-utils";
 import { getHomepageHeroFromWordPress } from "@/lib/wordpress/homepage-hero";
 import type { Metadata } from "next";
 
+/** Fetch at runtime so Cloudflare doesn’t block WordPress at build time. */
+export const dynamic = "force-dynamic";
+export const revalidate = 300;
+
 export async function generateMetadata(): Promise<Metadata> {
   const { seo } = await getHomepageHeroFromWordPress();
   const title = seo?.metaTitle || seo?.ogTitle || "ZDA Communications";
