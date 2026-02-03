@@ -2,6 +2,9 @@ import { getCategoriesWithSubcategories } from "@/lib/data/unified-data";
 import { Menu } from "@/types/Menu";
 import { NextResponse } from "next/server";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const timerLabel = `[Menu API] GET|${crypto.randomUUID()}`;
   console.time(timerLabel);

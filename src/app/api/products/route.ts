@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 type WooCommerceProduct = {
   id: number;
   name: string;

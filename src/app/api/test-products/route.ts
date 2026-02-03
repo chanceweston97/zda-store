@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAllProducts, getAllProductsCount, getCategoriesWithSubcategories } from "@/lib/data/unified-data";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const results: any = {
     timestamp: new Date().toISOString(),

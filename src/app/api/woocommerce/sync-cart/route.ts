@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { wcFetch } from "@/lib/woocommerce/client";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 /**
  * Sync cart items to WooCommerce
  * This endpoint adds items to WooCommerce cart before redirecting to checkout

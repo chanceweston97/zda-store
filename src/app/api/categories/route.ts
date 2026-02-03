@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/categories
  * Returns WooCommerce categories for the products/shop sidebar.

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { wcFetch } from "@/lib/woocommerce/client";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
 
+/** Do not run at build time — avoids Cloudflare blocking WooCommerce. */
+export const dynamic = "force-dynamic";
+
 export type WooCountryState = { code: string; name: string };
 export type WooCountry = { code: string; name: string; states?: WooCountryState[] };
 

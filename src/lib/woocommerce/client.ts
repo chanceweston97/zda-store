@@ -21,6 +21,24 @@ function redactUrlForLog(fullUrl: string): string {
   }
 }
 
+/** Redact credentials from error body (Cloudflare HTML often contains consumer_key/consumer_secret). */
+function redactErrorBody(text: string): string {
+  if (!text || typeof text !== "string") return "Unknown error";
+  // Cloudflare challenge HTML — never log or throw it; it can contain credentials in _cf_chl_opt
+  if (
+    text.includes("Just a moment") ||
+    text.includes("<!DOCTYPE") ||
+    text.includes("_cf_chl_opt") ||
+    text.includes("Enable JavaScript and cookies")
+  ) {
+    return "Blocked by Cloudflare (403). Skip Bot Protection for /wp-json/ or fetch at runtime.";
+  }
+  // Strip credential query params if they appear in the string
+  return text
+    .replace(/consumer_key=[^&\s'"]+/gi, "consumer_key=***")
+    .replace(/consumer_secret=[^&\s'"]+/gi, "consumer_secret=***");
+}
+
 /**
  * Create Basic Auth header for WooCommerce REST API
  */
@@ -111,28 +129,30 @@ export async function wcFetch<T>(
 
     if (!response.ok) {
       const errorText = await response.text();
-      let errorData;
+      let errorData: { message?: string; error?: { message?: string } };
       try {
         errorData = JSON.parse(errorText);
       } catch {
         errorData = { message: errorText || "Unknown error" };
       }
 
+      const rawMessage =
+        errorData.message ||
+        (errorData as any).error?.message ||
+        `HTTP error! status: ${response.status}`;
+      const safeMessage = redactErrorBody(String(rawMessage));
+
       console.error(`[WooCommerce] Error response:`, {
         status: response.status,
         statusText: response.statusText,
-        error: errorData,
+        error: { message: safeMessage },
         url: redactUrlForLog(url),
       });
 
-      const errorMessage =
-        errorData.message ||
-        errorData.error?.message ||
-        `HTTP error! status: ${response.status}`;
-      const error = new Error(errorMessage);
+      const error = new Error(safeMessage);
       (error as any).status = response.status;
       (error as any).statusText = response.statusText;
-      (error as any).data = errorData;
+      (error as any).data = { message: safeMessage };
       throw error;
     }
 
@@ -145,7 +165,7 @@ export async function wcFetch<T>(
   } catch (error: any) {
     // Enhanced error logging
     const errorDetails: any = {
-      message: error?.message || String(error),
+      message: redactErrorBody(error?.message || String(error)),
       name: error?.name,
       url: redactUrlForLog(url),
     };
