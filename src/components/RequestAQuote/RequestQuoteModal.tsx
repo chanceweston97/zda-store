@@ -111,13 +111,16 @@ export default function RequestQuoteModal() {
 
   return (
     <>
+      {/* Backdrop: a little dark, disabled look – modal stays light */}
       <div
-        className="fixed inset-0 z-[9999] bg-black/50"
+        className="fixed inset-0 z-[9999] backdrop-blur-[2px] cursor-pointer"
+        style={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
         aria-hidden
         onClick={closeRequestQuoteModal}
       />
       <div
-        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-xl modal-content bg-white"
+        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl bg-white"
+        style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
         role="dialog"
         aria-modal
         aria-labelledby="request-quote-title"
