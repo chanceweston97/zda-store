@@ -4,21 +4,13 @@ import {
   getCableTypes,
   imageBuilder,
 } from "@/lib/data/shop-utils";
-import { getAllProducts, getProductBySlug } from "@/lib/data/unified-data";
+import { getProductBySlug } from "@/lib/data/unified-data";
 import { getProductPrice } from "@/utils/getProductPrice";
 import { notFound } from "next/navigation";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 300; // 5 min ISR — products fetched at runtime, not build time (avoids Cloudflare bot challenge)
 export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  const products = await getAllProducts();
-  return products.map((product) => {
-    // Use handle when available, otherwise slug.current
-    const slug = (product as any)?.handle || product?.slug?.current;
-    return slug ? { slug } : null;
-  }).filter(Boolean) as { slug: string }[];
-}
 
 type Props = {
   params: Promise<{ slug: string }>;

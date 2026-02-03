@@ -2,7 +2,6 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import ShopWithSidebar from "@/components/ShopWithSidebar";
 import Newsletter from "@/components/Common/Newsletter";
 import {
-  getCategories,
   getCategoryBySlug,
   getCategoriesWithSubcategories,
   getAllProducts,
@@ -10,7 +9,8 @@ import {
 import { imageBuilder, getFaq } from "@/lib/data/shop-utils";
 import { notFound } from "next/navigation";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 300; // 5 min ISR — categories fetched at runtime, not build time (avoids Cloudflare bot challenge)
 export const dynamicParams = true;
 
 const RESERVED_SLUGS = new Set([
@@ -29,37 +29,6 @@ type Params = {
     sort: string;
   }>;
 };
-
-export async function generateStaticParams() {
-  try {
-    const categories = await getCategories();
-    const categoriesWithSubs = await getCategoriesWithSubcategories();
-    
-    // Include both parent categories and subcategories
-    // Use handle if available, otherwise use slug.current
-    const allSlugs = [
-      ...(categories || []).map((category) => ({ 
-        slug: (category as any).handle || category.slug?.current || category.slug 
-      })),
-      ...(categoriesWithSubs || []).flatMap((category) => 
-        category.subcategories?.map((sub) => ({ 
-          slug: (sub as any).handle || sub.slug?.current || sub.slug 
-        })) || []
-      ),
-    ];
-    
-    // Remove duplicates
-    const uniqueSlugs = Array.from(
-      new Map(allSlugs.map((item) => [item.slug, item])).values()
-    );
-    
-    return uniqueSlugs;
-  } catch (error) {
-    console.error("[generateStaticParams] Error generating static params:", error);
-    // Return empty array if generation fails (pages will be generated on-demand)
-    return [];
-  }
-}
 
 export async function generateMetadata({ params }: Params) {
   const { slug } = await params;

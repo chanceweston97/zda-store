@@ -295,7 +295,7 @@ async function fetchProductWithACF(productId: number): Promise<{ acf?: Record<st
   if (!baseUrl) return null;
   try {
     const url = `${baseUrl}/wp-json/wp/v2/product/${productId}?acf_format=standard`;
-    const response = await fetch(url, { cache: "no-store" });
+    const response = await fetch(url, { next: { revalidate: 60 } });
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -330,7 +330,7 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
     }
     
     const mediaUrl = `${WC_SITE_URL}/wp-json/wp/v2/media/${id}`;
-    const response = await fetch(mediaUrl, { cache: "no-store" });
+    const response = await fetch(mediaUrl, { next: { revalidate: 60 } });
     
     if (!response.ok) {
       console.warn(`[resolveMediaId] Failed to fetch media ${id}: ${response.status} ${response.statusText}`);

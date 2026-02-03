@@ -9,6 +9,18 @@ const WC_CONSUMER_KEY = process.env.NEXT_PUBLIC_WC_CONSUMER_KEY || "";
 const WC_CONSUMER_SECRET = process.env.NEXT_PUBLIC_WC_CONSUMER_SECRET || "";
 const WOO_ENABLED = (process.env.WOO_ENABLED || "true").toLowerCase() !== "false";
 
+/** Redact credentials from URL for safe logging (never log consumer_key/consumer_secret). */
+function redactUrlForLog(fullUrl: string): string {
+  try {
+    const u = new URL(fullUrl);
+    u.searchParams.delete("consumer_key");
+    u.searchParams.delete("consumer_secret");
+    return u.toString();
+  } catch {
+    return "[invalid-url]";
+  }
+}
+
 /**
  * Create Basic Auth header for WooCommerce REST API
  */
@@ -83,9 +95,14 @@ export async function wcFetch<T>(
         signal: controller.signal,
         keepalive: true,
       };
-      // Let Cloudflare cache WordPress API; Next.js does not cache
+      // Use revalidate so static generation during build succeeds (no "Dynamic server usage: no-store fetch").
+      // no-store forces dynamic rendering and can break "Collecting build traces" on Vercel.
       if (options.cache === undefined) {
-        fetchOptions.cache = "no-store";
+        if (isGet) {
+          fetchOptions.next = { revalidate: 60 };
+        } else {
+          fetchOptions.cache = "no-store";
+        }
       }
 
       const response = await fetch(url, fetchOptions);
@@ -105,7 +122,7 @@ export async function wcFetch<T>(
         status: response.status,
         statusText: response.statusText,
         error: errorData,
-        url: url,
+        url: redactUrlForLog(url),
       });
 
       const errorMessage =
@@ -130,7 +147,7 @@ export async function wcFetch<T>(
     const errorDetails: any = {
       message: error?.message || String(error),
       name: error?.name,
-      url: url,
+      url: redactUrlForLog(url),
     };
     
     // Add more details if available
@@ -146,22 +163,22 @@ export async function wcFetch<T>(
     // Check for specific error types
     if (error?.name === 'AbortError' || error?.message?.includes('aborted') || error?.message?.includes('timeout')) {
       const timeoutSeconds = Math.round((options.timeout ?? (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase()) ? 30000 : 10000)) / 1000);
-      const timeoutError = new Error(`Request to WooCommerce API timed out after ${timeoutSeconds} seconds. URL: ${url}`);
+      const timeoutError = new Error(`Request to WooCommerce API timed out after ${timeoutSeconds} seconds. URL: ${redactUrlForLog(url)}`);
       (timeoutError as any).code = 'TIMEOUT';
       (timeoutError as any).status = 504;
       throw timeoutError;
     }
     
     if (error?.message?.includes('certificate') || error?.message?.includes('SSL') || error?.message?.includes('TLS') || error?.code === 'CERT_HAS_EXPIRED') {
-      throw new Error(`SSL/TLS certificate error when connecting to WooCommerce. Please check your SSL certificate. URL: ${url}`);
+      throw new Error(`SSL/TLS certificate error when connecting to WooCommerce. Please check your SSL certificate. URL: ${redactUrlForLog(url)}`);
     }
     
     if (error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND' || error?.message?.includes('ECONNREFUSED') || error?.message?.includes('ENOTFOUND')) {
-      throw new Error(`Cannot connect to WooCommerce API. Please verify the URL is correct and the server is accessible. URL: ${url}`);
+      throw new Error(`Cannot connect to WooCommerce API. Please verify the URL is correct and the server is accessible. URL: ${redactUrlForLog(url)}`);
     }
     
     if (error?.message?.includes('fetch failed')) {
-      throw new Error(`Network error: Unable to reach WooCommerce API. This could be due to network issues, firewall, or the server being down. URL: ${url}. Original error: ${error?.message || 'Unknown'}`);
+      throw new Error(`Network error: Unable to reach WooCommerce API. This could be due to network issues, firewall, or the server being down. URL: ${redactUrlForLog(url)}. Original error: ${error?.message || 'Unknown'}`);
     }
     
     throw error;
