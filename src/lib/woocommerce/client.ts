@@ -113,14 +113,17 @@ export async function wcFetch<T>(
         signal: controller.signal,
         keepalive: true,
       };
-      // Use revalidate so static generation during build succeeds (no "Dynamic server usage: no-store fetch").
-      // no-store forces dynamic rendering and can break "Collecting build traces" on Vercel.
+      // When caller passes cache: "no-store", use it (e.g. categories for menu — must be fresh).
+      // Otherwise use revalidate so static generation during build succeeds (no "Dynamic server usage: no-store fetch").
       if (options.cache === undefined) {
         if (isGet) {
           fetchOptions.next = { revalidate: 60 };
         } else {
           fetchOptions.cache = "no-store";
         }
+      } else if (options.cache === "no-store" && isGet) {
+        fetchOptions.cache = "no-store";
+        fetchOptions.next = options.next ?? { revalidate: 0 };
       }
 
       const response = await fetch(url, fetchOptions);

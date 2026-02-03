@@ -88,7 +88,11 @@ const CATEGORIES_ENDPOINT = "/products/categories?per_page=100";
  */
 const fetchWooCategories = async (): Promise<any[]> => {
   try {
-    const categories = await wcFetch<WooCommerceCategory[]>(CATEGORIES_ENDPOINT);
+    // Disable cache so Vercel/edge never serves stale categories (menu must be fresh)
+    const categories = await wcFetch<WooCommerceCategory[]>(CATEGORIES_ENDPOINT, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+    });
     const raw = Array.isArray(categories) ? categories : [];
     if (raw.length === 0) return [];
 

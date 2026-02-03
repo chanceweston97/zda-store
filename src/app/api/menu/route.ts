@@ -24,7 +24,7 @@ export async function GET() {
       return NextResponse.json([], {
         status: 200, // Return 200 with empty array
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
         },
       });
     }
@@ -90,7 +90,7 @@ export async function GET() {
     console.timeEnd(timerLabel);
     return NextResponse.json(menuData, {
       headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600', // 5 min cache, 10 min stale
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     });
   } catch (error) {
@@ -101,7 +101,7 @@ export async function GET() {
     return NextResponse.json([], {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     });
   }
