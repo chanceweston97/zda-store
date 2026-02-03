@@ -1,8 +1,10 @@
 "use client";
 import { ModalProvider } from "../context/QuickViewModalContext";
+import { RequestQuoteModalProvider } from "../context/RequestQuoteModalContext";
 import { ReduxProvider } from "@/redux/provider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
+import RequestQuoteModal from "@/components/RequestAQuote/RequestQuoteModal";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import CartProvider from "@/components/Providers/CartProvider";
@@ -26,14 +28,17 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   const content = (
     <CartProvider>
       <AutoOpenCartProvider>
-        <ModalProvider>
-          <PreviewSliderProvider>
-            {children}
-            <QuickViewModal />
-            <CartSidebarModal />
-            <PreviewSliderModal />
-          </PreviewSliderProvider>
-        </ModalProvider>
+        <RequestQuoteModalProvider>
+          <ModalProvider>
+            <PreviewSliderProvider>
+              {children}
+              <QuickViewModal />
+              <CartSidebarModal />
+              <RequestQuoteModal />
+              <PreviewSliderModal />
+            </PreviewSliderProvider>
+          </ModalProvider>
+        </RequestQuoteModalProvider>
       </AutoOpenCartProvider>
     </CartProvider>
   );

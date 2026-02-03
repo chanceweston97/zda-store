@@ -30,7 +30,7 @@ type WcFetchOptions = RequestInit & {
     revalidate?: number;
     tags?: string[];
   };
-  timeout?: number; // Timeout in milliseconds (default: 3000ms for GET, 30000ms for POST/PUT/DELETE)
+  timeout?: number; // Timeout in milliseconds (default: 10s for GET, 30s for mutations)
 };
 
 export async function wcFetch<T>(
@@ -68,32 +68,25 @@ export async function wcFetch<T>(
   }
 
   try {
-    // Create abort controller for timeout (more compatible)
-    // Use longer timeout for POST/PUT/DELETE operations (like order creation)
-    // Default: 3 seconds for GET requests, 30 seconds for mutations
+    // Timeout: 10s for GET (Cloudflare caches WordPress), 30s for mutations
     const isMutation = options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase());
-    const defaultTimeout = isMutation ? 30000 : 3000; // 30s for mutations, 3s for reads
+    const defaultTimeout = isMutation ? 30000 : 10000;
     const timeout = options.timeout ?? defaultTimeout;
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
+
     try {
       const fetchOptions: WcFetchOptions = {
         ...options,
         headers,
         signal: controller.signal,
-        // Add keepalive for better connection handling
         keepalive: true,
       };
-
-      // CRITICAL FIX: Only set no-store if no next.revalidate is provided
-      // When next.revalidate is set, Next.js handles caching automatically
-      // Setting cache: "no-store" prevents static generation
-      if (options.cache === undefined && !options.next?.revalidate) {
+      // Let Cloudflare cache WordPress API; Next.js does not cache
+      if (options.cache === undefined) {
         fetchOptions.cache = "no-store";
       }
-      // If next.revalidate is provided, don't set cache - let Next.js handle it
 
       const response = await fetch(url, fetchOptions);
       
@@ -152,7 +145,7 @@ export async function wcFetch<T>(
     
     // Check for specific error types
     if (error?.name === 'AbortError' || error?.message?.includes('aborted') || error?.message?.includes('timeout')) {
-      const timeoutSeconds = Math.round((options.timeout ?? (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase()) ? 30000 : 3000)) / 1000);
+      const timeoutSeconds = Math.round((options.timeout ?? (options.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method.toUpperCase()) ? 30000 : 10000)) / 1000);
       const timeoutError = new Error(`Request to WooCommerce API timed out after ${timeoutSeconds} seconds. URL: ${url}`);
       (timeoutError as any).code = 'TIMEOUT';
       (timeoutError as any).status = 504;

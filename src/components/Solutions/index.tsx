@@ -2,8 +2,10 @@ import ProudPartners from "../Home/Hero/ProudPartners";
 import WorkWithUs from "../Home/Hero/WorkWithUs";
 import Newsletter from "../Common/Newsletter";
 import { getProudPartners } from "@/lib/data/shop-utils";
+import SolutionsHero from "./SolutionsHero";
 import SolutionsIntro from "./SolutionsIntro";
-import CompanyScrollItems from "../Company/CompanyScrollItems";
+import SolutionsScrollItems from "./SolutionsScrollItems";
+import SolutionsFrequencyBands from "./SolutionsFrequencyBands";
 import ExploreMore from "../Company/ExploreMore";
 
 export default async function Solutions() {
@@ -11,13 +13,17 @@ export default async function Solutions() {
 
   return (
     <main className="overflow-hidden">
-      {/* No hero section - same content as Company otherwise */}
+      {/* Hero: Industry solutions title + description (right) */}
+      <SolutionsHero />
 
-      {/* Company Intro Section */}
+      {/* Solutions Intro Section */}
       <SolutionsIntro />
 
-      {/* Company Scroll Items Section */}
-      <CompanyScrollItems />
+      {/* Industry solution items (In-Building, Public Safety, Utilities, Wildlife, Private LTE) */}
+      <SolutionsScrollItems />
+
+      {/* Frequency bands: Our RF infrastructure supports... */}
+      <SolutionsFrequencyBands />
 
       {/* Work With Us Section */}
       <WorkWithUs />

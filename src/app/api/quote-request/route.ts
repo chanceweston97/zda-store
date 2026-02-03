@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Integrates with Contact Form 7 REST API (WordPress headless)
  * 
  * Endpoint: POST /wp-json/contact-form-7/v1/contact-forms/{FORM_ID}/feedback
- * CMS URL: cms.zdacomm.com
+ * CMS URL: admin.zdacomm.com
  * Route: /api/quote-request
  */
 
@@ -66,11 +66,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { firstName, lastName, email, phone, productOrService, company, message } = body;
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      productOrService,
+      company,
+      message,
+      quantityForQuote,
+      products: bodyProducts,
+    } = body;
+
+    const productOrServiceValue =
+      typeof productOrService === "string" && productOrService.trim()
+        ? productOrService.trim()
+        : "(Not specified)";
 
     // Validate required fields
-    // CF7 form requires: your-name, your-email, your-tel, your-product, your-subject
-    if (!firstName || !lastName || !email || !phone || !productOrService || !company) {
+    if (!firstName || !lastName || !email || !phone || !company) {
       return NextResponse.json(
         { 
           message: "All required fields must be provided.",
@@ -115,7 +129,7 @@ export async function POST(req: NextRequest) {
     formData.append("your-tel", phone.trim());
     
     // Product/Service of Interest - REQUIRED field (your-product)
-    formData.append("your-product", productOrService.trim());
+    formData.append("your-product", productOrServiceValue);
     
     // Company name maps to your-subject (required field)
     formData.append("your-subject", company.trim());
@@ -125,6 +139,55 @@ export async function POST(req: NextRequest) {
       formData.append("your-message", message.trim());
     }
 
+    // Human-readable product details for admin (show in CF7 email / Flamingo)
+    const productsList = Array.isArray(bodyProducts) ? bodyProducts : [];
+    const productDetailsLines: string[] = [];
+    if (productsList.length > 0) {
+      productsList.forEach((p: any, index: number) => {
+        const id = String(p?.productId ?? p?.id ?? "");
+        const title = String(p?.productTitle ?? p?.title ?? "");
+        const price = p?.productPrice ?? p?.price;
+        const priceStr = typeof price === "number" ? `$${Number(price).toFixed(2)}` : (price != null ? String(price) : "—");
+        const qty = Number(p?.quantity ?? 0);
+        const url = String(p?.productUrl ?? p?.url ?? "");
+        const n = index + 1;
+        productDetailsLines.push(
+          `Product ${n}:`,
+          `  Product ID: ${id}`,
+          `  Product Title: ${title}`,
+          `  Product Price: ${priceStr}`,
+          `  Product Quantity: ${qty}`,
+          `  Product URL: ${url || "(none)"}`,
+        );
+      });
+    } else {
+      productDetailsLines.push("(No specific product)");
+    }
+    const quoteProductDetails = productDetailsLines.join("\n");
+    formData.append("quote_product_details", quoteProductDetails);
+
+    // Structured quote payload for WordPress (parse in CF7 mail template or Flamingo)
+    const quotePayload = {
+      customer: {
+        firstName: (firstName || "").trim(),
+        lastName: (lastName || "").trim(),
+        email: (email || "").trim(),
+        phone: (phone || "").trim(),
+        company: (company || "").trim(),
+      },
+      quantityForQuote: typeof quantityForQuote === "string" ? quantityForQuote.trim() : (quantityForQuote ?? ""),
+      products: Array.isArray(bodyProducts)
+        ? bodyProducts.map((p: any) => ({
+            productId: String(p?.productId ?? p?.id ?? ""),
+            productUrl: String(p?.productUrl ?? p?.url ?? ""),
+            productTitle: String(p?.productTitle ?? p?.title ?? ""),
+            productPrice: Number(p?.productPrice ?? p?.price ?? 0),
+            quantity: Number(p?.quantity ?? 0),
+          }))
+        : [],
+    };
+    formData.append("quote_payload", JSON.stringify(quotePayload));
+
     console.log("📤 Sending to Contact Form 7:", {
       endpoint: feedbackEndpoint,
       formId: CONTACT_FORM_7_QUOTE_ID,
@@ -133,18 +196,25 @@ export async function POST(req: NextRequest) {
         "your-name": fullName,
         "your-email": email.trim(),
         "your-tel": phone.trim(),
-        "your-product": productOrService.trim(),
+        "your-product": productOrServiceValue,
         "your-subject": company.trim(),
         "your-message": message || "(empty)",
+        "quote_product_details": quoteProductDetails,
+        "quote_payload": "(JSON string)",
       },
     });
 
     // POST to Contact Form 7 REST API
     // Contact Form 7 requires multipart/form-data
     // DO NOT set Content-Type header - FormData will set multipart/form-data with boundary automatically
+    // Send Origin and Referer matching the CMS so CF7's "Invalid origin" check accepts server-side requests
     const response = await fetch(feedbackEndpoint, {
       method: "POST",
       body: formData,
+      headers: {
+        Origin: CMS_URL,
+        Referer: `${CMS_URL}/`,
+      },
     });
 
     // Parse response - Contact Form 7 returns JSON

@@ -61,16 +61,16 @@ export default function RootLayout({
           <Toaster position="top-center" reverseOrder={false} />
 
           {children}
-        </Providers>
 
-        {!isAdminRoute && (
-          <>
-            <SmoothScroll />
-            <ScrollToTop />
-            <CacheRefreshButton />
-            <Footer />
-          </>
-        )}
+          {!isAdminRoute && (
+            <>
+              <SmoothScroll />
+              <ScrollToTop />
+              <CacheRefreshButton />
+              <Footer />
+            </>
+          )}
+        </Providers>
       </body>
     </html>
   );

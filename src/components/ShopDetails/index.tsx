@@ -28,6 +28,7 @@ import Description from "./Description";
 import WorkWithUs from "../Home/Hero/WorkWithUs";
 import FaqSection from "../Home/Faq";
 import { useRouter } from "next/navigation";
+import { useRequestQuoteModal } from "@/app/context/RequestQuoteModalContext";
 import { formatPrice } from "@/utils/price";
 import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
 import { trackViewItem, trackAddToCart } from "@/lib/ga4";
@@ -53,6 +54,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const { openRequestQuoteModal } = useRequestQuoteModal();
 
   // ✅ Lazy-load WooCommerce variations on the client (prevents SSR 504s)
   const wcProductId = (initialProduct as any)?._wcProductId as number | undefined;
@@ -1980,7 +1982,22 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   <div className="pt-2 space-y-3 mt-4">
                       <button
                         type="button"
-                        onClick={() => router.push("/request-a-quote")}
+                        onClick={() =>
+                          openRequestQuoteModal({
+                            products: [
+                              {
+                                id: product._id,
+                                title: product.name ?? "Product",
+                                price: dynamicPrice ?? product.price ?? 0,
+                                quantity,
+                                url:
+                                  typeof window !== "undefined"
+                                    ? `${window.location.origin}/products/${product?.slug?.current ?? product._id}`
+                                    : `/products/${product?.slug?.current ?? product._id}`,
+                              },
+                            ],
+                          })
+                        }
                         className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
                         style={{ 
                           fontFamily: 'Satoshi, sans-serif',

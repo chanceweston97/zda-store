@@ -235,9 +235,14 @@ export async function POST(req: NextRequest) {
     // POST to Contact Form 7 REST API
     // Contact Form 7 requires multipart/form-data
     // DO NOT set Content-Type header - FormData will set multipart/form-data with boundary automatically
+    // Send Origin and Referer matching the CMS so CF7's "Invalid origin" check accepts server-side requests
     const response = await fetch(feedbackEndpoint, {
       method: "POST",
       body: formData,
+      headers: {
+        Origin: CMS_URL,
+        Referer: `${CMS_URL}/`,
+      },
     });
 
     // Parse response - Contact Form 7 returns JSON

@@ -1,10 +1,9 @@
 /**
  * WooCommerce Categories Integration
- * Fetches from: GET /wp-json/wc/v3/products/categories
+ * Cloudflare caches WordPress API; Next.js uses no-store.
  */
 
 import { wcFetch } from "./client";
-import { unstable_cache } from "next/cache";
 
 export interface WooCommerceCategory {
   id: number;
@@ -88,24 +87,11 @@ const CATEGORIES_ENDPOINT = "/products/categories?per_page=100";
  * Calls wc/v3/products/categories directly. Returns [] on error so cache never blocks SSR; never throws.
  */
 const fetchWooCategories = async (): Promise<any[]> => {
-  const timerLabel = `[WooCommerce] categories|${crypto.randomUUID()}`;
   try {
-    console.time(timerLabel);
-    console.log("[getWooCommerceCategories] Fetching from wc/v3/products/categories...");
-    const categories = await wcFetch<WooCommerceCategory[]>(CATEGORIES_ENDPOINT, {
-      timeout: 5000,
-      next: { revalidate: 300, tags: ["wc-categories"] },
-    });
-    console.timeEnd(timerLabel);
+    const categories = await wcFetch<WooCommerceCategory[]>(CATEGORIES_ENDPOINT);
     const raw = Array.isArray(categories) ? categories : [];
-    console.log(`[getWooCommerceCategories] Received ${raw.length} raw categories from API`);
+    if (raw.length === 0) return [];
 
-    if (raw.length === 0) {
-      console.warn("[getWooCommerceCategories] No categories in WooCommerce - API returned empty array");
-      return [];
-    }
-
-    // Convert all categories (normalize id/count/parent in case API returns strings)
     const normalized: WooCommerceCategory[] = raw.map((cat: any) => ({
       id: Number(cat.id),
       name: cat.name ?? "",
@@ -119,21 +105,10 @@ const fetchWooCategories = async (): Promise<any[]> => {
       convertWCToCategory(cat, normalized)
     );
 
-    // Top-level: no parent or parent is 0
     const topLevelCategories = converted.filter((cat) => !cat.parent);
-    console.log(`[getWooCommerceCategories] Top-level categories: ${topLevelCategories.length} (total: ${converted.length})`);
-
-    if (topLevelCategories.length === 0) {
-      // If no strict top-level, show all as flat list so something appears
-      console.warn("[getWooCommerceCategories] No top-level categories; returning all categories as flat list");
-      return converted;
-    }
-
+    if (topLevelCategories.length === 0) return converted;
     return topLevelCategories;
   } catch (error) {
-    try {
-      console.timeEnd(timerLabel);
-    } catch { /* no-op */ }
     console.error("[getWooCommerceCategories] Error fetching categories:", error);
     if (error instanceof Error) {
       console.error("[getWooCommerceCategories] Error details:", error.message);
@@ -143,26 +118,13 @@ const fetchWooCategories = async (): Promise<any[]> => {
 };
 
 /**
- * Get all categories from WooCommerce (cached for 5 minutes)
- * ✅ FIX: Uses unstable_cache for Next.js server-side caching
- * Shop page loads instantly without waiting on WordPress
- */
-export const getCachedCategories = unstable_cache(
-  async () => fetchWooCategories(),
-  ["woo-categories"],
-  { revalidate: 300 } // 5 minutes - categories don't change often
-);
-
-/**
- * Get all categories from WooCommerce (backwards compatibility)
- * Now uses cached version
+ * Get all categories from WooCommerce (no Next.js cache; Cloudflare caches at edge)
  */
 export async function getWooCommerceCategories(): Promise<any[]> {
   try {
-    return await getCachedCategories();
+    return await fetchWooCategories();
   } catch (error) {
-    // If cache fails, return empty array - never block page load
-    console.error("[getWooCommerceCategories] Cache error, returning empty array:", error);
+    console.error("[getWooCommerceCategories] Error:", error);
     return [];
   }
 }

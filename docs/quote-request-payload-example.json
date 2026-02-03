@@ -1,0 +1,19 @@
+{
+  "customer": {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane@example.com",
+    "phone": "+1 803 555 1234",
+    "company": "Acme Wireless"
+  },
+  "quantityForQuote": "10",
+  "products": [
+    {
+      "productId": "83",
+      "productUrl": "https://yoursite.com/products/166-mhz-vhf-yagi-directional-antenna",
+      "productTitle": "166 MHz VHF Yagi Directional Antenna | 6-12 dBi | 164-170 MHz",
+      "productPrice": 180,
+      "quantity": 1
+    }
+  ]
+}

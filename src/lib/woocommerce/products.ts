@@ -1,8 +1,8 @@
 /**
  * WooCommerce Product Functions
+ * Cloudflare caches WordPress API; Next.js uses no-store so responses are correct per request.
  */
 
-import { unstable_cache } from "next/cache";
 import { wcFetch } from "./client";
 
 export interface WooCommerceProduct {
@@ -43,10 +43,8 @@ export interface WooCommerceProduct {
   catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
 }
 
-const WOO_PRODUCTS_REVALIDATE = 60;
-
 /**
- * Get all products from WooCommerce (cached per unique query, 60s)
+ * Get all products from WooCommerce (no Next.js cache; Cloudflare caches at edge)
  */
 export async function getProducts(params?: {
   per_page?: number;
@@ -66,80 +64,57 @@ export async function getProducts(params?: {
   const query = queryParams.toString();
   const endpoint = `/products${query ? `?${query}` : ""}`;
 
-  const cached = unstable_cache(
-    async () => {
-      const timerLabel = `[getProducts] ${endpoint}|${crypto.randomUUID()}`;
-      console.time(timerLabel);
-      const products = await wcFetch<WooCommerceProduct[]>(endpoint, {
-        timeout: 3000,
-        next: { revalidate: WOO_PRODUCTS_REVALIDATE, tags: ["wc-products"] },
-      });
-      console.timeEnd(timerLabel);
-      const filtered = products.filter((product) => {
-        const visibility = (product.catalog_visibility || "").toLowerCase();
-        const isVisible =
-          visibility !== "hidden" &&
-          visibility !== "search" &&
-          product.status !== "private" &&
-          product.status !== "draft";
-        const hasCategory =
-          (product.categories?.length || 0) > 0 &&
-          !product.categories?.some((cat) => cat.slug === "uncategorized");
-        return isVisible && hasCategory;
-      });
-      return filtered;
-    },
-    ["woo-products", query || "all"],
-    { revalidate: WOO_PRODUCTS_REVALIDATE }
-  );
-  return cached();
-}
-
-/**
- * Get product by ID (cached 60s, 3s timeout)
- */
-export async function getProductById(id: number): Promise<WooCommerceProduct> {
-  return wcFetch<WooCommerceProduct>(`/products/${id}`, {
-    timeout: 3000,
-    next: { revalidate: WOO_PRODUCTS_REVALIDATE, tags: [`wc-product-${id}`] },
+  const products = await wcFetch<WooCommerceProduct[]>(endpoint);
+  return products.filter((product) => {
+    const visibility = (product.catalog_visibility || "").toLowerCase();
+    const isVisible =
+      visibility !== "hidden" &&
+      visibility !== "search" &&
+      product.status !== "private" &&
+      product.status !== "draft";
+    const hasCategory =
+      (product.categories?.length || 0) > 0 &&
+      !product.categories?.some((cat) => cat.slug === "uncategorized");
+    return isVisible && hasCategory;
   });
 }
 
 /**
- * Get product by slug (cached 60s per slug; uses cached getProducts)
+ * Get product by ID
+ */
+export async function getProductById(id: number): Promise<WooCommerceProduct> {
+  return wcFetch<WooCommerceProduct>(`/products/${id}`);
+}
+
+/**
+ * Get product by slug (WooCommerce ?slug= query)
  */
 export async function getProductBySlug(slug: string): Promise<WooCommerceProduct | null> {
-  const cached = unstable_cache(
-    async () => {
-      try {
-        const products = await getProducts({ per_page: 100 });
-        const product = products.find((p) => p.slug === slug);
-        if (product) {
-          if (
-            product.catalog_visibility === "hidden" ||
-            product.catalog_visibility === "search" ||
-            product.status === "private" ||
-            product.status === "draft" ||
-            !product.categories?.length ||
-            product.categories?.some((cat) => cat.slug === "uncategorized")
-          ) {
-            return null;
-          }
-          return product;
-        }
-        const searchResults = await getProducts({ search: slug, per_page: 10 });
-        const found = searchResults.find((p) => p.slug === slug);
-        if (found && found.catalog_visibility === "hidden") return null;
-        return found || null;
-      } catch (error) {
-        console.error(`[getProductBySlug] Error for slug ${slug}:`, error);
+  try {
+    const endpoint = `/products?slug=${encodeURIComponent(slug)}&per_page=1`;
+    const products = await wcFetch<WooCommerceProduct[]>(endpoint);
+    const product = Array.isArray(products) && products.length > 0 ? products[0] : null;
+    if (product) {
+      if (
+        product.catalog_visibility === "hidden" ||
+        product.catalog_visibility === "search" ||
+        product.status === "private" ||
+        product.status === "draft" ||
+        !product.categories?.length ||
+        product.categories?.some((cat) => (cat as any).slug === "uncategorized")
+      ) {
         return null;
       }
-    },
-    ["woo-product-slug", slug],
-    { revalidate: WOO_PRODUCTS_REVALIDATE }
-  );
-  return cached();
+      return product;
+    }
+    const searchResults = await getProducts({ search: slug, per_page: 10 });
+    const found = searchResults.find((p) => p.slug === slug);
+    if (found && (found.catalog_visibility === "hidden" || found.catalog_visibility === "search")) return null;
+    return found || null;
+  } catch (error) {
+    console.error(`[getProductBySlug] Error for slug ${slug}:`, error);
+    return null;
+  }
 }
 
 /**
@@ -316,17 +291,11 @@ export function convertWCVariationsToVariants(params: {
  * Used for PDP so images (thumbnails, datasheet, etc.) display correctly.
  */
 async function fetchProductWithACF(productId: number): Promise<{ acf?: Record<string, any>; [key: string]: any } | null> {
-  // Use WooCommerce site URL only (no CMS fallback)
   const baseUrl = (process.env.NEXT_PUBLIC_WC_SITE_URL || "").replace(/\/+$/, "");
   if (!baseUrl) return null;
   try {
     const url = `${baseUrl}/wp-json/wp/v2/product/${productId}?acf_format=standard`;
-    const { fetchWithTimeout } = await import("@/lib/fetch-with-timeout");
-    const response = await fetchWithTimeout(
-      url,
-      { next: { revalidate: 300 } },
-      3000
-    );
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -360,18 +329,8 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
       return null;
     }
     
-    // WordPress REST API endpoint for media
     const mediaUrl = `${WC_SITE_URL}/wp-json/wp/v2/media/${id}`;
-    
-    // Use fetchWithTimeout to prevent 504 errors
-    const { fetchWithTimeout } = await import("@/lib/fetch-with-timeout");
-    const response = await fetchWithTimeout(
-      mediaUrl,
-      {
-        next: { revalidate: 3600 }, // 1 hour cache
-      },
-      3000 // 3 second timeout
-    );
+    const response = await fetch(mediaUrl, { cache: "no-store" });
     
     if (!response.ok) {
       console.warn(`[resolveMediaId] Failed to fetch media ${id}: ${response.status} ${response.statusText}`);
@@ -396,105 +355,13 @@ async function resolveMediaId(mediaId: number | string | null | undefined): Prom
 }
 
 /**
- * Circuit breaker state for variation fetches
- * Prevents cascading failures when MySQL is down
- */
-const OPEN_THRESHOLD = 3; // Open after 3 failures
-const RESET_TIMEOUT = 60000; // Reset after 60 seconds
-
-const variationCircuitBreaker = {
-  failures: 0,
-  lastFailureTime: 0,
-  isOpen: false,
-  OPEN_THRESHOLD,
-  RESET_TIMEOUT,
-};
-
-/**
- * Get product variations for a specific product
- * CRITICAL: This function should ONLY be called on product detail pages, NOT on listing pages
- * 
- * Circuit breaker pattern: If WooCommerce fails multiple times, stop trying to prevent 504s
+ * Get product variations for a specific product (PDP only)
  */
 export async function getProductVariations(productId: number): Promise<any[]> {
-  // Check circuit breaker - if open, fail fast to prevent cascading failures
-  const now = Date.now();
-  if (variationCircuitBreaker.isOpen) {
-    if (now - variationCircuitBreaker.lastFailureTime < variationCircuitBreaker.RESET_TIMEOUT) {
-      console.warn(`[getProductVariations] Circuit breaker OPEN - skipping variation fetch for product ${productId} to prevent 504`);
-      throw new Error('WooCommerce circuit breaker is open - variations temporarily unavailable');
-    } else {
-      // Reset circuit breaker after timeout
-      variationCircuitBreaker.isOpen = false;
-      variationCircuitBreaker.failures = 0;
-      console.log(`[getProductVariations] Circuit breaker RESET after timeout`);
-    }
-  }
-
-  try {
-    // WC_API_URL already includes /wp-json/wc/v3; 3s timeout so Woo never blocks
-    const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`, {
-      timeout: 3000,
-      next: { revalidate: 300, tags: [`wc-variations-${productId}`] },
-    });
-    
-    // Reset circuit breaker on success
-    variationCircuitBreaker.failures = 0;
-    variationCircuitBreaker.isOpen = false;
-    
-    return variations || [];
-  } catch (error) {
-    // Increment failure count
-    variationCircuitBreaker.failures++;
-    variationCircuitBreaker.lastFailureTime = Date.now();
-    
-    // Open circuit breaker if threshold reached
-    if (variationCircuitBreaker.failures >= variationCircuitBreaker.OPEN_THRESHOLD) {
-      variationCircuitBreaker.isOpen = true;
-      console.error(`[getProductVariations] Circuit breaker OPENED after ${variationCircuitBreaker.failures} failures. WooCommerce appears to be down.`);
-    }
-    
-    console.error(`[getProductVariations] Error fetching variations for product ${productId}:`, error);
-    
-    // HARD FAILURE: Don't return empty array - throw error to stop render cascade
-    // This prevents Next.js from retrying and causing 504s
-    throw error;
-  }
+  const variations = await wcFetch<any[]>(`/products/${productId}/variations?per_page=100`);
+  return variations || [];
 }
 
-
-const WOO_CATEGORIES_REVALIDATE = 300;
-
-const getCategoriesUncached = async (): Promise<Array<{
-  id: number;
-  name: string;
-  slug: string;
-  description?: string;
-  count?: number;
-  parent?: number;
-}>> => {
-  const timerLabel = `[getCategories] WooCommerce|${crypto.randomUUID()}`;
-  console.time(timerLabel);
-  const categories = await wcFetch<Array<{
-    id: number;
-    name: string;
-    slug: string;
-    description?: string;
-    count?: number;
-    parent?: number;
-  }>>("/products/categories?per_page=100", {
-    timeout: 3000,
-    next: { revalidate: WOO_CATEGORIES_REVALIDATE, tags: ["wc-categories"] },
-  });
-  console.timeEnd(timerLabel);
-  return categories;
-};
-
-const getCachedCategoriesRaw = unstable_cache(
-  getCategoriesUncached,
-  ["woo-categories-raw"],
-  { revalidate: WOO_CATEGORIES_REVALIDATE }
-);
 
 export async function getCategories(): Promise<Array<{
   id: number;
@@ -504,12 +371,7 @@ export async function getCategories(): Promise<Array<{
   count?: number;
   parent?: number;
 }>> {
-  try {
-    return await getCachedCategoriesRaw();
-  } catch (error: any) {
-    console.error("[getCategories] Error fetching categories:", error?.message || error);
-    throw error;
-  }
+  return wcFetch("/products/categories?per_page=100");
 }
 
 /**

@@ -72,7 +72,7 @@
         );
       }
 
-      const { email } = body;
+      const { email, turnstileResponse, recaptchaToken } = body;
 
       if (!email || !email.trim()) {
         return NextResponse.json(
@@ -106,6 +106,14 @@
       const formData = new FormData();
       formData.append("_wpcf7_unit_tag", `wpcf7-f${CONTACT_FORM_7_NEWSLETTER_ID}-p${Date.now()}-o1`);
       formData.append("your-email", email.trim());
+      // If form uses Turnstile/reCAPTCHA in CF7, WordPress returns "Unauthorized source" unless we send the token.
+      // Frontend can pass turnstileResponse → cf-turnstile-response, or recaptchaToken → g-recaptcha-response.
+      if (turnstileResponse && typeof turnstileResponse === "string" && turnstileResponse.trim()) {
+        formData.append("cf-turnstile-response", turnstileResponse.trim());
+      }
+      if (recaptchaToken && typeof recaptchaToken === "string" && recaptchaToken.trim()) {
+        formData.append("g-recaptcha-response", recaptchaToken.trim());
+      }
 
       console.log("📤 Sending to Contact Form 7:", {
         endpoint: feedbackEndpoint,
@@ -116,9 +124,14 @@
       // POST to Contact Form 7 REST API
       // Contact Form 7 requires multipart/form-data
       // DO NOT set Content-Type header - FormData will set multipart/form-data with boundary automatically
+      // Send Origin and Referer matching the CMS so CF7's "Invalid origin" check accepts server-side requests
       const response = await fetch(feedbackEndpoint, {
         method: "POST",
         body: formData,
+        headers: {
+          Origin: CMS_URL,
+          Referer: `${CMS_URL}/`,
+        },
       });
 
       let data;

@@ -9,10 +9,12 @@ import Legal from "./Legal";
 import Info from "./Info";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,10 +24,21 @@ const Footer = () => {
     }
     setIsLoading(true);
     try {
+      let recaptchaToken = "";
+      if (executeRecaptcha) {
+        try {
+          recaptchaToken = await executeRecaptcha("newsletter_subscribe");
+        } catch {
+          // continue without token
+        }
+      }
       const response = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({
+          email: email.trim(),
+          ...(recaptchaToken ? { recaptchaToken } : {}),
+        }),
       });
       const data = await response.json();
       if (response.ok) {

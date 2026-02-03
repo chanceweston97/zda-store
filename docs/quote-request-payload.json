@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ZDA Quote Request Payload",
+  "description": "Payload sent to WordPress Contact Form 7 quote form. The frontend sends this structure; the API forwards it as the field 'quote_payload' (JSON string). Use this to create your CF7 form and mail template.",
+  "type": "object",
+  "required": ["customer", "quantityForQuote", "products"],
+  "properties": {
+    "customer": {
+      "type": "object",
+      "description": "Customer info from the Get a Quote modal inputs",
+      "required": ["firstName", "lastName", "email", "phone", "company"],
+      "properties": {
+        "firstName": { "type": "string", "description": "First name" },
+        "lastName": { "type": "string", "description": "Last name" },
+        "email": { "type": "string", "format": "email", "description": "Email" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "company": { "type": "string", "description": "Company name" }
+      }
+    },
+    "quantityForQuote": {
+      "type": "string",
+      "description": "Quantity for quote (user input in the modal)"
+    },
+    "products": {
+      "type": "array",
+      "description": "Products the user is requesting a quote for (from product page or cable builder)",
+      "items": {
+        "type": "object",
+        "required": ["productId", "productUrl", "productTitle", "productPrice", "quantity"],
+        "properties": {
+          "productId": { "type": "string", "description": "Product ID (e.g. WooCommerce ID or 'custom-cable')" },
+          "productUrl": { "type": "string", "description": "Full or relative product URL (e.g. https://yoursite.com/products/my-product or /products/my-product)" },
+          "productTitle": { "type": "string", "description": "Product title" },
+          "productPrice": { "type": "number", "description": "Unit price (number)" },
+          "quantity": { "type": "number", "description": "Quantity selected by user" }
+        }
+      }
+    }
+  }
+}

@@ -32,35 +32,9 @@ export async function getAllProducts() {
           return visibility !== "hidden" && visibility !== "search";
         });
         
-        // CRITICAL FIX: Limit concurrency to prevent MySQL overload
-        // Process products in batches of 10 to avoid overwhelming the database
-        const BATCH_SIZE = 10;
-        const converted: any[] = [];
-        
-        for (let i = 0; i < visibleProducts.length; i += BATCH_SIZE) {
-          const batch = visibleProducts.slice(i, i + BATCH_SIZE);
-          try {
-            const batchResults = await Promise.all(
-              // Listing page: skip variations + skip media ID resolution for performance
-              batch.map((product) => convertWCToProduct(product, true, false))
-            );
-            converted.push(...batchResults);
-          } catch (error) {
-            // If a batch fails, log but continue with other batches
-            // This prevents one failed product from blocking all products
-            console.error(`[getAllProducts] Error converting batch ${i / BATCH_SIZE + 1}:`, error);
-            // Add placeholder products for failed batch to maintain array consistency
-            batch.forEach((product) => {
-              converted.push({
-                _id: product.id?.toString() || 'unknown',
-                name: product.name || 'Unknown Product',
-                _conversionFailed: true,
-              });
-            });
-          }
-        }
-        
-        console.log(`[getAllProducts] Successfully fetched ${converted.length} visible products from WooCommerce (${wcProducts.length - visibleProducts.length} hidden products filtered out)`);
+        const converted = await Promise.all(
+          visibleProducts.map((product: any) => convertWCToProduct(product, true, false))
+        );
         return converted;
       } else {
         console.warn("[getAllProducts] No products returned from WooCommerce, falling back to local data");
@@ -143,10 +117,18 @@ export async function getProductsByFilter(
 }
 
 /**
- * Get total products count
+ * Get total products count (consistent with getAllProducts when WooCommerce enabled)
  */
 export async function getAllProductsCount(): Promise<number> {
-  // Fallback to local data
+  if (isWooCommerceEnabled()) {
+    try {
+      const products = await getAllProducts();
+      return products.length;
+    } catch (error) {
+      console.error("[getAllProductsCount] WooCommerce fetch failed:", error);
+      return 0;
+    }
+  }
   try {
     const { getAllProductsCount: getLocalProductsCount } = await import("@/lib/data/shop-utils");
     return getLocalProductsCount() || 0;
@@ -236,11 +218,12 @@ export async function getCategoryBySlug(slug: string) {
       const { getWooCommerceCategories } = await import("@/lib/woocommerce/categories");
       const allCategories = await getWooCommerceCategories();
       
+      const slugLower = slug.toLowerCase();
       // Search in top-level categories and subcategories recursively
       const findCategory = (categories: any[]): any => {
         for (const category of categories) {
-          const categoryHandle = (category as any).handle || category.slug?.current || category.slug;
-          if (categoryHandle === slug) {
+          const categoryHandle = ((category as any).handle || category.slug?.current || category.slug || "");
+          if (categoryHandle.toLowerCase() === slugLower) {
             return category;
           }
           // Check subcategories recursively

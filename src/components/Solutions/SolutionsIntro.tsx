@@ -12,7 +12,6 @@ export default function SolutionsIntro() {
       style={{
         paddingTop: '50px',
         paddingBottom: '50px',
-        marginTop: '100px'
       }}
     >
       <div 
