@@ -1,13 +1,5 @@
 import Link from 'next/link'
 
-const hours = [
-  {
-    id: 1,
-    label: 'Mon - Fri : 8:30AM - 5:00PM',
-    href: '#',
-  }
-]
-
 export default function Info() {
   return (
     <div className="w-full sm:w-auto">
@@ -22,50 +14,36 @@ export default function Info() {
           lineHeight: '30px'
         }}
       >
-        HOURS
+        CONTACT
       </h2>
 
-      <ul className="flex flex-col gap-3">
-        {hours.map((item) => (
-          <li key={item.id} className="text-white">
-            {item.label}
-          </li>
-        ))}
-      </ul>
-
-      <h2 
-        className="mb-7.5 mt-7.5"
-        style={{
-          color: '#70C8FF',
-          fontFamily: 'Satoshi, sans-serif',
-          fontSize: '20px',
-          fontStyle: 'normal',
-          fontWeight: 400,
-          lineHeight: '30px'
-        }}
-      >
-        ADDRESS
-      </h2>
-
-      <ul className="flex flex-col gap-3">
-        <li className="text-white">
-          3040 McNaughton Dr. Ste. A<br />
-          Columbia, SC 29223
-        </li>
+      <ul className="flex flex-col gap-2.5">
         <li>
           <Link
             className="ease-out duration-200 hover:text-[#70C8FF]"
             href="mailto:sales@zdacomm.com"
-            style={{ color: '#fff' }}
+            style={{
+              color: '#fff',
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '18px',
+              fontWeight: 400,
+              lineHeight: '28px'
+            }}
           >
             sales@zdacomm.com
           </Link>
         </li>
-        <li className="mb-5 sm:mb-0">
+        <li>
           <Link
             className="ease-out duration-200 hover:text-[#70C8FF]"
             href="tel:18034194702"
-            style={{ color: '#fff' }}
+            style={{
+              color: '#fff',
+              fontFamily: 'Satoshi, sans-serif',
+              fontSize: '18px',
+              fontWeight: 400,
+              lineHeight: '28px'
+            }}
           >
             +1 (803) 419-4702
           </Link>

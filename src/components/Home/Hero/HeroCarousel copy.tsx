@@ -42,7 +42,7 @@ export default function Hero({ slider }: HeroProps) {
 
         <h1 className="text-white font-semibold leading-tight text-[28px] sm:text-[40px] lg:text-[50px] tracking-tight">
           {slider?.headline ??
-            "Field-tested antennas and cabling built to improve signal where it counts."}
+            "Industrial-grade RF solutions for reliable wireless connectivity."}
         </h1>
 
         <div className="mt-5 flex flex-wrap gap-3">

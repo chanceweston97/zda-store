@@ -32,7 +32,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
 
   // Fallback values if no CMS data is provided
   const title = introductionData?.title || "Enabling wireless networks since 2008";
-  const description = introductionData?.description || "At ZDA Communications, we care about one thing above all: reliable wireless performance. We design and supply industrial-grade antennas, cabling, and RF accessories that help homes, enterprises, and field teams achieve clear, consistent connectivity. ";
+  const description = introductionData?.description || "At ZDA Communications, reliability is the foundation of every product we build.  We design and supply industrial-grade antennas, cabling, and RF components engineered to deliver consistent wireless performance in enterprise, public safety, utility, and critical infrastructure networks. ";
   const buttons = (introductionData?.buttons || [
     { text: "More About Us", link: "/about" },
     { text: "Explore Products", link: "/products" },

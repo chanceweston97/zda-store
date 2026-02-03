@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 export type QuoteProductItem = {
   id: string | number;
   title: string;
+  sku?: string;
   price: number;
   quantity: number;
   /** Full or relative product URL (e.g. /products/my-product or https://site.com/products/my-product) */

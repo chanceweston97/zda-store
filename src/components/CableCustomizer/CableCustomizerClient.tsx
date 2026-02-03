@@ -233,9 +233,8 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         if (typeof value === "number" && value <= 0) {
           return "Length must be greater than 0";
         }
-        const cableType = config.cableType ? cableTypesMap.get(config.cableType) : null;
-        if (cableType?.slug === "lmr-600" && typeof value === "number" && value > 150) {
-          return "LMR 600 has a maximum length of 150 ft";
+        if (typeof value === "number" && value > 150) {
+          return "Maximum length is 150 ft";
         }
         return undefined;
       default:
@@ -483,7 +482,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Cable Series */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Cable Series *
                   </label>
                   <select
@@ -540,7 +539,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Cable Type */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Cable Type *
                   </label>
                   <select
@@ -642,7 +641,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Connector 1 Dropdown */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Step 1: Connector A *
                   </label>
                   <select
@@ -694,7 +693,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Connector 2 Dropdown */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Step 2: Connector B *
                   </label>
                   <select
@@ -746,23 +745,20 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Cable Length */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Step 3: Cable Length *
                   </label>
                   <div className="space-y-3">
                     <input
                       type="number"
                       min="1"
-                      max={config.cableType && cableTypesMap.get(config.cableType)?.slug === "lmr-600" ? 150 : undefined}
+                      max={150}
                       step="1"
                       value={config.length}
                       onChange={(e) => {
                         const value = e.target.value ? parseInt(e.target.value) : "";
-                        const cableType = config.cableType ? cableTypesMap.get(config.cableType) : null;
-                        
-                        // Validate max length for LMR 600 (150 ft max)
-                        if (cableType?.slug === "lmr-600" && typeof value === "number" && value > 150) {
-                          setErrors((prev) => ({ ...prev, length: "LMR 600 has a maximum length of 150 ft" }));
+                        if (typeof value === "number" && value > 150) {
+                          setErrors((prev) => ({ ...prev, length: "Maximum length is 150 ft" }));
                           return;
                         }
                         
@@ -803,9 +799,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                     />
                     <div className="space-y-1">
                       <p className="text-sm text-gray-4">Minimum length: 1 foot</p>
-                      {config.cableType && cableTypesMap.get(config.cableType)?.slug === "lmr-600" && (
-                        <p className="text-sm text-gray-4">Maximum length: 150 ft</p>
-                      )}
+                      <p className="text-sm text-gray-4">Maximum length: 150 ft</p>
                     </div>
                     {touched.length && errors.length && (
                       <p className="mt-1 text-sm text-red">{errors.length}</p>
@@ -815,7 +809,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
                 {/* Quantity */}
                 <div className="mb-4">
-                  <label className="block text-[#383838] text-[16px] font-medium mb-2">
+                  <label className="block text-[#383838] text-[16px] mb-2">
                     Quantity
                   </label>
                   <div 
@@ -845,7 +839,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       </svg>
                     </button>
 
-                    <span className="flex items-center justify-center font-medium text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                    <span className="flex items-center justify-center text-[#383838]" style={{ fontFamily: 'Satoshi, sans-serif' }}>
                       {config.quantity}
                     </span>
 
@@ -867,8 +861,8 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                 {totalPrice > 0 && (
                   <div className="mb-4 pt-4 border-t border-gray-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[#383838] text-[18px] font-medium">Total Price:</span>
-                      <span className="text-[#2958A4] text-[24px] font-bold">${formatPrice(totalPrice)}</span>
+                      <span className="text-[#383838] text-[18px]">Total Price:</span>
+                      <span className="text-[#2958A4] text-[24px] font-normal">${formatPrice(totalPrice)}</span>
                     </div>
                   </div>
                 )}
@@ -892,7 +886,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       ],
                     })
                   }
-                  className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 w-full"
+                  className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] transition-all duration-300 ease-in-out hover:opacity-90 w-full"
                   style={{ 
                     fontFamily: 'Satoshi, sans-serif',
                     backgroundColor: '#2958A4',
@@ -966,7 +960,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                       className="object-contain"
                     />
                   </div>
-                  <div className="mt-2 text-center text-[#383838] text-sm font-medium">
+                  <div className="mt-2 text-center text-[#383838] text-sm">
                     {config.length ? `${config.length} ft` : "—"}
                   </div>
                 </div>
@@ -997,21 +991,21 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
               {/* Configuration Summary */}
               <div className="pt-6 border-t border-gray-3">
-                <h4 className="text-[#2958A4] text-[18px] font-medium mb-4">
+                <h4 className="text-[#2958A4] text-[18px] mb-4">
                   Configuration Summary
                 </h4>
                 <div className="space-y-2 text-[#383838] text-[14px]">
                   <div className="flex justify-between">
                     <span>Cable Series:</span>
-                    <span className="font-medium">{cableSeriesMap.get(config.cableSeries)?.name || "Not selected"}</span>
+                    <span>{cableSeriesMap.get(config.cableSeries)?.name || "Not selected"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Cable Type:</span>
-                    <span className="font-medium">{cableTypesMap.get(config.cableType)?.name || "Not selected"}</span>
+                    <span>{cableTypesMap.get(config.cableType)?.name || "Not selected"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Connector A:</span>
-                    <span className="font-medium">
+                    <span>
                       {config.connector1 
                         ? connectorsMap.get(config.connector1)?.name || "Not selected"
                         : "Not selected"}
@@ -1019,7 +1013,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   </div>
                   <div className="flex justify-between">
                     <span>Connector B:</span>
-                    <span className="font-medium">
+                    <span>
                       {config.connector2 
                         ? connectorsMap.get(config.connector2)?.name || "Not selected"
                         : "Not selected"}
@@ -1027,11 +1021,11 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   </div>
                   <div className="flex justify-between">
                     <span>Length:</span>
-                    <span className="font-medium">{config.length ? `${config.length} ft` : "Not selected"}</span>
+                    <span>{config.length ? `${config.length} ft` : "Not selected"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Quantity:</span>
-                    <span className="font-medium">{config.quantity}</span>
+                    <span>{config.quantity}</span>
                   </div>
                 </div>
               </div>

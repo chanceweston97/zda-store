@@ -13,7 +13,7 @@ const accountLinks = [
   },
   {
     id: 3,
-    label: 'Cable Customizer',
+    label: 'Cable Builder',
     href: '/cable-builder',
   },
   {
@@ -44,12 +44,18 @@ export default function ProductsLinks() {
         PRODUCTS
       </h2>
 
-      <ul className="flex flex-col gap-3.5">
+      <ul className="flex flex-col gap-2.5">
         {
           accountLinks.map((link) => (
             <li key={link.id}>
               <Link
                 className="text-white ease-out duration-200 hover:text-[#70C8FF]"
+                style={{
+                  fontFamily: 'Satoshi, sans-serif',
+                  fontSize: '18px',
+                  fontWeight: 400,
+                  lineHeight: '28px'
+                }}
                 href={link.href}
               >
                 {link.label}

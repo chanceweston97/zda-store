@@ -467,6 +467,50 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     : null;
   const currentGain = getGainValue(currentGainOption, gainIndex);
 
+  const displaySku = useMemo(() => {
+    const variants = ((product as any).variants ?? []) as any[];
+    const selectedVariant = selectedLengthIndex >= 0 ? variants[selectedLengthIndex] : variants[0];
+
+    if (isConnectorProduct && variants.length > 0) {
+      return selectedVariant?.sku || (product as any).sku;
+    }
+
+    if (isStandaloneConnector) {
+      return (product as any).sku || variants[0]?.sku;
+    }
+
+    if (product.productType === "connector" && variants.length > 0) {
+      return selectedVariant?.sku || (product as any).sku;
+    }
+
+    if (isCableProduct && lengthOptions.length > 0) {
+      const selectedLengthOption = selectedLengthIndex >= 0 ? lengthOptions[selectedLengthIndex] : lengthOptions[0];
+      return (selectedLengthOption as any)?.sku || (product as any).sku || selectedVariant?.sku;
+    }
+
+    if (product.productType === "antenna") {
+      if (variants.length > 0) {
+        return selectedVariant?.sku || (product as any).sku;
+      }
+      if (currentGainOption) {
+        return (currentGainOption as any)?.sku ||
+          (product as any).sku ||
+          variants[0]?.sku ||
+          (product.gainOptions && (product.gainOptions[0] as any)?.sku);
+      }
+    }
+
+    return (product as any).sku || variants[0]?.sku;
+  }, [
+    product,
+    isCableProduct,
+    isConnectorProduct,
+    isStandaloneConnector,
+    lengthOptions,
+    selectedLengthIndex,
+    currentGainOption,
+  ]);
+
   // Get unit price (per item, without quantity) from selected gain option or calculated from length and connector price
   const dynamicPrice = useMemo(() => {
     // For connectors with variants: use price from selected variant (cable type)
@@ -926,135 +970,21 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                 className="mb-4"
               >
                 {/* SKU Display - Use SKU from selected variant or product */}
-                {(() => {
-                  // For connector products with cableSeries and cableType (isConnectorProduct)
-                  if (isConnectorProduct && (product as any).variants && (product as any).variants.length > 0) {
-                    // Use selected variant if available, otherwise use first variant
-                    const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
-                    const selectedVariant = (product as any).variants[variantIndex];
-                    const displaySku = selectedVariant?.sku || (product as any).sku;
-                    return displaySku ? (
-                      <span
-                        style={{
-                          color: '#457B9D',
-                          fontFamily: 'Satoshi, sans-serif',
-                          fontSize: '16px',
-                          fontStyle: 'normal',
-                          fontWeight: 500,
-                          lineHeight: '26px',
-                          letterSpacing: '-0.32px'
-                        }}
-                      >
-                        {displaySku}
-                      </span>
-                    ) : null;
-                  }
-                  // For standalone connectors
-                  if (isStandaloneConnector) {
-                    // Show product SKU or first variant SKU if available
-                    const displaySku = (product as any).sku || 
-                                      ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
-                    return displaySku ? (
-                      <span
-                        style={{
-                          color: '#457B9D',
-                          fontFamily: 'Satoshi, sans-serif',
-                          fontSize: '16px',
-                          fontStyle: 'normal',
-                          fontWeight: 500,
-                          lineHeight: '26px',
-                          letterSpacing: '-0.32px'
-                        }}
-                      >
-                        {displaySku}
-                      </span>
-                    ) : null;
-                  }
-                  // For simple connectors and other connectors with variants, use SKU from selected variant (cable type)
-                  if (product.productType === "connector" && (product as any).variants && (product as any).variants.length > 0) {
-                    // Use selected variant if available, otherwise use first variant
-                    const variantIndex = selectedLengthIndex >= 0 ? selectedLengthIndex : 0;
-                    const selectedVariant = (product as any).variants[variantIndex];
-                    const displaySku = selectedVariant?.sku || (product as any).sku;
-                    return displaySku ? (
-                      <span
-                        style={{
-                          color: '#457B9D',
-                          fontFamily: 'Satoshi, sans-serif',
-                          fontSize: '16px',
-                          fontStyle: 'normal',
-                          fontWeight: 500,
-                          lineHeight: '26px',
-                          letterSpacing: '-0.32px'
-                        }}
-                      >
-                        {displaySku}
-                      </span>
-                    ) : null;
-                  }
-                  // For cable products, use SKU from selected length option
-                  if (isCableProduct && lengthOptions.length > 0) {
-                    const selectedLengthOption = selectedLengthIndex >= 0 ? lengthOptions[selectedLengthIndex] : lengthOptions[0];
-                    const displaySku = (selectedLengthOption as any)?.sku || 
-                                      (product as any).sku || 
-                                      ((product as any).variants && (product as any).variants.length > 0 && 
-                                       ((product as any).variants[selectedLengthIndex >= 0 ? selectedLengthIndex : 0]?.sku));
-                    return displaySku ? (
-                      <span
-                        style={{
-                          color: '#457B9D',
-                          fontFamily: 'Satoshi, sans-serif',
-                          fontSize: '16px',
-                          fontStyle: 'normal',
-                          fontWeight: 500,
-                          lineHeight: '26px',
-                          letterSpacing: '-0.32px'
-                        }}
-                      >
-                        {displaySku}
-                      </span>
-                    ) : null;
-                  }
-                  // For antenna products, use SKU from selected gain option
-                  if (product.productType === "antenna" && currentGainOption) {
-                    const displaySku = (currentGainOption as any)?.sku || 
-                                      (product as any).sku || 
-                                      ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku) ||
-                                      (product.gainOptions && product.gainOptions.length > 0 && (product.gainOptions[0] as any)?.sku);
-                    return displaySku ? (
-                      <span
-                        style={{
-                          color: '#457B9D',
-                          fontFamily: 'Satoshi, sans-serif',
-                          fontSize: '16px',
-                          fontStyle: 'normal',
-                          fontWeight: 500,
-                          lineHeight: '26px',
-                          letterSpacing: '-0.32px'
-                        }}
-                      >
-                        {displaySku}
-                      </span>
-                    ) : null;
-                  }
-                  // For other products, show SKU if available
-                  const displaySku = (product as any).sku || ((product as any).variants && (product as any).variants.length > 0 && (product as any).variants[0]?.sku);
-                  return displaySku ? (
-                    <span
-                      style={{
-                        color: '#457B9D',
-                        fontFamily: 'Satoshi, sans-serif',
-                        fontSize: '16px',
-                        fontStyle: 'normal',
-                        fontWeight: 500,
-                        lineHeight: '26px',
-                        letterSpacing: '-0.32px'
-                      }}
-                    >
-                      {displaySku}
-                    </span>
-                  ) : null;
-                })()}
+                {displaySku ? (
+                  <span
+                    style={{
+                      color: '#457B9D',
+                      fontFamily: 'Satoshi, sans-serif',
+                      fontSize: '16px',
+                      fontStyle: 'normal',
+                      fontWeight: 500,
+                      lineHeight: '26px',
+                      letterSpacing: '-0.32px'
+                    }}
+                  >
+                    {displaySku}
+                  </span>
+                ) : null}
 
                 {/* Product Title */}
                 <h2
@@ -1988,6 +1918,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                               {
                                 id: product._id,
                                 title: product.name ?? "Product",
+                                sku: displaySku ?? (product as any).sku ?? undefined,
                                 price: dynamicPrice ?? product.price ?? 0,
                                 quantity,
                                 url:

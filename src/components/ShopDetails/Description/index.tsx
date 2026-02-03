@@ -317,7 +317,7 @@ export default function Description({ product, metadata }: Props) {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("description")}
-                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] rounded-[10px] ${activeTab === "description"
+                                className={`w-full px-8 py-2 text-[16px] leading-[26px] rounded-[10px] ${activeTab === "description"
                                     ? "bg-[#2958A4] text-white shadow-sm"
                                     : "text-[#2958A4]"
                                     }`}
@@ -329,7 +329,7 @@ export default function Description({ product, metadata }: Props) {
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("specifications")}
-                                className={`w-full px-8 py-2 text-[16px] font-medium leading-[26px] rounded-[10px] ${activeTab === "specifications"
+                                className={`w-full px-8 py-2 text-[16px] leading-[26px] rounded-[10px] ${activeTab === "specifications"
                                     ? "bg-[#2958A4] text-white shadow-sm"
                                     : "text-[#2958A4]"
                                     }`}
@@ -360,7 +360,7 @@ export default function Description({ product, metadata }: Props) {
                                             {/* FEATURES */}
                                             {features && (
                                                 <div className="col-span-1">
-                                                    <h4 className="text-black text-[19px] font-bold leading-7 tracking-[-0.38px]">
+                                                    <h4 className="text-black text-[19px]  leading-7 tracking-[-0.38px]">
                                                         Features
                                                     </h4>
                                                     <div className="mt-2">
@@ -477,7 +477,7 @@ export default function Description({ product, metadata }: Props) {
                                             {/* APPLICATIONS */}
                                             {applications && (
                                                 <div className="col-span-1">
-                                                    <h4 className="text-black text-[19px] font-bold leading-7 tracking-[-0.38px]">
+                                                    <h4 className="text-black text-[19px]  leading-7 tracking-[-0.38px]">
                                                         Applications
                                                     </h4>
                                                     <div className="mt-2">

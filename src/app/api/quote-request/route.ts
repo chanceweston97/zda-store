@@ -179,6 +179,7 @@ export async function POST(req: NextRequest) {
       products: Array.isArray(bodyProducts)
         ? bodyProducts.map((p: any) => ({
             productId: String(p?.productId ?? p?.id ?? ""),
+            productSku: String(p?.productSku ?? p?.sku ?? ""),
             productUrl: String(p?.productUrl ?? p?.url ?? ""),
             productTitle: String(p?.productTitle ?? p?.title ?? ""),
             productPrice: Number(p?.productPrice ?? p?.price ?? 0),

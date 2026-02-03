@@ -43,7 +43,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
     ? imageBuilder(bannerData.backgroundImage).url()
     : "/images/hero/banner.webp";
   
-  const title = bannerData?.title || "Field-tested antennas and cabling <br /> built to improve signal where it counts.";
+  const title = bannerData?.title || "Industrial-grade RF solutions for reliable wireless connectivity.";
   const brandName = bannerData?.brandName || "ZDA Communications";
   const buttons = bannerData?.buttons || [
     { text: "All Products", link: "/products" },

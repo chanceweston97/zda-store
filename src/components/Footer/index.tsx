@@ -71,20 +71,25 @@ const Footer = () => {
         <div className="max-w-[1440px] mx-auto">
           <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-[50px] xl:pb-15 px-[50px]">
             {/* Logo + Newsletter (kept) */}
-            <div className="max-w-[330px] w-full mt-5 lg:mt-0">
-              <div className="mb-7.5 text-custom-1 font-medium text-dark">
+            <div className="max-w-[400px] w-full mt-5 lg:mt-0">
+              <div className="mb-7.5 text-custom-1 text-dark">
                 <Link className="shrink-0" href="/">
                   <Image
                     src="/images/logo/logo-white.png"
                     alt="Logo"
-                    width={147}
-                    height={61}
+                    width={139}
+                    height={50}
                   />
                 </Link>
               </div>
               <div className="mb-4">
-                <p className="text-white text-[16px] mb-3">Sign up for our latest newsletters</p>
-                <form onSubmit={handleSubmit} className="relative" style={{ height: "50px" }}>
+                <p
+                  className="text-white text-[16px] mb-3"
+                  style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400, lineHeight: "26px" }}
+                >
+                  Sign up for our latest newsletters
+                </p>
+                <form onSubmit={handleSubmit} className="relative w-[400px] h-[50px]">
                   <input
                     type="email"
                     placeholder="Enter your email"
@@ -104,14 +109,16 @@ const Footer = () => {
                   />
                   <button
                     type="submit"
-                    className="absolute right-[5px] top-1/2 -translate-y-1/2 text-[14px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute right-[5px] top-1/2 -translate-y-1/2 text-[16px] transition-all duration-300 ease-in-out hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       fontFamily: "Satoshi, sans-serif",
+                      fontWeight: 400,
                       width: "75px",
                       height: "40px",
                       borderRadius: "10px",
                       background: "#70C8FF",
-                      color: "#000",
+                      color: "#002D78",
+                      lineHeight: "28px",
                     }}
                     disabled={isLoading}
                   >

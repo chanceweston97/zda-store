@@ -75,6 +75,7 @@ export default function RequestQuoteModal() {
         products.length > 0
           ? products.map((p) => ({
               productId: String(p.id),
+              productSku: p.sku ?? "",
               productUrl: p.url ?? "",
               productTitle: p.title,
               productPrice: p.price,
@@ -119,89 +120,80 @@ export default function RequestQuoteModal() {
         onClick={closeRequestQuoteModal}
       />
       <div
-        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl bg-white"
-        style={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
+        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl"
+        style={{ backgroundColor: "#F6F7F7", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
         role="dialog"
         aria-modal
         aria-labelledby="request-quote-title"
       >
-        {/* Header – brand blue */}
-        <div
-          className="flex items-center justify-center relative py-4 px-6"
-          style={{ backgroundColor: "#2958A4" }}
+        <button
+          type="button"
+          onClick={closeRequestQuoteModal}
+          className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center text-black/70 hover:text-black hover:bg-black/5 rounded-full transition-colors"
+          aria-label="Close modal"
         >
-          <h2
-            id="request-quote-title"
-            className="text-white text-[18px] sm:text-[20px] font-medium uppercase tracking-wide"
-            style={{ fontFamily: "Satoshi, sans-serif" }}
-          >
-            Get a Quote
-          </h2>
-          <button
-            type="button"
-            onClick={closeRequestQuoteModal}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded-full transition-colors"
-            aria-label="Close modal"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
 
-        {/* Body */}
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="p-6 sm:p-8"
+          className="p-[50px]"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                First Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...register("firstName", { required: "First name is required" })}
-                placeholder="First Name"
-                className={inputBase}
-              />
-              {errors.firstName && (
-                <p className={errorMessageClass} style={errorMessageStyle}>{errors.firstName.message}</p>
-              )}
-            </div>
-            <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                Last Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...register("lastName", { required: "Last name is required" })}
-                placeholder="Last Name"
-                className={inputBase}
-              />
-              {errors.lastName && (
-                <p className={errorMessageClass} style={errorMessageStyle}>{errors.lastName.message}</p>
-              )}
-            </div>
+          <div className="flex flex-col items-center text-center gap-2 mb-6">
+            <h2
+              id="request-quote-title"
+              className="text-[40px] leading-[26px]"
+              style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
+            >
+              <span className="text-black">Request for </span>
+              <span className="text-[#2958A4]">Quote</span>
+            </h2>
+            <p
+              className="text-black text-[14px] leading-[26px] max-w-[660px]"
+              style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
+            >
+              Submit your RFQ for lead times, quantity pricing, tax-exempt orders, and Net 30 terms where applicable.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
-            <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...register("phone", { required: "Phone number is required" })}
-                placeholder="Phone Number"
-                type="tel"
-                className={inputBase}
-              />
-              {errors.phone && (
-                <p className={errorMessageClass} style={errorMessageStyle}>{errors.phone.message}</p>
-              )}
+          <div className="mx-auto w-full max-w-[660px] space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                  First name*
+                </label>
+                <input
+                  {...register("firstName", { required: "First name is required" })}
+                  placeholder=""
+                  className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                  style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
+                />
+                {errors.firstName && (
+                  <p className={errorMessageClass} style={errorMessageStyle}>{errors.firstName.message}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                  Last name*
+                </label>
+                <input
+                  {...register("lastName", { required: "Last name is required" })}
+                  placeholder=""
+                  className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                  style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
+                />
+                {errors.lastName && (
+                  <p className={errorMessageClass} style={errorMessageStyle}>{errors.lastName.message}</p>
+                )}
+              </div>
             </div>
+
             <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                Email <span className="text-red-500">*</span>
+              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                Email address*
               </label>
               <input
                 {...register("email", {
@@ -211,40 +203,70 @@ export default function RequestQuoteModal() {
                     message: "Enter a valid email",
                   },
                 })}
-                placeholder="Enter your email"
+                placeholder=""
                 type="email"
-                className={inputBase}
+                className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
               />
               {errors.email && (
                 <p className={errorMessageClass} style={errorMessageStyle}>{errors.email.message}</p>
               )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
             <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                Company Name <span className="text-red-500">*</span>
+              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                Phone number*
+              </label>
+              <input
+                {...register("phone", { required: "Phone number is required" })}
+                placeholder=""
+                type="tel"
+                className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
+              />
+              {errors.phone && (
+                <p className={errorMessageClass} style={errorMessageStyle}>{errors.phone.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                Company name
               </label>
               <input
                 {...register("company", { required: "Company name is required" })}
-                placeholder="Company"
-                className={inputBase}
+                placeholder=""
+                className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
               />
               {errors.company && (
                 <p className={errorMessageClass} style={errorMessageStyle}>{errors.company.message}</p>
               )}
             </div>
+
             <div>
-              <label className={labelClass} style={{ fontFamily: "Satoshi, sans-serif" }}>
-                Quantity for Quote <span className="text-red-500">*</span>
+              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                SKU
+              </label>
+              <div className="w-full h-[40px] rounded-[8px] bg-white px-4 flex items-center justify-between">
+                <span className="text-black text-[16px] leading-[30px]" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                  {products?.[0]?.sku || (products?.[0]?.id ? String(products[0].id) : "—")}
+                </span>
+                <span className="text-black/70 text-[12px]">▼</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                Quantity
               </label>
               <input
                 {...register("quantityForQuote", { required: "Quantity is required" })}
-                placeholder="Quantity"
+                placeholder=""
                 type="number"
                 min="1"
-                className={inputBase}
+                className="w-full h-[40px] rounded-[8px] bg-white px-4 text-black outline-none"
+                style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
               />
               {errors.quantityForQuote && (
                 <p className={errorMessageClass} style={errorMessageStyle}>{errors.quantityForQuote.message}</p>
@@ -252,14 +274,14 @@ export default function RequestQuoteModal() {
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-8 flex justify-center">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-[10px] bg-[#2958A4] text-white text-[16px] font-medium uppercase tracking-wide px-6 py-3 hover:bg-[#214683] disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
-              style={{ fontFamily: "Satoshi, sans-serif" }}
+              className="rounded-[10px] bg-[#2958A4] text-white text-[16px] px-[30px] py-[10px] hover:bg-[#214683] disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+              style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 500, width: "150px", lineHeight: "26px" }}
             >
-              {isSubmitting ? "Submitting..." : "Get a Quote"}
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </form>

@@ -49,7 +49,7 @@ export default function WorkWithUs() {
         marginRight: '-50vw'
       }}
     >
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-[100px]">
+      <div className="w-full max-w-[1340px] mx-auto">
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-8 sm:mb-10 lg:mb-12">
           <h2 
@@ -83,23 +83,17 @@ export default function WorkWithUs() {
           </p>
           <Link
             href="/contact"
-            className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active"
+            className="btn filled group relative inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] hover:active w-[180px] sm:w-[200px] h-12"
             style={{ 
               fontFamily: 'Satoshi, sans-serif',
-              padding: '10px 30px',
-              paddingRight: '30px',
+              padding: '10px 24px',
               cursor: 'pointer',
-              minWidth: 'fit-content'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.paddingRight = '30px';
             }}
           >
-            <ButtonArrowHomepage />
-            <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Inquire Today</p>
+            <span className="flex items-center gap-2 transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">
+              <ButtonArrowHomepage />
+              <span className="m-0">Inquire Today</span>
+            </span>
           </Link>
         </div>
 
@@ -119,7 +113,7 @@ export default function WorkWithUs() {
                     style={{
                       width: '1px',
                       height: '225px',
-                      backgroundColor: '#D1D5DB',
+                      backgroundColor: '#000',
                       flexShrink: 0,
                       alignSelf: 'center'
                     }}
