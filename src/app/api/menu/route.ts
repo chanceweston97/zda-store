@@ -22,9 +22,9 @@ export async function GET() {
       console.warn("[Menu API] No categories found, returning empty menu");
       console.warn("[Menu API] This means getCategoriesWithSubcategories() returned empty. Check WooCommerce connection.");
       return NextResponse.json([], {
-        status: 200, // Return 200 with empty array
+        status: 200,
         headers: {
-          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       });
     }
@@ -101,7 +101,7 @@ export async function GET() {
     return NextResponse.json([], {
       status: 200,
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
   }
