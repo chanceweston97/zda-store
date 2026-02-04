@@ -14,7 +14,7 @@ import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
 import Image from "next/image";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 import { useDispatch } from "react-redux";
 import { useShoppingCart } from "use-shopping-cart";
@@ -50,7 +50,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
 
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { openRequestQuoteModal } = useRequestQuoteModal();
+  const { isOpen: isQuoteModalOpen, products: quoteModalProducts, openRequestQuoteModal } = useRequestQuoteModal();
 
   // ✅ Lazy-load WooCommerce variations on the client (prevents SSR 504s)
   const wcProductId = (initialProduct as any)?._wcProductId as number | undefined;
@@ -81,7 +81,20 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     }
     return initialProduct;
   }, [initialProduct, variationsResp?.variants]);
-  
+
+  const prevQuoteModalOpenRef = useRef(false);
+  useEffect(() => {
+    const wasOpen = prevQuoteModalOpenRef.current;
+    prevQuoteModalOpenRef.current = isQuoteModalOpen;
+    if (wasOpen && !isQuoteModalOpen && quoteModalProducts.length === 1) {
+      const p = quoteModalProducts[0];
+      const productId = (product as any)?._id ?? (product as any)?.id;
+      if (productId != null && String(p.id) === String(productId)) {
+        setQuantity(p.quantity);
+      }
+    }
+  }, [isQuoteModalOpen, quoteModalProducts, product]);
+
   // Console log product details from API for debugging
   useEffect(() => {
     console.log("========================================");

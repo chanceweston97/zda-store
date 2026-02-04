@@ -144,18 +144,18 @@ export async function POST(req: NextRequest) {
     if (productsList.length > 0) {
       productsList.forEach((p: any, index: number) => {
         const id = String(p?.productId ?? p?.id ?? "");
+        const sku = String(p?.productSku ?? p?.sku ?? "").trim() || "(none)";
         const title = String(p?.productTitle ?? p?.title ?? "");
         const price = p?.productPrice ?? p?.price;
         const priceStr = typeof price === "number" ? `$${Number(price).toFixed(2)}` : (price != null ? String(price) : "—");
-        const qty = Number(p?.quantity ?? 0);
         const url = String(p?.productUrl ?? p?.url ?? "");
         const n = index + 1;
         productDetailsLines.push(
           `Product ${n}:`,
           `  Product ID: ${id}`,
+          `  SKU: ${sku}`,
           `  Product Title: ${title}`,
           `  Product Price: ${priceStr}`,
-          `  Product Quantity: ${qty}`,
           `  Product URL: ${url || "(none)"}`,
         );
       });

@@ -22,13 +22,14 @@ const errorMessageClass = "mt-1 text-xs font-medium";
 const errorMessageStyle = { color: "#dc2626" } as const;
 
 export default function RequestQuoteModal() {
-  const { isOpen, products, closeRequestQuoteModal } = useRequestQuoteModal();
+  const { isOpen, products, closeRequestQuoteModal, updateProductQuantity } = useRequestQuoteModal();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
     reset,
     setValue,
@@ -38,12 +39,23 @@ export default function RequestQuoteModal() {
     },
   });
 
+  const quantityForQuoteWatched = watch("quantityForQuote");
+
   useEffect(() => {
     if (products.length > 0) {
       const totalQty = products.reduce((s, p) => s + p.quantity, 0);
       setValue("quantityForQuote", String(totalQty));
     }
   }, [products, setValue]);
+
+  // When user changes quantity in modal, update context so submit sends correct qty and PDP can sync on close
+  useEffect(() => {
+    if (products.length !== 1 || !quantityForQuoteWatched) return;
+    const qty = parseInt(String(quantityForQuoteWatched).trim(), 10);
+    if (!Number.isNaN(qty) && qty >= 1) {
+      updateProductQuantity(0, qty);
+    }
+  }, [quantityForQuoteWatched, products.length, updateProductQuantity]);
 
   useEffect(() => {
     if (!isOpen) return;
