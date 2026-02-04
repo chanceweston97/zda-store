@@ -39,7 +39,7 @@ export default function CompanyIntro() {
             margin: 0,
             marginBottom: '20px',
             width: '100%',
-            maxWidth: '693px'
+            maxWidth: '802px'
           }}
         >
           <span style={{ color: '#000' }}>

@@ -39,7 +39,7 @@ export default function SolutionsIntro() {
             margin: 0,
             marginBottom: '20px',
             width: '100%',
-            maxWidth: '693px'
+            maxWidth: '802px'
           }}
         >
           <span style={{ color: '#000' }}>
@@ -67,10 +67,10 @@ export default function SolutionsIntro() {
             lineHeight: 'clamp(24px, 3vw, 30px)',
             margin: 0,
             width: '100%',
-            maxWidth: '783px'
+            maxWidth: '1071px'
           }}
         >
-          Our antennas, cabling, and RF components are engineered for reliable performance in demanding industrial, public safety, and infrastructure networks.
+          Antennas, RF cable assemblies, and RF components built for predictable coverage and clean signal paths, with every unit electrically verified using Anritsu test equipment to ensure repeatable field performance across enterprise and critical infrastructure deployments.
         </p>
       </div>
     </section>
