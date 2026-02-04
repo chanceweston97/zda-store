@@ -1,14 +1,28 @@
 import ProductsPageWithCategoriesFallback from "@/components/ShopWithSidebar/ProductsPageWithCategoriesFallback";
 import { getWooCommerceCategories } from "@/lib/woocommerce/categories";
 import { isWooCommerceEnabled } from "@/lib/woocommerce/config";
-import { Metadata } from 'next';
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { Metadata } from "next";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Products | ZDA Communications',
-  description: 'Browse our products at ZDA Communications',
-  // other metadata
+  title: "RF Products: Antennas, Cables & Connectors | ZDA Communications",
+  description:
+    "Industrial antennas, coaxial cables, and RF components built for consistent performance, reliability, and efficiency in critical networks.",
+  openGraph: {
+    title: "RF Products | ZDA Communications",
+    description:
+      "Industrial-grade RF hardware engineered for dependable performance in demanding wireless environments.",
+    images: [{ url: DEFAULT_OG_IMAGE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RF Products | ZDA Communications",
+    description:
+      "Industrial-grade RF hardware engineered for dependable performance in demanding wireless environments.",
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 type PageProps = {

@@ -1941,7 +1941,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                         }}
                       >
                         <ButtonArrowHomepage />
-                        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request a Quote</p>
+                        <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request for Quote</p>
                       </button>
                     </div>
                 </div>

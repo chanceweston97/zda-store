@@ -867,15 +867,30 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   </div>
                 )}
 
-                {/* Request a Quote Button */}
+                {/* Request for Quote Button - same flow as PDP, title = customized cable contents */}
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    const connectorAName = config.connector1
+                      ? connectorsMap.get(config.connector1)?.name ?? "Not selected"
+                      : "Not selected";
+                    const connectorBName = config.connector2
+                      ? connectorsMap.get(config.connector2)?.name ?? "Not selected"
+                      : "Not selected";
+                    const cableTypeName = config.cableType
+                      ? cableTypesMap.get(config.cableType)?.name ?? "Not selected"
+                      : "Not selected";
+                    const lengthStr =
+                      config.length !== "" && typeof config.length === "number" && config.length > 0
+                        ? `${config.length} ft`
+                        : "Not selected";
+                    const customizedCableTitle = `Customized Cable: Connector A: ${connectorAName}, Connector B: ${connectorBName}, Cable Length: ${lengthStr}, Quantity: ${config.quantity}`;
                     openRequestQuoteModal({
                       products: [
                         {
                           id: "custom-cable",
-                          title: "Custom cable",
+                          title: customizedCableTitle,
+                          sku: "Custom Cable",
                           price: totalPrice,
                           quantity: config.quantity,
                           url:
@@ -884,8 +899,8 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                               : "/cable-builder",
                         },
                       ],
-                    })
-                  }
+                    });
+                  }}
                   className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] transition-all duration-300 ease-in-out hover:opacity-90 w-full"
                   style={{ 
                     fontFamily: 'Satoshi, sans-serif',
@@ -904,7 +919,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   }}
                 >
                   <ButtonArrowHomepage />
-                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request a Quote</p>
+                  <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Request for Quote</p>
                 </button>
               </div>
             </div>
@@ -1036,7 +1051,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
      
 
-      {/* Request a Quote Section */}
+      {/* Request for Quote Section */}
       <WorkWithUs />
       {/* FAQ Section */}
       <FaqSection />

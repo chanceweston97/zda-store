@@ -1,10 +1,23 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import CatalogButton from "./CatalogButton";
 
 export const metadata: Metadata = {
-  title: "Catalog | ZDA Communications",
-  description: "ZDA Communications Catalog - Coming Soon",
+  title: "Product Catalog | ZDA Communications",
+  description:
+    "ZDA's comprehensive RF product catalog consisting of antennas, RF cabling, and components.",
+  openGraph: {
+    title: "Product Catalog | ZDA Communications",
+    description: "A complete catalog of antennas, RF cabling, and RF components.",
+    images: [{ url: DEFAULT_OG_IMAGE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Product Catalog | ZDA Communications",
+    description: "A complete catalog of antennas, RF cabling, and RF components.",
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 const CatalogPage = () => {

@@ -1,10 +1,25 @@
 import { CableCustomizerClient } from "@/components/CableCustomizer";
-import { Metadata } from "next";
 import { getCableSeries, getCableTypes, getConnectors, imageBuilder } from "@/lib/data/shop-utils";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cable Builder | ZDA Communication",
-  description: "Build your perfect custom cable. Select connectors, length, and specifications.",
+  title: "Custom RF Coax Cable Builder | LMR & RG Assemblies | ZDA",
+  description:
+    "Build custom RF coax cable assemblies fast—LMR-equivalent and RG series cut to length with 4.3-10, N-Type, SMA and other terminations. Request a quote.",
+  openGraph: {
+    title: "RF Cable Builder | ZDA Communications",
+    description:
+      "Configure cut-to-length RF coax assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
+    images: [{ url: DEFAULT_OG_IMAGE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RF Cable Builder | ZDA Communications",
+    description:
+      "Configure cut-to-length RF coax assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 const CableCustomizerPage = async () => {

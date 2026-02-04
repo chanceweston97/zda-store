@@ -105,7 +105,7 @@ export default function RequestAQuote({
                         {/* LEFT COLUMN — TITLE + DESCRIPTION */}
                         <div className="flex flex-col">
                             <h1 className="text-[#2958A4] text-[66px] font-medium leading-[66px] tracking-[-2.64px]">
-                                Request a Quote
+                                Request for Quote
                             </h1>
 
                             <p className="mt-[60px] text-[#000] text-[24px] font-medium leading-[26px]">
@@ -296,7 +296,7 @@ export default function RequestAQuote({
                 {/* Heading + copy */}
                 <div className="text-center">
                     <h1 className="text-[#2958A4] text-center text-[66px] font-medium leading-[66px] tracking-[-2.64px]">
-                        Request a Quote
+                        Request for Quote
                     </h1>
 
                     <p className="mt-[60px] text-[#2958A4] text-center text-[24px] font-medium leading-[26px]">
