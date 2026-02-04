@@ -149,9 +149,7 @@ export async function POST(req: NextRequest) {
         const price = p?.productPrice ?? p?.price;
         const priceStr = typeof price === "number" ? `$${Number(price).toFixed(2)}` : (price != null ? String(price) : "—");
         const url = String(p?.productUrl ?? p?.url ?? "");
-        const n = index + 1;
         productDetailsLines.push(
-          `Product ${n}:`,
           `  Product ID: ${id}`,
           `  SKU: ${sku}`,
           `  Product Title: ${title}`,
