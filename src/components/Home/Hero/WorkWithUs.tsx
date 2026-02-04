@@ -9,7 +9,7 @@ const services = [
   {
     icon: "/images/workwithus/antennas.svg",
     title: "Antennas",
-    description: "Directional and omnidirectional antennas engineered for consistent RF performance across DAS, public safety, utility, and infrastructure deployments."
+    description: "Directional and omni antennas for reliable RF coverage across DAS, public safety, utility, and infrastructure networks."
   },
   {
     icon: "/images/workwithus/cables.svg",
@@ -19,12 +19,12 @@ const services = [
   {
     icon: "/images/workwithus/rf-accessories.svg",
     title: "RF Components",
-    description: "Industrial-grade RF components for professional wireless systems, including connectors, adapters, and attenuators optimized for low-VSWR performance."
+    description: "Industrial RF connectors, adapters, and attenuators optimized for low-VSWR performance."
   },
   {
     icon: "/images/workwithus/manufacturing.svg",
     title: "Manufacturing",
-    description: "Custom RF assemblies and antenna configurations tailored to application-specific network requirements and deployment conditions."
+    description: "Custom RF builds and antenna configurations tailored to your application and deployment needs."
   }
 ];
 
@@ -112,7 +112,7 @@ export default function WorkWithUs() {
                     className="hidden sm:block"
                     style={{
                       width: '1px',
-                      height: '225px',
+                      height: '250px',
                       backgroundColor: '#000',
                       flexShrink: 0,
                       alignSelf: 'center'
@@ -120,7 +120,7 @@ export default function WorkWithUs() {
                   />
                 )}
                 <div 
-                  className="w-full sm:w-[250px] flex flex-col items-center text-center sm:items-start sm:text-left flex-shrink-0"
+                  className="w-full sm:w-[300px] flex flex-col items-center text-center sm:items-start sm:text-left flex-shrink-0"
                   style={{
                     height: '250px'
                   }}

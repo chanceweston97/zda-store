@@ -41,8 +41,23 @@ export default function Hero({ slider }: HeroProps) {
       <div className="absolute z-10 left-6 sm:left-10 lg:left-16 top-1/2 -translate-y-1/2 max-w-[760px]">
 
         <h1 className="text-white font-semibold leading-tight text-[28px] sm:text-[40px] lg:text-[50px] tracking-tight">
-          {slider?.headline ??
-            "Industrial-grade RF solutions for reliable wireless connectivity."}
+          {(() => {
+            const headline = slider?.headline ?? "Industrial-grade RF solutions for reliable wireless connectivity.";
+            const sloganPhrase = " for reliable wireless connectivity";
+            const idx = headline.indexOf(sloganPhrase);
+            if (idx !== -1) {
+              const first = headline.slice(0, idx).trim();
+              const second = "for reliable wireless connectivity" + headline.slice(idx + sloganPhrase.length).trim();
+              return (
+                <>
+                  {first}
+                  <br />
+                  {second || "for reliable wireless connectivity."}
+                </>
+              );
+            }
+            return headline;
+          })()}
         </h1>
 
         <div className="mt-5 flex flex-wrap gap-3">

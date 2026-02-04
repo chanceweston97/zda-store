@@ -120,7 +120,7 @@ export default function RequestQuoteModal() {
         onClick={closeRequestQuoteModal}
       />
       <div
-        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl"
         style={{ backgroundColor: "#F6F7F7", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
         role="dialog"
         aria-modal
@@ -129,10 +129,10 @@ export default function RequestQuoteModal() {
         <button
           type="button"
           onClick={closeRequestQuoteModal}
-          className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center text-black/70 hover:text-black hover:bg-black/5 rounded-full transition-colors"
+          className="absolute right-3 top-3 w-7 h-7 flex items-center justify-center text-black/70 hover:text-black hover:bg-black/5 rounded-full transition-colors"
           aria-label="Close modal"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
@@ -140,29 +140,29 @@ export default function RequestQuoteModal() {
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="p-[50px]"
+          className="p-6 sm:p-8"
         >
-          <div className="flex flex-col items-center text-center gap-2 mb-6">
+          <div className="flex flex-col items-center text-center gap-1 mb-4">
             <h2
               id="request-quote-title"
-              className="text-[40px] leading-[26px]"
+              className="text-[28px] sm:text-[32px] leading-tight"
               style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
             >
               <span className="text-black">Request for </span>
               <span className="text-[#2958A4]">Quote</span>
             </h2>
             <p
-              className="text-black text-[14px] leading-[26px] max-w-[660px]"
+              className="text-black text-[13px] leading-[20px] max-w-[480px]"
               style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}
             >
               Submit your RFQ for lead times, quantity pricing, tax-exempt orders, and Net 30 terms where applicable.
             </p>
           </div>
 
-          <div className="mx-auto w-full max-w-[660px] space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="mx-auto w-full space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                   First name*
                 </label>
                 <input
@@ -176,7 +176,7 @@ export default function RequestQuoteModal() {
                 )}
               </div>
               <div>
-                <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+                <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                   Last name*
                 </label>
                 <input
@@ -192,7 +192,7 @@ export default function RequestQuoteModal() {
             </div>
 
             <div>
-              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+              <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                 Email address*
               </label>
               <input
@@ -214,7 +214,7 @@ export default function RequestQuoteModal() {
             </div>
 
             <div>
-              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+              <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                 Phone number*
               </label>
               <input
@@ -230,7 +230,7 @@ export default function RequestQuoteModal() {
             </div>
 
             <div>
-              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+              <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                 Company name
               </label>
               <input
@@ -245,19 +245,18 @@ export default function RequestQuoteModal() {
             </div>
 
             <div>
-              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+              <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                 SKU
               </label>
-              <div className="w-full h-[40px] rounded-[8px] bg-white px-4 flex items-center justify-between">
+              <div className="w-full h-[40px] rounded-[8px] bg-white px-4 flex items-center">
                 <span className="text-black text-[16px] leading-[30px]" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                   {products?.[0]?.sku || (products?.[0]?.id ? String(products[0].id) : "—")}
                 </span>
-                <span className="text-black/70 text-[12px]">▼</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-black text-[18px] leading-[30px] mb-3" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
+              <label className="block text-black text-[15px] sm:text-[16px] leading-[22px] mb-1.5" style={{ fontFamily: "Satoshi, sans-serif", fontWeight: 400 }}>
                 Quantity
               </label>
               <input
@@ -274,7 +273,7 @@ export default function RequestQuoteModal() {
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 flex justify-center">
             <button
               type="submit"
               disabled={isSubmitting}

@@ -51,7 +51,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
   ];
   const card = bannerData?.card;
 
-  // Parse title to handle <br> tags
+  // Parse title to handle <br> tags or slogan line break ("...solutions" / "for reliable wireless connectivity.")
   const renderTitle = () => {
     if (title.includes("<br")) {
       const parts = title.split(/<br\s*\/?>/i);
@@ -61,6 +61,20 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
           {index < parts.length - 1 && <br />}
         </span>
       ));
+    }
+    // Slogan: put "for reliable wireless connectivity." on second line
+    const sloganPhrase = " for reliable wireless connectivity";
+    const idx = title.indexOf(sloganPhrase);
+    if (idx !== -1) {
+      const first = title.slice(0, idx).trim();
+      const second = "for reliable wireless connectivity" + title.slice(idx + sloganPhrase.length).trim();
+      return (
+        <>
+          {first}
+          <br />
+          {second || "for reliable wireless connectivity."}
+        </>
+      );
     }
     return title;
   };

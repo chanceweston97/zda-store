@@ -3,8 +3,6 @@
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import {
   FullScreenIcon,
-  MinusIcon,
-  PlusIcon,
 } from "@/assets/icons";
 import { updateproductDetails } from "@/redux/features/product-details";
 import {
@@ -22,11 +20,9 @@ import { useDispatch } from "react-redux";
 import { useShoppingCart } from "use-shopping-cart";
 import toast from "react-hot-toast";
 import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
-import Breadcrumb from "../Common/Breadcrumb";
 import Newsletter from "../Common/Newsletter";
 import Description from "./Description";
 import WorkWithUs from "../Home/Hero/WorkWithUs";
-import FaqSection from "../Home/Faq";
 import { useRouter } from "next/navigation";
 import { useRequestQuoteModal } from "@/app/context/RequestQuoteModalContext";
 import { formatPrice } from "@/utils/price";
@@ -901,7 +897,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
   return (
     <>
       <section className="relative pt-[100px] pb-10 overflow-hidden lg:pt-[120px] xl:pt-[120px]">
-        <div className="w-full px-4 mx-auto max-w-[1340px] sm:px-6 xl:px-0 ">
+        <div className="w-full px-[50px] mx-auto max-w-[1340px] xl:px-0 ">
           <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
             {/* LEFT: GALLERY */}
             <div className="w-full lg:w-1/2">
@@ -1968,7 +1964,6 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
         }}
       />
       <WorkWithUs />
-      <FaqSection />
       <Newsletter />
     </>
   );

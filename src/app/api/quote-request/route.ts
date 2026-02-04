@@ -120,21 +120,20 @@ export async function POST(req: NextRequest) {
     // Format: wpcf7-f{FORM_ID}-p{timestamp}-o1
     const unitTag = `wpcf7-f${CONTACT_FORM_7_QUOTE_ID}-p${Date.now()}-o1`;
     formData.append("_wpcf7_unit_tag", unitTag);
-    
-    // Combine firstName and lastName into your-name (CF7 expects single name field)
+
+    // Field names must match CF7 form exactly. Your form uses: first-name, last-name, company, quantity
+    formData.append("first-name", firstName.trim());
+    formData.append("last-name", lastName.trim());
+    formData.append("company", company.trim());
+    formData.append("quantity", (quantityForQuote && String(quantityForQuote).trim()) || "1");
+
+    // Also send common CF7 field names for compatibility
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     formData.append("your-name", fullName);
-    
     formData.append("your-email", email.trim());
     formData.append("your-tel", phone.trim());
-    
-    // Product/Service of Interest - REQUIRED field (your-product)
     formData.append("your-product", productOrServiceValue);
-    
-    // Company name maps to your-subject (required field)
     formData.append("your-subject", company.trim());
-    
-    // Message is optional
     if (message && message.trim()) {
       formData.append("your-message", message.trim());
     }

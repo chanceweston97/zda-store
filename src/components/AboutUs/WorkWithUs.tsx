@@ -6,22 +6,22 @@ const workItems = [
     {
         icon: "/images/icons/cable-reel.svg",
         title: "Cable Builder",
-        text: "Directional and omni RF antennas for reliable, real-world coverage.",
+        text: "Directional and omni antennas for reliable RF coverage across DAS, public safety, utility, and infrastructure networks.",
     },
     {
         icon: "/images/icons/antennas.svg",
         title: "Antennas",
-        text: "Low-loss coaxial cable assemblies built to your spec, assembled in the United States.",
+        text: "Low-loss coaxial cable assemblies built to specification and assembled in the United States for long-term reliability.",
     },
     {
         icon: "/images/icons/data.svg",
         title: "Connectors",
-        text: "Industrial RF connectors and adapters for secure, low-VSWR joins.",
+        text: "Industrial RF connectors, adapters, and attenuators optimized for low-VSWR performance.",
     },
     {
         icon: "/images/icons/manufacture.svg",
         title: "Manufacturing",
-        text: "Custom RF builds and assembles tailored to your network.",
+        text: "Custom RF builds and antenna configurations tailored to your application and deployment needs.",
     },
 ];
 

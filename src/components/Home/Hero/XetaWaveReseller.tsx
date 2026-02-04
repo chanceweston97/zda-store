@@ -128,7 +128,7 @@ export default function XetaWaveReseller() {
                 For complete system solutions, reach out to a product expert.
               </p>
               <Link
-                href="/request-a-quote"
+                href="/contact"
                 className="group inline-flex items-center gap-2 rounded-lg px-6 py-3 transition-all duration-300 ease-in-out hover:opacity-90"
                 style={{
                   backgroundColor: '#70C8FF',

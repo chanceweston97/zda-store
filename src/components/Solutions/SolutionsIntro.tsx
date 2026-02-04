@@ -43,10 +43,10 @@ export default function SolutionsIntro() {
           }}
         >
           <span style={{ color: '#000' }}>
-          RF connectivity solutions <br />
+          Engineered RF infrastructure for <br />
           </span>
           <span style={{ color: '#2958A4' }}>
-          for any network
+          integrators and mission-critical networks
           </span>
         </h2>
 
