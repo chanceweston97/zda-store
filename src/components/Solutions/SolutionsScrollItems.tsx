@@ -12,6 +12,7 @@ const NUMBER_HEIGHT = 20;
 const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 470;
 const IMAGE_SIZE = 470;
+const MOBILE_BREAKPOINT = 768;
 
 const SOLUTIONS_ITEMS = [
   {
@@ -33,7 +34,7 @@ const SOLUTIONS_ITEMS = [
     title: "Utilities, SCADA & Industrial",
     description:
       "ZDA Communications supplies rugged antennas, low-loss coaxial cable assemblies, and RF components for SCADA, telemetry, and industrial networks operating across VHF, UHF, and 902–928 MHz ISM. Built for remote sites and harsh environments, our solutions help integrators maintain reliable links and repeatable installations across distributed assets.\n\nIn partnership with XetaWave, we help integrators source the complete RF link, combining proven radios with deployment-ready antennas, install-ready coax assemblies, and the interconnect hardware needed to bring sites online with clean, consistent performance.",
-    image: "/images/solutions/utilies.jpg",
+    image: "/images/solutions/Utilities.jpg",
   },
   {
     label: "166/433/2400 MHz Tracking Networks",
@@ -56,10 +57,37 @@ export default function SolutionsScrollItems() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const dotsRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT
+  );
 
   const itemCount = SOLUTIONS_ITEMS.length;
   const lastCardPinTop =
     HEADER_OFFSET + (itemCount - 1) * (NUMBER_HEIGHT + NUMBER_MARGIN);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile || cardRefs.current.length !== itemCount) return;
+    const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const index = cards.indexOf(entry.target as HTMLDivElement);
+          if (index >= 0) setActiveIndex(index);
+        });
+      },
+      { root: null, rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+    );
+    cards.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, [isMobile, itemCount]);
 
   useEffect(() => {
     ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -68,7 +96,20 @@ export default function SolutionsScrollItems() {
     if (!containerRef.current || !dotsRef.current || cards.length !== itemCount)
       return;
 
-    // Pin dots with first card
+    if (isMobile) {
+      cards.forEach((card, i) => {
+        gsap.set(card, { clearProps: "all" });
+        if (card) {
+          card.style.marginBottom = "";
+          card.style.minHeight = "";
+          card.style.boxShadow = "none";
+        }
+      });
+      ScrollTrigger.refresh();
+      return;
+    }
+
+    // Pin dots with first card (desktop only)
     ScrollTrigger.create({
       trigger: cards[0],
       start: `top ${HEADER_OFFSET}px`,
@@ -78,7 +119,7 @@ export default function SolutionsScrollItems() {
       pinSpacing: false,
     });
 
-    // Cards 1 to N-1: sticky pin
+    // Cards 1 to N-1: sticky pin (desktop only)
     for (let i = 0; i < itemCount - 1; i++) {
       const cardPinTop = HEADER_OFFSET + i * (NUMBER_HEIGHT + NUMBER_MARGIN);
       gsap.set(cards[i], { zIndex: i + 1 });
@@ -107,7 +148,6 @@ export default function SolutionsScrollItems() {
       });
     }
 
-    // Last card: not sticky, higher z-index so it stacks on top
     gsap.set(cards[itemCount - 1], { zIndex: itemCount });
     ScrollTrigger.create({
       trigger: cards[itemCount - 1],
@@ -121,12 +161,29 @@ export default function SolutionsScrollItems() {
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [itemCount, lastCardPinTop]);
+  }, [itemCount, lastCardPinTop, isMobile]);
 
   return (
     <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12">
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start">
-        {/* Dots - Hidden on mobile */}
+        {/* Dots - Horizontal on mobile (no ref), column + pinned on desktop (ref for GSAP) */}
+        <div
+          className="flex md:hidden flex-row justify-center gap-2 mb-4 shrink-0"
+          aria-hidden
+        >
+          {SOLUTIONS_ITEMS.map((_, index) => (
+            <div
+              key={index}
+              style={{
+                width: activeIndex === index ? 24 : 8,
+                height: 8,
+                borderRadius: 4,
+                background: activeIndex === index ? "#2958A4" : "#CBD5E1",
+                transition: "0.3s",
+              }}
+            />
+          ))}
+        </div>
         <div
           ref={dotsRef}
           className="hidden md:flex"
@@ -159,14 +216,16 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className="flex flex-col md:flex-row"
+              className="flex flex-col md:flex-row rounded-[10px] md:rounded-none overflow-hidden border border-gray-200 md:border-0"
               style={{
-                minHeight: CARD_HEIGHT,
+                minHeight: isMobile ? undefined : CARD_HEIGHT,
                 height: "auto",
                 transition: "box-shadow 0.3s",
                 overflow: "hidden",
                 position: "relative",
-                marginBottom: index < itemCount - 1 ? "400px" : 0,
+                marginBottom: isMobile
+                  ? index < itemCount - 1 ? 32 : 0
+                  : index < itemCount - 1 ? "400px" : 0,
               }}
             >
               {/* Left: Image 550x550 (fixed on desktop, responsive on mobile) */}
@@ -198,7 +257,7 @@ export default function SolutionsScrollItems() {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                  padding: "clamp(30px, 5vw, 30px)",
+                  padding: "clamp(16px, 4vw, 30px)",
                   background: "#FFF",
                 }}
               >
@@ -237,10 +296,10 @@ export default function SolutionsScrollItems() {
                     width: "100%",
                     color: "#383838",
                     fontFamily: "Satoshi, sans-serif",
-                    fontSize: "18px",
+                    fontSize: "clamp(14px, 3.5vw, 18px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "28px",
+                    lineHeight: "clamp(22px, 4vw, 28px)",
                     wordWrap: "break-word",
                     margin: 0,
                   }}
