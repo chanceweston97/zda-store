@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ExploreMore from "@/components/Company/ExploreMore";
 import ShopWithSidebar from "./index";
 import Newsletter from "@/components/Common/Newsletter";
 import { Category } from "@/types/category";
@@ -45,6 +46,7 @@ export default function ProductsPageWithCategoriesFallback({
   return (
     <>
       <ShopWithSidebar data={data} categoryName={categoryName} />
+      <ExploreMore />
       <Newsletter />
     </>
   );

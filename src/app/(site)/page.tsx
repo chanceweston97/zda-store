@@ -1,8 +1,7 @@
 import Newsletter from "@/components/Common/Newsletter";
-import FaqSection from "@/components/Home/Faq";
+import ExploreMore from "@/components/Company/ExploreMore";
 import Hero from "@/components/Home/Hero";
 import WorkWithUs from "@/components/Home/Hero/WorkWithUs";
-import { getFaq } from "@/lib/data/shop-utils";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -34,16 +33,13 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const faqData = await getFaq();
-
   return (
     <main>
       <Hero />
       <WorkWithUs />
-      <FaqSection faqData={faqData} />
+      <ExploreMore />
 
       <Newsletter />
-
     </main>
   );
 }

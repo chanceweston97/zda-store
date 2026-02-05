@@ -59,7 +59,7 @@ export default function SolutionsFrequencyBands() {
       style={sectionStyles}
     >
       <div className="w-full max-w-[1340px] mx-auto flex flex-col gap-[50px]">
-        {/* Heading: 40px Satoshi 400, line-height 60px; “connecting” in #2958A4 */}
+        {/* Heading: 40px Satoshi 400, line-height 60px, letter-spacing -4% – unchanged */}
         <div className="w-full flex flex-col justify-center items-start gap-[25px]">
           <div
             className="w-full break-words"
@@ -69,6 +69,7 @@ export default function SolutionsFrequencyBands() {
               fontFamily: "Satoshi, sans-serif",
               fontWeight: 400,
               lineHeight: "60px",
+              letterSpacing: "-0.04em",
               wordWrap: "break-word",
             }}
           >
@@ -78,38 +79,45 @@ export default function SolutionsFrequencyBands() {
           </div>
         </div>
 
-        {/* Three columns of band cards */}
-        <div className="w-full flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8">
+        {/* Band items only: 1240px wide, reduced spacing, responsive */}
+        <div className="w-full max-w-[1240px] mx-auto flex flex-col lg:flex-row justify-between items-stretch gap-8 lg:gap-6">
           {BANDS.map((column, colIndex) => (
             <div
               key={colIndex}
-              className="flex flex-col justify-start items-start gap-[50px] w-full lg:flex-1 lg:max-w-[320px]"
+              className="flex flex-col justify-start items-start gap-6 md:gap-8 w-full lg:flex-1 lg:min-w-0"
             >
               {column.map((band, bandIndex) => (
                 <div
                   key={bandIndex}
-                  className="flex flex-col justify-start items-start gap-[50px] w-full max-w-[320px]"
+                  className="flex flex-col justify-start items-start gap-3 w-full max-w-full lg:max-w-[300px]"
                 >
-                  <div className="flex flex-col justify-start items-start gap-2.5">
+                  <div className="flex flex-col justify-start items-start gap-1.5 sm:gap-2">
                     <div
-                      className="text-[#457B9D] font-normal leading-[34px] break-words max-w-[280px]"
+                      className="text-[#457B9D] font-normal break-words w-full max-w-full"
                       style={{
-                        fontSize: "clamp(22px, 3vw, 28px)",
+                        fontSize: "clamp(18px, 2.5vw, 28px)",
+                        lineHeight: "clamp(26px, 3.5vw, 34px)",
                         fontFamily: "Satoshi, sans-serif",
                       }}
                     >
                       {band.title}
                     </div>
                     <div
-                      className="text-black font-normal text-lg leading-[34px] break-words max-w-[280px]"
-                      style={sectionStyles}
+                      className="text-black font-normal break-words w-full max-w-full text-base sm:text-lg"
+                      style={{
+                        ...sectionStyles,
+                        lineHeight: "clamp(24px, 3vw, 34px)",
+                      }}
                     >
                       {band.frequency}
                     </div>
                   </div>
                   <div
-                    className="w-full max-w-[320px] text-black font-normal text-base leading-[26px] break-words"
-                    style={sectionStyles}
+                    className="w-full max-w-full text-black font-normal break-words text-sm sm:text-base"
+                    style={{
+                      ...sectionStyles,
+                      lineHeight: "clamp(22px, 2.8vw, 26px)",
+                    }}
                   >
                     {band.description}
                   </div>

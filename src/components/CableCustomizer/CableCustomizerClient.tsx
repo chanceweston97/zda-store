@@ -10,7 +10,6 @@ import { useAutoOpenCart } from "../Providers/AutoOpenCartProvider";
 import toast from "react-hot-toast";
 import { MinusIcon, PlusIcon } from "@/assets/icons";
 import { ButtonArrowHomepage } from "../Common/ButtonArrowHomepage";
-import FaqSection from "../Home/Faq";
 import Newsletter from "../Common/Newsletter";
 import { formatPrice } from "@/utils/price";
 import WorkWithUs from "../Home/Hero/WorkWithUs";
@@ -1053,9 +1052,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
 
       {/* Request for Quote Section */}
       <WorkWithUs />
-      {/* FAQ Section */}
-      <FaqSection />
-      
+
       {/* Newsletter Section */}
       <Newsletter />
     </>

@@ -12,7 +12,8 @@ const NUMBER_HEIGHT = 20;
 const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 470;
 const IMAGE_SIZE = 470;
-const MOBILE_BREAKPOINT = 768;
+/** Below this width: stacked layout, no pinning, centered image. 768–1024px = same as mobile. */
+const MOBILE_BREAKPOINT = 1025;
 
 const SOLUTIONS_ITEMS = [
   {
@@ -93,23 +94,27 @@ export default function SolutionsScrollItems() {
     ScrollTrigger.getAll().forEach((t) => t.kill());
 
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
-    if (!containerRef.current || !dotsRef.current || cards.length !== itemCount)
-      return;
+    if (!containerRef.current || cards.length !== itemCount) return;
 
-    if (isMobile) {
-      cards.forEach((card, i) => {
+    const width = typeof window !== "undefined" ? window.innerWidth : 0;
+    if (width < MOBILE_BREAKPOINT) {
+      cards.forEach((card) => {
+        if (!card) return;
         gsap.set(card, { clearProps: "all" });
-        if (card) {
-          card.style.marginBottom = "";
-          card.style.minHeight = "";
-          card.style.boxShadow = "none";
-        }
+        card.style.marginBottom = "";
+        card.style.minHeight = "";
+        card.style.boxShadow = "none";
+        card.style.position = "";
+        card.style.top = "";
+        card.style.left = "";
+        card.style.width = "";
       });
       ScrollTrigger.refresh();
       return;
     }
+    if (!dotsRef.current) return;
 
-    // Pin dots with first card (desktop only)
+    // Pin dots with first card (desktop only, ≥1024px)
     ScrollTrigger.create({
       trigger: cards[0],
       start: `top ${HEADER_OFFSET}px`,
@@ -164,11 +169,11 @@ export default function SolutionsScrollItems() {
   }, [itemCount, lastCardPinTop, isMobile]);
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12">
-      <div className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start">
-        {/* Dots - Horizontal on mobile (no ref), column + pinned on desktop (ref for GSAP) */}
+    <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 lg:py-12">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 xl:gap-[50px] items-start">
+        {/* Dots - Horizontal below 1024px (no ref), column + pinned on desktop (ref for GSAP) */}
         <div
-          className="flex md:hidden flex-row justify-center gap-2 mb-4 shrink-0"
+          className="flex lg:hidden flex-row justify-center gap-2 mb-4 shrink-0"
           aria-hidden
         >
           {SOLUTIONS_ITEMS.map((_, index) => (
@@ -186,7 +191,7 @@ export default function SolutionsScrollItems() {
         </div>
         <div
           ref={dotsRef}
-          className="hidden md:flex"
+          className="hidden lg:flex"
           style={{
             flexDirection: "column",
             gap: 12,
@@ -208,29 +213,30 @@ export default function SolutionsScrollItems() {
           ))}
         </div>
 
-        {/* Cards */}
-        <div ref={containerRef} className="w-full md:flex-1">
+        {/* Cards – under 1024px: flex-col + gap-14, no border, no sticky; desktop: gap-0 for pin layout */}
+        <div
+          ref={containerRef}
+          className="w-full lg:flex-1 flex flex-col gap-14 lg:gap-0"
+        >
           {SOLUTIONS_ITEMS.map((item, index) => (
             <div
               key={index}
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className="flex flex-col md:flex-row rounded-[10px] md:rounded-none overflow-hidden border border-gray-200 md:border-0"
+              className="flex flex-col lg:flex-row overflow-hidden rounded-[10px] lg:rounded-none static lg:relative"
               style={{
                 minHeight: isMobile ? undefined : CARD_HEIGHT,
                 height: "auto",
                 transition: "box-shadow 0.3s",
                 overflow: "hidden",
-                position: "relative",
-                marginBottom: isMobile
-                  ? index < itemCount - 1 ? 32 : 0
-                  : index < itemCount - 1 ? "400px" : 0,
+                marginBottom:
+                  isMobile ? 0 : index < itemCount - 1 ? "400px" : 0,
               }}
             >
-              {/* Left: Image 550x550 (fixed on desktop, responsive on mobile) */}
+              {/* Left: Image – centered below 1024px, no border; fixed size on desktop */}
               <div
-                className="w-full md:shrink-0"
+                className="w-full flex justify-center lg:justify-start lg:shrink-0"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -239,59 +245,58 @@ export default function SolutionsScrollItems() {
                 }}
               >
                 <div
-                  className="w-full aspect-square md:w-[470px] md:min-w-[470px] md:h-[470px] md:min-h-[450px] md:aspect-auto relative overflow-hidden rounded-[10px]"
+                  className="w-full max-w-[min(100%,360px)] sm:max-w-[min(100%,420px)] aspect-square lg:max-w-none lg:w-[470px] lg:min-w-[470px] lg:h-[470px] lg:min-h-[450px] lg:aspect-auto relative overflow-hidden rounded-[10px]"
                 >
                   <Image
                     src={item.image}
                     alt={item.title}
                     fill
-                    className="object-cover rounded-[10px]"
-                    sizes="(max-width: 768px) 100vw, 550px"
+                    className="object-cover object-center rounded-[10px]"
+                    sizes="(max-width: 1024px) 100vw, 550px"
                   />
                 </div>
               </div>
-              {/* Right: Content */}
+              {/* Right: Content – below 1024px: label + title centered, description left */}
               <div
-                className="w-full md:flex-1 md:shrink-0"
+                className="w-full lg:flex-1 lg:shrink-0 flex flex-col justify-center"
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
                   padding: "clamp(16px, 4vw, 30px)",
                   background: "#FFF",
                 }}
               >
-                <div
-                  style={{
-                    color: "#457B9D",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(14px, 2vw, 16px)",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "clamp(24px, 4vw, 46px)",
-                    letterSpacing: "-0.32px",
-                    marginBottom: "20px",
-                  }}
-                >
-                  {item.label}
+                <div className="text-center lg:text-left">
+                  <div
+                    style={{
+                      color: "#457B9D",
+                      fontFamily: "Satoshi, sans-serif",
+                      fontSize: "clamp(14px, 2vw, 16px)",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "clamp(24px, 4vw, 46px)",
+                      letterSpacing: "-0.32px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                  <h3
+                    style={{
+                      color: "#000",
+                      fontFamily: "Satoshi, sans-serif",
+                      fontSize: "clamp(32px, 5vw, 40px)",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "clamp(38px, 5vw, 46px)",
+                      letterSpacing: "-0.96px",
+                      margin: 0,
+                      marginBottom: "30px",
+                    }}
+                  >
+                    {item.title}
+                  </h3>
                 </div>
-                <h3
-                  style={{
-                    color: "#000",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(32px, 5vw, 40px)",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "clamp(38px, 5vw, 46px)",
-                    letterSpacing: "-0.96px",
-                    margin: 0,
-                    marginBottom: "30px",
-                  }}
-                >
-                  {item.title}
-                </h3>
                 <p
-                  className="whitespace-pre-line"
+                  className="whitespace-pre-line text-left"
                   style={{
                     width: "100%",
                     color: "#383838",
