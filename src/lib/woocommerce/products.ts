@@ -501,8 +501,8 @@ export async function convertWCToProduct(
     : (Array.isArray(metadataObj.applications) ? metadataObj.applications.join('\n') : null);
 
   const specifications = metadataObj.specifications || null;
-  // Use subtitle from metadata as shortDescription (priority: subtitle > shortDescription > short_description)
-  const subtitle = stripHTML(metadataObj.subtitle || metadataObj.shortDescription || wcProduct.short_description || "");
+  // Product short description (WordPress "Product short description" in edit screen) – prefer WooCommerce native field, then metadata
+  const subtitle = stripHTML(wcProduct.short_description || metadataObj.subtitle || metadataObj.shortDescription || "");
   const featureTitle = metadataObj.featureTitle ? stripHTML(metadataObj.featureTitle) : null; // Strip HTML from featureTitle
   
   // Get datasheet fields - prefer ACF standard format (URLs from ?acf_format=standard), else IDs/raw
@@ -726,7 +726,7 @@ export async function convertWCToProduct(
     previewImages,
     category,
     description,
-    shortDescription: subtitle, // Use subtitle from metadata (from WordPress admin)
+    shortDescription: subtitle, // WordPress "Product short description" (subtitle)
     inStock: wcProduct.status === "publish", // Published products are in stock
     status: wcProduct.status === "publish",
     tags: [], // WooCommerce uses tags differently, extract if needed

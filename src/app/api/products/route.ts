@@ -11,6 +11,7 @@ type WooCommerceProduct = {
   price?: string;
   regular_price?: string;
   sale_price?: string;
+  short_description?: string;
   images?: Array<{ src: string }>;
   categories?: Array<{ id: number; name: string; slug: string }>;
   variations?: number[];
@@ -24,6 +25,12 @@ const parsePrice = (value?: string) => {
   const num = parseFloat(value);
   return Number.isFinite(num) ? num : 0;
 };
+
+/** Strip HTML tags for product short description (WordPress "Product short description") */
+function stripHTML(html: string | undefined): string {
+  if (!html || typeof html !== "string") return "";
+  return html.replace(/<[^>]*>/g, "").trim();
+}
 
 // Fetch from WooCommerce (Cloudflare caches WordPress; Next.js does not cache)
 async function getProductsFromWoo(url: string): Promise<WooCommerceProduct[]> {
@@ -130,7 +137,7 @@ export async function GET(req: Request) {
       per_page: perPage,
       page,
       _fields:
-        "id,name,price,regular_price,sale_price,slug,images,categories,sku,variations,meta_data,status,catalog_visibility",
+        "id,name,price,regular_price,sale_price,slug,short_description,images,categories,sku,variations,meta_data,status,catalog_visibility",
       status: "publish",
     });
     if (categoryFilterParam) queryParams.append("category", categoryFilterParam);
@@ -209,6 +216,14 @@ export async function GET(req: Request) {
             ? featuresValue
             : null;
 
+        const subtitleMeta = product.meta_data?.find((item) => item.key === "subtitle");
+        const shortDescMeta = product.meta_data?.find((item) => item.key === "shortDescription");
+        const shortDescription =
+          stripHTML(product.short_description) ||
+          stripHTML(typeof subtitleMeta?.value === "string" ? subtitleMeta.value : "") ||
+          stripHTML(typeof shortDescMeta?.value === "string" ? shortDescMeta.value : "") ||
+          undefined;
+
         let sku = product.sku || "";
         if (!sku && product.variations && product.variations.length > 0) {
           const variationSku = await fetchFirstVariationSku(product.id);
@@ -222,6 +237,7 @@ export async function GET(req: Request) {
           price: parsePrice(product.price || product.sale_price || product.regular_price),
           discountedPrice: parsePrice(product.sale_price) || undefined,
           sku,
+          ...(shortDescription ? { shortDescription } : {}),
           features,
           thumbnails: image ? [{ image, color: null }] : [],
           previewImages: image ? [{ image, color: null }] : [],

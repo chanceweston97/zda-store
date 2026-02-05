@@ -214,56 +214,57 @@ const SingleGridItem = ({ item }: { item: Product }) => {
       </div>
 
       <div>
-        {/* Product Title */}
-        <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
-          <h3 
-            className="font-medium text-dark ease-out duration-200 hover:text-blue mb-2 line-clamp-1"
-            style={{
-              fontFamily: 'Satoshi, sans-serif',
-              fontSize: '30px',
-              fontWeight: 500,
-              lineHeight: '36px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {item.name}
-          </h3>
-        </Link>
-
-        {/* SKU Display */}
-        {sku && (
-          <span
-            style={{
-              color: '#457B9D',
-              fontFamily: 'Satoshi, sans-serif',
-              fontSize: '14px',
-              fontStyle: 'normal',
-              fontWeight: 500,
-              lineHeight: '20px',
-              letterSpacing: '-0.28px',
-              marginBottom: '8px',
-              display: 'block'
-            }}
-          >
-            {sku}
-          </span>
-        )}
-
-        {/* Price in Rectangle */}
-        <div 
-          className="inline-block mb-2 px-3 py-1.5"
+        {/* Title + SKU + Price section (like PDP - only this in the block) */}
+        <div
+          className="mb-3"
           style={{
-            background: '#F1F6FF',
-            borderRadius: '4px'
+            padding: '12px',
+            borderRadius: '10px',
+            background: '#F1F6FF'
           }}
         >
+          {/* SKU */}
+          {sku && (
+            <span
+              style={{
+                color: '#457B9D',
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '20px',
+                letterSpacing: '-0.28px',
+                display: 'block',
+                marginBottom: '4px'
+              }}
+            >
+              {sku}
+            </span>
+          )}
+
+          {/* Product Title */}
+          <Link href={`/products/${item?.slug?.current}`} prefetch={false}>
+            <h3 
+              className="font-medium text-dark ease-out duration-200 hover:text-blue line-clamp-2"
+              style={{
+                fontFamily: 'Satoshi, sans-serif',
+                fontSize: '18px',
+                fontWeight: 500,
+                lineHeight: '24px',
+                margin: 0,
+                marginBottom: '6px'
+              }}
+            >
+              {item.name}
+            </h3>
+          </Link>
+
+          {/* Price */}
           <span 
             className="text-dark font-medium"
             style={{
               fontFamily: 'Satoshi, sans-serif',
-              fontSize: '30px',
+              fontSize: '18px',
               fontWeight: 500
             }}
           >
@@ -271,11 +272,12 @@ const SingleGridItem = ({ item }: { item: Product }) => {
           </span>
         </div>
 
-        {/* Tagline/Short Description */}
+        {/* Short Description - outside title/price block, above features (like PDP) */}
         {item.shortDescription && (
           <p 
-            className="mb-2 text-gray-600"
+            className="mb-3"
             style={{
+              color: '#000',
               fontFamily: 'Satoshi, sans-serif',
               fontSize: '14px',
               fontWeight: 400,
