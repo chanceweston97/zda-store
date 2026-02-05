@@ -132,7 +132,7 @@ export default function RequestQuoteModal() {
         onClick={closeRequestQuoteModal}
       />
       <div
-        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-[10000] w-[calc(100%-24px)] max-w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-[10px] overflow-hidden shadow-2xl"
         style={{ backgroundColor: "#F6F7F7", boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
         role="dialog"
         aria-modal

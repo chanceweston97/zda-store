@@ -225,7 +225,7 @@ export default function Contact() {
               noValidate
               style={{
                 display: 'flex',
-                width: '750px',
+                width: '600px',
                 maxWidth: '100%',
                 padding: '20px',
                 flexDirection: 'column',

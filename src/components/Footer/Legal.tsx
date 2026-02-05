@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 const legalLinks = [
-  { id: 1, label: "Terms of Sale", href: "/terms-of-sale" },
-  { id: 2, label: "Terms and Conditions", href: "/terms-and-conditions" },
-  { id: 3, label: "Privacy Policy", href: "/privacy-policy" },
+  { id: 1, label: "Terms and Conditions", href: "/terms-and-conditions" },
+  { id: 2, label: "Privacy Policy", href: "/privacy-policy" },
 ];
 
 export default function Legal() {

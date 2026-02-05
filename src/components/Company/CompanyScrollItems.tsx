@@ -214,12 +214,13 @@ export default function CompanyScrollItems() {
               </div>
             </div>
             {/* Right Content Section */}
-            <div className="w-full md:w-[60%] md:shrink-0" style={{ 
+            <div className="w-full md:w-[60%] md:shrink-0 md:min-h-0" style={{ 
               display: "flex", 
               flexDirection: "column", 
-              justifyContent: "center",
+              justifyContent: "flex-start",
               padding: 'clamp(30px, 5vw, 60px)',
-              background: '#FFF'
+              background: '#FFF',
+              overflow: 'visible'
             }}>
               <div style={{ 
                 color: '#457B9D',
@@ -227,9 +228,9 @@ export default function CompanyScrollItems() {
                 fontSize: 'clamp(14px, 2vw, 16px)',
                 fontStyle: 'normal',
                 fontWeight: 400,
-                lineHeight: 'clamp(24px, 4vw, 46px)',
+                lineHeight: '1.35',
                 letterSpacing: '-0.32px',
-                marginBottom: '20px'
+                marginBottom: '12px'
               }}>
                 {items[0].label}
               </div>
@@ -239,10 +240,10 @@ export default function CompanyScrollItems() {
                 fontSize: 'clamp(32px, 5vw, 48px)',
                 fontStyle: 'normal',
                 fontWeight: 400,
-                lineHeight: 'clamp(38px, 5vw, 46px)',
+                lineHeight: '1.2',
                 letterSpacing: '-0.96px',
                 margin: 0,
-                marginBottom: '30px'
+                marginBottom: '20px'
               }}>
                 {items[0].title}
               </h3>
@@ -286,12 +287,13 @@ export default function CompanyScrollItems() {
               </div>
             </div>
             {/* Right Content Section */}
-            <div className="w-full md:w-[60%] md:shrink-0" style={{ 
+            <div className="w-full md:w-[60%] md:shrink-0 md:min-h-0" style={{ 
               display: "flex", 
               flexDirection: "column", 
-              justifyContent: "center",
+              justifyContent: "flex-start",
               padding: 'clamp(30px, 5vw, 60px)',
-              background: '#FFF'
+              background: '#FFF',
+              overflow: 'visible'
             }}>
               {items[1].label && (
                 <div style={{ 
@@ -300,9 +302,9 @@ export default function CompanyScrollItems() {
                   fontSize: 'clamp(14px, 2vw, 16px)',
                   fontStyle: 'normal',
                   fontWeight: 400,
-                  lineHeight: 'clamp(24px, 4vw, 46px)',
+                  lineHeight: '1.35',
                   letterSpacing: '-0.32px',
-                  marginBottom: '20px'
+                  marginBottom: '12px'
                 }}>
                   {items[1].label}
                 </div>
@@ -313,10 +315,10 @@ export default function CompanyScrollItems() {
                 fontSize: 'clamp(32px, 5vw, 48px)',
                 fontStyle: 'normal',
                 fontWeight: 400,
-                lineHeight: 'clamp(38px, 5vw, 46px)',
+                lineHeight: '1.2',
                 letterSpacing: '-0.96px',
                 margin: 0,
-                marginBottom: '30px'
+                marginBottom: '20px'
               }}>
                 {items[1].title}
               </h3>
@@ -358,12 +360,13 @@ export default function CompanyScrollItems() {
               </div>
             </div>
             {/* Right Content Section */}
-            <div className="w-full md:w-[60%] md:shrink-0" style={{ 
+            <div className="w-full md:w-[60%] md:shrink-0 md:min-h-0" style={{ 
               display: "flex", 
               flexDirection: "column", 
-              justifyContent: "center",
+              justifyContent: "flex-start",
               padding: 'clamp(30px, 5vw, 60px)',
-              background: '#FFF'
+              background: '#FFF',
+              overflow: 'visible'
             }}>
               {items[2].label && (
                 <div style={{ 
@@ -372,9 +375,9 @@ export default function CompanyScrollItems() {
                   fontSize: 'clamp(14px, 2vw, 16px)',
                   fontStyle: 'normal',
                   fontWeight: 400,
-                  lineHeight: 'clamp(24px, 4vw, 46px)',
+                  lineHeight: '1.35',
                   letterSpacing: '-0.32px',
-                  marginBottom: '20px'
+                  marginBottom: '12px'
                 }}>
                   {items[2].label}
                 </div>
@@ -385,10 +388,10 @@ export default function CompanyScrollItems() {
                 fontSize: 'clamp(32px, 5vw, 48px)',
                 fontStyle: 'normal',
                 fontWeight: 400,
-                lineHeight: 'clamp(38px, 5vw, 46px)',
+                lineHeight: '1.2',
                 letterSpacing: '-0.96px',
                 margin: 0,
-                marginBottom: '30px'
+                marginBottom: '20px'
               }}>
                 {items[2].title}
               </h3>

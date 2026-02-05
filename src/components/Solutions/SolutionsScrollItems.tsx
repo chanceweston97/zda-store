@@ -177,16 +177,15 @@ export default function SolutionsScrollItems() {
                   : { zIndex: itemCount }),
               }}
             >
-              {/* Left Image Section - same as Company */}
+              {/* Left Image Section - smaller height on mobile so description is readable */}
               <div
                 className="w-full md:w-[40%] md:shrink-0"
                 style={{ display: "flex", alignItems: "stretch" }}
               >
                 <div
+                  className="h-[200px] md:h-full md:min-h-[300px]"
                   style={{
                     width: "100%",
-                    height: "100%",
-                    minHeight: "300px",
                     position: "relative",
                     overflow: "hidden",
                     borderRadius: "10px",
@@ -202,15 +201,16 @@ export default function SolutionsScrollItems() {
                   />
                 </div>
               </div>
-              {/* Right Content Section - same as Company */}
+              {/* Right Content Section */}
               <div
-                className="w-full md:w-[60%] md:shrink-0"
+                className="w-full md:w-[60%] md:shrink-0 md:min-h-0"
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "center",
+                  justifyContent: "flex-start",
                   padding: "clamp(30px, 5vw, 60px)",
                   background: "#FFF",
+                  overflow: "visible",
                 }}
               >
                 <div
@@ -220,9 +220,9 @@ export default function SolutionsScrollItems() {
                     fontSize: "clamp(14px, 2vw, 16px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "clamp(24px, 4vw, 46px)",
+                    lineHeight: "1.35",
                     letterSpacing: "-0.32px",
-                    marginBottom: "20px",
+                    marginBottom: "12px",
                   }}
                 >
                   {item.label}
@@ -234,10 +234,10 @@ export default function SolutionsScrollItems() {
                     fontSize: "clamp(32px, 5vw, 48px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "clamp(38px, 5vw, 46px)",
+                    lineHeight: "1.2",
                     letterSpacing: "-0.96px",
                     margin: 0,
-                    marginBottom: "30px",
+                    marginBottom: "20px",
                   }}
                 >
                   {item.title}
