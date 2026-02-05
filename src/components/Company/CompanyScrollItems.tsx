@@ -230,7 +230,7 @@ export default function CompanyScrollItems() {
                 fontWeight: 400,
                 lineHeight: '1.35',
                 letterSpacing: '-0.32px',
-                marginBottom: '12px'
+                marginBottom: '14px'
               }}>
                 {items[0].label}
               </div>
@@ -304,7 +304,7 @@ export default function CompanyScrollItems() {
                   fontWeight: 400,
                   lineHeight: '1.35',
                   letterSpacing: '-0.32px',
-                  marginBottom: '12px'
+                  marginBottom: '14px'
                 }}>
                   {items[1].label}
                 </div>
@@ -377,7 +377,7 @@ export default function CompanyScrollItems() {
                   fontWeight: 400,
                   lineHeight: '1.35',
                   letterSpacing: '-0.32px',
-                  marginBottom: '12px'
+                  marginBottom: '14px'
                 }}>
                   {items[2].label}
                 </div>

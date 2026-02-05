@@ -910,11 +910,11 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
   return (
     <>
       <section className="relative pt-[100px] pb-10 overflow-hidden lg:pt-[120px] xl:pt-[120px]">
-        <div className="w-full px-[50px] mx-auto max-w-[1340px] xl:px-0 ">
-          <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-16">
-            {/* LEFT: GALLERY */}
-            <div className="w-full lg:w-1/2">
-              <div className="relative min-h-[400px] lg:min-h-[512px] rounded-lg border border-gray-3 flex items-center justify-center">
+        <div className="w-full px-4 sm:px-6 lg:px-[50px] xl:px-0 mx-auto max-w-[1340px]">
+          <div className="flex flex-col lg:flex-row gap-8 xl:gap-20 items-start">
+            {/* LEFT: GALLERY - 500x500 per design */}
+            <div className="w-full lg:w-[500px] lg:flex-shrink-0">
+              <div className="relative w-full aspect-square max-w-[500px] rounded-lg border border-gray-3 flex items-center justify-center overflow-hidden bg-gray-1">
                 <button
                   onClick={handlePreviewSlider}
                   aria-label="button for zoom"
@@ -924,13 +924,13 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                 </button>
 
                 {mainImageUrl && (
-                  <div className="relative w-full h-[400px] lg:h-[512px] rounded-lg overflow-hidden">
+                  <div className="relative w-full aspect-square">
                     <Image
                       src={mainImageUrl}
                       alt={product.name}
                       fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      className="object-contain"
+                      sizes="(max-width: 1024px) 100vw, 500px"
                     />
                   </div>
                 )}
@@ -962,8 +962,8 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
               </div>
             </div>
 
-            {/* RIGHT: PRODUCT CONTENT */}
-            <div className="w-full lg:w-1/2">
+            {/* RIGHT: PRODUCT CONTENT - 750px max per design, gap 20px */}
+            <div className="w-full lg:max-w-[750px] flex flex-col gap-5">
               {/* Section for SKU, Title, Price with background */}
               <div
                 style={{
@@ -976,7 +976,6 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   borderRadius: '10px',
                   backgroundColor: '#F1F6FF'
                 }}
-                className="mb-4"
               >
                 {/* SKU Display - Use SKU from selected variant or product */}
                 {displaySku ? (
@@ -995,15 +994,15 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   </span>
                 ) : null}
 
-                {/* Product Title */}
+                {/* Product Title - 48px / 58px per design */}
                 <h2
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '30px',
+                    fontSize: 'clamp(28px, 4vw, 48px)',
                     fontStyle: 'normal',
                     fontWeight: 400,
-                    lineHeight: '58px',
+                    lineHeight: 'clamp(34px, 5vw, 58px)',
                     letterSpacing: '-1.92px',
                     margin: 0
                   }}
@@ -1011,12 +1010,12 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   {product.name}
                 </h2>
 
-                {/* Price */}
+                {/* Price - 36px per design */}
                 <h3
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: '30px',
+                    fontSize: 'clamp(24px, 3vw, 36px)',
                     fontStyle: 'normal',
                     fontWeight: 400,
                     lineHeight: '36px',

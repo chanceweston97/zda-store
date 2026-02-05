@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const SOLUTIONS_CARD_ID_PREFIX = "solutions-card";
+
 const HEADER_OFFSET = 80;
 const NUMBER_HEIGHT = 20;
 const NUMBER_MARGIN = 50;
@@ -64,6 +66,21 @@ export default function SolutionsScrollItems() {
   useEffect(() => {
     const id = requestAnimationFrame(() => setRefsReady(true));
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Scroll to card when landing page links with hash (e.g. /solutions#solutions-card-0)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash?.slice(1);
+    if (!hash || !hash.startsWith(SOLUTIONS_CARD_ID_PREFIX)) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
   }, []);
 
   // Same effect as Company: kill all, create pins for dots + cards 1 to N-1, last card just tracks index
@@ -162,6 +179,7 @@ export default function SolutionsScrollItems() {
           {SOLUTIONS_ITEMS.map((item, index) => (
             <div
               key={index}
+              id={`${SOLUTIONS_CARD_ID_PREFIX}-${index}`}
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
@@ -222,7 +240,7 @@ export default function SolutionsScrollItems() {
                     fontWeight: 400,
                     lineHeight: "1.35",
                     letterSpacing: "-0.32px",
-                    marginBottom: "12px",
+                    marginBottom: "14px",
                   }}
                 >
                   {item.label}

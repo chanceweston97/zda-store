@@ -3,25 +3,25 @@
 import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
-const exploreItems = [
-  {
-    title: "Products",
-    description: "Get to know our antennas, cables, and RF components.",
-    link: "/products"
-  },
-  {
-    title: "Catalog",
-    description: "Explore our full range of RF products and solutions.",
-    link: "/catalog"
-  },
-  {
-    title: "Cable Builder",
-    description: "Build-to-spec coaxial cable assemblies for RF systems.",
-    link: "/cable-builder"
-  }
+const EXPLORE_SOLUTIONS_FIRST = [
+  { title: "Solutions", description: "Industry solutions for DAS, public safety, utilities, and private wireless.", link: "/solutions" },
+  { title: "Catalog", description: "Explore our full range of RF products and solutions.", link: "/catalog" },
+  { title: "Cable Builder", description: "Build-to-spec coaxial cable assemblies for RF systems.", link: "/cable-builder" },
 ];
 
-export default function ExploreMore() {
+const EXPLORE_PRODUCTS_FIRST = [
+  { title: "Products", description: "Get to know our antennas, cables, and RF components.", link: "/products" },
+  { title: "Catalog", description: "Explore our full range of RF products and solutions.", link: "/catalog" },
+  { title: "Cable Builder", description: "Build-to-spec coaxial cable assemblies for RF systems.", link: "/cable-builder" },
+];
+
+type ExploreMoreProps = {
+  /** When true (Solutions page), first link is Products. Otherwise (Landing, Company) first link is Solutions. */
+  variant?: "solutionsPage" | "default";
+};
+
+export default function ExploreMore({ variant = "default" }: ExploreMoreProps) {
+  const exploreItems = variant === "solutionsPage" ? EXPLORE_PRODUCTS_FIRST : EXPLORE_SOLUTIONS_FIRST;
   const titleRef = useScrollAnimation({ threshold: 0.2 });
   const cardsRef = useScrollAnimation({ threshold: 0.2 });
 

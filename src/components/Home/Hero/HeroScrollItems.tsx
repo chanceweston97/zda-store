@@ -16,11 +16,12 @@ const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 450;
 const GAP = 50;
 
+// Button URLs link to Solutions page and scroll to the matching card (solutions-card-0..4; card 3 = Wildlife, card 4 = Private LTE)
 const FALLBACK_ITEMS: HomeOfferingItem[] = [
-  { title: "In-Building Wireless and DAS", description: "Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.", button: { title: "Explore DAS Solutions", url: "/categories/antennas" }, image: null },
-  { title: "Public Safety & ERRCS", description: "RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.", button: { title: "Explore Public Safety Solutions", url: "/categories/cables" }, image: null },
-  { title: "Utilities, SCADA & Industrial", description: "Directional and omnidirectional antennas designed for long-range, low-noise communications in utility, telemetry, and industrial control networks.", button: { title: "Explore Industrial Solutions", url: "/categories/connectors" }, image: null },
-  { title: "Private LTE/5G & Infrastructure", description: "RF solutions supporting private LTE, private 5G, and fixed wireless deployments where controlled coverage and system reliability are critical.", button: { title: "Explore Private Wireless", url: "/contact" }, image: null },
+  { title: "In-Building Wireless and DAS", description: "Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.", button: { title: "Explore DAS Solutions", url: "/solutions#solutions-card-0" }, image: null },
+  { title: "Public Safety & ERRCS", description: "RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.", button: { title: "Explore Public Safety Solutions", url: "/solutions#solutions-card-1" }, image: null },
+  { title: "Utilities, SCADA & Industrial", description: "Directional and omnidirectional antennas designed for long-range, low-noise communications in utility, telemetry, and industrial control networks.", button: { title: "Explore Industrial Solutions", url: "/solutions#solutions-card-2" }, image: null },
+  { title: "Private LTE/5G & Infrastructure", description: "RF solutions supporting private LTE, private 5G, and fixed wireless deployments where controlled coverage and system reliability are critical.", button: { title: "Explore Private Wireless", url: "/solutions#solutions-card-4" }, image: null },
 ];
 
 interface HeroScrollItemsProps {

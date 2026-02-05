@@ -204,7 +204,7 @@ export default function Description({ product, metadata }: Props) {
         <section className="pb-5 pt-10">
             <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 xl:px-0">
                 {/* Technical Specifications Section */}
-                <div style={{ marginBottom: '40px' }}>
+                <div className="flex flex-col gap-[25px]" style={{ marginBottom: '40px' }}>
                     <h2
                         style={{
                             color: '#000',
@@ -214,8 +214,7 @@ export default function Description({ product, metadata }: Props) {
                             fontWeight: 400,
                             lineHeight: '50px',
                             letterSpacing: '-1px',
-                            margin: 0,
-                            marginBottom: '16px'
+                            margin: 0
                         }}
                     >
                         Technical Specifications
@@ -228,7 +227,8 @@ export default function Description({ product, metadata }: Props) {
                             fontStyle: 'normal',
                             fontWeight: 400,
                             lineHeight: '30px',
-                            margin: 0
+                            margin: 0,
+                            maxWidth: '837px'
                         }}
                     >
                         For full product specifications, download the attached data sheet.
@@ -236,18 +236,18 @@ export default function Description({ product, metadata }: Props) {
                 </div>
             </div>
             <div className="mx-auto flex w-full max-w-[1340px] flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-stretch xl:px-0">
-                {/* LEFT COLUMN – DATASHEET */}
-                <div className="flex w-full flex-col gap-4 lg:w-[38%]">
+                {/* LEFT COLUMN – DATASHEET - 500px width, ~648px height per design */}
+                <div className="flex w-full flex-col gap-4 lg:w-[500px] lg:flex-shrink-0">
                     {/* Datasheet preview + button */}
                     {datasheetImageUrl && !imageError ? (
                         <div className="relative overflow-hidden flex flex-col">
-                            <div className="flex-1 relative">
+                            <div className="relative w-full" style={{ minHeight: 400 }}>
                                 <Image
                                     src={datasheetImageUrl}
                                     alt={`${product.name} datasheet`}
-                                    width={400}
-                                    height={518}
-                                    className="h-full w-full object-contain cursor-pointer"
+                                    width={500}
+                                    height={648}
+                                    className="w-full h-auto max-h-[648px] object-contain cursor-pointer"
                                     onError={() => setImageError(true)}
                                     onClick={() => {
                                         if (!datasheetPdfUrl) return;
@@ -283,7 +283,10 @@ export default function Description({ product, metadata }: Props) {
                                     paddingRight: '30px',
                                     cursor: datasheetPdfUrl ? 'pointer' : 'not-allowed',
                                     minWidth: 'fit-content',
-                                    height: '40px'
+                                    height: '40px',
+                                    fontSize: '16px',
+                                    fontWeight: 500,
+                                    lineHeight: '26px'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (datasheetPdfUrl) {
@@ -309,39 +312,44 @@ export default function Description({ product, metadata }: Props) {
                     )}
                 </div>
 
-                {/* RIGHT COLUMN – TABS + CONTENT */}
-                <div className="w-full lg:w-[62%] h-full flex flex-col">
-                    {/* Tabs */}
-                    <div className="mb-6 flex w-full justify-center">
-                        <div className="w-full justify-center inline-flex rounded-[10px] bg-[#E9ECF3]">
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab("description")}
-                                className={`w-full px-8 py-2 text-[16px] leading-[26px] rounded-[10px] ${activeTab === "description"
-                                    ? "bg-[#2958A4] text-white shadow-sm"
-                                    : "text-[#2958A4]"
-                                    }`}
-                                style={activeTab !== "description" ? { backgroundColor: '#DFEBFF' } : {}}
-                            >
-                                Description
-                            </button>
-
+                {/* RIGHT COLUMN – TABS + CONTENT - 810px max per design */}
+                <div className="w-full lg:flex-1 max-w-[810px] flex flex-col">
+                    {/* Tabs - Specifications #DFEBFF / Description active #2958A4 with #DFEBFF text */}
+                    <div className="mb-6 flex w-full">
+                        <div className="w-full inline-flex rounded-[10px] overflow-hidden" style={{ backgroundColor: '#DFEBFF' }}>
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("specifications")}
-                                className={`w-full px-8 py-2 text-[16px] leading-[26px] rounded-[10px] ${activeTab === "specifications"
-                                    ? "bg-[#2958A4] text-white shadow-sm"
-                                    : "text-[#2958A4]"
-                                    }`}
-                                style={activeTab !== "specifications" ? { backgroundColor: '#DFEBFF' } : {}}
+                                className="flex-1 px-6 py-3 rounded-[10px] transition-colors"
+                                style={{
+                                    fontFamily: 'Satoshi, sans-serif',
+                                    fontSize: '16px',
+                                    fontWeight: 500,
+                                    lineHeight: '26px',
+                                    ...(activeTab === "specifications" ? { backgroundColor: '#2958A4', color: '#DFEBFF' } : { backgroundColor: '#DFEBFF', color: '#2958A4' })
+                                }}
                             >
                                 Specifications
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("description")}
+                                className="flex-1 px-6 py-3 rounded-[10px] transition-colors"
+                                style={{
+                                    fontFamily: 'Satoshi, sans-serif',
+                                    fontSize: '16px',
+                                    fontWeight: 500,
+                                    lineHeight: '26px',
+                                    ...(activeTab === "description" ? { backgroundColor: '#2958A4', color: '#DFEBFF' } : { backgroundColor: '#DFEBFF', color: '#2958A4' })
+                                }}
+                            >
+                                Description
                             </button>
                         </div>
                     </div>
 
-                    {/* Tab content */}
-                    <div className="text-[16px] leading-[26px] text-black flex-1">
+                    {/* Tab content - description body 18px/28px per design */}
+                    <div className="text-black flex-1" style={{ fontFamily: 'Satoshi, sans-serif', fontSize: '18px', lineHeight: '28px' }}>
                         {activeTab === "description" ? (
                             (metadata?.description || product.description) ? (
                                 <div>
@@ -359,8 +367,8 @@ export default function Description({ product, metadata }: Props) {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
                                             {/* FEATURES */}
                                             {features && (
-                                                <div className="col-span-1">
-                                                    <h4 className="text-black text-[19px]  leading-7 tracking-[-0.38px]">
+                                                <div className="col-span-1" style={{ maxWidth: '400px' }}>
+                                                    <h4 style={{ color: '#000', fontFamily: 'Satoshi, sans-serif', fontSize: '19px', fontWeight: 500, lineHeight: '28px', margin: 0, marginBottom: '8px' }}>
                                                         Features
                                                     </h4>
                                                     <div className="mt-2">
@@ -373,10 +381,10 @@ export default function Description({ product, metadata }: Props) {
                                                                             style={{
                                                                                 color: '#000',
                                                                                 fontFamily: 'Satoshi, sans-serif',
-                                                                                fontSize: '16px',
+                                                                                fontSize: '18px',
                                                                                 fontStyle: 'normal',
                                                                                 fontWeight: 400,
-                                                                                lineHeight: '26px'
+                                                                                lineHeight: '28px'
                                                                             }}
                                                                         >
                                                                             {cleanHTMLString(feature)}
@@ -476,8 +484,8 @@ export default function Description({ product, metadata }: Props) {
 
                                             {/* APPLICATIONS */}
                                             {applications && (
-                                                <div className="col-span-1">
-                                                    <h4 className="text-black text-[19px]  leading-7 tracking-[-0.38px]">
+                                                <div className="col-span-1" style={{ maxWidth: '400px' }}>
+                                                    <h4 style={{ color: '#000', fontFamily: 'Satoshi, sans-serif', fontSize: '19px', fontWeight: 500, lineHeight: '28px', margin: 0, marginBottom: '8px' }}>
                                                         Applications
                                                     </h4>
                                                     <div className="mt-2">
@@ -486,7 +494,7 @@ export default function Description({ product, metadata }: Props) {
                                                                 {applications.map((application: string, index: number) => (
                                                                     <li key={index} className="flex items-start gap-2">
                                                                         <span className="text-black text-[16px] leading-[24px]">•</span>
-                                                                        <span className="text-black text-[16px] leading-[26px] font-normal">
+                                                                        <span style={{ color: '#000', fontFamily: 'Satoshi, sans-serif', fontSize: '18px', fontWeight: 400, lineHeight: '28px' }}>
                                                                             {cleanHTMLString(application)}
                                                                         </span>
                                                                     </li>

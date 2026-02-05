@@ -33,9 +33,9 @@ export default async function Solutions() {
         <ProudPartners partnersData={partnersData} />
       </div>
 
-      {/* Explore More Section */}
+      {/* Explore More Section - Products first on Solutions page */}
       <div style={{ marginTop: "50px" }}>
-        <ExploreMore />
+        <ExploreMore variant="solutionsPage" />
       </div>
 
       {/* Newsletter Section */}
