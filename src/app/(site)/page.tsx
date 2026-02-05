@@ -41,7 +41,7 @@ export default async function HomePage() {
     <main>
       <Hero />
       <WorkWithUs />
-      <div style={{ marginTop: "50px" }}>
+      <div style={{ marginTop: "50px", marginBottom: "50px" }}>
         <ProudPartners partnersData={partnersData} />
       </div>
       <ExploreMore />
