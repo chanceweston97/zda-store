@@ -1,7 +1,9 @@
 import Newsletter from "@/components/Common/Newsletter";
 import ExploreMore from "@/components/Company/ExploreMore";
 import Hero from "@/components/Home/Hero";
+import ProudPartners from "@/components/Home/Hero/ProudPartners";
 import WorkWithUs from "@/components/Home/Hero/WorkWithUs";
+import { getProudPartners } from "@/lib/data/shop-utils";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -33,10 +35,15 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const partnersData = await getProudPartners();
+
   return (
     <main>
       <Hero />
       <WorkWithUs />
+      <div style={{ marginTop: "50px" }}>
+        <ProudPartners partnersData={partnersData} />
+      </div>
       <ExploreMore />
 
       <Newsletter />

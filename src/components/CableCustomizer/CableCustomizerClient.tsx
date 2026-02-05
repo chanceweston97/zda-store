@@ -92,14 +92,15 @@ function generateCableSku(
     if (!cableTypeCode) cableTypeCode = cableType.slug.toUpperCase();
   }
 
+  // F = female, M = male (replace Female before Male so "Female" isn't partially matched)
   const toConnectorCode = (name: string): string => {
     const s = name.replace(/-/g, "").replace(/\s/g, "");
-    return s.replace(/Male$/i, "M").replace(/Female$/i, "F");
+    return s.replace(/Female$/i, "F").replace(/Male$/i, "M");
   };
   const conn1Code = toConnectorCode(conn1.name);
   const conn2Code = toConnectorCode(conn2.name);
 
-  return `ZDA${seriesLetter}${cableTypeCode}${conn1Code}-${conn2Code}-${config.length}`;
+  return `ZDA${seriesLetter}${cableTypeCode}${conn1Code}-${conn2Code}-${config.length}`.toUpperCase();
 }
 
 export default function CableCustomizerClient({ data }: CableCustomizerClientProps) {

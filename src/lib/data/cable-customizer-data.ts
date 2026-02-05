@@ -9,7 +9,7 @@
  * 3. Ensure all prices are in DOLLARS (not cents)
  * 
  * Data Structure:
- * - cableSeries: Array of cable series (RG Series, LMR Series, etc.)
+ * - cableSeries: Array of cable series (RG Series, ZDAL Series (LMR® Equivalent), etc.)
  * - cableTypes: Array of cable types with pricePerFoot
  * - connectors: Array of connectors with pricing per cable type
  */
@@ -64,7 +64,7 @@ export const cableSeriesData: CableSeries[] = [
   {
     id: "lmr-series",
     _id: "lmr-series",
-    name: "LMR Series",
+    name: "ZDAL Series (LMR® Equivalent)",
     slug: "lmr-series",
     image: null,
   },
@@ -77,10 +77,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR100",
     _id: "LMR100",
-    name: "LMR 100",
+    name: "ZDAL 100",
     slug: "LMR100",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 0.55,
     image: null,
     maxLength: null,
@@ -89,10 +89,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR195",
     _id: "LMR195",
-    name: "LMR 195",
+    name: "ZDAL 195",
     slug: "LMR195",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 0.75,
     image: null,
     maxLength: null,
@@ -101,10 +101,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR200",
     _id: "LMR200",
-    name: "LMR 200",
+    name: "ZDAL 200",
     slug: "LMR200",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 0.85,
     image: null,
     maxLength: null,
@@ -113,10 +113,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-240",
     _id: "LMR-240",
-    name: "LMR 240",
+    name: "ZDAL 240",
     slug: "LMR-240",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 0.88,
     image: null,
     maxLength: null,
@@ -125,10 +125,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-400",
     _id: "LMR-400",
-    name: "LMR 400",
+    name: "ZDAL 400",
     slug: "LMR-400",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 1.05,
     image: null,
     maxLength: null,
@@ -137,10 +137,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-600",
     _id: "LMR-600",
-    name: "LMR 600",
+    name: "ZDAL 600",
     slug: "LMR-600",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 1.98,
     image: null,
     maxLength: null,
@@ -221,10 +221,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-400-ultr",
     _id: "LMR-400-ultr",
-    name: "LMR 400 UltraFlex",
+    name: "ZDAL 400 UltraFlex",
     slug: "LMR-400-ultr",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 2.15,
     image: null,
     maxLength: null,
@@ -233,10 +233,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-195-ultr",
     _id: "LMR-195-ultr",
-    name: "LMR 195 UltraFlex",
+    name: "ZDAL 195 UltraFlex",
     slug: "LMR-195-ultr",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 1.68,
     image: null,
     maxLength: null,
@@ -245,10 +245,10 @@ export const cableTypesData: CableType[] = [
   {
     id: "LMR-240-2",
     _id: "LMR-240-2",
-    name: "LMR 240 UltraFlex",
+    name: "ZDAL 240 UltraFlex",
     slug: "LMR-240-2",
     series: "lmr-series",
-    seriesName: "LMR Series",
+    seriesName: "ZDAL Series (LMR® Equivalent)",
     pricePerFoot: 1.95,
     image: null,
     maxLength: null,
