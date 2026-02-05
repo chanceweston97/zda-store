@@ -62,6 +62,46 @@ interface ValidationErrors {
   length?: string;
 }
 
+/**
+ * Generate SKU for custom cable: ZDA(L|RG)(cableType)(conn1)-(conn2)-(length)
+ * e.g. ZDAL400NM-SMAM-40 for LMR400 N-Male to SMA Male 40'
+ */
+function generateCableSku(
+  config: CableConfig,
+  cableSeriesMap: Map<string, { id: string; name: string; slug: string }>,
+  cableTypesMap: Map<string, { name: string; slug: string; series: string }>,
+  connectorsMap: Map<string, { name: string; slug: string }>
+): string {
+  if (!config.cableSeries || !config.cableType || !config.connector1 || !config.connector2 || config.length === "" || typeof config.length !== "number" || config.length < 1) {
+    return "";
+  }
+  const series = cableSeriesMap.get(config.cableSeries);
+  const cableType = cableTypesMap.get(config.cableType);
+  const conn1 = connectorsMap.get(config.connector1);
+  const conn2 = connectorsMap.get(config.connector2);
+  if (!series || !cableType || !conn1 || !conn2) return "";
+
+  const seriesLetter = series.slug.toLowerCase().includes("lmr") ? "L" : "RG";
+
+  let cableTypeCode: string;
+  if (seriesLetter === "L") {
+    cableTypeCode = cableType.slug.replace(/^LMR-?/i, "").replace(/-/g, "").toUpperCase();
+    if (!cableTypeCode) cableTypeCode = cableType.slug.replace(/-/g, "").toUpperCase();
+  } else {
+    cableTypeCode = cableType.slug.replace(/^rg/i, "").toUpperCase();
+    if (!cableTypeCode) cableTypeCode = cableType.slug.toUpperCase();
+  }
+
+  const toConnectorCode = (name: string): string => {
+    const s = name.replace(/-/g, "").replace(/\s/g, "");
+    return s.replace(/Male$/i, "M").replace(/Female$/i, "F");
+  };
+  const conn1Code = toConnectorCode(conn1.name);
+  const conn2Code = toConnectorCode(conn2.name);
+
+  return `ZDA${seriesLetter}${cableTypeCode}${conn1Code}-${conn2Code}-${config.length}`;
+}
+
 export default function CableCustomizerClient({ data }: CableCustomizerClientProps) {
   const router = useRouter();
   const { addItemWithAutoOpen } = useAutoOpenCart();
@@ -118,6 +158,12 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
     const sorted = data.connectors.sort((a, b) => (a.name > b.name ? 1 : -1));
     return sorted;
   }, [data.connectors]);
+
+  // Generated SKU for current selection (ZDA + series + cable type + connectors + length)
+  const generatedSku = useMemo(
+    () => generateCableSku(config, cableSeriesMap, cableTypesMap, connectorsMap),
+    [config, cableSeriesMap, cableTypesMap, connectorsMap]
+  );
 
   // Get connector price for a specific cable type
   const getConnectorPrice = (connectorSlug: string, cableTypeSlug: string): number => {
@@ -343,6 +389,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
         lengthInFeet: config.length, // Use different key to avoid conflict
         isCustom: true,
         unique_key: uniqueKey,
+        sku: generatedSku || undefined,
       },
     };
 
@@ -889,7 +936,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                         {
                           id: "custom-cable",
                           title: customizedCableTitle,
-                          sku: "Custom Cable",
+                          sku: generatedSku || "Custom Cable",
                           price: totalPrice,
                           quantity: config.quantity,
                           url:
@@ -1009,6 +1056,12 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   Configuration Summary
                 </h4>
                 <div className="space-y-2 text-[#383838] text-[14px]">
+                  {generatedSku ? (
+                    <div className="flex justify-between items-center">
+                      <span>SKU:</span>
+                      <span className="font-mono font-semibold text-[#2958A4]">{generatedSku}</span>
+                    </div>
+                  ) : null}
                   <div className="flex justify-between">
                     <span>Cable Series:</span>
                     <span>{cableSeriesMap.get(config.cableSeries)?.name || "Not selected"}</span>
