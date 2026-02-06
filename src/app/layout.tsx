@@ -21,7 +21,6 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/admin");
-  const isSolutionsPage = pathname === "/solutions";
 
   return (
     <html lang="en" className="font-inter scroll-smooth" suppressHydrationWarning>
@@ -61,7 +60,7 @@ export default function RootLayout({
 
           <Toaster position="top-center" reverseOrder={false} />
 
-          <div className={isSolutionsPage ? "" : "max-md:pb-20 max-md:pr-14"}>
+          <div>
             {children}
 
             {!isAdminRoute && (

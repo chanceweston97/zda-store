@@ -194,15 +194,15 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
 
   // cart image: just reuse main hero image
   const cartImageUrl = mainImageUrl;
-  // Ensure gainIndex is valid
+  // Ensure gainIndex is valid - start with no selection (-1)
   const validGainOptions = product.gainOptions?.filter((opt) => opt !== null && opt !== undefined) ?? [];
-  const initialGainIndex = validGainOptions.length > 0 ? 0 : -1;
+  const initialGainIndex = -1;
   const [gainIndex, setGainIndex] = useState(initialGainIndex);
 
-  // Update gainIndex if it becomes invalid
+  // Update gainIndex if it becomes invalid (e.g. options changed)
   useEffect(() => {
-    if (gainIndex >= (validGainOptions.length ?? 0) || gainIndex < 0) {
-      setGainIndex(validGainOptions.length > 0 ? 0 : -1);
+    if (gainIndex >= (validGainOptions.length ?? 0)) {
+      setGainIndex(-1);
     }
   }, [product.gainOptions, gainIndex, validGainOptions.length]);
 
@@ -479,37 +479,33 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
   const displaySku = useMemo(() => {
     const variants = ((product as any).variants ?? []) as any[];
     const selectedVariant = selectedLengthIndex >= 0 ? variants[selectedLengthIndex] : variants[0];
+    const baseSku = (product as any).sku;
 
     if (isConnectorProduct && variants.length > 0) {
-      return selectedVariant?.sku || (product as any).sku;
+      return selectedLengthIndex >= 0 ? (selectedVariant?.sku || baseSku) : baseSku || selectedVariant?.sku;
     }
 
     if (isStandaloneConnector) {
-      return (product as any).sku || variants[0]?.sku;
+      return baseSku || variants[0]?.sku;
     }
 
     if (product.productType === "connector" && variants.length > 0) {
-      return selectedVariant?.sku || (product as any).sku;
+      return selectedLengthIndex >= 0 ? (selectedVariant?.sku || baseSku) : baseSku || selectedVariant?.sku;
     }
 
     if (isCableProduct && lengthOptions.length > 0) {
-      const selectedLengthOption = selectedLengthIndex >= 0 ? lengthOptions[selectedLengthIndex] : lengthOptions[0];
-      return (selectedLengthOption as any)?.sku || (product as any).sku || selectedVariant?.sku;
+      if (selectedLengthIndex >= 0) {
+        const selectedLengthOption = lengthOptions[selectedLengthIndex];
+        return (selectedLengthOption as any)?.sku || baseSku || selectedVariant?.sku;
+      }
+      return baseSku || (lengthOptions[0] as any)?.sku || selectedVariant?.sku;
     }
 
     if (product.productType === "antenna") {
-      if (variants.length > 0) {
-        return selectedVariant?.sku || (product as any).sku;
-      }
-      if (currentGainOption) {
-        return (currentGainOption as any)?.sku ||
-          (product as any).sku ||
-          variants[0]?.sku ||
-          (product.gainOptions && (product.gainOptions[0] as any)?.sku);
-      }
+      return baseSku || (currentGainOption as any)?.sku || selectedVariant?.sku || variants[0]?.sku;
     }
 
-    return (product as any).sku || variants[0]?.sku;
+    return baseSku || variants[0]?.sku;
   }, [
     product,
     isCableProduct,
@@ -518,6 +514,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     lengthOptions,
     selectedLengthIndex,
     currentGainOption,
+    gainIndex,
   ]);
 
   // Get unit price (per item, without quantity) from selected gain option or calculated from length and connector price
@@ -653,8 +650,47 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     return getGainPrice(currentGainOption, gainIndex);
   }, [currentGainOption, gainIndex, product.gainOptions, isConnectorProduct, isStandaloneConnector, isSimpleConnector, isCableProduct, selectedLength, selectedLengthIndex, lengthOptions, cableTypePricePerFoot, connectorPrice, product.price, selectedCableTypeSlug, standaloneConnectorPrice, (product as any).variants]);
 
-  // Calculate total price for display (unit price × quantity) - REMOVED: Price should not scale with quantity
-  // Price display will show dynamicPrice (unit price) only
+  // Price display text: show "first ~ last" range when no selection, otherwise single price
+  const priceDisplayText = useMemo(() => {
+    // Antenna with gainOptions - no gain selected
+    if (product.productType === "antenna" && validGainOptions.length > 0 && gainIndex < 0) {
+      const prices = validGainOptions.map((opt, i) => getGainPrice(opt, i));
+      if (prices.length > 0) {
+        const minP = Math.min(...prices);
+        const maxP = Math.max(...prices);
+        return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+      }
+    }
+    // Antenna with variants - no variant selected
+    if (product.productType === "antenna" && (product as any).variants?.length > 0 && selectedLengthIndex < 0) {
+      const prices = (product as any).variants.map((v: any) => getVariantPrice(v));
+      if (prices.length > 0) {
+        const minP = Math.min(...prices);
+        const maxP = Math.max(...prices);
+        return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+      }
+    }
+    // Cable with lengthOptions or variants - no length selected
+    if (isCableProduct && selectedLengthIndex < 0) {
+      if (lengthOptions.length > 0) {
+        const prices = lengthOptions.map((o: any) => getLengthPrice(o));
+        if (prices.length > 0) {
+          const minP = Math.min(...prices);
+          const maxP = Math.max(...prices);
+          return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+        }
+      }
+      if ((product as any).variants?.length > 0) {
+        const prices = (product as any).variants.map((v: any) => getVariantPrice(v));
+        if (prices.length > 0) {
+          const minP = Math.min(...prices);
+          const maxP = Math.max(...prices);
+          return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+        }
+      }
+    }
+    return `$${formatPrice(dynamicPrice)}`;
+  }, [product.productType, validGainOptions, gainIndex, selectedLengthIndex, isCableProduct, lengthOptions, dynamicPrice, (product as any).variants]);
 
   const cartItem = useMemo(() => ({
     id: currentCartItemId, // Use unique ID that includes variant
@@ -796,6 +832,16 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
         return;
       }
     }
+    // For antenna products with gain options, validate gain is selected
+    if (product.productType === "antenna" && validGainOptions.length > 0 && gainIndex < 0) {
+      toast.error("Please select the gain first");
+      return;
+    }
+    // For antenna products with variants, validate gain/variant is selected
+    if (product.productType === "antenna" && (product as any).variants?.length > 0 && selectedLengthIndex < 0) {
+      toast.error("Please select the gain first");
+      return;
+    }
     
     // For cable products, validate length is selected
     if (isCableProduct) {
@@ -873,6 +919,55 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
       
       toast.success("Product added to cart!");
     }
+  };
+
+  const handleRequestQuote = () => {
+    // For antenna: require gain selection
+    if (product.productType === "antenna" && validGainOptions.length > 0 && gainIndex < 0) {
+      toast.error("Please select the gain first");
+      return;
+    }
+    if (product.productType === "antenna" && (product as any).variants?.length > 0 && selectedLengthIndex < 0) {
+      toast.error("Please select the gain first");
+      return;
+    }
+    // For cable: require length selection
+    if (isCableProduct && (selectedLengthIndex < 0 || !selectedLength)) {
+      toast.error("Please select the length first");
+      return;
+    }
+    // For connectors that need selection
+    if (isConnectorProduct && !selectedLength) {
+      toast.error("Please select the length first");
+      return;
+    }
+    if (product.productType === "connector" && !isConnectorProduct && !isStandaloneConnector && (product as any).variants?.length > 0 && selectedLengthIndex < 0) {
+      toast.error("Please select a Cable Type first");
+      return;
+    }
+    if (isSimpleConnector && selectedLengthIndex < 0) {
+      toast.error("Please select a Cable Type first");
+      return;
+    }
+    if (isStandaloneConnector && (!selectedCableSeriesSlug || !selectedCableTypeSlug)) {
+      toast.error("Please select both Cable Series and Cable Type first");
+      return;
+    }
+    openRequestQuoteModal({
+      products: [
+        {
+          id: product._id,
+          title: product.name ?? "Product",
+          sku: displaySku ?? (product as any).sku ?? undefined,
+          price: dynamicPrice ?? product.price ?? 0,
+          quantity,
+          url:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/products/${product?.slug?.current ?? product._id}`
+              : `/products/${product?.slug?.current ?? product._id}`,
+        },
+      ],
+    });
   };
 
   const handleToggleWishlist = () => {
@@ -1010,7 +1105,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   {product.name}
                 </h2>
 
-                {/* Price - 36px per design */}
+                {/* Price - 36px per design (range when no selection) */}
                 <h3
                   style={{
                     color: '#000',
@@ -1024,7 +1119,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                     margin: 0
                   }}
                 >
-                  ${formatPrice(dynamicPrice)}
+                  {priceDisplayText}
                 </h3>
               </div>
 
@@ -1920,23 +2015,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   <div className="pt-2 space-y-3 mt-4">
                       <button
                         type="button"
-                        onClick={() =>
-                          openRequestQuoteModal({
-                            products: [
-                              {
-                                id: product._id,
-                                title: product.name ?? "Product",
-                                sku: displaySku ?? (product as any).sku ?? undefined,
-                                price: dynamicPrice ?? product.price ?? 0,
-                                quantity,
-                                url:
-                                  typeof window !== "undefined"
-                                    ? `${window.location.origin}/products/${product?.slug?.current ?? product._id}`
-                                    : `/products/${product?.slug?.current ?? product._id}`,
-                              },
-                            ],
-                          })
-                        }
+                        onClick={handleRequestQuote}
                         className="btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent bg-[#2958A4] text-white text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#214683] w-full"
                         style={{ 
                           fontFamily: 'Satoshi, sans-serif',

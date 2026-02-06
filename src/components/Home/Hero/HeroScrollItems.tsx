@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
 import gsap from "gsap";
@@ -16,7 +15,8 @@ const NUMBER_MARGIN = 50;
 const CARD_HEIGHT = 450;
 const GAP = 50;
 
-// Button URLs link to Solutions page and scroll to the matching card (solutions-card-0..4; card 3 = Wildlife, card 4 = Private LTE)
+// Button URLs link to /solutions and scroll to the matching card (solutions-card-0..4; card 3 = Wildlife, card 4 = Private LTE)
+const CARD_BUTTON_URLS = ["/solutions#solutions-card-0", "/solutions#solutions-card-1", "/solutions#solutions-card-2", "/solutions#solutions-card-4"];
 const FALLBACK_ITEMS: HomeOfferingItem[] = [
   { title: "In-Building Wireless and DAS", description: "Indoor antennas and RF components engineered for active and passive DAS deployments across enterprise, public venue, and public safety environments.", button: { title: "Explore DAS Solutions", url: "/solutions#solutions-card-0" }, image: null },
   { title: "Public Safety & ERRCS", description: "RF solutions supporting VHF, UHF, and 700/800 MHz public safety communications where coverage reliability and code compliance are critical.", button: { title: "Explore Public Safety Solutions", url: "/solutions#solutions-card-1" }, image: null },
@@ -36,7 +36,12 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
   const card4Ref = useRef<HTMLDivElement>(null);
 
   const displayItems = useMemo(() => {
-    return [0, 1, 2, 3].map((i) => items?.[i] ?? FALLBACK_ITEMS[i]);
+    return [0, 1, 2, 3].map((i) => {
+      const item = items?.[i] ?? FALLBACK_ITEMS[i];
+      // Always use solutions page URLs (override WordPress/categories links)
+      const url = CARD_BUTTON_URLS[i];
+      return item?.button ? { ...item, button: { ...item.button, url } } : item;
+    });
   }, [items]);
 
   useEffect(() => {
@@ -205,10 +210,9 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 {displayItems[0].description}
               </p>
-              <Link
+              <a
                 href={displayItems[0].button.url}
-                prefetch={false}
-                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full no-underline"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
@@ -226,7 +230,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 <ButtonArrowHomepage />
                 <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[0].button.title}</p>
-              </Link>
+              </a>
             </div>
             <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
               <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
@@ -271,10 +275,9 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 {displayItems[1].description}
               </p>
-              <Link
+              <a
                 href={displayItems[1].button.url}
-                prefetch={false}
-                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full no-underline"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
@@ -292,7 +295,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 <ButtonArrowHomepage />
                 <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[1].button.title}</p>
-              </Link>
+              </a>
             </div>
             <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
               <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
@@ -337,10 +340,9 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 {displayItems[2].description}
               </p>
-              <Link
+              <a
                 href={displayItems[2].button.url}
-                prefetch={false}
-                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full no-underline"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
@@ -358,7 +360,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 <ButtonArrowHomepage />
                 <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[2].button.title}</p>
-              </Link>
+              </a>
             </div>
             <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
               <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
@@ -401,9 +403,9 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 {displayItems[3].description}
               </p>
-              <Link
+              <a
                 href={displayItems[3].button.url}
-                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full"
+                className="btn group relative inline-flex items-center justify-center rounded-[10px] border-1 border-[#2958A4] bg-transparent text-[#2958A4] text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:bg-[#2958A4] hover:text-white hover:border-[#2958A4] w-full no-underline"
                 style={{
                   fontFamily: "Satoshi, sans-serif",
                   padding: "10px 30px",
@@ -421,7 +423,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
               >
                 <ButtonArrowHomepage />
                 <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">{displayItems[3].button.title}</p>
-              </Link>
+              </a>
             </div>
             <div className="order-1 md:order-2 w-full max-w-[360px] flex-shrink-0 flex items-center justify-center" style={{ aspectRatio: "1/1" }}>
               <div className="w-full h-full bg-[#E0E7FF] rounded-lg flex items-center justify-center text-[#6B7280] relative overflow-hidden" style={{ aspectRatio: "1/1" }}>

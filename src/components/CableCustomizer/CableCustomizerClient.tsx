@@ -63,8 +63,8 @@ interface ValidationErrors {
 }
 
 /**
- * Generate SKU for custom cable: ZDA(L|RG)(cableType)(conn1)-(conn2)-(length)
- * e.g. ZDAL400NM-SMAM-40 for LMR400 N-Male to SMA Male 40'
+ * Generate SKU for custom cable: ZDA(cable type)(number)-(connector1)-(connector2)-(length)
+ * e.g. ZDAL400UF-NM-NM-50 for LMR400 UltraFlex N-Male to N-Male 50'
  */
 function generateCableSku(
   config: CableConfig,
@@ -87,6 +87,7 @@ function generateCableSku(
   if (seriesLetter === "L") {
     cableTypeCode = cableType.slug.replace(/^LMR-?/i, "").replace(/-/g, "").toUpperCase();
     if (!cableTypeCode) cableTypeCode = cableType.slug.replace(/-/g, "").toUpperCase();
+    cableTypeCode = cableTypeCode.replace(/ULTR/g, "UF");
   } else {
     cableTypeCode = cableType.slug.replace(/^rg/i, "").toUpperCase();
     if (!cableTypeCode) cableTypeCode = cableType.slug.toUpperCase();
@@ -100,7 +101,7 @@ function generateCableSku(
   const conn1Code = toConnectorCode(conn1.name);
   const conn2Code = toConnectorCode(conn2.name);
 
-  return `ZDA${seriesLetter}${cableTypeCode}${conn1Code}-${conn2Code}-${config.length}`.toUpperCase();
+  return `ZDA${seriesLetter}${cableTypeCode}-${conn1Code}-${conn2Code}-${config.length}`.toUpperCase();
 }
 
 export default function CableCustomizerClient({ data }: CableCustomizerClientProps) {
@@ -1100,9 +1101,10 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
             </div>
           </div>
         </div>
+        <p className="mt-6 text-center text-sm text-gray-500" style={{ fontFamily: "Satoshi, sans-serif" }}>
+          LMR® is a registered trademark of Times Microwave.
+        </p>
       </section>
-
-     
 
       {/* Request for Quote Section */}
       <WorkWithUs />

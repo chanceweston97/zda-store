@@ -82,13 +82,18 @@ export default function SolutionsScrollItems() {
     if (typeof window === "undefined") return;
     const hash = window.location.hash?.slice(1);
     if (!hash || !hash.startsWith(SOLUTIONS_CARD_ID_PREFIX)) return;
-    const timer = setTimeout(() => {
+    const scrollToCard = () => {
       const el = document.getElementById(hash);
       if (el) {
-        const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+        ScrollTrigger.refresh();
+        requestAnimationFrame(() => {
+          const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+        });
       }
-    }, 400);
+    };
+    // Wait for layout/ScrollTrigger to be ready
+    const timer = setTimeout(scrollToCard, 600);
     return () => clearTimeout(timer);
   }, []);
 

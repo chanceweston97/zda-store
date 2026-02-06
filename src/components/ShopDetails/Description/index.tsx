@@ -314,23 +314,9 @@ export default function Description({ product, metadata }: Props) {
 
                 {/* RIGHT COLUMN – TABS + CONTENT - 810px max per design */}
                 <div className="w-full lg:flex-1 max-w-[810px] flex flex-col">
-                    {/* Tabs - Specifications #DFEBFF / Description active #2958A4 with #DFEBFF text */}
+                    {/* Tabs - Description first, Specifications second */}
                     <div className="mb-6 flex w-full">
                         <div className="w-full inline-flex rounded-[10px] overflow-hidden" style={{ backgroundColor: '#DFEBFF' }}>
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab("specifications")}
-                                className="flex-1 px-6 py-3 rounded-[10px] transition-colors"
-                                style={{
-                                    fontFamily: 'Satoshi, sans-serif',
-                                    fontSize: '16px',
-                                    fontWeight: 500,
-                                    lineHeight: '26px',
-                                    ...(activeTab === "specifications" ? { backgroundColor: '#2958A4', color: '#DFEBFF' } : { backgroundColor: '#DFEBFF', color: '#2958A4' })
-                                }}
-                            >
-                                Specifications
-                            </button>
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("description")}
@@ -344,6 +330,20 @@ export default function Description({ product, metadata }: Props) {
                                 }}
                             >
                                 Description
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("specifications")}
+                                className="flex-1 px-6 py-3 rounded-[10px] transition-colors"
+                                style={{
+                                    fontFamily: 'Satoshi, sans-serif',
+                                    fontSize: '16px',
+                                    fontWeight: 500,
+                                    lineHeight: '26px',
+                                    ...(activeTab === "specifications" ? { backgroundColor: '#2958A4', color: '#DFEBFF' } : { backgroundColor: '#DFEBFF', color: '#2958A4' })
+                                }}
+                            >
+                                Specifications
                             </button>
                         </div>
                     </div>
