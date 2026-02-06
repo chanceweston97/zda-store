@@ -65,5 +65,5 @@ const ProductsPage = async ({ searchParams }: PageProps) => {
     </main>
   );
 };
-
+  
 export default ProductsPage;

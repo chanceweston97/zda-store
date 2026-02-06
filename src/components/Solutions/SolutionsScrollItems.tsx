@@ -10,9 +10,11 @@ gsap.registerPlugin(ScrollTrigger);
 const SOLUTIONS_CARD_ID_PREFIX = "solutions-card";
 
 const HEADER_OFFSET = 80;
-const NUMBER_HEIGHT = 20;
-const NUMBER_MARGIN = 50;
-const CARD_HEIGHT = 450;
+const NUMBER_HEIGHT = 16;
+const NUMBER_MARGIN = 36;
+const CARD_HEIGHT = 360;
+const STAGGER_DESKTOP = NUMBER_HEIGHT + NUMBER_MARGIN; // 52px - header overlap when stacked
+const STAGGER_MOBILE = 24; // smaller overlap on mobile
 
 const SOLUTIONS_ITEMS = [
   {
@@ -59,14 +61,23 @@ export default function SolutionsScrollItems() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const itemCount = SOLUTIONS_ITEMS.length;
-  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * (NUMBER_HEIGHT + NUMBER_MARGIN);
 
   // Run ScrollTrigger setup after refs from .map() are attached (Company uses fixed refs so refs are ready immediately)
   const [refsReady, setRefsReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setRefsReady(true));
     return () => cancelAnimationFrame(id);
   }, []);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handler = () => setIsMobile(mq.matches);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  const stagger = isMobile ? STAGGER_MOBILE : STAGGER_DESKTOP;
+  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * stagger;
 
   // Scroll to card when landing page links with hash (e.g. /solutions#solutions-card-0)
   useEffect(() => {
@@ -103,7 +114,7 @@ export default function SolutionsScrollItems() {
 
     // Cards 1 to N-1: sticky pin (same as Company)
     for (let i = 0; i < itemCount - 1; i++) {
-      const cardPinTop = HEADER_OFFSET + i * (NUMBER_HEIGHT + NUMBER_MARGIN);
+      const cardPinTop = HEADER_OFFSET + i * stagger;
       gsap.set(cards[i], { zIndex: i + 1 });
       ScrollTrigger.create({
         trigger: cards[i],
@@ -144,10 +155,26 @@ export default function SolutionsScrollItems() {
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [refsReady, itemCount, lastCardPinTop]);
+  }, [refsReady, itemCount, lastCardPinTop, stagger]);
 
   return (
-    <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12">
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .solutions-card-sticky-gap { margin-bottom: 280px; }
+            @media (max-width: 767px) {
+              .solutions-card-title { font-size: 16px !important; line-height: 1.2 !important; letter-spacing: -0.15px !important; }
+              .solutions-card-desc { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -0.05px !important; }
+              .solutions-card-sticky-gap { margin-bottom: 220px; }
+            }
+          `,
+        }}
+      />
+    <div
+      className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12"
+      style={{ paddingBottom: "max(3rem, env(safe-area-inset-bottom, 0px) + 2rem)" }}
+    >
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start">
         {/* Dots - Hidden on mobile (same as Company) */}
         <div
@@ -174,8 +201,12 @@ export default function SolutionsScrollItems() {
           ))}
         </div>
 
-        {/* Cards - same structure as Company */}
-        <div ref={containerRef} className="w-full md:flex-1">
+        {/* Cards - same structure as Company; extra bottom padding so card content is not cut off by toolbar/URL bar */}
+        <div
+          ref={containerRef}
+          className="w-full md:flex-1"
+          style={{ paddingBottom: "min(50vh, 400px)" }}
+        >
           {SOLUTIONS_ITEMS.map((item, index) => (
             <div
               key={index}
@@ -183,7 +214,7 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className="flex flex-col md:flex-row"
+              className={`flex flex-col md:flex-row ${index < itemCount - 1 ? "solutions-card-sticky-gap" : ""}`}
               style={{
                 minHeight: CARD_HEIGHT,
                 height: "auto",
@@ -191,17 +222,17 @@ export default function SolutionsScrollItems() {
                 overflow: "hidden",
                 position: "relative",
                 ...(index < itemCount - 1
-                  ? { marginBottom: "400px" }
-                  : { zIndex: itemCount }),
+                  ? {}
+                  : { zIndex: itemCount, marginBottom: "min(40vh, 320px)" }),
               }}
             >
-              {/* Left Image Section - smaller height on mobile so description is readable */}
+              {/* Left Image Section - condensed on mobile only */}
               <div
                 className="w-full md:w-[40%] md:shrink-0"
                 style={{ display: "flex", alignItems: "stretch" }}
               >
                 <div
-                  className="h-[200px] md:h-full md:min-h-[300px]"
+                  className="h-[160px] md:h-full md:min-h-[300px]"
                   style={{
                     width: "100%",
                     position: "relative",
@@ -226,7 +257,7 @@ export default function SolutionsScrollItems() {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-start",
-                  padding: "clamp(30px, 5vw, 60px)",
+                  padding: "clamp(20px, 4vw, 44px)",
                   background: "#FFF",
                   overflow: "visible",
                 }}
@@ -235,40 +266,42 @@ export default function SolutionsScrollItems() {
                   style={{
                     color: "#457B9D",
                     fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(14px, 2vw, 16px)",
+                    fontSize: "clamp(13px, 1.8vw, 15px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "1.35",
-                    letterSpacing: "-0.32px",
-                    marginBottom: "14px",
+                    lineHeight: "1.3",
+                    letterSpacing: "-0.12px",
+                    marginBottom: "10px",
                   }}
                 >
                   {item.label}
                 </div>
                 <h3
+                  className="solutions-card-title"
                   style={{
                     color: "#000",
                     fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(32px, 5vw, 48px)",
+                    fontSize: "clamp(26px, 4.2vw, 40px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "1.2",
-                    letterSpacing: "-0.96px",
+                    lineHeight: "1.18",
+                    letterSpacing: "-0.4px",
                     margin: 0,
-                    marginBottom: "20px",
+                    marginBottom: "14px",
                   }}
                 >
                   {item.title}
                 </h3>
                 <p
-                  className="whitespace-pre-line"
+                  className="solutions-card-desc whitespace-pre-line"
                   style={{
                     color: "#383838",
                     fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(16px, 2vw, 18px)",
+                    fontSize: "clamp(14px, 1.8vw, 16px)",
                     fontStyle: "normal",
                     fontWeight: 400,
-                    lineHeight: "clamp(24px, 3vw, 28px)",
+                    lineHeight: "clamp(22px, 2.6vw, 26px)",
+                    letterSpacing: "-0.1px",
                     margin: 0,
                   }}
                 >
@@ -280,5 +313,6 @@ export default function SolutionsScrollItems() {
         </div>
       </div>
     </div>
+    </>
   );
 }
