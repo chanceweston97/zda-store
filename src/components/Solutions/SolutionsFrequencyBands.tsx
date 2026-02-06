@@ -65,7 +65,7 @@ export default function SolutionsFrequencyBands() {
         }}
       />
     <section
-      className="w-full flex flex-col items-start overflow-hidden px-4 sm:px-6 md:px-[50px] gap-[50px] py-12 md:py-16"
+      className="w-full flex flex-col items-start overflow-hidden px-4 sm:px-6 md:px-[50px] gap-[50px] pt-0 pb-12 md:pb-16"
       style={sectionStyles}
     >
       <div className="w-full max-w-[1340px] mx-auto flex flex-col gap-[50px]">

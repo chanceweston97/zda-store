@@ -4,20 +4,20 @@ import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Custom RF Coax Cable Builder | LMR & RG Assemblies | ZDA",
+  title: "RF Coaxial Cable Builder | LMR & RG Assemblies | ZDA",
   description:
-    "Build custom RF coax cable assemblies fast—LMR-equivalent and RG series cut to length with 4.3-10, N-Type, SMA and other terminations. Request a quote.",
+    "Build RF coaxial cable assemblies fast—LMR-equivalent and RG series cut to length with 4.3-10, N-Type, SMA and other terminations. Request a quote.",
   openGraph: {
-    title: "RF Cable Builder | ZDA Communications",
+    title: "RF Coaxial Cable Builder | ZDA Communications",
     description:
-      "Configure cut-to-length RF coax assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
+      "Configure cut-to-length RF coaxial cable assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
     images: [{ url: DEFAULT_OG_IMAGE }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "RF Cable Builder | ZDA Communications",
+    title: "RF Coaxial Cable Builder | ZDA Communications",
     description:
-      "Configure cut-to-length RF coax assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
+      "Configure cut-to-length RF coaxial cable assemblies using LMR-equivalent and RG series cable with 4.3-10, N-Type, SMA, and other connector terminations.",
     images: [DEFAULT_OG_IMAGE],
   },
 };

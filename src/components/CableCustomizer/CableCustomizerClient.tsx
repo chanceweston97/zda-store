@@ -458,7 +458,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                   marginBottom: 'clamp(20px, 5vw, 50px)'
                 }}
               >
-                Custom Cable Builder
+                RF Cable Builder
               </h1>
               <p 
                 className="text-white"

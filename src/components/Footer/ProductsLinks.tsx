@@ -18,8 +18,8 @@ const accountLinks = [
   },
   {
     id: 4,
-    label: 'Connectors',
-    href: '/categories/connectors',
+    label: 'RF Components',
+    href: '/categories/rf-components',
   },
   {
     id: 5,

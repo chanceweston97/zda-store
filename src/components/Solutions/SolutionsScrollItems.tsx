@@ -57,8 +57,6 @@ const SOLUTIONS_ITEMS = [
 export default function SolutionsScrollItems() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const dotsRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const itemCount = SOLUTIONS_ITEMS.length;
 
@@ -100,19 +98,9 @@ export default function SolutionsScrollItems() {
     ScrollTrigger.getAll().forEach((t) => t.kill());
 
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
-    if (!containerRef.current || !dotsRef.current || cards.length !== itemCount) return;
+    if (!containerRef.current || cards.length !== itemCount) return;
 
-    // Pin dots with first card (same as Company)
-    ScrollTrigger.create({
-      trigger: cards[0],
-      start: `top ${HEADER_OFFSET}px`,
-      endTrigger: cards[itemCount - 1],
-      end: `top ${lastCardPinTop}px`,
-      pin: dotsRef.current,
-      pinSpacing: false,
-    });
-
-    // Cards 1 to N-1: sticky pin (same as Company)
+    // Cards 1 to N-1: sticky pin
     for (let i = 0; i < itemCount - 1; i++) {
       const cardPinTop = HEADER_OFFSET + i * stagger;
       gsap.set(cards[i], { zIndex: i + 1 });
@@ -125,11 +113,9 @@ export default function SolutionsScrollItems() {
         pinSpacing: false,
         anticipatePin: 1,
         onEnter: () => {
-          setActiveIndex(i);
           if (cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         },
         onEnterBack: () => {
-          setActiveIndex(i);
           if (cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         },
         onLeave: () => {
@@ -146,8 +132,6 @@ export default function SolutionsScrollItems() {
     ScrollTrigger.create({
       trigger: cards[itemCount - 1],
       start: `top ${lastCardPinTop}px`,
-      onEnter: () => setActiveIndex(itemCount - 1),
-      onEnterBack: () => setActiveIndex(itemCount - 1),
     });
 
     ScrollTrigger.refresh();
@@ -163,12 +147,62 @@ export default function SolutionsScrollItems() {
         dangerouslySetInnerHTML={{
           __html: `
             .solutions-card-sticky-gap { margin-bottom: 280px; }
-            .solutions-last-card-gap { margin-bottom: 0; }
             .solutions-container-bottom { padding-bottom: 0; }
+            @media (min-width: 768px) {
+              .solutions-card-label {
+                color: #457B9D;
+                font-size: 16px;
+                font-family: Satoshi, sans-serif;
+                font-weight: 400;
+                line-height: 20px;
+                word-wrap: break-word;
+              }
+              .solutions-card-title {
+                color: black;
+                font-size: 40px;
+                font-family: Satoshi, sans-serif;
+                font-weight: 400;
+                line-height: 46px;
+                word-wrap: break-word;
+              }
+              .solutions-card-desc {
+                color: #383838;
+                font-size: 18px;
+                font-family: Satoshi, sans-serif;
+                font-weight: 400;
+                line-height: 28px;
+                word-wrap: break-word;
+                padding-right: 2.5rem;
+              }
+              .solutions-card-content { gap: 50px; }
+              .solutions-card-title-block { flex-direction: column; gap: 10px; }
+            }
+            @media (min-width: 768px) {
+              .solutions-card-item-mobile { padding: 0 !important; }
+              .solutions-card-last { margin-bottom: 0 !important; }
+            }
             @media (max-width: 767px) {
+              .solutions-card-item-mobile { height: 600px !important; min-height: 600px !important; padding: 10px !important; padding-bottom: 60px !important; }
+              .solutions-card-sticky-gap { margin-bottom: 220px; }
+              .solutions-card-last { margin-bottom: 0 !important; }
+              .solutions-card-label {
+                color: #457B9D;
+                font-size: clamp(13px, 1.8vw, 15px) !important;
+                font-family: Satoshi, sans-serif;
+                font-weight: 400;
+                line-height: 1.3 !important;
+                letter-spacing: -0.12px;
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+              }
               .solutions-card-title { font-size: 16px !important; line-height: 1.2 !important; letter-spacing: -0.15px !important; }
               .solutions-card-desc { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -0.05px !important; }
-              .solutions-card-sticky-gap { margin-bottom: 220px; }
+              .solutions-card-image-wrap {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 120px !important;
+                min-height: 120px !important;
+              }
             }
           `,
         }}
@@ -177,36 +211,11 @@ export default function SolutionsScrollItems() {
       className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12"
       style={{ paddingBottom: "max(3rem, env(safe-area-inset-bottom, 0px) + 2rem)" }}
     >
-      <div className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start">
-        {/* Dots - Hidden on mobile (same as Company) */}
-        <div
-          ref={dotsRef}
-          className="hidden md:flex"
-          style={{
-            flexDirection: "column",
-            gap: 12,
-            alignSelf: "flex-start",
-            marginTop: `${CARD_HEIGHT * (2 / 3)}px`,
-          }}
-        >
-          {SOLUTIONS_ITEMS.map((_, index) => (
-            <div
-              key={index}
-              style={{
-                width: 8,
-                height: activeIndex === index ? 40 : 8,
-                borderRadius: 4,
-                background: activeIndex === index ? "#2958A4" : "#CBD5E1",
-                transition: "0.3s",
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Cards - same structure as Company; extra bottom padding so card content is not cut off by toolbar/URL bar */}
+      <div className="flex flex-col md:flex-row items-start">
+        {/* Cards */}
         <div
           ref={containerRef}
-          className="w-full md:flex-1 solutions-container-bottom"
+          className="w-full md:flex-1 solutions-container-bottom solutions-cards-container"
         >
           {SOLUTIONS_ITEMS.map((item, index) => (
             <div
@@ -215,97 +224,60 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className={`flex flex-col md:flex-row ${index < itemCount - 1 ? "solutions-card-sticky-gap" : "solutions-last-card-gap"}`}
+              className={`flex flex-col md:flex-row md:justify-between md:items-center bg-white solutions-card-item-mobile solutions-card-sticky-gap ${index === itemCount - 1 ? "solutions-card-last" : ""}`}
               style={{
                 minHeight: CARD_HEIGHT,
                 height: "auto",
                 transition: "box-shadow 0.3s",
                 overflow: "hidden",
                 position: "relative",
-                ...(index < itemCount - 1
-                  ? {}
-                  : { zIndex: itemCount }),
+                ...(index === itemCount - 1 ? { zIndex: itemCount } : {}),
               }}
             >
               {/* Left Image Section - condensed on mobile only */}
               <div
-                className="w-full md:w-[40%] md:shrink-0"
+                className="w-full md:w-[550px] md:shrink-0"
                 style={{ display: "flex", alignItems: "stretch" }}
               >
-                <div
-                  className="h-[160px] md:h-full md:min-h-[300px]"
-                  style={{
-                    width: "100%",
-                    position: "relative",
-                    overflow: "hidden",
-                    borderRadius: "10px",
-                  }}
-                >
+<div
+                className="solutions-card-image-wrap h-[160px] md:h-[550px] md:w-[550px] md:shrink-0"
+                style={{
+                  width: "100%",
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: "10px",
+                }}
+              >
                   <Image
                     src={item.image}
                     alt={item.title}
                     fill
                     className="object-cover"
                     style={{ borderRadius: "10px" }}
-                    sizes="(max-width: 768px) 100vw, 40vw"
+                    sizes="(max-width: 768px) 100vw, 550px"
                   />
                 </div>
               </div>
               {/* Right Content Section */}
               <div
-                className="w-full md:w-[60%] md:shrink-0 md:min-h-0"
+                className="w-full md:w-[750px] md:shrink-0 md:min-h-0 solutions-card-content flex flex-col gap-2 sm:gap-6"
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-start",
-                  padding: "clamp(20px, 4vw, 44px)",
                   background: "#FFF",
                   overflow: "visible",
                 }}
               >
-                <div
-                  style={{
-                    color: "#457B9D",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(13px, 1.8vw, 15px)",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "1.3",
-                    letterSpacing: "-0.12px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  {item.label}
+                <div className="solutions-card-title-block flex flex-col sm:gap-2.5 md:gap-[10px]">
+                  <div className="solutions-card-label">
+                    {item.label}
+                  </div>
+                  <h3 className="solutions-card-title" style={{ margin: 0 }}>
+                    {item.title}
+                  </h3>
                 </div>
-                <h3
-                  className="solutions-card-title"
-                  style={{
-                    color: "#000",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(26px, 4.2vw, 40px)",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "1.18",
-                    letterSpacing: "-0.4px",
-                    margin: 0,
-                    marginBottom: "14px",
-                  }}
-                >
-                  {item.title}
-                </h3>
-                <p
-                  className="solutions-card-desc whitespace-pre-line"
-                  style={{
-                    color: "#383838",
-                    fontFamily: "Satoshi, sans-serif",
-                    fontSize: "clamp(14px, 1.8vw, 16px)",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    lineHeight: "clamp(22px, 2.6vw, 26px)",
-                    letterSpacing: "-0.1px",
-                    margin: 0,
-                  }}
-                >
+                <p className="solutions-card-desc whitespace-pre-line" style={{ margin: 0 }}>
                   {item.description}
                 </p>
               </div>

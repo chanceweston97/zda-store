@@ -80,7 +80,7 @@ const Newsletter = () => {
         <Link
           ref={buttonRef.ref}
           href="/contact"
-          className={`btn filled group relative inline-flex items-center justify-center rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 ${
+          className={`btn filled group relative inline-flex items-center justify-center gap-2 rounded-[10px] border border-transparent text-[14px] sm:text-[16px] font-medium transition-all duration-300 ease-in-out hover:opacity-90 w-[180px] sm:w-[200px] h-12 ${
             buttonRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -89,22 +89,16 @@ const Newsletter = () => {
             fontFamily: 'Satoshi, sans-serif',
             backgroundColor: '#70C8FF',
             color: '#002D78',
-            padding: '10px 30px',
-            paddingRight: '30px',
+            padding: '10px 24px',
             cursor: 'pointer',
-            minWidth: 'fit-content',
             transitionDuration: '1000ms',
             transitionDelay: '400ms'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.paddingRight = 'calc(30px + 17px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.paddingRight = '30px';
-          }}
         >
-          <ButtonArrowHomepage />
-          <p className="transition-transform duration-300 ease-in-out group-hover:translate-x-[11px] m-0">Inquire Today</p>
+          <span className="flex items-center gap-2 transition-transform duration-300 ease-in-out group-hover:translate-x-[11px]">
+            <ButtonArrowHomepage />
+            <span className="m-0">Inquire Today</span>
+          </span>
         </Link>
       </div>
     </section>
