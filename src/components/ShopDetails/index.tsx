@@ -999,7 +999,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: 'clamp(28px, 4vw, 48px)',
+                    fontSize: 'clamp(28px, 4vw, 36px)',
                     fontStyle: 'normal',
                     fontWeight: 400,
                     lineHeight: 'clamp(34px, 5vw, 58px)',
@@ -1015,7 +1015,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
                   style={{
                     color: '#000',
                     fontFamily: 'Satoshi, sans-serif',
-                    fontSize: 'clamp(24px, 3vw, 36px)',
+                    fontSize: 'clamp(24px, 3vw, 30px)',
                     fontStyle: 'normal',
                     fontWeight: 400,
                     lineHeight: '36px',
