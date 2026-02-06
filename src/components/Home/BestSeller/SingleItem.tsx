@@ -13,7 +13,7 @@ import {
 } from "@/redux/features/wishlist-slice";
 // import ReviewStar from "@/components/Shop/ReviewStar";
 import { imageBuilder } from "@/lib/data/shop-utils";
-import { getProductPrice } from "@/utils/getProductPrice";
+import { getProductPrice, getProductPriceDisplay } from "@/utils/getProductPrice";
 import { formatPrice } from "@/utils/price";
 import { useShoppingCart } from "use-shopping-cart";
 import { useAutoOpenCart } from "../../Providers/AutoOpenCartProvider";
@@ -117,7 +117,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </h3>
 
           <span className="flex items-center justify-center gap-2 text-lg font-medium">
-            <span className="text-dark">${formatPrice(productPrice)}</span>
+            <span className="text-dark">{getProductPriceDisplay(item)}</span>
             {item.discountedPrice && item.discountedPrice < productPrice && (
               <span className="line-through text-dark-4">${formatPrice(productPrice)}</span>
             )}

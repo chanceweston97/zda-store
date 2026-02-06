@@ -481,18 +481,18 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     const selectedVariant = selectedLengthIndex >= 0 ? variants[selectedLengthIndex] : variants[0];
     const baseSku = (product as any).sku;
 
+    // Connectors: show variant SKU when cable type selected
     if (isConnectorProduct && variants.length > 0) {
       return selectedLengthIndex >= 0 ? (selectedVariant?.sku || baseSku) : baseSku || selectedVariant?.sku;
     }
-
     if (isStandaloneConnector) {
       return baseSku || variants[0]?.sku;
     }
-
     if (product.productType === "connector" && variants.length > 0) {
       return selectedLengthIndex >= 0 ? (selectedVariant?.sku || baseSku) : baseSku || selectedVariant?.sku;
     }
 
+    // Cables: show length variant SKU when length selected
     if (isCableProduct && lengthOptions.length > 0) {
       if (selectedLengthIndex >= 0) {
         const selectedLengthOption = lengthOptions[selectedLengthIndex];
@@ -501,7 +501,14 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
       return baseSku || (lengthOptions[0] as any)?.sku || selectedVariant?.sku;
     }
 
+    // Antennas: show gain variant SKU when gain selected
     if (product.productType === "antenna") {
+      if (validGainOptions.length > 0 && gainIndex >= 0) {
+        return (currentGainOption as any)?.sku || baseSku || selectedVariant?.sku;
+      }
+      if (variants.length > 0 && selectedLengthIndex >= 0) {
+        return selectedVariant?.sku || baseSku;
+      }
       return baseSku || (currentGainOption as any)?.sku || selectedVariant?.sku || variants[0]?.sku;
     }
 
@@ -515,6 +522,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
     selectedLengthIndex,
     currentGainOption,
     gainIndex,
+    validGainOptions.length,
   ]);
 
   // Get unit price (per item, without quantity) from selected gain option or calculated from length and connector price

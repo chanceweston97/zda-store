@@ -9,7 +9,7 @@ import {
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
-import { getProductPrice } from "@/utils/getProductPrice";
+import { getProductPrice, getProductPriceDisplay } from "@/utils/getProductPrice";
 import { formatPrice } from "@/utils/price";
 import Image from "next/image";
 import Link from "next/link";
@@ -266,7 +266,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
               </h2>
             </Link>
 
-            {/* Price */}
+            {/* Price - range like PDP when variants exist */}
             <h3
               style={{
                 color: '#000',
@@ -280,7 +280,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
                 margin: 0
               }}
             >
-              ${formatPrice(productPrice)}
+              {getProductPriceDisplay(item)}
             </h3>
           </div>
 

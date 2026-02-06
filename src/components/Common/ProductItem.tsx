@@ -10,7 +10,7 @@ import {
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
-import { getProductPrice } from "@/utils/getProductPrice";
+import { getProductPrice, getProductPriceDisplay } from "@/utils/getProductPrice";
 import { formatPrice } from "@/utils/price";
 import Image from "next/image";
 import Link from "next/link";
@@ -253,7 +253,7 @@ const ProductItem = ({ item }: { item: Product }) => {
       )}
 
       <span className="flex items-center gap-2 font-medium" style={{ fontSize: '30px', fontFamily: 'Satoshi, sans-serif' }}>
-        <span className="text-dark">${formatPrice(productPrice)}</span>
+        <span className="text-dark">{getProductPriceDisplay(item)}</span>
         {item.discountedPrice && item.discountedPrice < productPrice && (
           <span className="line-through text-dark-4">${formatPrice(productPrice)}</span>
         )}

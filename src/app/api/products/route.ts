@@ -174,32 +174,35 @@ export async function GET(req: Request) {
       if (allCount === 0) allCount = totalCount;
     }
 
-    const fetchFirstVariationSku = async (
+    const fetchVariationData = async (
       productId: number
-    ): Promise<string | null> => {
+    ): Promise<{ sku: string | null; priceMin?: number; priceMax?: number }> => {
       try {
         const variationParams = new URLSearchParams({
           consumer_key: consumerKey,
           consumer_secret: consumerSecret,
-          per_page: "1",
-          page: "1",
+          per_page: "100",
           orderby: "id",
           order: "asc",
-          _fields: "sku",
+          _fields: "sku,price,regular_price,sale_price",
         });
-        
         const variationRes = await fetch(
           `${apiUrl}/products/${productId}/variations?${variationParams.toString()}`,
           { cache: "no-store" }
         );
-        
-        if (!variationRes.ok) return null;
-        const variations = (await variationRes.json()) as Array<{ sku?: string }>;
-        const sku = variations?.[0]?.sku?.trim();
-        return sku || null;
+        if (!variationRes.ok) return { sku: null };
+        const variations = (await variationRes.json()) as Array<{ sku?: string; price?: string; regular_price?: string; sale_price?: string }>;
+        if (!variations?.length) return { sku: null };
+        const sku = variations[0]?.sku?.trim() || null;
+        const prices = variations
+          .map((v) => parsePrice(v.sale_price || v.price || v.regular_price))
+          .filter((p) => p > 0);
+        if (prices.length === 0) return { sku };
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        return { sku, priceMin: min, priceMax: max };
       } catch (error) {
-        // Silently fail - don't block product listing if variation fetch fails
-        return null;
+        return { sku: null };
       }
     };
 
@@ -225,16 +228,25 @@ export async function GET(req: Request) {
           undefined;
 
         let sku = product.sku || "";
-        if (!sku && product.variations && product.variations.length > 0) {
-          const variationSku = await fetchFirstVariationSku(product.id);
-          if (variationSku) sku = variationSku;
+        let price = parsePrice(product.price || product.sale_price || product.regular_price);
+        let priceMin: number | undefined;
+        let priceMax: number | undefined;
+        if (product.variations && product.variations.length > 0) {
+          const varData = await fetchVariationData(product.id);
+          if (!sku && varData.sku) sku = varData.sku;
+          if (varData.priceMin != null && varData.priceMax != null && varData.priceMin !== varData.priceMax) {
+            priceMin = varData.priceMin;
+            priceMax = varData.priceMax;
+            price = varData.priceMin;
+          }
         }
 
         products.push({
           _id: String(product.id),
           name: product.name,
           slug: { current: product.slug },
-          price: parsePrice(product.price || product.sale_price || product.regular_price),
+          price,
+          ...(priceMin != null && priceMax != null ? { priceMin, priceMax } : {}),
           discountedPrice: parsePrice(product.sale_price) || undefined,
           sku,
           ...(shortDescription ? { shortDescription } : {}),

@@ -1,7 +1,7 @@
 import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
 import { AppDispatch } from "@/redux/store";
 import { imageBuilder } from "@/lib/data/shop-utils";
-import { getProductPrice } from "@/utils/getProductPrice";
+import { getProductPrice, getProductPriceDisplay } from "@/utils/getProductPrice";
 import { formatPrice } from "@/utils/price";
 import Image from "next/image";
 import Link from "next/link";
@@ -82,7 +82,7 @@ const SingleItem = ({ item }: any) => {
       {/* Price */}
       <td className="py-4 px-6">
         <p className="text-lg font-semibold text-dark">
-          ${formatPrice(productPrice)}
+          {getProductPriceDisplay(item)}
         </p>
       </td>
 

@@ -9,7 +9,7 @@ import {
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { imageBuilder } from "@/lib/data/shop-utils";
 import { Product } from "@/types/product";
-import { getProductPrice } from "@/utils/getProductPrice";
+import { getProductPrice, getProductPriceDisplay } from "@/utils/getProductPrice";
 import { formatPrice } from "@/utils/price";
 import Image from "next/image";
 import Link from "next/link";
@@ -259,7 +259,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             </h3>
           </Link>
 
-          {/* Price */}
+          {/* Price - range like PDP when variants exist */}
           <span 
             className="text-dark font-medium"
             style={{
@@ -268,7 +268,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
               fontWeight: 500
             }}
           >
-            ${formatPrice(productPrice)}
+            {getProductPriceDisplay(item)}
           </span>
         </div>
 
