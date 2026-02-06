@@ -65,7 +65,6 @@ export default function SolutionsHero() {
               fontStyle: "normal",
               fontWeight: 400,
               lineHeight: "clamp(32px, 8vw, 50px)",
-              letterSpacing: "-2.4px",
               margin: 0,
             }}
           >

@@ -163,6 +163,8 @@ export default function SolutionsScrollItems() {
         dangerouslySetInnerHTML={{
           __html: `
             .solutions-card-sticky-gap { margin-bottom: 280px; }
+            .solutions-last-card-gap { margin-bottom: 0; }
+            .solutions-container-bottom { padding-bottom: 0; }
             @media (max-width: 767px) {
               .solutions-card-title { font-size: 16px !important; line-height: 1.2 !important; letter-spacing: -0.15px !important; }
               .solutions-card-desc { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -0.05px !important; }
@@ -204,8 +206,7 @@ export default function SolutionsScrollItems() {
         {/* Cards - same structure as Company; extra bottom padding so card content is not cut off by toolbar/URL bar */}
         <div
           ref={containerRef}
-          className="w-full md:flex-1"
-          style={{ paddingBottom: "min(50vh, 400px)" }}
+          className="w-full md:flex-1 solutions-container-bottom"
         >
           {SOLUTIONS_ITEMS.map((item, index) => (
             <div
@@ -214,7 +215,7 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className={`flex flex-col md:flex-row ${index < itemCount - 1 ? "solutions-card-sticky-gap" : ""}`}
+              className={`flex flex-col md:flex-row ${index < itemCount - 1 ? "solutions-card-sticky-gap" : "solutions-last-card-gap"}`}
               style={{
                 minHeight: CARD_HEIGHT,
                 height: "auto",
@@ -223,7 +224,7 @@ export default function SolutionsScrollItems() {
                 position: "relative",
                 ...(index < itemCount - 1
                   ? {}
-                  : { zIndex: itemCount, marginBottom: "min(40vh, 320px)" }),
+                  : { zIndex: itemCount }),
               }}
             >
               {/* Left Image Section - condensed on mobile only */}

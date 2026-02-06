@@ -54,6 +54,16 @@ const sectionStyles = {
 
 export default function SolutionsFrequencyBands() {
   return (
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media (max-width: 767px) {
+              .solutions-frequency-heading { font-size: 26px !important; }
+            }
+          `,
+        }}
+      />
     <section
       className="w-full flex flex-col items-start overflow-hidden px-4 sm:px-6 md:px-[50px] gap-[50px] py-12 md:py-16"
       style={sectionStyles}
@@ -62,13 +72,13 @@ export default function SolutionsFrequencyBands() {
         {/* Heading: 40px Satoshi 400, line-height 60px, letter-spacing -4% – unchanged */}
         <div className="w-full flex flex-col justify-center items-start gap-[25px]">
           <div
-            className="w-full break-words"
+            className="w-full break-words solutions-frequency-heading"
             style={{
               color: "black",
               fontSize: "40px",
               fontFamily: "Satoshi, sans-serif",
               fontWeight: 400,
-              lineHeight: "60px",
+              lineHeight: "1.2",
               letterSpacing: "-0.04em",
               wordWrap: "break-word",
             }}
@@ -128,5 +138,6 @@ export default function SolutionsFrequencyBands() {
         </div>
       </div>
     </section>
+    </>
   );
 }
