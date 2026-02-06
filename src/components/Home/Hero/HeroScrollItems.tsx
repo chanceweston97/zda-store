@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ButtonArrowHomepage } from "@/components/Common/ButtonArrowHomepage";
@@ -34,8 +34,6 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
   const card2Ref = useRef<HTMLDivElement>(null);
   const card3Ref = useRef<HTMLDivElement>(null);
   const card4Ref = useRef<HTMLDivElement>(null);
-  const dotsRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const displayItems = useMemo(() => {
     return [0, 1, 2, 3].map((i) => items?.[i] ?? FALLBACK_ITEMS[i]);
@@ -52,16 +50,6 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
     const card3PinTop = HEADER_OFFSET + 2 * (NUMBER_HEIGHT + NUMBER_MARGIN);
     const card4PinTop = HEADER_OFFSET + 3 * (NUMBER_HEIGHT + NUMBER_MARGIN);
 
-    // Pin dots with first card
-    ScrollTrigger.create({
-      trigger: card1Ref.current,
-      start: `top ${card1PinTop}px`,
-      endTrigger: card4Ref.current,
-      end: `top ${card4PinTop}px`,
-      pin: dotsRef.current,
-      pinSpacing: false,
-    });
-
     // Card 1: pins at header, unpins when card 4 reaches
     // Lower z-index so it gets covered by newer cards
     gsap.set(card1Ref.current, { zIndex: 1 });
@@ -74,13 +62,11 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
       pinSpacing: false,
       anticipatePin: 1,
       onEnter: () => {
-        setActiveIndex(0);
         if (card1Ref.current) {
           card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
       onEnterBack: () => {
-        setActiveIndex(0);
         if (card1Ref.current) {
           card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
@@ -109,13 +95,11 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
       pinSpacing: false,
       anticipatePin: 1,
       onEnter: () => {
-        setActiveIndex(1);
         if (card2Ref.current) {
           card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
       onEnterBack: () => {
-        setActiveIndex(1);
         if (card2Ref.current) {
           card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
@@ -144,13 +128,11 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
       pinSpacing: false,
       anticipatePin: 1,
       onEnter: () => {
-        setActiveIndex(2);
         if (card3Ref.current) {
           card3Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
       onEnterBack: () => {
-        setActiveIndex(2);
         if (card3Ref.current) {
           card3Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
@@ -171,8 +153,6 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
     ScrollTrigger.create({
       trigger: card4Ref.current,
       start: `top ${card4PinTop}px`,
-      onEnter: () => setActiveIndex(3),
-      onEnterBack: () => setActiveIndex(3),
     });
 
     ScrollTrigger.refresh();
@@ -185,57 +165,8 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
   return (
     <div className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0">
       <div
-        className="flex flex-col md:flex-row gap-6 md:gap-12 xl:gap-[50px] items-start"
+        className="flex flex-col md:flex-row items-start"
       >
-        {/* Dots - Hidden on mobile */}
-        <div
-          ref={dotsRef}
-          className="hidden md:flex"
-          style={{
-            flexDirection: "column",
-            gap: 12,
-            alignSelf: "flex-start",
-            marginTop: `${CARD_HEIGHT * 2 / 3}px`, // Position at 1/3 of first item height
-          }}
-        >
-          <div
-            style={{
-              width: 8,
-              height: activeIndex === 0 ? 40 : 8,
-              borderRadius: 4,
-              background: activeIndex === 0 ? "#2958A4" : "#CBD5E1",
-              transition: "0.3s",
-            }}
-          />
-          <div
-            style={{
-              width: 8,
-              height: activeIndex === 1 ? 40 : 8,
-              borderRadius: 4,
-              background: activeIndex === 1 ? "#2958A4" : "#CBD5E1",
-              transition: "0.3s",
-            }}
-          />
-          <div
-            style={{
-              width: 8,
-              height: activeIndex === 2 ? 40 : 8,
-              borderRadius: 4,
-              background: activeIndex === 2 ? "#2958A4" : "#CBD5E1",
-              transition: "0.3s",
-            }}
-          />
-          <div
-            style={{
-              width: 8,
-              height: activeIndex === 3 ? 40 : 8,
-              borderRadius: 4,
-              background: activeIndex === 3 ? "#2958A4" : "#CBD5E1",
-              transition: "0.3s",
-            }}
-          />
-        </div>
-
         {/* Cards */}
         <div ref={containerRef} className="w-full md:flex-1">
           {/* Card 1 */}
