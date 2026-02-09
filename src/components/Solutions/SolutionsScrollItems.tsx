@@ -214,6 +214,36 @@ export default function SolutionsScrollItems() {
                 min-height: 120px !important;
               }
             }
+            /* Compact layout when viewport is under 1440×680 only (1990×1040 and larger unchanged) */
+            @media (max-width: 1440px) and (max-height: 680px) {
+              .solutions-card-item { gap: 0 !important; }
+              .solutions-card-image-wrap img { object-position: center; }
+              .solutions-card-label {
+                font-size: 13px !important;
+                line-height: 1.2 !important;
+              }
+              .solutions-card-title {
+                font-size: 28px !important;
+                line-height: 1.2 !important;
+              }
+              .solutions-card-desc {
+                font-size: 14px !important;
+                line-height: 1.35 !important;
+                padding-right: 1rem !important;
+              }
+              .solutions-card-content { gap: 16px !important; }
+              .solutions-card-title-block { gap: 6px !important; }
+              .solutions-card-desc-scroll {
+                max-height: min(320px, calc(100vh - 240px)) !important;
+              }
+              .solutions-card-image-wrap {
+                height: 320px !important;
+                min-height: 320px !important;
+                width: 380px !important;
+                max-width: 380px !important;
+              }
+              .solutions-card-sticky-gap { margin-bottom: 200px !important; }
+            }
           `,
         }}
       />
@@ -234,7 +264,7 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className={`flex flex-col md:flex-row md:justify-between md:items-center md:gap-8 bg-white solutions-card-item-mobile solutions-card-sticky-gap ${index === itemCount - 1 ? "solutions-card-last" : ""}`}
+              className={`solutions-card-item flex flex-col md:flex-row md:justify-between md:items-center md:gap-5 bg-white solutions-card-item-mobile solutions-card-sticky-gap ${index === itemCount - 1 ? "solutions-card-last" : ""}`}
               style={{
                 minHeight: CARD_HEIGHT,
                 height: "auto",
@@ -248,7 +278,7 @@ export default function SolutionsScrollItems() {
               {/* Left Image Section - condensed on mobile only */}
               <div
                 className="w-full md:w-[550px] md:shrink-0"
-                style={{ display: "flex", alignItems: "stretch" }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
               >
 <div
                 className="solutions-card-image-wrap h-[160px] md:h-[550px] md:w-[550px] md:shrink-0"
@@ -263,7 +293,7 @@ export default function SolutionsScrollItems() {
                     src={item.image}
                     alt={item.title}
                     fill
-                    className="object-cover"
+                    className="object-cover object-center"
                     style={{ borderRadius: "10px" }}
                     sizes="(max-width: 768px) 100vw, 550px"
                   />
