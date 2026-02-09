@@ -36,7 +36,7 @@ export default function CompanyHero() {
         className="relative z-10 flex flex-col md:flex-row items-center w-full"
         style={{
           display: 'flex',
-          width: '1440px',
+          width: '1340px',
           maxWidth: '100%',
           padding: '0',
           alignItems: 'center'
