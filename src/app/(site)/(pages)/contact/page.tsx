@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 const ContactPage = async () => {
   return (
-    <main>
+    <main id="top">
       <Contact />
     </main>
   );

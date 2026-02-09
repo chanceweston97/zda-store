@@ -181,6 +181,11 @@ export default function SolutionsScrollItems() {
               }
               .solutions-card-content { gap: 50px; }
               .solutions-card-title-block { flex-direction: column; gap: 10px; }
+              .solutions-card-desc-scroll {
+                max-height: min(400px, calc(100vh - 280px));
+                overflow-y: auto;
+                overflow-x: hidden;
+              }
             }
             @media (min-width: 768px) {
               .solutions-card-item-mobile { padding: 0 !important; }
@@ -236,6 +241,7 @@ export default function SolutionsScrollItems() {
                 transition: "box-shadow 0.3s",
                 overflow: "hidden",
                 position: "relative",
+                borderRadius: "10px",
                 ...(index === itemCount - 1 ? { zIndex: itemCount } : {}),
               }}
             >
@@ -263,7 +269,7 @@ export default function SolutionsScrollItems() {
                   />
                 </div>
               </div>
-              {/* Right Content Section */}
+              {/* Right Content Section - scrollable when content is long (e.g. Wildlife Tracking) */}
               <div
                 className="w-full md:w-[750px] md:shrink-0 md:min-h-0 solutions-card-content flex flex-col gap-2 sm:gap-6"
                 style={{
@@ -272,6 +278,8 @@ export default function SolutionsScrollItems() {
                   justifyContent: "flex-start",
                   background: "#FFF",
                   overflow: "visible",
+                  minHeight: 0,
+                  flex: "1 1 auto",
                 }}
               >
                 <div className="solutions-card-title-block flex flex-col sm:gap-2.5 md:gap-[10px]">
@@ -282,9 +290,11 @@ export default function SolutionsScrollItems() {
                     {item.title}
                   </h3>
                 </div>
-                <p className="solutions-card-desc whitespace-pre-line" style={{ margin: 0 }}>
-                  {item.description}
-                </p>
+                <div className="solutions-card-desc-scroll md:flex-1 md:min-h-0">
+                  <p className="solutions-card-desc whitespace-pre-line" style={{ margin: 0 }}>
+                    {item.description}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

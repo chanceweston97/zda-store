@@ -666,7 +666,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
       if (prices.length > 0) {
         const minP = Math.min(...prices);
         const maxP = Math.max(...prices);
-        return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+        return minP !== maxP ? `$${formatPrice(minP)} - $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
       }
     }
     // Antenna with variants - no variant selected
@@ -675,7 +675,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
       if (prices.length > 0) {
         const minP = Math.min(...prices);
         const maxP = Math.max(...prices);
-        return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+        return minP !== maxP ? `$${formatPrice(minP)} - $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
       }
     }
     // Cable with lengthOptions or variants - no length selected
@@ -685,7 +685,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
         if (prices.length > 0) {
           const minP = Math.min(...prices);
           const maxP = Math.max(...prices);
-          return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+          return minP !== maxP ? `$${formatPrice(minP)} - $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
         }
       }
       if ((product as any).variants?.length > 0) {
@@ -693,7 +693,7 @@ const ShopDetails = ({ product: initialProduct, cableSeries, cableTypes }: ShopD
         if (prices.length > 0) {
           const minP = Math.min(...prices);
           const maxP = Math.max(...prices);
-          return minP !== maxP ? `$${formatPrice(minP)} ~ $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
+          return minP !== maxP ? `$${formatPrice(minP)} - $${formatPrice(maxP)}` : `$${formatPrice(minP)}`;
         }
       }
     }

@@ -229,7 +229,7 @@ export function getProductPriceRange(product: Product): { min: number; max: numb
 
 /**
  * Get formatted price display string for a product (like PDP default)
- * Shows single price, or price range (first ~ last) when multiple variants
+ * Shows single price, or price range (min - max) when multiple variants
  */
 export function getProductPriceDisplay(product: Product): string {
   const priceRange = getProductPriceRange(product);
@@ -241,7 +241,7 @@ export function getProductPriceDisplay(product: Product): string {
   }
 
   if (priceRange.min !== priceRange.max) {
-    return `$${priceRange.min.toFixed(2)} ~ $${priceRange.max.toFixed(2)}`;
+    return `$${priceRange.min.toFixed(2)} - $${priceRange.max.toFixed(2)}`;
   }
 
   return `$${priceRange.min.toFixed(2)}`;
