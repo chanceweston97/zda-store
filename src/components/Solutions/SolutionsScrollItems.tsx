@@ -234,7 +234,7 @@ export default function SolutionsScrollItems() {
               ref={(el) => {
                 cardRefs.current[index] = el;
               }}
-              className={`flex flex-col md:flex-row md:justify-between md:items-center bg-white solutions-card-item-mobile solutions-card-sticky-gap ${index === itemCount - 1 ? "solutions-card-last" : ""}`}
+              className={`flex flex-col md:flex-row md:justify-between md:items-center md:gap-8 bg-white solutions-card-item-mobile solutions-card-sticky-gap ${index === itemCount - 1 ? "solutions-card-last" : ""}`}
               style={{
                 minHeight: CARD_HEIGHT,
                 height: "auto",
