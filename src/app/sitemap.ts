@@ -25,19 +25,21 @@ function getProductSlug(p: any): string | null {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = SITE_BASE_URL.replace(/\/$/, "");
+  // Ensure no localhost or multiple URLs; sitemap must use production base only
+  const base = SITE_BASE_URL.replace(/\/$/, "").split(",")[0].trim();
+  const safeBase = base && !base.includes("localhost") ? base : "https://www.zdacomm.com";
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: base, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/company`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${base}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/solutions`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${base}/products`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${base}/catalog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${base}/cable-builder`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/terms-and-conditions`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${base}/blogs/blog-grid`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+    { url: safeBase, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
+    { url: `${safeBase}/company`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${safeBase}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${safeBase}/solutions`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
+    { url: `${safeBase}/products`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+    { url: `${safeBase}/catalog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${safeBase}/cable-builder`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${safeBase}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${safeBase}/terms-and-conditions`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${safeBase}/blogs/blog-grid`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
   ];
 
   let categoryUrls: MetadataRoute.Sitemap = [];
@@ -51,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       if (slug && !slugs.has(slug)) {
         slugs.add(slug);
         categoryUrls.push({
-          url: `${base}/categories/${slug}`,
+          url: `${safeBase}/categories/${slug}`,
           lastModified: new Date(),
           changeFrequency: "weekly" as const,
           priority: 0.8,
@@ -68,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const slug = getProductSlug(p);
       if (slug) {
         productUrls.push({
-          url: `${base}/products/${slug}`,
+          url: `${safeBase}/products/${slug}`,
           lastModified: new Date(),
           changeFrequency: "weekly" as const,
           priority: 0.7,
