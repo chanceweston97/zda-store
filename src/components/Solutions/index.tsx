@@ -16,18 +16,6 @@ export default async function Solutions() {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-            .solutions-hero-section {
-              margin-top: 80px !important;
-              min-height: 220px !important;
-              padding: 24px 20px !important;
-            }
-            @media (max-width: 767px) {
-              .solutions-hero-section {
-                margin-top: 24px !important;
-                min-height: 280px !important;
-                padding: 24px 16px !important;
-              }
-            }
             .solutions-intro-section {
               padding-top: 24px !important;
               padding-bottom: 24px !important;
