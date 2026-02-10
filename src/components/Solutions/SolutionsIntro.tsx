@@ -8,7 +8,7 @@ export default function SolutionsIntro() {
 
   return (
     <section 
-      className="w-full bg-white"
+      className="solutions-intro-section w-full bg-white"
       style={{
         paddingTop: '50px',
         paddingBottom: '50px',

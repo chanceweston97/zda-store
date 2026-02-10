@@ -10,7 +10,7 @@ export default function SolutionsHero() {
 
   return (
     <section
-      className="w-full flex flex-col md:flex-row justify-center items-center relative overflow-hidden p-5 md:p-[50px]"
+      className="solutions-hero-section w-full flex flex-col md:flex-row justify-center items-center relative overflow-hidden p-5 md:p-[50px]"
       style={{
         display: "flex",
         width: "100%",

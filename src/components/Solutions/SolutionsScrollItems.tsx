@@ -9,7 +9,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const SOLUTIONS_CARD_ID_PREFIX = "solutions-card";
 
-const HEADER_OFFSET = 80;
+const HEADER_OFFSET = 80; // 1st item header top = menu header bottom line
+const STAGGER_STEP_PX = 10; // 2nd +10px, 3rd +20px, 4th +30px, 5th +40px from header bottom
 const NUMBER_HEIGHT = 16;
 const NUMBER_MARGIN = 36;
 const CARD_HEIGHT = 360;
@@ -75,7 +76,8 @@ export default function SolutionsScrollItems() {
     return () => mq.removeEventListener("change", handler);
   }, []);
   const stagger = isMobile ? STAGGER_MOBILE : STAGGER_DESKTOP;
-  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * stagger;
+  // 1st = header bottom (80), 2nd +10, 3rd +20, 4th +30, 5th +40
+  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * STAGGER_STEP_PX;
 
   // Scroll to card when landing page links with hash (e.g. /solutions#solutions-card-0)
   useEffect(() => {
@@ -85,9 +87,11 @@ export default function SolutionsScrollItems() {
     const scrollToCard = () => {
       const el = document.getElementById(hash);
       if (el) {
+        const index = parseInt(hash.replace(SOLUTIONS_CARD_ID_PREFIX + "-", ""), 10);
+        const scrollOffset = HEADER_OFFSET + index * STAGGER_STEP_PX;
         ScrollTrigger.refresh();
         requestAnimationFrame(() => {
-          const y = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+          const y = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
           window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
         });
       }
@@ -105,9 +109,9 @@ export default function SolutionsScrollItems() {
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
     if (!containerRef.current || cards.length !== itemCount) return;
 
-    // Cards 1 to N-1: sticky pin
+    // Cards 1 to N-1: sticky pin — 1st = header bottom, 2nd +10px, 3rd +20px, 4th +30px, 5th +40px
     for (let i = 0; i < itemCount - 1; i++) {
-      const cardPinTop = HEADER_OFFSET + i * stagger;
+      const cardPinTop = HEADER_OFFSET + i * STAGGER_STEP_PX;
       gsap.set(cards[i], { zIndex: i + 1 });
       ScrollTrigger.create({
         trigger: cards[i],
@@ -214,7 +218,7 @@ export default function SolutionsScrollItems() {
                 min-height: 120px !important;
               }
             }
-            /* Compact layout when viewport is under 1440×680 only (1990×1040 and larger unchanged) */
+            /* Compact layout when viewport is under 1440×680 only */
             @media (max-width: 1440px) and (max-height: 680px) {
               .solutions-card-item { gap: 0 !important; }
               .solutions-card-image-wrap img { object-position: center; }
@@ -244,7 +248,7 @@ export default function SolutionsScrollItems() {
               }
               .solutions-card-sticky-gap { margin-bottom: 200px !important; }
             }
-          `,
+                      `,
         }}
       />
     <div
