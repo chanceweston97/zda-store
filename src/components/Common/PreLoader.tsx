@@ -5,7 +5,9 @@ const PreLoader = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 100);
+    // Minimal delay so LCP isn’t blocked; remove or set to 0 for best PageSpeed
+    const t = setTimeout(() => setLoading(false), 0);
+    return () => clearTimeout(t);
   }, []);
 
   return (

@@ -25,6 +25,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="font-inter scroll-smooth" suppressHydrationWarning>
       <head>
+        {/* Preload critical font for LCP / FCP (PageSpeed) */}
+        <link
+          rel="preload"
+          href="/fonts/Satoshi-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         {/* Google Tag (Ads + Analytics): single gtag.js load, then config both */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-17872973606"
