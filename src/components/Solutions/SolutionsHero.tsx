@@ -5,7 +5,6 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 export default function SolutionsHero() {
   const titleRef = useScrollAnimation({ threshold: 0.2 });
-  const dividerRef = useScrollAnimation({ threshold: 0.2 });
   const descriptionRef = useScrollAnimation({ threshold: 0.2 });
 
   return (
@@ -63,24 +62,17 @@ export default function SolutionsHero() {
           </h1>
         </div>
 
-        {/* Divider - hidden on mobile */}
-        <div className="hidden md:flex items-center shrink-0">
-          <div
-            ref={dividerRef.ref}
-            className={`transition-all duration-1000 ease-out delay-300 ${
-              dividerRef.isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-full"
-            }`}
-            style={{
-              width: "1px",
-              height: "250px",
-              background: "#FFF",
-              flexShrink: 0,
-              display: "block",
-            }}
-          />
-        </div>
+        {/* Divider - hidden on mobile, visible on md+ */}
+        <div
+          className="hidden md:block shrink-0"
+          style={{
+            width: "1px",
+            height: "250px",
+            background: "#FFF",
+            flexShrink: 0,
+          }}
+          aria-hidden
+        />
 
         {/* Right: Description */}
         <div
