@@ -33,27 +33,17 @@ export default function SolutionsHero() {
         />
       </div>
 
-      <div
-        className="relative z-10 flex flex-col md:flex-row items-center w-full"
-        style={{
-          display: "flex",
-          width: "1340px",
-          maxWidth: "100%",
-          padding: "0",
-          alignItems: "center",
-        }}
-      >
+      <div className="relative z-10 flex flex-col md:flex-row items-center w-full max-w-[1340px] mx-auto gap-6 md:gap-[250px] md:px-0 px-2">
         {/* Left: "Industry solutions" */}
         <div
           ref={titleRef.ref}
-          className={`transition-all ease-out flex items-center justify-center md:justify-start md:mr-[250px] md:mb-0 mb-5 ${
+          className={`transition-all ease-out flex items-center justify-center md:justify-start shrink-0 ${
             titleRef.isVisible
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-8"
           }`}
           style={{
             transitionDuration: "600ms",
-            height: "100%",
           }}
         >
           <h1
@@ -66,17 +56,15 @@ export default function SolutionsHero() {
               fontWeight: 400,
               lineHeight: "clamp(32px, 8vw, 50px)",
               margin: 0,
+              wordWrap: "break-word",
             }}
           >
             Industry solutions
           </h1>
         </div>
 
-        {/* Divider */}
-        <div
-          className="hidden md:flex items-center"
-          style={{ height: "100%" }}
-        >
+        {/* Divider - hidden on mobile */}
+        <div className="hidden md:flex items-center shrink-0">
           <div
             ref={dividerRef.ref}
             className={`transition-all duration-1000 ease-out delay-300 ${
@@ -97,20 +85,14 @@ export default function SolutionsHero() {
         {/* Right: Description */}
         <div
           ref={descriptionRef.ref}
-          className={`transition-all duration-1000 ease-out delay-500 flex items-center justify-center md:justify-start md:ml-[80px] ${
+          className={`transition-all duration-1000 ease-out delay-500 flex items-center justify-center md:justify-start min-w-0 ${
             descriptionRef.isVisible
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-8"
           }`}
-          style={{
-            width: "100%",
-            maxWidth: "477px",
-            flexShrink: 0,
-            height: "100%",
-          }}
         >
           <p
-            className="text-center md:text-left"
+            className="text-center md:text-left w-full"
             style={{
               color: "#FFF",
               fontFamily: "Satoshi, sans-serif",
@@ -119,6 +101,7 @@ export default function SolutionsHero() {
               fontWeight: 400,
               lineHeight: "clamp(22px, 5vw, 26px)",
               margin: 0,
+              wordWrap: "break-word",
             }}
           >
             Delivering engineered wireless connectivity solutions that provide

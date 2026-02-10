@@ -222,7 +222,7 @@ export default function SolutionsScrollItems() {
         }}
       />
     <div
-      className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-12"
+      className="mx-auto w-full max-w-[1340px] py-12 sm:py-16 md:py-12"
       style={{ paddingBottom: "max(3rem, env(safe-area-inset-bottom, 0px) + 2rem)" }}
     >
       <div className="flex flex-col md:flex-row items-start">
