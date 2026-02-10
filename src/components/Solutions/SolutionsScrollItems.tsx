@@ -218,41 +218,11 @@ export default function SolutionsScrollItems() {
                 min-height: 120px !important;
               }
             }
-            /* Compact layout when viewport is under 1440×680 only */
-            @media (max-width: 1440px) and (max-height: 680px) {
-              .solutions-card-item { gap: 0 !important; }
-              .solutions-card-image-wrap img { object-position: center; }
-              .solutions-card-label {
-                font-size: 13px !important;
-                line-height: 1.2 !important;
-              }
-              .solutions-card-title {
-                font-size: 28px !important;
-                line-height: 1.2 !important;
-              }
-              .solutions-card-desc {
-                font-size: 14px !important;
-                line-height: 1.35 !important;
-                padding-right: 1rem !important;
-              }
-              .solutions-card-content { gap: 16px !important; }
-              .solutions-card-title-block { gap: 6px !important; }
-              .solutions-card-desc-scroll {
-                max-height: min(320px, calc(100vh - 240px)) !important;
-              }
-              .solutions-card-image-wrap {
-                height: 320px !important;
-                min-height: 320px !important;
-                width: 380px !important;
-                max-width: 380px !important;
-              }
-              .solutions-card-sticky-gap { margin-bottom: 200px !important; }
-            }
                       `,
         }}
       />
     <div
-      className="mx-auto max-w-[1340px] px-4 sm:px-6 xl:px-0 py-12 sm:py-16 md:py-12"
+      className="mx-auto w-full max-w-[1600px] px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-12"
       style={{ paddingBottom: "max(3rem, env(safe-area-inset-bottom, 0px) + 2rem)" }}
     >
       <div className="flex flex-col md:flex-row items-start">
