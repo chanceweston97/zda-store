@@ -2,7 +2,7 @@ import { getHeroBanners, getHeroIntroduction, getHomeOfferingItems } from "@/lib
 import HeroStatic from "./HeroStatic";
 import HeroIntroduction from "./HeroIntroduction";
 import HeroBackbone from "./HeroBackbone";
-import HeroScrollItems from "./HeroScrollItems";
+import HeroScrollItemsLazy from "./HeroScrollItemsLazy";
 import XetaWaveReseller from "./XetaWaveReseller";
 
 const Hero = async () => {
@@ -25,7 +25,7 @@ const Hero = async () => {
                 <HeroBackbone />
               </div>
               <div style={{ marginTop: '50px' }}>
-                <HeroScrollItems items={offeringItems} />
+                <HeroScrollItemsLazy items={offeringItems} />
               </div>
               <div style={{ marginTop: '50px' }}>
                 <XetaWaveReseller />

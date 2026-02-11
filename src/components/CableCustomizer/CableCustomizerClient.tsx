@@ -363,7 +363,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
       name: cableName,
       price: priceInCents,
       currency: "usd",
-      image: "/images/cable-customizer/hero-cable.png",
+      image: "/images/cable-customizer/hero-cable.webp",
       price_id: null,
       slug: "custom-cable",
       // WooCommerce product ID for custom cables (virtual product)
@@ -495,7 +495,7 @@ export default function CableCustomizerClient({ data }: CableCustomizerClientPro
                 ></div>
                 <div className="relative w-full h-full flex items-center justify-center z-10">
                   <Image
-                    src="/images/cable-customizer/hero-cable.png"
+                    src="/images/cable-customizer/hero-cable.webp"
                     alt="Custom Cable"
                     fill
                     className="object-contain"

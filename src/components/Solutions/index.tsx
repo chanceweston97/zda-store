@@ -4,7 +4,7 @@ import Newsletter from "../Common/Newsletter";
 import { getProudPartners } from "@/lib/data/shop-utils";
 import SolutionsHero from "./SolutionsHero";
 import SolutionsIntro from "./SolutionsIntro";
-import SolutionsScrollItems from "./SolutionsScrollItems";
+import SolutionsScrollItemsLazy from "./SolutionsScrollItemsLazy";
 import SolutionsFrequencyBands from "./SolutionsFrequencyBands";
 import ExploreMore from "../Company/ExploreMore";
 
@@ -30,7 +30,7 @@ export default async function Solutions() {
       <SolutionsIntro />
 
       {/* Industry solution items (In-Building, Public Safety, Utilities, Wildlife, Private LTE) */}
-      <SolutionsScrollItems />
+      <SolutionsScrollItemsLazy />
 
       {/* Frequency bands: Our RF infrastructure supports... */}
       <SolutionsFrequencyBands />

@@ -43,7 +43,7 @@ export default function HeroIntroduction({ introductionData }: HeroIntroductionP
   );
   const imageUrl = introductionData?.image
     ? imageBuilder(introductionData.image).url()
-    : "/images/cable-customizer/hero-cable.png";
+    : "/images/cable-customizer/hero-cable.webp";
 
   // Split title for styling - "Enabling wireless networks" in black, "since 2008" in blue
   const titleLower = title.toLowerCase();

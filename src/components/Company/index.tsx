@@ -5,7 +5,7 @@ import { getProudPartners, getOurStory } from "@/lib/data/shop-utils";
 import { AnimatedWhatWeFocusOn, AnimatedLetsWorkTogether } from "../OurStory/AnimatedSections";
 import CompanyHero from "./CompanyHero";
 import CompanyIntro from "./CompanyIntro";
-import CompanyScrollItems from "./CompanyScrollItems";
+import CompanyScrollItemsLazy from "./CompanyScrollItemsLazy";
 import ExploreMore from "./ExploreMore";
 
 export default async function Company() {
@@ -21,7 +21,7 @@ export default async function Company() {
       <CompanyIntro />
 
       {/* Company Scroll Items Section */}
-      <CompanyScrollItems />
+      <CompanyScrollItemsLazy />
 
       {/* Work With Us Section */}
       <WorkWithUs />
