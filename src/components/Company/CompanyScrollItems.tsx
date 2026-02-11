@@ -83,12 +83,12 @@ export default function CompanyScrollItems() {
       pinSpacing: false,
       anticipatePin: 1,
       onEnter: () => {
-        if (card1Ref.current) {
+        if (!isMobile && card1Ref.current) {
           card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
       onEnterBack: () => {
-        if (card1Ref.current) {
+        if (!isMobile && card1Ref.current) {
           card1Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
@@ -115,12 +115,12 @@ export default function CompanyScrollItems() {
       pinSpacing: false,
       anticipatePin: 1,
       onEnter: () => {
-        if (card2Ref.current) {
+        if (!isMobile && card2Ref.current) {
           card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
       onEnterBack: () => {
-        if (card2Ref.current) {
+        if (!isMobile && card2Ref.current) {
           card2Ref.current.style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         }
       },
@@ -164,7 +164,7 @@ export default function CompanyScrollItems() {
               .company-card-item-mobile {
                 height: 600px !important;
                 min-height: 600px !important;
-                padding: 10px !important;
+                padding: 0 !important;
                 padding-bottom: 60px !important;
               }
               .company-card-sticky-gap { margin-bottom: 220px; }
@@ -184,10 +184,10 @@ export default function CompanyScrollItems() {
               .company-card-image-wrap {
                 width: 100% !important;
                 max-width: 100% !important;
-                height: 120px !important;
-                min-height: 120px !important;
+                height: 260px !important;
+                min-height: 260px !important;
               }
-              .company-card-content-inner { padding: 10px !important; }
+              .company-card-content-inner { padding: 0 !important; }
             }
           `,
         }}

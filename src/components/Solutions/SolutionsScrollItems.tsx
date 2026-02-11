@@ -129,10 +129,10 @@ export default function SolutionsScrollItems() {
         pinSpacing: false,
         anticipatePin: 1,
         onEnter: () => {
-          if (cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+          if (!isMobile && cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         },
         onEnterBack: () => {
-          if (cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
+          if (!isMobile && cards[i]) cards[i].style.boxShadow = "0 20px 50px rgba(0,0,0,0.12)";
         },
         onLeave: () => {
           if (cards[i]) cards[i].style.boxShadow = "none";
@@ -160,7 +160,7 @@ export default function SolutionsScrollItems() {
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [refsReady, itemCount, lastCardPinTop, stagger]);
+  }, [refsReady, itemCount, lastCardPinTop, stagger, isMobile]);
 
   return (
     <>
@@ -226,8 +226,8 @@ export default function SolutionsScrollItems() {
               .solutions-card-image-wrap {
                 width: 100% !important;
                 max-width: 100% !important;
-                height: 120px !important;
-                min-height: 120px !important;
+                height: 260px !important;
+                min-height: 260px !important;
               }
             }
                       `,
