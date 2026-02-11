@@ -11,7 +11,7 @@ export default function Legal() {
       <h2
         className="mb-7.5"
         style={{
-          color: "#70C8FF",
+          color: "#FFFFFF",
           fontFamily: "Satoshi, sans-serif",
           fontSize: "20px",
           fontStyle: "normal",

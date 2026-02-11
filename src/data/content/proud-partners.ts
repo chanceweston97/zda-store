@@ -6,12 +6,12 @@ export const proudPartners: ProudPartners = {
   title: "Proud Partners Of",
   isActive: true,
   partners: [
-    { name: "IWT", logo: "/images/hero/partners/iwt.svg" },
-    { name: "ABC", logo: "/images/hero/partners/ABC.png" },
-    { name: "Motus", logo: "/images/hero/partners/motus.png" },
-    { name: "xetawave", logo: "/images/hero/partners/xetawave.svg" },
-    { name: "APS", logo: "/images/hero/partners/aps.svg" },
-    { name: "surecall", logo: "/images/hero/partners/surecall.png" },
+    { name: "IWT", logo: "/images/hero/partners/iwt.webp" },
+    { name: "ABC", logo: "/images/hero/partners/ABC.webp" },
+    { name: "Motus", logo: "/images/hero/partners/motus.webp" },
+    { name: "xetawave", logo: "/images/hero/partners/xetawave.webp" },
+    { name: "APS", logo: "/images/hero/partners/aps.webp"},
+    { name: "surecall", logo: "/images/hero/partners/surecall.webp" },
   ],
 };
 

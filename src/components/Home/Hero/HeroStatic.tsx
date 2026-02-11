@@ -205,7 +205,7 @@ function CardAnimation({ card }: { card?: { image?: any; title?: string; descrip
           />
         </div>
 
-        <h3 
+        <h2 
           className={`text-white text-2xl transition-all duration-700 text-center ease-out delay-300 ${
             isVisible 
               ? 'opacity-100 translate-y-0' 
@@ -213,7 +213,7 @@ function CardAnimation({ card }: { card?: { image?: any; title?: string; descrip
           }`}
         >
           {cardTitle}
-        </h3>
+        </h2>
 
         <p 
           className={`text-white/80 text-[18px] mt-1 leading-relaxed transition-all duration-700 text-center ease-out delay-500 ${

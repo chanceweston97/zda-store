@@ -196,7 +196,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
           >
             <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>01/04</div>
+                <div style={{ fontSize: 16, color: "#1D4F7A", marginBottom: 0 }}>01/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{displayItems[0].title}</h3>
               </div>
               <p
@@ -261,7 +261,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
           >
             <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>02/04</div>
+                <div style={{ fontSize: 16, color: "#1D4F7A", marginBottom: 0 }}>02/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[1].title}</h3>
               </div>
               <p
@@ -326,7 +326,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
           >
             <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>03/04</div>
+                <div style={{ fontSize: 16, color: "#1D4F7A", marginBottom: 0 }}>03/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[2].title}</h3>
               </div>
               <p
@@ -389,7 +389,7 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
           >
             <div className="order-2 md:order-1" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 16, color: "#457B9D", marginBottom: 0 }}>04/04</div>
+                <div style={{ fontSize: 16, color: "#1D4F7A", marginBottom: 0 }}>04/04</div>
                 <h3 className="text-3xl sm:text-4xl lg:text-5xl" style={{ fontSize: "46px", marginTop: "10px", marginBottom: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayItems[3].title}</h3>
               </div>
               <p
