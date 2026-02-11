@@ -226,7 +226,7 @@ const Header = () => {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-3">
               <Link href="/">
                 <Image
-                  src="/images/logo/logo.png"
+                  src="/images/logo/logo.webp"
                   alt="Logo"
                   width={111}
                   height={46}
