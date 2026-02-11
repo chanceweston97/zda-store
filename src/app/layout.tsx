@@ -1,6 +1,7 @@
 import "./css/style.css";
 import type { Metadata } from "next";
 import SmoothScroll from "@/components/Common/SmoothScroll";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: "ZDA Communications",
@@ -27,6 +28,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <GoogleAnalytics />
         <SmoothScroll />
         {children}
       </body>
