@@ -28,7 +28,7 @@
 @theme {
   /* --font-*: initial; */
   /* --font-euclid-circular-a: Euclid Circular A; */
-  --font-gsans: "General Sans", sans-serif;
+  --font-gsans: "Satoshi", system-ui, sans-serif;
 
   --color-*: initial;
   --color-current: currentColor;

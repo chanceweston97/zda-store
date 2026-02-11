@@ -149,7 +149,12 @@ export default function CompanyScrollItems() {
       onEnterBack: () => setActiveIndex(2),
     });
 
-    ScrollTrigger.refresh();
+    const doRefresh = () => ScrollTrigger.refresh();
+    if (typeof requestIdleCallback !== "undefined") {
+      requestIdleCallback(doRefresh, { timeout: 500 });
+    } else {
+      requestAnimationFrame(doRefresh);
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach(t => t.kill());

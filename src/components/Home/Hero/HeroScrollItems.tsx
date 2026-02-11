@@ -160,7 +160,12 @@ export default function HeroScrollItems({ items }: HeroScrollItemsProps) {
       start: `top ${card4PinTop}px`,
     });
 
-    ScrollTrigger.refresh();
+    const doRefresh = () => ScrollTrigger.refresh();
+    if (typeof requestIdleCallback !== "undefined") {
+      requestIdleCallback(doRefresh, { timeout: 500 });
+    } else {
+      requestAnimationFrame(doRefresh);
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach(t => t.kill());

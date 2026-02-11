@@ -89,11 +89,18 @@ export default function SolutionsScrollItems() {
       if (el) {
         const index = parseInt(hash.replace(SOLUTIONS_CARD_ID_PREFIX + "-", ""), 10);
         const scrollOffset = HEADER_OFFSET + index * STAGGER_STEP_PX;
-        ScrollTrigger.refresh();
-        requestAnimationFrame(() => {
-          const y = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
-          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-        });
+        const run = () => {
+          ScrollTrigger.refresh();
+          requestAnimationFrame(() => {
+            const y = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
+            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+          });
+        };
+        if (typeof requestIdleCallback !== "undefined") {
+          requestIdleCallback(run, { timeout: 800 });
+        } else {
+          requestAnimationFrame(run);
+        }
       }
     };
     // Wait for layout/ScrollTrigger to be ready
@@ -143,7 +150,12 @@ export default function SolutionsScrollItems() {
       start: `top ${lastCardPinTop}px`,
     });
 
-    ScrollTrigger.refresh();
+    const doRefresh = () => ScrollTrigger.refresh();
+    if (typeof requestIdleCallback !== "undefined") {
+      requestIdleCallback(doRefresh, { timeout: 500 });
+    } else {
+      requestAnimationFrame(doRefresh);
+    }
 
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
