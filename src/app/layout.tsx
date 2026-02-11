@@ -4,6 +4,7 @@ import PreLoader from "@/components/Common/PreLoader";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import CacheRefreshButton from "@/components/Common/CacheRefreshButton";
 import SmoothScroll from "@/components/Common/SmoothScroll";
+import AsyncFontStylesheet from "@/components/Common/AsyncFontStylesheet";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
@@ -49,6 +50,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body id="lenis-root">
+        <AsyncFontStylesheet />
+        <noscript>
+          <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/general-sans" />
+        </noscript>
         {!isAdminRoute && <PreLoader />}
         
         {/* Track route changes for GA */}
