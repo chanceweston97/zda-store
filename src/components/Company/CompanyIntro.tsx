@@ -15,7 +15,7 @@ export default function CompanyIntro() {
       }}
     >
       <div 
-        className="mx-auto"
+        className="mx-auto px-[10px] md:px-0"
         style={{
           width: '100%',
           maxWidth: '1340px',

@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Params) {
     return {
       title: `${
         categoryData?.title || "Category Page"
-      } | ZDACommunications`,
+      } | ZDA Communications`,
       description: `${categoryData?.description?.slice(0, 136)}...`,
       author: "ZDAComm",
       alternates: {

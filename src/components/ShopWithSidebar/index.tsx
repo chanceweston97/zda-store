@@ -37,7 +37,7 @@ function ProductsHeroSection() {
       </div>
 
       <div
-        className="relative z-10 flex flex-col md:flex-row items-center p-5 md:p-[50px]"
+        className="relative z-10 flex flex-col md:flex-row items-center p-5 md:p-[50px] md:gap-[100px]"
         style={{
           display: 'flex',
           width: '1440px',
@@ -48,7 +48,7 @@ function ProductsHeroSection() {
         {/* Left: "Products" */}
         <div 
           ref={titleRef.ref}
-          className={`transition-all ease-out flex items-center justify-center md:justify-start md:mr-[250px] ${
+          className={`transition-all ease-out flex items-center justify-center md:justify-start flex-shrink-0 ${
             titleRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -74,7 +74,7 @@ function ProductsHeroSection() {
 
         {/* Divider */}
         <div 
-          className="hidden md:flex items-center"
+          className="hidden md:flex items-center flex-shrink-0"
           style={{ height: '100%' }}
         >
           <div 
@@ -97,15 +97,13 @@ function ProductsHeroSection() {
         {/* Right: Description */}
         <div 
           ref={descriptionRef.ref}
-          className={`transition-all duration-1000 ease-out delay-500 flex items-center md:ml-[80px] ${
+          className={`transition-all duration-1000 ease-out delay-500 flex items-center flex-1 min-w-0 ${
             descriptionRef.isVisible 
               ? 'opacity-100 translate-x-0' 
               : 'opacity-0 -translate-x-8'
           }`}
           style={{
-            width: '100%',
             maxWidth: '477px',
-            flexShrink: 0,
             height: '100%'
           }}
         >
@@ -160,7 +158,7 @@ function CategoryHeroSection({ categoryName }: { categoryName: string }) {
       </div>
 
       <div
-        className="relative z-10 flex flex-col md:flex-row items-center p-5 md:p-[50px]"
+        className="relative z-10 flex flex-col md:flex-row items-center p-5 md:p-[50px] md:gap-[100px]"
         style={{
           display: 'flex',
           width: '1440px',
@@ -171,7 +169,7 @@ function CategoryHeroSection({ categoryName }: { categoryName: string }) {
         {/* Left: Category Name */}
         <div 
           ref={titleRef.ref}
-          className={`transition-all ease-out flex items-center justify-center md:justify-start md:mr-[250px] ${
+          className={`transition-all ease-out flex items-center justify-center md:justify-start flex-shrink-0 ${
             titleRef.isVisible 
               ? 'opacity-100 translate-y-0' 
               : 'opacity-0 translate-y-8'
@@ -197,7 +195,7 @@ function CategoryHeroSection({ categoryName }: { categoryName: string }) {
 
         {/* Divider - Blue/White */}
         <div 
-          className="hidden md:flex items-center"
+          className="hidden md:flex items-center flex-shrink-0"
           style={{ height: '100%' }}
         >
           <div 
@@ -220,15 +218,13 @@ function CategoryHeroSection({ categoryName }: { categoryName: string }) {
         {/* Right: Description */}
         <div 
           ref={descriptionRef.ref}
-          className={`transition-all duration-1000 ease-out delay-500 flex items-center md:ml-[80px] ${
+          className={`transition-all duration-1000 ease-out delay-500 flex items-center flex-1 min-w-0 ${
             descriptionRef.isVisible 
               ? 'opacity-100 translate-x-0' 
               : 'opacity-0 -translate-x-8'
           }`}
           style={{
-            width: '100%',
             maxWidth: '477px',
-            flexShrink: 0,
             height: '100%'
           }}
         >
