@@ -113,7 +113,7 @@ const Header = () => {
               <div className="flex-shrink-0">
                 <Link className="shrink-0" href="/">
                   <Image
-                    src="/images/logo/logo.png"
+                    src="/images/logo/logo.webp"
                     alt="Logo"
                     width={111}
                     height={46}

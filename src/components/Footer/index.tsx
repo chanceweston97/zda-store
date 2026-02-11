@@ -75,7 +75,7 @@ const Footer = () => {
               <div className="mb-7.5 text-custom-1 text-dark">
                 <Link className="shrink-0" href="/">
                   <Image
-                    src="/images/logo/logo-white.png"
+                    src="/images/logo/logo-white.webp"
                     alt="Logo"
                     width={139}
                     height={50}

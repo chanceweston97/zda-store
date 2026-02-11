@@ -15,4 +15,4 @@ function getSiteBaseUrl(): string {
 export const SITE_BASE_URL = getSiteBaseUrl();
 
 /** OG image: ZDA logo (used across all main pages for social sharing) */
-export const DEFAULT_OG_IMAGE = `${SITE_BASE_URL}/images/logo/logo.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_BASE_URL}/images/logo/logo.webp`;
