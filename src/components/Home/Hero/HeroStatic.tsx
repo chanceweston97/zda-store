@@ -87,6 +87,7 @@ export default function HeroStatic({ bannerData }: HeroStaticProps) {
         alt={bannerData?.backgroundImageAlt || "Hero"}
         fill
         priority
+        sizes="100vw"
         className="object-cover brightness-50"
       />
 
