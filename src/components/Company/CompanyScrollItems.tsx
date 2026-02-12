@@ -67,10 +67,12 @@ export default function CompanyScrollItems() {
 
     if (!containerRef.current || !card1Ref.current || !card2Ref.current || !card3Ref.current) return;
 
-    // Same animation as Solutions: staggered pins on both mobile and desktop (10px step)
+    // Mobile: all cards stick to header bottom (no extra top gap).
+    // Desktop: slight stagger (10px step) for stacked effect.
+    const pinStepPx = isMobile ? 0 : STAGGER_STEP_PX;
     const card1PinTop = HEADER_OFFSET;
-    const card2PinTop = HEADER_OFFSET + STAGGER_STEP_PX;
-    const card3PinTop = HEADER_OFFSET + 2 * STAGGER_STEP_PX;
+    const card2PinTop = HEADER_OFFSET + pinStepPx;
+    const card3PinTop = HEADER_OFFSET + 2 * pinStepPx;
 
     // Card 1: pins at header, unpins when card 3 reaches
     gsap.set(card1Ref.current, { zIndex: 1 });
@@ -162,8 +164,7 @@ export default function CompanyScrollItems() {
             }
             @media (max-width: 767px) {
               .company-card-item-mobile {
-                height: 600px !important;
-                min-height: 600px !important;
+                /* remove top padding only */
                 padding: 0 !important;
                 padding-bottom: 60px !important;
               }
@@ -183,9 +184,9 @@ export default function CompanyScrollItems() {
               .company-card-desc { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -0.05px !important; }
               .company-card-image-wrap {
                 width: 100% !important;
-                max-width: 100% !important;
-                height: 260px !important;
-                min-height: 260px !important;
+                aspect-ratio: 1 / 1;
+                height: auto !important;
+                min-height: 0 !important;
               }
               .company-card-content-inner { padding: 0 !important; }
             }

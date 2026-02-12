@@ -76,8 +76,10 @@ export default function SolutionsScrollItems() {
     return () => mq.removeEventListener("change", handler);
   }, []);
   const stagger = isMobile ? STAGGER_MOBILE : STAGGER_DESKTOP;
-  // 1st = header bottom (80), 2nd +10, 3rd +20, 4th +30, 5th +40
-  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * STAGGER_STEP_PX;
+  // Mobile: all cards stick to header bottom (no extra top gap).
+  // Desktop: slight stagger (10px step) for stacked effect.
+  const pinStepPx = isMobile ? 0 : STAGGER_STEP_PX;
+  const lastCardPinTop = HEADER_OFFSET + (itemCount - 1) * pinStepPx;
 
   // Scroll to card when landing page links with hash (e.g. /solutions#solutions-card-0)
   useEffect(() => {
@@ -88,7 +90,8 @@ export default function SolutionsScrollItems() {
       const el = document.getElementById(hash);
       if (el) {
         const index = parseInt(hash.replace(SOLUTIONS_CARD_ID_PREFIX + "-", ""), 10);
-        const scrollOffset = HEADER_OFFSET + index * STAGGER_STEP_PX;
+        const isMobileNow = window.matchMedia("(max-width: 767px)").matches;
+        const scrollOffset = HEADER_OFFSET + (isMobileNow ? 0 : index * STAGGER_STEP_PX);
         const run = () => {
           ScrollTrigger.refresh();
           requestAnimationFrame(() => {
@@ -116,9 +119,9 @@ export default function SolutionsScrollItems() {
     const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
     if (!containerRef.current || cards.length !== itemCount) return;
 
-    // Cards 1 to N-1: sticky pin — 1st = header bottom, 2nd +10px, 3rd +20px, 4th +30px, 5th +40px
+    // Cards 1 to N-1: sticky pin — mobile all at header bottom; desktop staggered
     for (let i = 0; i < itemCount - 1; i++) {
-      const cardPinTop = HEADER_OFFSET + i * STAGGER_STEP_PX;
+      const cardPinTop = HEADER_OFFSET + i * pinStepPx;
       gsap.set(cards[i], { zIndex: i + 1 });
       ScrollTrigger.create({
         trigger: cards[i],
@@ -208,7 +211,10 @@ export default function SolutionsScrollItems() {
               .solutions-card-last { margin-bottom: 0 !important; }
             }
             @media (max-width: 767px) {
-              .solutions-card-item-mobile { height: 600px !important; min-height: 600px !important; padding: 10px !important; padding-bottom: 60px !important; }
+              .solutions-card-item-mobile {
+                /* remove top padding only */
+                padding: 0 10px 60px 10px !important;
+              }
               .solutions-card-sticky-gap { margin-bottom: 220px; }
               .solutions-card-last { margin-bottom: 0 !important; }
               .solutions-card-label {
@@ -225,9 +231,9 @@ export default function SolutionsScrollItems() {
               .solutions-card-desc { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -0.05px !important; }
               .solutions-card-image-wrap {
                 width: 100% !important;
-                max-width: 100% !important;
-                height: 260px !important;
-                min-height: 260px !important;
+                aspect-ratio: 1 / 1;
+                height: auto !important;
+                min-height: 0 !important;
               }
             }
                       `,
